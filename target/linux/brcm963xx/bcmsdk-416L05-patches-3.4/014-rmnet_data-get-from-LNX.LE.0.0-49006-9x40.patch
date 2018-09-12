@@ -1,0 +1,5164 @@
+From 980d4348a0c9db19fb5337963c055bfff80045e1 Mon Sep 17 00:00:00 2001
+From: Steven Yu-Yu Hung <steven.hung@wnc.com.tw>
+Date: Wed, 26 Nov 2014 19:16:25 +0800
+Subject: [PATCH 4/5] rmnet_data: get from LNX.LE.0.0-49006-9x40
+
+https://www.codeaurora.org/cgit/quic/la/kernel/msm-3.10/commit/?id=LNX.LE.0.0-49006-9x40
+---
+ include/linux/Kbuild                 |    2 +
+ include/linux/if_ether.h             |    2 +
+ include/linux/net_map.h              |   32 +
+ include/linux/pkt_sched.h            |    1 +
+ include/linux/rmnet_data.h           |  250 +++++++
+ include/net/pkt_sched.h              |    3 +-
+ net/Kconfig                          |    1 +
+ net/Makefile                         |    1 +
+ net/core/flow_dissector.c            |   35 +
+ net/rmnet_data/Kconfig               |   29 +
+ net/rmnet_data/Makefile              |   14 +
+ net/rmnet_data/rmnet_data_config.c   | 1210 ++++++++++++++++++++++++++++++++++
+ net/rmnet_data/rmnet_data_config.h   |  116 ++++
+ net/rmnet_data/rmnet_data_handlers.c |  573 ++++++++++++++++
+ net/rmnet_data/rmnet_data_handlers.h |   25 +
+ net/rmnet_data/rmnet_data_main.c     |   62 ++
+ net/rmnet_data/rmnet_data_private.h  |   77 +++
+ net/rmnet_data/rmnet_data_stats.c    |  119 ++++
+ net/rmnet_data/rmnet_data_stats.h    |   59 ++
+ net/rmnet_data/rmnet_data_trace.h    |  229 +++++++
+ net/rmnet_data/rmnet_data_vnd.c      | 1068 ++++++++++++++++++++++++++++++
+ net/rmnet_data/rmnet_data_vnd.h      |   41 ++
+ net/rmnet_data/rmnet_map.h           |  132 ++++
+ net/rmnet_data/rmnet_map_command.c   |  179 +++++
+ net/rmnet_data/rmnet_map_data.c      |  569 ++++++++++++++++
+ net/sched/sch_api.c                  |   32 +
+ net/sched/sch_prio.c                 |   10 +
+ 27 files changed, 4870 insertions(+), 1 deletion(-)
+ create mode 100644 include/linux/net_map.h
+ create mode 100644 include/linux/rmnet_data.h
+ create mode 100644 net/rmnet_data/Kconfig
+ create mode 100644 net/rmnet_data/Makefile
+ create mode 100644 net/rmnet_data/rmnet_data_config.c
+ create mode 100644 net/rmnet_data/rmnet_data_config.h
+ create mode 100644 net/rmnet_data/rmnet_data_handlers.c
+ create mode 100644 net/rmnet_data/rmnet_data_handlers.h
+ create mode 100644 net/rmnet_data/rmnet_data_main.c
+ create mode 100644 net/rmnet_data/rmnet_data_private.h
+ create mode 100644 net/rmnet_data/rmnet_data_stats.c
+ create mode 100644 net/rmnet_data/rmnet_data_stats.h
+ create mode 100644 net/rmnet_data/rmnet_data_trace.h
+ create mode 100644 net/rmnet_data/rmnet_data_vnd.c
+ create mode 100644 net/rmnet_data/rmnet_data_vnd.h
+ create mode 100644 net/rmnet_data/rmnet_map.h
+ create mode 100644 net/rmnet_data/rmnet_map_command.c
+ create mode 100644 net/rmnet_data/rmnet_map_data.c
+
+Index: linux-3.4.11/include/linux/Kbuild
+===================================================================
+--- linux-3.4.11.orig/include/linux/Kbuild	2016-04-14 18:54:46.011730712 +0800
++++ linux-3.4.11/include/linux/Kbuild	2016-04-14 18:54:58.447730289 +0800
+@@ -254,6 +254,7 @@
+ header-y += mroute6.h
+ header-y += msdos_fs.h
+ header-y += msm_rmnet.h
++header-y += rmnet_data.h
+ header-y += msg.h
+ header-y += mtio.h
+ header-y += n_r3964.h
+@@ -265,6 +266,7 @@
+ header-y += neighbour.h
+ header-y += net.h
+ header-y += net_dropmon.h
++header-y += net_map.h
+ header-y += net_tstamp.h
+ header-y += netdevice.h
+ header-y += netfilter.h
+Index: linux-3.4.11/include/linux/if_ether.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/if_ether.h	2016-04-14 18:30:43.767781027 +0800
++++ linux-3.4.11/include/linux/if_ether.h	2016-04-14 18:54:58.447730289 +0800
+@@ -91,6 +91,8 @@
+ #define ETH_P_QINQ3	0x9300		/* deprecated QinQ VLAN [ NOT AN OFFICIALLY REGISTERED ID ] */
+ #define ETH_P_EDSA	0xDADA		/* Ethertype DSA [ NOT AN OFFICIALLY REGISTERED ID ] */
+ #define ETH_P_AF_IUCV   0xFBFB		/* IBM af_iucv [ NOT AN OFFICIALLY REGISTERED ID ] */
++#define ETH_P_MAP	0xDA1A		/* Multiplexing and Aggregation Protocol
++					 *  NOT AN OFFICIALLY REGISTERED ID ] */
+ 
+ #if defined(CONFIG_BCM_KF_VLAN)
+ #define ETH_P_8021AG	0x8902		/* 802.1ag Connectivity Fault Mgmt */
+Index: linux-3.4.11/include/linux/net_map.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/include/linux/net_map.h	2016-04-14 18:54:58.447730289 +0800
+@@ -0,0 +1,32 @@
++#ifndef _NET_MAP_H_
++#define _NET_MAP_H_
++
++struct rmnet_map_header_s {
++#if defined(__LITTLE_ENDIAN_BITFIELD)
++	uint8_t  pad_len:6;
++	uint8_t  reserved_bit:1;
++	uint8_t  cd_bit:1;
++#elif defined(__BIG_ENDIAN_BITFIELD)
++	uint8_t  cd_bit:1;
++	uint8_t  reserved_bit:1;
++	uint8_t  pad_len:6;
++#else
++#error "Please fix <asm/byteorder.h>"
++#endif
++	uint8_t  mux_id;
++	uint16_t pkt_len;
++}  __aligned(1);
++
++#define RMNET_MAP_GET_MUX_ID(Y) (((struct rmnet_map_header_s *)Y->data)->mux_id)
++#define RMNET_MAP_GET_CD_BIT(Y) (((struct rmnet_map_header_s *)Y->data)->cd_bit)
++#define RMNET_MAP_GET_PAD(Y) (((struct rmnet_map_header_s *)Y->data)->pad_len)
++#define RMNET_MAP_GET_CMD_START(Y) ((struct rmnet_map_control_command_s *) \
++				  (Y->data + sizeof(struct rmnet_map_header_s)))
++#define RMNET_MAP_GET_LENGTH(Y) (ntohs( \
++			       ((struct rmnet_map_header_s *)Y->data)->pkt_len))
++
++#define RMNET_IP_VER_MASK 0xF0
++#define RMNET_IPV4        0x40
++#define RMNET_IPV6        0x60
++
++#endif /* _NET_MAP_H_ */
+Index: linux-3.4.11/include/linux/pkt_sched.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/pkt_sched.h	2016-04-14 18:30:43.767781027 +0800
++++ linux-3.4.11/include/linux/pkt_sched.h	2016-04-14 18:54:58.447730289 +0800
+@@ -118,6 +118,7 @@
+ struct tc_prio_qopt {
+ 	int	bands;			/* Number of bands */
+ 	__u8	priomap[TC_PRIO_MAX+1];	/* Map: logical priority -> PRIO band */
++	__u8    enable_flow;            /* Enable dequeue */
+ };
+ 
+ /* MULTIQ section */
+Index: linux-3.4.11/include/linux/rmnet_data.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/include/linux/rmnet_data.h	2016-04-14 18:54:58.451730287 +0800
+@@ -0,0 +1,250 @@
++ /*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * RMNET Data configuration specification
++ */
++
++#ifndef _RMNET_DATA_H_
++#define _RMNET_DATA_H_
++
++/* ***************** Constants ********************************************** */
++#define RMNET_LOCAL_LOGICAL_ENDPOINT -1
++
++#define RMNET_EGRESS_FORMAT__RESERVED__         (1<<0)
++#define RMNET_EGRESS_FORMAT_MAP                 (1<<1)
++#define RMNET_EGRESS_FORMAT_AGGREGATION         (1<<2)
++#define RMNET_EGRESS_FORMAT_MUXING              (1<<3)
++
++#define RMNET_INGRESS_FIX_ETHERNET              (1<<0)
++#define RMNET_INGRESS_FORMAT_MAP                (1<<1)
++#define RMNET_INGRESS_FORMAT_DEAGGREGATION      (1<<2)
++#define RMNET_INGRESS_FORMAT_DEMUXING           (1<<3)
++#define RMNET_INGRESS_FORMAT_MAP_COMMANDS       (1<<4)
++#define RMNET_INGRESS_FORMAT_MAP_CKSUMV3        (1<<5)
++
++/* ***************** Netlink API ******************************************** */
++#define RMNET_NETLINK_PROTO 31
++#define RMNET_MAX_STR_LEN  16
++#define RMNET_NL_DATA_MAX_LEN 64
++
++#define RMNET_NETLINK_MSG_COMMAND    0
++#define RMNET_NETLINK_MSG_RETURNCODE 1
++#define RMNET_NETLINK_MSG_RETURNDATA 2
++
++struct rmnet_nl_msg_s {
++	uint16_t reserved;
++	uint16_t message_type;
++	uint16_t reserved2:14;
++	uint16_t crd:2;
++	union {
++		uint16_t arg_length;
++		uint16_t return_code;
++	};
++	union {
++		uint8_t data[RMNET_NL_DATA_MAX_LEN];
++		struct {
++			uint8_t  dev[RMNET_MAX_STR_LEN];
++			uint32_t flags;
++			uint16_t agg_size;
++			uint16_t agg_count;
++			uint8_t  tail_spacing;
++		} data_format;
++		struct {
++			uint8_t dev[RMNET_MAX_STR_LEN];
++			int32_t ep_id;
++			uint8_t operating_mode;
++			uint8_t next_dev[RMNET_MAX_STR_LEN];
++		} local_ep_config;
++		struct {
++			uint32_t id;
++			uint8_t  vnd_name[RMNET_MAX_STR_LEN];
++		} vnd;
++		struct {
++			uint32_t id;
++			uint32_t map_flow_id;
++			uint32_t tc_flow_id;
++		} flow_control;
++	};
++};
++
++enum rmnet_netlink_message_types_e {
++	/*
++	 * RMNET_NETLINK_ASSOCIATE_NETWORK_DEVICE - Register RMNET data driver
++	 *                                          on a particular device.
++	 * Args: char[] dev_name: Null terminated ASCII string, max length: 15
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_ASSOCIATE_NETWORK_DEVICE,
++
++	/*
++	 * RMNET_NETLINK_UNASSOCIATE_NETWORK_DEVICE - Unregister RMNET data
++	 *                                            driver on a particular
++	 *                                            device.
++	 * Args: char[] dev_name: Null terminated ASCII string, max length: 15
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_UNASSOCIATE_NETWORK_DEVICE,
++
++	/*
++	 * RMNET_NETLINK_GET_NETWORK_DEVICE_ASSOCIATED - Get if RMNET data
++	 *                                            driver is registered on a
++	 *                                            particular device.
++	 * Args: char[] dev_name: Null terminated ASCII string, max length: 15
++	 * Returns: 1 if registered, 0 if not
++	 */
++	RMNET_NETLINK_GET_NETWORK_DEVICE_ASSOCIATED,
++
++	/*
++	 * RMNET_NETLINK_SET_LINK_EGRESS_DATA_FORMAT - Sets the egress data
++	 *                                             format for a particular
++	 *                                             link.
++	 * Args: uint32_t egress_flags
++	 *       char[] dev_name: Null terminated ASCII string, max length: 15
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_SET_LINK_EGRESS_DATA_FORMAT,
++
++	/*
++	 * RMNET_NETLINK_GET_LINK_EGRESS_DATA_FORMAT - Gets the egress data
++	 *                                             format for a particular
++	 *                                             link.
++	 * Args: char[] dev_name: Null terminated ASCII string, max length: 15
++	 * Returns: 4-bytes data: uint32_t egress_flags
++	 */
++	RMNET_NETLINK_GET_LINK_EGRESS_DATA_FORMAT,
++
++	/*
++	 * RMNET_NETLINK_SET_LINK_INGRESS_DATA_FORMAT - Sets the ingress data
++	 *                                              format for a particular
++	 *                                              link.
++	 * Args: uint32_t ingress_flags
++	 *       char[] dev_name: Null terminated ASCII string, max length: 15
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_SET_LINK_INGRESS_DATA_FORMAT,
++
++	/*
++	 * RMNET_NETLINK_GET_LINK_INGRESS_DATA_FORMAT - Gets the ingress data
++	 *                                              format for a particular
++	 *                                              link.
++	 * Args: char[] dev_name: Null terminated ASCII string, max length: 15
++	 * Returns: 4-bytes data: uint32_t ingress_flags
++	 */
++	RMNET_NETLINK_GET_LINK_INGRESS_DATA_FORMAT,
++
++	/*
++	 * RMNET_NETLINK_SET_LOGICAL_EP_CONFIG - Sets the logical endpoint
++	 *                                       configuration for a particular
++	 *                                       link.
++	 * Args: char[] dev_name: Null terminated ASCII string, max length: 15
++	 *     int32_t logical_ep_id, valid values are -1 through 31
++	 *     uint8_t rmnet_mode: one of none, vnd, bridged
++	 *     char[] egress_dev_name: Egress device if operating in bridge mode
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_SET_LOGICAL_EP_CONFIG,
++
++	/*
++	 * RMNET_NETLINK_UNSET_LOGICAL_EP_CONFIG - Un-sets the logical endpoint
++	 *                                       configuration for a particular
++	 *                                       link.
++	 * Args: char[] dev_name: Null terminated ASCII string, max length: 15
++	 *       int32_t logical_ep_id, valid values are -1 through 31
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_UNSET_LOGICAL_EP_CONFIG,
++
++	/*
++	 * RMNET_NETLINK_GET_LOGICAL_EP_CONFIG - Gets the logical endpoint
++	 *                                       configuration for a particular
++	 *                                       link.
++	 * Args: char[] dev_name: Null terminated ASCII string, max length: 15
++	 *        int32_t logical_ep_id, valid values are -1 through 31
++	 * Returns: uint8_t rmnet_mode: one of none, vnd, bridged
++	 * char[] egress_dev_name: Egress device
++	 */
++	RMNET_NETLINK_GET_LOGICAL_EP_CONFIG,
++
++	/*
++	 * RMNET_NETLINK_NEW_VND - Creates a new virtual network device node
++	 * Args: int32_t node number
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_NEW_VND,
++
++	/*
++	 * RMNET_NETLINK_NEW_VND_WITH_PREFIX - Creates a new virtual network
++	 *                                     device node with the specified
++	 *                                     prefix for the device name
++	 * Args: int32_t node number
++	 *       char[] vnd_name - Use as prefix
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_NEW_VND_WITH_PREFIX,
++
++	/*
++	 * RMNET_NETLINK_GET_VND_NAME - Gets the string name of a VND from ID
++	 * Args: int32_t node number
++	 * Returns: char[] vnd_name
++	 */
++	RMNET_NETLINK_GET_VND_NAME,
++
++	/*
++	 * RMNET_NETLINK_FREE_VND - Removes virtual network device node
++	 * Args: int32_t node number
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_FREE_VND,
++
++	/*
++	 * RMNET_NETLINK_ADD_VND_TC_FLOW - Add flow control handle on VND
++	 * Args: int32_t node number
++	 *       uint32_t MAP Flow Handle
++	 *       uint32_t TC Flow Handle
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_ADD_VND_TC_FLOW,
++
++	/*
++	 * RMNET_NETLINK_DEL_VND_TC_FLOW - Removes flow control handle on VND
++	 * Args: int32_t node number
++	 *       uint32_t MAP Flow Handle
++	 * Returns: status code
++	 */
++	RMNET_NETLINK_DEL_VND_TC_FLOW
++};
++
++enum rmnet_config_endpoint_modes_e {
++	/* Pass the frame up the stack with no modifications to skb->dev      */
++	RMNET_EPMODE_NONE,
++	/* Replace skb->dev to a virtual rmnet device and pass up the stack   */
++	RMNET_EPMODE_VND,
++	/* Pass the frame directly to another device with dev_queue_xmit().   */
++	RMNET_EPMODE_BRIDGE,
++	/* Must be the last item in the list                                  */
++	RMNET_EPMODE_LENGTH
++};
++
++enum rmnet_config_return_codes_e {
++	RMNET_CONFIG_OK,
++	RMNET_CONFIG_UNKNOWN_MESSAGE,
++	RMNET_CONFIG_UNKNOWN_ERROR,
++	RMNET_CONFIG_NOMEM,
++	RMNET_CONFIG_DEVICE_IN_USE,
++	RMNET_CONFIG_INVALID_REQUEST,
++	RMNET_CONFIG_NO_SUCH_DEVICE,
++	RMNET_CONFIG_BAD_ARGUMENTS,
++	RMNET_CONFIG_BAD_EGRESS_DEVICE,
++	RMNET_CONFIG_TC_HANDLE_FULL
++};
++
++#endif /* _RMNET_DATA_H_ */
+Index: linux-3.4.11/include/net/pkt_sched.h
+===================================================================
+--- linux-3.4.11.orig/include/net/pkt_sched.h	2016-04-14 18:30:43.767781027 +0800
++++ linux-3.4.11/include/net/pkt_sched.h	2016-04-14 18:54:58.451730287 +0800
+@@ -103,7 +103,8 @@
+ 			      struct tcf_result *res);
+ extern int tc_classify(struct sk_buff *skb, const struct tcf_proto *tp,
+ 		       struct tcf_result *res);
+-
++extern int tc_qdisc_flow_control(struct net_device *dev, u32 tcm_handle,
++				  int flow_enable);
+ /* Calculate maximal size of packet seen by hard_start_xmit
+    routine of this device.
+  */
+Index: linux-3.4.11/net/Kconfig
+===================================================================
+--- linux-3.4.11.orig/net/Kconfig	2016-04-14 18:30:43.767781027 +0800
++++ linux-3.4.11/net/Kconfig	2016-04-14 18:54:58.451730287 +0800
+@@ -293,6 +293,7 @@
+ source "net/dns_resolver/Kconfig"
+ source "net/batman-adv/Kconfig"
+ source "net/openvswitch/Kconfig"
++source "net/rmnet_data/Kconfig"
+ 
+ config RPS
+ 	boolean
+Index: linux-3.4.11/net/Makefile
+===================================================================
+--- linux-3.4.11.orig/net/Makefile	2016-04-14 18:30:43.767781027 +0800
++++ linux-3.4.11/net/Makefile	2016-04-14 18:54:58.451730287 +0800
+@@ -73,6 +73,7 @@
+ obj-$(CONFIG_BATMAN_ADV)	+= batman-adv/
+ obj-$(CONFIG_NFC)		+= nfc/
+ obj-$(CONFIG_OPENVSWITCH)	+= openvswitch/
++obj-$(CONFIG_RMNET_DATA) += rmnet_data/
+ ifdef BCM_KF # defined(CONFIG_BCM_KF_ANDROID)
+ ifneq ($(strip $(CONFIG_BCM_ANDROID)),)
+ obj-$(CONFIG_NET_ACTIVITY_STATS)		+= activity_stats.o
+Index: linux-3.4.11/net/core/flow_dissector.c
+===================================================================
+--- linux-3.4.11.orig/net/core/flow_dissector.c	2016-04-14 18:30:43.767781027 +0800
++++ linux-3.4.11/net/core/flow_dissector.c	2016-04-14 18:54:58.451730287 +0800
+@@ -8,6 +8,7 @@
+ #include <linux/if_pppox.h>
+ #include <linux/ppp_defs.h>
+ #include <net/flow_keys.h>
++#include <linux/net_map.h>
+ 
+ /* copy saddr & daddr, possibly using 64bit load/store
+  * Equivalent to :	flow->src = iph->saddr;
+@@ -93,6 +94,40 @@
+ 			goto ipv6;
+ 		default:
+ 			return false;
++		}
++	}
++	case __constant_htons(ETH_P_MAP): {
++		struct {
++			struct rmnet_map_header_s map;
++			uint8_t proto;
++		} *map, _map;
++		unsigned int maplen;
++
++		map = skb_header_pointer(skb, nhoff, sizeof(_map), &_map);
++		if (!map)
++			return false;
++
++		/* Is MAP command? */
++		if (map->map.cd_bit)
++			return false;
++
++		/* Is aggregated frame? */
++		maplen = ntohs(map->map.pkt_len);
++		maplen += map->map.pad_len;
++		maplen += sizeof(struct rmnet_map_header_s);
++		if (maplen < skb->len)
++			return false;
++
++		nhoff += sizeof(struct rmnet_map_header_s);
++		switch (map->proto & RMNET_IP_VER_MASK) {
++		case RMNET_IPV4:
++			proto = htons(ETH_P_IP);
++			goto ip;
++		case RMNET_IPV6:
++			proto = htons(ETH_P_IPV6);
++			goto ipv6;
++		default:
++			return false;
+ 		}
+ 	}
+ 	default:
+Index: linux-3.4.11/net/rmnet_data/Kconfig
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/Kconfig	2016-04-14 18:54:58.451730287 +0800
+@@ -0,0 +1,30 @@
++#
++# RMNET Data and MAP driver
++#
++
++menuconfig RMNET_DATA
++	depends on NETDEVICES
++	bool "RmNet Data and MAP driver"
++	default n
++	---help---
++	  If you say Y here, then the rmnet_data module will be statically
++	  compiled into the kernel. The rmnet data module provides MAP
++	  functionality for embedded and bridged traffic.
++if RMNET_DATA
++
++config RMNET_DATA_FC
++	bool "RmNet Data Flow Control"
++	depends on NET_SCHED && NET_SCH_PRIO
++	---help---
++	  Say Y here if you want RmNet data to handle in-band flow control and
++	  ioctl based flow control. This depends on net scheduler and prio queue
++	  capability being present in the kernel. In-band flow control requires
++	  MAP protocol be used.
++config RMNET_DATA_DEBUG_PKT
++	bool "Packet Debug Logging"
++	---help---
++	  Say Y here if you want RmNet data to be able to log packets in main
++	  system log. This should not be enabled on production builds as it can
++	  impact system performance. Note that simply enabling it here will not
++	  enable the logging; it must be enabled at run-time as well.
++endif # RMNET_DATA
+Index: linux-3.4.11/net/rmnet_data/Makefile
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/Makefile	2016-04-14 18:54:58.451730287 +0800
+@@ -0,0 +1,14 @@
++#
++# Makefile for the RMNET Data module
++#
++
++rmnet_data-y		 := rmnet_data_main.o
++rmnet_data-y		 += rmnet_data_config.o
++rmnet_data-y		 += rmnet_data_vnd.o
++rmnet_data-y		 += rmnet_data_handlers.o
++rmnet_data-y		 += rmnet_map_data.o
++rmnet_data-y		 += rmnet_map_command.o
++rmnet_data-y		 += rmnet_data_stats.o
++obj-$(CONFIG_RMNET_DATA) += rmnet_data.o
++
++CFLAGS_rmnet_data_main.o := -I$(src)
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_config.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_config.c	2016-04-14 18:54:58.451730287 +0800
+@@ -0,0 +1,1210 @@
++/*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * RMNET Data configuration engine
++ *
++ */
++
++#include <net/sock.h>
++#include <linux/module.h>
++#include <linux/netlink.h>
++#include <linux/netdevice.h>
++#include <linux/skbuff.h>
++#include <linux/spinlock.h>
++#include <linux/rmnet_data.h>
++#include "rmnet_data_config.h"
++#include "rmnet_data_handlers.h"
++#include "rmnet_data_vnd.h"
++#include "rmnet_data_private.h"
++
++RMNET_LOG_MODULE(RMNET_DATA_LOGMASK_CONFIG);
++
++/* ***************** Local Definitions and Declarations ********************* */
++static struct sock *nl_socket_handle;
++
++#ifndef RMNET_KERNEL_PRE_3_8
++static struct netlink_kernel_cfg rmnet_netlink_cfg = {
++	.input = rmnet_config_netlink_msg_handler
++};
++#endif
++
++static struct notifier_block rmnet_dev_notifier = {
++	.notifier_call = rmnet_config_notify_cb,
++	.next = 0,
++	.priority = 0
++};
++
++#define RMNET_NL_MSG_SIZE(Y) (sizeof(((struct rmnet_nl_msg_s *)0)->Y))
++
++struct rmnet_free_vnd_work {
++	struct work_struct work;
++	int vnd_id;
++};
++
++/* ***************** Init and Cleanup *************************************** */
++
++#ifdef RMNET_KERNEL_PRE_3_8
++static struct sock *_rmnet_config_start_netlink(void)
++{
++	return netlink_kernel_create(&init_net,
++				     RMNET_NETLINK_PROTO,
++				     0,
++				     rmnet_config_netlink_msg_handler,
++				     NULL,
++				     THIS_MODULE);
++}
++#else
++static struct sock *_rmnet_config_start_netlink(void)
++{
++	return netlink_kernel_create(&init_net,
++				     RMNET_NETLINK_PROTO,
++				     &rmnet_netlink_cfg);
++}
++#endif /* RMNET_KERNEL_PRE_3_8 */
++
++/**
++ * rmnet_config_init() - Startup init
++ *
++ * Registers netlink protocol with kernel and opens socket. Netlink handler is
++ * registered with kernel.
++ */
++int rmnet_config_init(void)
++{
++	int rc;
++	nl_socket_handle = _rmnet_config_start_netlink();
++	if (!nl_socket_handle) {
++		LOGE("%s", "Failed to init netlink socket");
++		return RMNET_INIT_ERROR;
++	}
++
++	rc = register_netdevice_notifier(&rmnet_dev_notifier);
++	if (rc != 0) {
++		LOGE("Failed to register device notifier; rc=%d", rc);
++		/* TODO: Cleanup the nl socket */
++		return RMNET_INIT_ERROR;
++	}
++
++	return 0;
++}
++
++/**
++ * rmnet_config_exit() - Cleans up all netlink related resources
++ */
++void rmnet_config_exit(void)
++{
++	int rc;
++	netlink_kernel_release(nl_socket_handle);
++	rc = unregister_netdevice_notifier(&rmnet_dev_notifier);
++	if (rc != 0)
++		LOGE("Failed to unregister device notifier; rc=%d", rc);
++}
++
++/* ***************** Helper Functions *************************************** */
++
++/**
++ * _rmnet_is_physical_endpoint_associated() - Determines if device is associated
++ * @dev:      Device to get check
++ *
++ * Compares device rx_handler callback pointer against known funtion
++ *
++ * Return:
++ *      - 1 if associated
++ *      - 0 if NOT associated
++ */
++static inline int _rmnet_is_physical_endpoint_associated(struct net_device *dev)
++{
++	rx_handler_func_t *rx_handler;
++	rx_handler = rcu_dereference(dev->rx_handler);
++
++	if (rx_handler == rmnet_rx_handler)
++		return 1;
++	else
++		return 0;
++}
++
++/**
++ * _rmnet_get_phys_ep_config() - Get physical ep config for an associated device
++ * @dev:      Device to get endpoint configuration from
++ *
++ * Return:
++ *     - pointer to configuration if successful
++ *     - 0 (null) if device is not associated
++ */
++static inline struct rmnet_phys_ep_conf_s *_rmnet_get_phys_ep_config
++							(struct net_device *dev)
++{
++	if (_rmnet_is_physical_endpoint_associated(dev))
++		return (struct rmnet_phys_ep_conf_s *)
++			rcu_dereference(dev->rx_handler_data);
++	else
++		return 0;
++}
++
++/**
++ * _rmnet_get_logical_ep() - Gets the logical end point configuration
++ * structure for a network device
++ * @dev:             Device to get endpoint configuration from
++ * @config_id:       Logical endpoint id on device
++ * Retrieves the logical_endpoint_config structure.
++ *
++ * Return:
++ *      - End point configuration structure
++ *      - NULL in case of an error
++ */
++struct rmnet_logical_ep_conf_s *_rmnet_get_logical_ep(struct net_device *dev,
++						      int config_id)
++{
++	struct rmnet_phys_ep_conf_s *config;
++	struct rmnet_logical_ep_conf_s *epconfig_l;
++
++	if (rmnet_vnd_is_vnd(dev))
++		epconfig_l = rmnet_vnd_get_le_config(dev);
++	else {
++		config = _rmnet_get_phys_ep_config(dev);
++
++		if (!config)
++			return NULL;
++
++		if (config_id == RMNET_LOCAL_LOGICAL_ENDPOINT)
++			epconfig_l = &config->local_ep;
++		else
++			epconfig_l = &config->muxed_ep[config_id];
++	}
++
++	return epconfig_l;
++}
++
++/* ***************** Netlink Handler **************************************** */
++#define _RMNET_NETLINK_NULL_CHECKS() do { if (!rmnet_header || !resp_rmnet) \
++			BUG(); \
++		} while (0)
++
++static void _rmnet_netlink_set_link_egress_data_format
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	struct net_device *dev;
++	_RMNET_NETLINK_NULL_CHECKS();
++
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++	dev = dev_get_by_name(&init_net, rmnet_header->data_format.dev);
++
++	if (!dev) {
++		resp_rmnet->return_code = RMNET_CONFIG_NO_SUCH_DEVICE;
++		return;
++	}
++
++	resp_rmnet->return_code =
++		rmnet_set_egress_data_format(dev,
++					     rmnet_header->data_format.flags,
++					     rmnet_header->data_format.agg_size,
++					     rmnet_header->data_format.agg_count
++					     );
++	dev_put(dev);
++}
++
++static void _rmnet_netlink_set_link_ingress_data_format
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	struct net_device *dev;
++	_RMNET_NETLINK_NULL_CHECKS();
++
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++
++	dev = dev_get_by_name(&init_net, rmnet_header->data_format.dev);
++	if (!dev) {
++		resp_rmnet->return_code = RMNET_CONFIG_NO_SUCH_DEVICE;
++		return;
++	}
++
++	resp_rmnet->return_code = rmnet_set_ingress_data_format(
++					dev,
++					rmnet_header->data_format.flags,
++					rmnet_header->data_format.tail_spacing);
++	dev_put(dev);
++}
++
++static void _rmnet_netlink_set_logical_ep_config
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	struct net_device *dev, *dev2;
++	_RMNET_NETLINK_NULL_CHECKS();
++
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++	if (rmnet_header->local_ep_config.ep_id < -1
++	    || rmnet_header->local_ep_config.ep_id > 254) {
++		resp_rmnet->return_code = RMNET_CONFIG_BAD_ARGUMENTS;
++		return;
++	}
++
++	dev = dev_get_by_name(&init_net,
++				rmnet_header->local_ep_config.dev);
++
++	dev2 = dev_get_by_name(&init_net,
++				rmnet_header->local_ep_config.next_dev);
++
++
++	if (dev && dev2)
++		resp_rmnet->return_code =
++			rmnet_set_logical_endpoint_config(
++				dev,
++				rmnet_header->local_ep_config.ep_id,
++				rmnet_header->local_ep_config.operating_mode,
++				dev2);
++	else
++		resp_rmnet->return_code = RMNET_CONFIG_NO_SUCH_DEVICE;
++
++	if (dev)
++		dev_put(dev);
++	if (dev2)
++		dev_put(dev2);
++}
++
++static void _rmnet_netlink_unset_logical_ep_config
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	struct net_device *dev;
++	_RMNET_NETLINK_NULL_CHECKS();
++
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++	if (rmnet_header->local_ep_config.ep_id < -1
++	    || rmnet_header->local_ep_config.ep_id > 254) {
++		resp_rmnet->return_code = RMNET_CONFIG_BAD_ARGUMENTS;
++		return;
++	}
++
++	dev = dev_get_by_name(&init_net,
++				rmnet_header->local_ep_config.dev);
++
++	if (dev) {
++		resp_rmnet->return_code =
++			rmnet_unset_logical_endpoint_config(
++				dev,
++				rmnet_header->local_ep_config.ep_id);
++		dev_put(dev);
++	} else {
++		resp_rmnet->return_code = RMNET_CONFIG_NO_SUCH_DEVICE;
++	}
++}
++
++static void _rmnet_netlink_get_logical_ep_config
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	struct net_device *dev;
++	_RMNET_NETLINK_NULL_CHECKS();
++
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++	if (rmnet_header->local_ep_config.ep_id < -1
++	    || rmnet_header->local_ep_config.ep_id > 254) {
++		resp_rmnet->return_code = RMNET_CONFIG_BAD_ARGUMENTS;
++		return;
++	}
++
++	dev = dev_get_by_name(&init_net,
++				rmnet_header->local_ep_config.dev);
++
++	if (dev)
++		resp_rmnet->return_code =
++			rmnet_get_logical_endpoint_config(
++				dev,
++				rmnet_header->local_ep_config.ep_id,
++				&resp_rmnet->local_ep_config.operating_mode,
++				resp_rmnet->local_ep_config.next_dev,
++				sizeof(resp_rmnet->local_ep_config.next_dev));
++	else {
++		resp_rmnet->return_code = RMNET_CONFIG_NO_SUCH_DEVICE;
++		return;
++	}
++
++	if (resp_rmnet->return_code == RMNET_CONFIG_OK) {
++		/* Begin Data */
++		resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNDATA;
++		resp_rmnet->arg_length = RMNET_NL_MSG_SIZE(local_ep_config);
++	}
++	dev_put(dev);
++}
++
++static void _rmnet_netlink_associate_network_device
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	struct net_device *dev;
++	_RMNET_NETLINK_NULL_CHECKS();
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++
++	dev = dev_get_by_name(&init_net, rmnet_header->data);
++	if (!dev) {
++		resp_rmnet->return_code = RMNET_CONFIG_NO_SUCH_DEVICE;
++		return;
++	}
++
++	resp_rmnet->return_code = rmnet_associate_network_device(dev);
++	dev_put(dev);
++}
++
++static void _rmnet_netlink_unassociate_network_device
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	struct net_device *dev;
++	_RMNET_NETLINK_NULL_CHECKS();
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++
++	dev = dev_get_by_name(&init_net, rmnet_header->data);
++	if (!dev) {
++		resp_rmnet->return_code = RMNET_CONFIG_NO_SUCH_DEVICE;
++		return;
++	}
++
++	resp_rmnet->return_code = rmnet_unassociate_network_device(dev);
++	dev_put(dev);
++}
++
++static void _rmnet_netlink_get_network_device_associated
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	struct net_device *dev;
++
++	_RMNET_NETLINK_NULL_CHECKS();
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++
++	dev = dev_get_by_name(&init_net, rmnet_header->data);
++	if (!dev) {
++		resp_rmnet->return_code = RMNET_CONFIG_NO_SUCH_DEVICE;
++		return;
++	}
++
++	resp_rmnet->return_code = _rmnet_is_physical_endpoint_associated(dev);
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNDATA;
++	dev_put(dev);
++}
++
++static void _rmnet_netlink_get_link_egress_data_format
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	struct net_device *dev;
++	struct rmnet_phys_ep_conf_s *config;
++	_RMNET_NETLINK_NULL_CHECKS();
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++
++
++	dev = dev_get_by_name(&init_net, rmnet_header->data_format.dev);
++	if (!dev) {
++		resp_rmnet->return_code = RMNET_CONFIG_NO_SUCH_DEVICE;
++		return;
++	}
++
++	config = _rmnet_get_phys_ep_config(dev);
++	if (!config) {
++		resp_rmnet->return_code = RMNET_CONFIG_INVALID_REQUEST;
++		dev_put(dev);
++		return;
++	}
++
++	/* Begin Data */
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNDATA;
++	resp_rmnet->arg_length = RMNET_NL_MSG_SIZE(data_format);
++	resp_rmnet->data_format.flags = config->egress_data_format;
++	resp_rmnet->data_format.agg_count = config->egress_agg_count;
++	resp_rmnet->data_format.agg_size  = config->egress_agg_size;
++	dev_put(dev);
++}
++
++static void _rmnet_netlink_get_link_ingress_data_format
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	struct net_device *dev;
++	struct rmnet_phys_ep_conf_s *config;
++	_RMNET_NETLINK_NULL_CHECKS();
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++
++
++	dev = dev_get_by_name(&init_net, rmnet_header->data_format.dev);
++	if (!dev) {
++		resp_rmnet->return_code = RMNET_CONFIG_NO_SUCH_DEVICE;
++		return;
++	}
++
++	config = _rmnet_get_phys_ep_config(dev);
++	if (!config) {
++		resp_rmnet->return_code = RMNET_CONFIG_INVALID_REQUEST;
++		dev_put(dev);
++		return;
++	}
++
++	/* Begin Data */
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNDATA;
++	resp_rmnet->arg_length = RMNET_NL_MSG_SIZE(data_format);
++	resp_rmnet->data_format.flags = config->ingress_data_format;
++	resp_rmnet->data_format.tail_spacing = config->tail_spacing;
++	dev_put(dev);
++}
++
++static void _rmnet_netlink_get_vnd_name
++					(struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	int r;
++	_RMNET_NETLINK_NULL_CHECKS();
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++
++	r = rmnet_vnd_get_name(rmnet_header->vnd.id, resp_rmnet->vnd.vnd_name,
++			       RMNET_MAX_STR_LEN);
++
++	if (r != 0) {
++		resp_rmnet->return_code = RMNET_CONFIG_INVALID_REQUEST;
++		return;
++	}
++
++	/* Begin Data */
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNDATA;
++	resp_rmnet->arg_length = RMNET_NL_MSG_SIZE(vnd);
++}
++
++static void _rmnet_netlink_add_del_vnd_tc_flow
++					(uint32_t command,
++					 struct rmnet_nl_msg_s *rmnet_header,
++					 struct rmnet_nl_msg_s *resp_rmnet)
++{
++	uint32_t id;
++	uint32_t map_flow_id;
++	uint32_t tc_flow_id;
++
++	_RMNET_NETLINK_NULL_CHECKS();
++	resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++
++	id = rmnet_header->flow_control.id;
++	map_flow_id = rmnet_header->flow_control.map_flow_id;
++	tc_flow_id = rmnet_header->flow_control.tc_flow_id;
++
++	switch (command) {
++	case RMNET_NETLINK_ADD_VND_TC_FLOW:
++		resp_rmnet->return_code = rmnet_vnd_add_tc_flow(id,
++								map_flow_id,
++								tc_flow_id);
++		break;
++	case RMNET_NETLINK_DEL_VND_TC_FLOW:
++		resp_rmnet->return_code = rmnet_vnd_del_tc_flow(id,
++								map_flow_id,
++								tc_flow_id);
++		break;
++	default:
++		LOGM("Called with unhandled command %d", command);
++		resp_rmnet->return_code = RMNET_CONFIG_INVALID_REQUEST;
++		break;
++	}
++}
++
++/**
++ * rmnet_config_netlink_msg_handler() - Netlink message handler callback
++ * @skb:      Packet containing netlink messages
++ *
++ * Standard kernel-expected format for a netlink message handler. Processes SKBs
++ * which contain RmNet data specific netlink messages.
++ */
++void rmnet_config_netlink_msg_handler(struct sk_buff *skb)
++{
++	struct nlmsghdr *nlmsg_header, *resp_nlmsg;
++	struct rmnet_nl_msg_s *rmnet_header, *resp_rmnet;
++	int return_pid, response_data_length;
++	struct sk_buff *skb_response;
++
++	response_data_length = 0;
++	nlmsg_header = (struct nlmsghdr *) skb->data;
++	rmnet_header = (struct rmnet_nl_msg_s *) nlmsg_data(nlmsg_header);
++
++	LOGL("Netlink message pid=%d, seq=%d, length=%d, rmnet_type=%d",
++		nlmsg_header->nlmsg_pid,
++		nlmsg_header->nlmsg_seq,
++		nlmsg_header->nlmsg_len,
++		rmnet_header->message_type);
++
++	return_pid = nlmsg_header->nlmsg_pid;
++
++	skb_response = nlmsg_new(sizeof(struct nlmsghdr)
++				 + sizeof(struct rmnet_nl_msg_s),
++				 GFP_KERNEL);
++
++	if (!skb_response) {
++		LOGH("%s", "Failed to allocate response buffer");
++		return;
++	}
++
++	resp_nlmsg = nlmsg_put(skb_response,
++			       0,
++			       nlmsg_header->nlmsg_seq,
++			       NLMSG_DONE,
++			       sizeof(struct rmnet_nl_msg_s),
++			       0);
++
++	resp_rmnet = nlmsg_data(resp_nlmsg);
++
++	if (!resp_rmnet)
++		BUG();
++
++	resp_rmnet->message_type = rmnet_header->message_type;
++	rtnl_lock();
++	switch (rmnet_header->message_type) {
++	case RMNET_NETLINK_ASSOCIATE_NETWORK_DEVICE:
++		_rmnet_netlink_associate_network_device
++						(rmnet_header, resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_UNASSOCIATE_NETWORK_DEVICE:
++		_rmnet_netlink_unassociate_network_device
++						(rmnet_header, resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_GET_NETWORK_DEVICE_ASSOCIATED:
++		_rmnet_netlink_get_network_device_associated
++						(rmnet_header, resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_SET_LINK_EGRESS_DATA_FORMAT:
++		_rmnet_netlink_set_link_egress_data_format
++						(rmnet_header, resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_GET_LINK_EGRESS_DATA_FORMAT:
++		_rmnet_netlink_get_link_egress_data_format
++						(rmnet_header, resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_SET_LINK_INGRESS_DATA_FORMAT:
++		_rmnet_netlink_set_link_ingress_data_format
++						(rmnet_header, resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_GET_LINK_INGRESS_DATA_FORMAT:
++		_rmnet_netlink_get_link_ingress_data_format
++						(rmnet_header, resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_SET_LOGICAL_EP_CONFIG:
++		_rmnet_netlink_set_logical_ep_config(rmnet_header, resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_UNSET_LOGICAL_EP_CONFIG:
++		_rmnet_netlink_unset_logical_ep_config(rmnet_header,
++						       resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_GET_LOGICAL_EP_CONFIG:
++		_rmnet_netlink_get_logical_ep_config(rmnet_header, resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_NEW_VND:
++		resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++		resp_rmnet->return_code =
++					 rmnet_create_vnd(rmnet_header->vnd.id);
++		break;
++
++	case RMNET_NETLINK_NEW_VND_WITH_PREFIX:
++		resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++		resp_rmnet->return_code = rmnet_create_vnd_prefix(
++						rmnet_header->vnd.id,
++						rmnet_header->vnd.vnd_name);
++		break;
++
++	case RMNET_NETLINK_FREE_VND:
++		resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++		/* Please check rmnet_vnd_free_dev documentation regarding
++		   the below locking sequence
++		*/
++		rtnl_unlock();
++		resp_rmnet->return_code = rmnet_free_vnd(rmnet_header->vnd.id);
++		rtnl_lock();
++		break;
++
++	case RMNET_NETLINK_GET_VND_NAME:
++		_rmnet_netlink_get_vnd_name(rmnet_header, resp_rmnet);
++		break;
++
++	case RMNET_NETLINK_DEL_VND_TC_FLOW:
++	case RMNET_NETLINK_ADD_VND_TC_FLOW:
++		_rmnet_netlink_add_del_vnd_tc_flow(rmnet_header->message_type,
++						   rmnet_header,
++						   resp_rmnet);
++		break;
++
++	default:
++		resp_rmnet->crd = RMNET_NETLINK_MSG_RETURNCODE;
++		resp_rmnet->return_code = RMNET_CONFIG_UNKNOWN_MESSAGE;
++		break;
++	}
++	rtnl_unlock();
++	nlmsg_unicast(nl_socket_handle, skb_response, return_pid);
++	LOGD("%s", "Done processing command");
++
++}
++
++/* ***************** Configuration API ************************************** */
++
++/**
++ * rmnet_unassociate_network_device() - Unassociate network device
++ * @dev:      Device to unassociate
++ *
++ * Frees all structures generate for device. Unregisters rx_handler
++ * todo: needs to do some sanity verification first (is device in use, etc...)
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful
++ *      - RMNET_CONFIG_NO_SUCH_DEVICE dev is null
++ *      - RMNET_CONFIG_INVALID_REQUEST if device is not already associated
++ *      - RMNET_CONFIG_DEVICE_IN_USE if device has logical ep that wasn't unset
++ *      - RMNET_CONFIG_UNKNOWN_ERROR net_device private section is null
++ */
++int rmnet_unassociate_network_device(struct net_device *dev)
++{
++	struct rmnet_phys_ep_conf_s *config;
++	int config_id = RMNET_LOCAL_LOGICAL_ENDPOINT;
++	struct rmnet_logical_ep_conf_s *epconfig_l;
++	ASSERT_RTNL();
++
++	LOGL("(%s);", dev->name);
++
++	if (!dev)
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++
++	if (!_rmnet_is_physical_endpoint_associated(dev))
++		return RMNET_CONFIG_INVALID_REQUEST;
++
++	for (; config_id < RMNET_DATA_MAX_LOGICAL_EP; config_id++) {
++		epconfig_l = _rmnet_get_logical_ep(dev, config_id);
++		if (epconfig_l && epconfig_l->refcount)
++			return RMNET_CONFIG_DEVICE_IN_USE;
++	}
++
++	config = (struct rmnet_phys_ep_conf_s *)
++		rcu_dereference(dev->rx_handler_data);
++
++	if (!config)
++		return RMNET_CONFIG_UNKNOWN_ERROR;
++
++	kfree(config);
++
++	netdev_rx_handler_unregister(dev);
++
++	/* Explicitly release the reference from the device */
++	dev_put(dev);
++	return RMNET_CONFIG_OK;
++}
++
++/**
++ * rmnet_set_ingress_data_format() - Set ingress data format on network device
++ * @dev:                 Device to ingress data format on
++ * @egress_data_format:  32-bit unsigned bitmask of ingress format
++ *
++ * Network device must already have association with RmNet Data driver
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful
++ *      - RMNET_CONFIG_NO_SUCH_DEVICE dev is null
++ *      - RMNET_CONFIG_UNKNOWN_ERROR net_device private section is null
++ */
++int rmnet_set_ingress_data_format(struct net_device *dev,
++				  uint32_t ingress_data_format,
++				  uint8_t  tail_spacing)
++{
++	struct rmnet_phys_ep_conf_s *config;
++	ASSERT_RTNL();
++
++	LOGL("(%s,0x%08X);", dev->name, ingress_data_format);
++
++	if (!dev)
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++
++	config = _rmnet_get_phys_ep_config(dev);
++
++	if (!config)
++		return RMNET_CONFIG_INVALID_REQUEST;
++
++	config->ingress_data_format = ingress_data_format;
++	config->tail_spacing = tail_spacing;
++
++	return RMNET_CONFIG_OK;
++}
++
++/**
++ * rmnet_set_egress_data_format() - Set egress data format on network device
++ * @dev:                 Device to egress data format on
++ * @egress_data_format:  32-bit unsigned bitmask of egress format
++ *
++ * Network device must already have association with RmNet Data driver
++ * todo: Bounds check on agg_*
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful
++ *      - RMNET_CONFIG_NO_SUCH_DEVICE dev is null
++ *      - RMNET_CONFIG_UNKNOWN_ERROR net_device private section is null
++ */
++int rmnet_set_egress_data_format(struct net_device *dev,
++				 uint32_t egress_data_format,
++				 uint16_t agg_size,
++				 uint16_t agg_count)
++{
++	struct rmnet_phys_ep_conf_s *config;
++	ASSERT_RTNL();
++
++	LOGL("(%s,0x%08X, %d, %d);",
++	     dev->name, egress_data_format, agg_size, agg_count);
++
++	if (!dev)
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++
++	config = _rmnet_get_phys_ep_config(dev);
++
++	if (!config)
++		return RMNET_CONFIG_UNKNOWN_ERROR;
++
++	config->egress_data_format = egress_data_format;
++	config->egress_agg_size = agg_size;
++	config->egress_agg_count = agg_count;
++
++	return RMNET_CONFIG_OK;
++}
++
++/**
++ * rmnet_associate_network_device() - Associate network device
++ * @dev:      Device to register with RmNet data
++ *
++ * Typically used on physical network devices. Registers RX handler and private
++ * metadata structures.
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful
++ *      - RMNET_CONFIG_NO_SUCH_DEVICE dev is null
++ *      - RMNET_CONFIG_INVALID_REQUEST if the device to be associated is a vnd
++ *      - RMNET_CONFIG_DEVICE_IN_USE if dev rx_handler is already filled
++ *      - RMNET_CONFIG_DEVICE_IN_USE if netdev_rx_handler_register() fails
++ */
++int rmnet_associate_network_device(struct net_device *dev)
++{
++	struct rmnet_phys_ep_conf_s *config;
++	int rc;
++	ASSERT_RTNL();
++
++	LOGL("(%s);\n", dev->name);
++
++	if (!dev)
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++
++	if (_rmnet_is_physical_endpoint_associated(dev)) {
++		LOGM("%s is already regestered", dev->name);
++		return RMNET_CONFIG_DEVICE_IN_USE;
++	}
++
++	if (rmnet_vnd_is_vnd(dev)) {
++		LOGM("%s is a vnd", dev->name);
++		return RMNET_CONFIG_INVALID_REQUEST;
++	}
++
++	config = (struct rmnet_phys_ep_conf_s *)
++		 kmalloc(sizeof(struct rmnet_phys_ep_conf_s), GFP_ATOMIC);
++
++	if (!config)
++		return RMNET_CONFIG_NOMEM;
++
++	memset(config, 0, sizeof(struct rmnet_phys_ep_conf_s));
++	config->dev = dev;
++	spin_lock_init(&config->agg_lock);
++
++	rc = netdev_rx_handler_register(dev, rmnet_rx_handler, config);
++
++	if (rc) {
++		LOGM("netdev_rx_handler_register returns %d", rc);
++		kfree(config);
++		return RMNET_CONFIG_DEVICE_IN_USE;
++	}
++
++	/* Explicitly hold a reference to the device */
++	dev_hold(dev);
++	return RMNET_CONFIG_OK;
++}
++
++/**
++ * _rmnet_set_logical_endpoint_config() - Set logical endpoing config on device
++ * @dev:         Device to set endpoint configuration on
++ * @config_id:   logical endpoint id on device
++ * @epconfig:    endpoing configuration structure to set
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful
++ *      - RMNET_CONFIG_UNKNOWN_ERROR net_device private section is null
++ *      - RMNET_CONFIG_NO_SUCH_DEVICE if device to set config on is null
++ *      - RMNET_CONFIG_DEVICE_IN_USE if device already has a logical ep
++ *      - RMNET_CONFIG_BAD_ARGUMENTS if logical endpoint id is out of range
++ */
++int _rmnet_set_logical_endpoint_config(struct net_device *dev,
++				       int config_id,
++				       struct rmnet_logical_ep_conf_s *epconfig)
++{
++	struct rmnet_logical_ep_conf_s *epconfig_l;
++
++	ASSERT_RTNL();
++
++	if (!dev)
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++
++	if (config_id < RMNET_LOCAL_LOGICAL_ENDPOINT
++		|| config_id >= RMNET_DATA_MAX_LOGICAL_EP)
++		return RMNET_CONFIG_BAD_ARGUMENTS;
++
++	epconfig_l = _rmnet_get_logical_ep(dev, config_id);
++
++	if (!epconfig_l)
++			return RMNET_CONFIG_UNKNOWN_ERROR;
++
++	if (epconfig_l->refcount)
++		return RMNET_CONFIG_DEVICE_IN_USE;
++
++	memcpy(epconfig_l, epconfig, sizeof(struct rmnet_logical_ep_conf_s));
++	if (config_id == RMNET_LOCAL_LOGICAL_ENDPOINT)
++		epconfig_l->mux_id = 0;
++	else
++		epconfig_l->mux_id = config_id;
++
++	/* Explicitly hold a reference to the egress device */
++	dev_hold(epconfig_l->egress_dev);
++	return RMNET_CONFIG_OK;
++}
++
++/**
++ * _rmnet_unset_logical_endpoint_config() - Un-set the logical endpoing config
++ * on device
++ * @dev:         Device to set endpoint configuration on
++ * @config_id:   logical endpoint id on device
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful
++ *      - RMNET_CONFIG_UNKNOWN_ERROR net_device private section is null
++ *      - RMNET_CONFIG_NO_SUCH_DEVICE if device to set config on is null
++ *      - RMNET_CONFIG_BAD_ARGUMENTS if logical endpoint id is out of range
++ */
++int _rmnet_unset_logical_endpoint_config(struct net_device *dev,
++				       int config_id)
++{
++	struct rmnet_logical_ep_conf_s *epconfig_l = 0;
++
++	ASSERT_RTNL();
++
++	if (!dev)
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++
++	if (config_id < RMNET_LOCAL_LOGICAL_ENDPOINT
++		|| config_id >= RMNET_DATA_MAX_LOGICAL_EP)
++		return RMNET_CONFIG_BAD_ARGUMENTS;
++
++	epconfig_l = _rmnet_get_logical_ep(dev, config_id);
++
++	if (!epconfig_l || !epconfig_l->refcount)
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++
++	/* Explicitly release the reference from the egress device */
++	dev_put(epconfig_l->egress_dev);
++	memset(epconfig_l, 0, sizeof(struct rmnet_logical_ep_conf_s));
++
++	return RMNET_CONFIG_OK;
++}
++
++/**
++ * rmnet_set_logical_endpoint_config() - Set logical endpoint config on a device
++ * @dev:            Device to set endpoint configuration on
++ * @config_id:      logical endpoint id on device
++ * @rmnet_mode:     endpoint mode. Values from: rmnet_config_endpoint_modes_e
++ * @egress_device:  device node to forward packet to once done processing in
++ *                  ingress/egress handlers
++ *
++ * Creates a logical_endpoint_config structure and fills in the information from
++ * function arguments. Calls _rmnet_set_logical_endpoint_config() to finish
++ * configuration. Network device must already have association with RmNet Data
++ * driver
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful
++ *      - RMNET_CONFIG_BAD_EGRESS_DEVICE if egress device is null
++ *      - RMNET_CONFIG_BAD_EGRESS_DEVICE if egress device is not handled by
++ *                                       RmNet data module
++ *      - RMNET_CONFIG_UNKNOWN_ERROR net_device private section is null
++ *      - RMNET_CONFIG_NO_SUCH_DEVICE if device to set config on is null
++ *      - RMNET_CONFIG_BAD_ARGUMENTS if logical endpoint id is out of range
++ */
++int rmnet_set_logical_endpoint_config(struct net_device *dev,
++				      int config_id,
++				      uint8_t rmnet_mode,
++				      struct net_device *egress_dev)
++{
++	struct rmnet_logical_ep_conf_s epconfig;
++
++	LOGL("(%s, %d, %d, %s);",
++		dev->name, config_id, rmnet_mode, egress_dev->name);
++
++	if (!egress_dev
++	    || ((!_rmnet_is_physical_endpoint_associated(egress_dev))
++	    && (!rmnet_vnd_is_vnd(egress_dev)))) {
++		return RMNET_CONFIG_BAD_EGRESS_DEVICE;
++	}
++
++	memset(&epconfig, 0, sizeof(struct rmnet_logical_ep_conf_s));
++	epconfig.refcount = 1;
++	epconfig.rmnet_mode = rmnet_mode;
++	epconfig.egress_dev = egress_dev;
++
++	return _rmnet_set_logical_endpoint_config(dev, config_id, &epconfig);
++}
++
++/**
++ * rmnet_unset_logical_endpoint_config() - Un-set logical endpoing configuration
++ * on a device
++ * @dev:            Device to set endpoint configuration on
++ * @config_id:      logical endpoint id on device
++ *
++ * Retrieves the logical_endpoint_config structure and frees the egress device.
++ * Network device must already have association with RmNet Data driver
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful
++ *      - RMNET_CONFIG_UNKNOWN_ERROR net_device private section is null
++ *      - RMNET_CONFIG_NO_SUCH_DEVICE device is not associated
++ *      - RMNET_CONFIG_BAD_ARGUMENTS if logical endpoint id is out of range
++ */
++int rmnet_unset_logical_endpoint_config(struct net_device *dev,
++					int config_id)
++{
++	LOGL("(%s, %d);", dev->name, config_id);
++
++	if (!dev
++	    || ((!_rmnet_is_physical_endpoint_associated(dev))
++	    && (!rmnet_vnd_is_vnd(dev)))) {
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++	}
++
++	return _rmnet_unset_logical_endpoint_config(dev, config_id);
++}
++
++/**
++ * rmnet_get_logical_endpoint_config() - Gets logical endpoing configuration
++ * for a device
++ * @dev:                  Device to get endpoint configuration on
++ * @config_id:            logical endpoint id on device
++ * @rmnet_mode:           (I/O) logical endpoint mode
++ * @egress_dev_name:      (I/O) logical endpoint egress device name
++ * @egress_dev_name_size: The maximal size of the I/O egress_dev_name
++ *
++ * Retrieves the logical_endpoint_config structure.
++ * Network device must already have association with RmNet Data driver
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful
++ *      - RMNET_CONFIG_UNKNOWN_ERROR net_device private section is null
++ *      - RMNET_CONFIG_NO_SUCH_DEVICE device is not associated
++ *      - RMNET_CONFIG_BAD_ARGUMENTS if logical endpoint id is out of range or
++ *        if the provided buffer size for egress dev name is too short
++ */
++int rmnet_get_logical_endpoint_config(struct net_device *dev,
++				      int config_id,
++				      uint8_t *rmnet_mode,
++				      uint8_t *egress_dev_name,
++				      size_t egress_dev_name_size)
++{
++	struct rmnet_logical_ep_conf_s *epconfig_l = 0;
++	size_t strlcpy_res = 0;
++
++	LOGL("(%s, %d);", dev->name, config_id);
++
++	if (!egress_dev_name || !rmnet_mode)
++		return RMNET_CONFIG_BAD_ARGUMENTS;
++	if (config_id < RMNET_LOCAL_LOGICAL_ENDPOINT
++		|| config_id >= RMNET_DATA_MAX_LOGICAL_EP)
++		return RMNET_CONFIG_BAD_ARGUMENTS;
++
++	epconfig_l = _rmnet_get_logical_ep(dev, config_id);
++
++	if (!epconfig_l || !epconfig_l->refcount)
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++
++	*rmnet_mode = epconfig_l->rmnet_mode;
++
++	strlcpy_res = strlcpy(egress_dev_name, epconfig_l->egress_dev->name,
++			      egress_dev_name_size);
++
++	if (strlcpy_res >= egress_dev_name_size)
++		return RMNET_CONFIG_BAD_ARGUMENTS;
++
++	return RMNET_CONFIG_OK;
++}
++
++/**
++ * rmnet_create_vnd() - Create virtual network device node
++ * @id:       RmNet virtual device node id
++ *
++ * Return:
++ *      - result of rmnet_vnd_create_dev()
++ */
++int rmnet_create_vnd(int id)
++{
++	struct net_device *dev;
++	ASSERT_RTNL();
++	LOGL("(%d);", id);
++	return rmnet_vnd_create_dev(id, &dev, NULL);
++}
++
++/**
++ * rmnet_create_vnd() - Create virtual network device node
++ * @id:       RmNet virtual device node id
++ * @prefix:   String prefix for device name
++ *
++ * Return:
++ *      - result of rmnet_vnd_create_dev()
++ */
++int rmnet_create_vnd_prefix(int id, const char *prefix)
++{
++	struct net_device *dev;
++	ASSERT_RTNL();
++	LOGL("(%d, \"%s\");", id, prefix);
++	return rmnet_vnd_create_dev(id, &dev, prefix);
++}
++
++/**
++ * rmnet_free_vnd() - Free virtual network device node
++ * @id:       RmNet virtual device node id
++ *
++ * Return:
++ *      - result of rmnet_vnd_free_dev()
++ */
++int rmnet_free_vnd(int id)
++{
++	LOGL("(%d);", id);
++	return rmnet_vnd_free_dev(id);
++}
++
++static void _rmnet_free_vnd_later(struct work_struct *work)
++{
++	struct rmnet_free_vnd_work *fwork;
++	fwork = (struct rmnet_free_vnd_work *) work;
++	rmnet_free_vnd(fwork->vnd_id);
++	kfree(work);
++}
++
++/**
++ * rmnet_free_vnd_later() - Schedule a work item to free virtual network device
++ * @id:       RmNet virtual device node id
++ *
++ * Schedule the VND to be freed at a later time. We need to do this if the
++ * rtnl lock is already held as to prevent a deadlock.
++ */
++static void rmnet_free_vnd_later(int id)
++{
++	struct rmnet_free_vnd_work *work;
++	LOGL("(%d);", id);
++	work = (struct rmnet_free_vnd_work *)
++		kmalloc(sizeof(struct rmnet_free_vnd_work), GFP_KERNEL);
++	if (!work) {
++		LOGH("Failed to queue removal of VND:%d", id);
++		return;
++	}
++	INIT_WORK((struct work_struct *)work, _rmnet_free_vnd_later);
++	work->vnd_id = id;
++	schedule_work((struct work_struct *)work);
++}
++
++/**
++ * rmnet_force_unassociate_device() - Force a device to unassociate
++ * @dev:       Device to unassociate
++ *
++ * Return:
++ *      - void
++ */
++static void rmnet_force_unassociate_device(struct net_device *dev)
++{
++	int i;
++	struct net_device *vndev;
++	struct rmnet_logical_ep_conf_s *cfg;
++	ASSERT_RTNL();
++
++	if (!dev)
++		BUG();
++
++	if (!_rmnet_is_physical_endpoint_associated(dev)) {
++		LOGM("%s", "Called on unassociated device, skipping");
++		return;
++	}
++
++	/* Check the VNDs for offending mappings */
++	for (i = 0; i < RMNET_DATA_MAX_VND; i++) {
++		vndev = rmnet_vnd_get_by_id(i);
++		if (!vndev) {
++			LOGL("VND %d not in use; skipping", i);
++			continue;
++		}
++		cfg = rmnet_vnd_get_le_config(vndev);
++		if (!cfg) {
++			LOGH("Got NULL config from VND %d", i);
++			BUG();
++			continue;
++		}
++		if (cfg->refcount && (cfg->egress_dev == dev)) {
++			rmnet_unset_logical_endpoint_config(vndev,
++						  RMNET_LOCAL_LOGICAL_ENDPOINT);
++			rmnet_free_vnd_later(i);
++		}
++	}
++
++	/* Clear on the mappings on the phys ep */
++	rmnet_unset_logical_endpoint_config(dev, RMNET_LOCAL_LOGICAL_ENDPOINT);
++	for (i = 0; i < RMNET_DATA_MAX_LOGICAL_EP; i++)
++		rmnet_unset_logical_endpoint_config(dev, i);
++	rmnet_unassociate_network_device(dev);
++}
++
++/**
++ * rmnet_config_notify_cb() - Callback for netdevice notifier chain
++ * @nb:       Notifier block data
++ * @event:    Netdevice notifier event ID
++ * @data:     Contains a net device for which we are getting notified
++ *
++ * Return:
++ *      - result of NOTIFY_DONE()
++ */
++int rmnet_config_notify_cb(struct notifier_block *nb,
++				  unsigned long event, void *data)
++{
++	struct net_device *dev = (struct net_device *)data;
++
++	if (!dev)
++		BUG();
++
++	LOGL("(..., %lu, %s)", event, dev->name);
++
++	switch (event) {
++	case NETDEV_UNREGISTER_FINAL:
++	case NETDEV_UNREGISTER:
++		if (_rmnet_is_physical_endpoint_associated(dev)) {
++			LOGH("Kernel is trying to unregister %s", dev->name);
++			rmnet_force_unassociate_device(dev);
++		}
++		break;
++
++	default:
++		LOGD("Unhandeled event [%lu]", event);
++		break;
++	}
++
++	return NOTIFY_DONE;
++}
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_config.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_config.h	2016-04-14 18:54:58.451730287 +0800
+@@ -0,0 +1,116 @@
++/*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * RMNET Data configuration engine
++ *
++ */
++
++#include <linux/types.h>
++#include <linux/spinlock.h>
++
++#ifndef _RMNET_DATA_CONFIG_H_
++#define _RMNET_DATA_CONFIG_H_
++
++#define RMNET_DATA_MAX_LOGICAL_EP 256
++
++/**
++ * struct rmnet_logical_ep_conf_s - Logical end-point configuration
++ *
++ * @refcount: Reference count for this endpoint. 0 signifies the endpoint is not
++ *            configured for use
++ * @rmnet_mode: Specifies how the traffic should be finally delivered. Possible
++ *            options are available in enum rmnet_config_endpoint_modes_e
++ * @mux_id: Virtual channel ID used by MAP protocol
++ * @egress_dev: Next device to deliver the packet to. Exact usage of this
++ *            parmeter depends on the rmnet_mode
++ */
++struct rmnet_logical_ep_conf_s {
++	uint8_t refcount;
++	uint8_t rmnet_mode;
++	uint8_t mux_id;
++	struct net_device *egress_dev;
++};
++
++/**
++ * struct rmnet_phys_ep_conf_s - Physical endpoint configuration
++ * One instance of this structure is instantiated for each net_device associated
++ * with rmnet_data.
++ *
++ * @dev: The device which is associated with rmnet_data. Corresponds to this
++ *       specific instance of rmnet_phys_ep_conf_s
++ * @local_ep: Default non-muxed endpoint. Used for non-MAP protocols/formats
++ * @muxed_ep: All multiplexed logical endpoints associated with this device
++ * @ingress_data_format: RMNET_INGRESS_FORMAT_* flags from rmnet_data.h
++ * @egress_data_format: RMNET_EGRESS_FORMAT_* flags from rmnet_data.h
++ *
++ * @egress_agg_size: Maximum size (bytes) of data which should be aggregated
++ * @egress_agg_count: Maximum count (packets) of data which should be aggregated
++ *                  Smaller of the two parameters above are chosen for
++ *                  aggregation
++ * @tail_spacing: Guaranteed padding (bytes) when de-aggregating ingress frames
++ */
++struct rmnet_phys_ep_conf_s {
++	struct net_device *dev;
++	struct rmnet_logical_ep_conf_s local_ep;
++	struct rmnet_logical_ep_conf_s muxed_ep[RMNET_DATA_MAX_LOGICAL_EP];
++	uint32_t ingress_data_format;
++	uint32_t egress_data_format;
++
++	/* MAP specific */
++	uint16_t egress_agg_size;
++	uint16_t egress_agg_count;
++	spinlock_t agg_lock;
++	struct sk_buff *agg_skb;
++	uint8_t agg_state;
++	uint8_t agg_count;
++	uint8_t tail_spacing;
++};
++
++int rmnet_config_init(void);
++void rmnet_config_exit(void);
++
++int rmnet_unassociate_network_device(struct net_device *dev);
++int rmnet_set_ingress_data_format(struct net_device *dev,
++				  uint32_t ingress_data_format,
++				  uint8_t  tail_spacing);
++int rmnet_set_egress_data_format(struct net_device *dev,
++				 uint32_t egress_data_format,
++				 uint16_t agg_size,
++				 uint16_t agg_count);
++int rmnet_associate_network_device(struct net_device *dev);
++int _rmnet_set_logical_endpoint_config(struct net_device *dev,
++				       int config_id,
++				      struct rmnet_logical_ep_conf_s *epconfig);
++int rmnet_set_logical_endpoint_config(struct net_device *dev,
++				      int config_id,
++				      uint8_t rmnet_mode,
++				      struct net_device *egress_dev);
++int _rmnet_unset_logical_endpoint_config(struct net_device *dev,
++					 int config_id);
++int rmnet_unset_logical_endpoint_config(struct net_device *dev,
++					int config_id);
++int _rmnet_get_logical_endpoint_config(struct net_device *dev,
++				       int config_id,
++				      struct rmnet_logical_ep_conf_s *epconfig);
++int rmnet_get_logical_endpoint_config(struct net_device *dev,
++				      int config_id,
++				      uint8_t *rmnet_mode,
++				      uint8_t *egress_dev_name,
++				      size_t egress_dev_name_size);
++void rmnet_config_netlink_msg_handler (struct sk_buff *skb);
++int rmnet_config_notify_cb(struct notifier_block *nb,
++				  unsigned long event, void *data);
++int rmnet_create_vnd(int id);
++int rmnet_create_vnd_prefix(int id, const char *name);
++int rmnet_free_vnd(int id);
++
++#endif /* _RMNET_DATA_CONFIG_H_ */
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_handlers.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_handlers.c	2016-04-14 18:54:58.455730284 +0800
+@@ -0,0 +1,573 @@
++/*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * RMNET Data ingress/egress handler
++ *
++ */
++
++#include <linux/skbuff.h>
++#include <linux/netdevice.h>
++#include <linux/module.h>
++#include <linux/rmnet_data.h>
++#include <linux/net_map.h>
++#include "rmnet_data_private.h"
++#include "rmnet_data_config.h"
++#include "rmnet_data_vnd.h"
++#include "rmnet_map.h"
++#include "rmnet_data_stats.h"
++#include "rmnet_data_trace.h"
++
++RMNET_LOG_MODULE(RMNET_DATA_LOGMASK_HANDLER);
++
++
++void rmnet_egress_handler(struct sk_buff *skb,
++			  struct rmnet_logical_ep_conf_s *ep);
++
++#ifdef CONFIG_RMNET_DATA_DEBUG_PKT
++unsigned int dump_pkt_rx;
++module_param(dump_pkt_rx, uint, S_IRUGO | S_IWUSR);
++MODULE_PARM_DESC(dump_pkt_rx, "Dump packets entering ingress handler");
++
++unsigned int dump_pkt_tx;
++module_param(dump_pkt_tx, uint, S_IRUGO | S_IWUSR);
++MODULE_PARM_DESC(dump_pkt_tx, "Dump packets exiting egress handler");
++#endif /* CONFIG_RMNET_DATA_DEBUG_PKT */
++
++/* ***************** Helper Functions *************************************** */
++
++/**
++ * __rmnet_data_set_skb_proto() - Set skb->protocol field
++ * @skb:      packet being modified
++ *
++ * Peek at the first byte of the packet and set the protocol. There is not
++ * good way to determine if a packet has a MAP header. As of writing this,
++ * the reserved bit in the MAP frame will prevent it from overlapping with
++ * IPv4/IPv6 frames. This could change in the future!
++ */
++static inline void __rmnet_data_set_skb_proto(struct sk_buff *skb)
++{
++	switch (skb->data[0] & 0xF0) {
++	case 0x40: /* IPv4 */
++		skb->protocol = htons(ETH_P_IP);
++		break;
++	case 0x60: /* IPv6 */
++		skb->protocol = htons(ETH_P_IPV6);
++		break;
++	default:
++		skb->protocol = htons(ETH_P_MAP);
++		break;
++	}
++}
++
++#ifdef CONFIG_RMNET_DATA_DEBUG_PKT
++/**
++ * rmnet_print_packet() - Print packet / diagnostics
++ * @skb:      Packet to print
++ * @printlen: Number of bytes to print
++ * @dev:      Name of interface
++ * @dir:      Character representing direction (e.g.. 'r' for receive)
++ *
++ * This function prints out raw bytes in an SKB. Use of this will have major
++ * performance impacts and may even trigger watchdog resets if too much is being
++ * printed. Hence, this should always be compiled out unless absolutely needed.
++ */
++void rmnet_print_packet(const struct sk_buff *skb, const char *dev, char dir)
++{
++	char buffer[200];
++	unsigned int len, printlen;
++	int i, buffloc = 0;
++
++	switch (dir) {
++	case 'r':
++		printlen = dump_pkt_rx;
++		break;
++
++	case 't':
++		printlen = dump_pkt_tx;
++		break;
++
++	default:
++		printlen = 0;
++		break;
++	}
++
++	if (!printlen)
++		return;
++
++	pr_err("[%s][%c] - PKT skb->len=%d skb->head=%p skb->data=%p skb->tail=%p skb->end=%p\n",
++		dev, dir, skb->len, (void *)skb->head, (void *)skb->data,
++		skb_tail_pointer(skb), skb_end_pointer(skb));
++
++	if (skb->len > 0)
++		len = skb->len;
++	else
++		len = ((unsigned int)(uintptr_t)skb->end) -
++		      ((unsigned int)(uintptr_t)skb->data);
++
++	pr_err("[%s][%c] - PKT len: %d, printing first %d bytes\n",
++		dev, dir, len, printlen);
++
++	memset(buffer, 0, sizeof(buffer));
++	for (i = 0; (i < printlen) && (i < len); i++) {
++		if ((i%16) == 0) {
++			pr_err("[%s][%c] - PKT%s\n", dev, dir, buffer);
++			memset(buffer, 0, sizeof(buffer));
++			buffloc = 0;
++			buffloc += snprintf(&buffer[buffloc],
++					sizeof(buffer)-buffloc, "%04X:",
++					i);
++		}
++
++		buffloc += snprintf(&buffer[buffloc], sizeof(buffer)-buffloc,
++					" %02x", skb->data[i]);
++
++	}
++	pr_err("[%s][%c] - PKT%s\n", dev, dir, buffer);
++}
++#else
++void rmnet_print_packet(const struct sk_buff *skb, const char *dev, char dir)
++{
++	return;
++}
++#endif /* CONFIG_RMNET_DATA_DEBUG_PKT */
++
++/* ***************** Generic handler **************************************** */
++
++/**
++ * rmnet_bridge_handler() - Bridge related functionality
++ *
++ * Return:
++ *      - RX_HANDLER_CONSUMED in all cases
++ */
++static rx_handler_result_t rmnet_bridge_handler(struct sk_buff *skb,
++					struct rmnet_logical_ep_conf_s *ep)
++{
++	if (!ep->egress_dev) {
++		LOGD("Missing egress device for packet arriving on %s",
++		     skb->dev->name);
++		rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_BRDG_NO_EGRESS);
++	} else {
++		rmnet_egress_handler(skb, ep);
++	}
++
++	return RX_HANDLER_CONSUMED;
++}
++
++/**
++ * __rmnet_deliver_skb() - Deliver skb
++ *
++ * Determines where to deliver skb. Options are: consume by network stack,
++ * pass to bridge handler, or pass to virtual network device
++ *
++ * Return:
++ *      - RX_HANDLER_CONSUMED if packet forwarded or dropped
++ *      - RX_HANDLER_PASS if packet is to be consumed by network stack as-is
++ */
++static rx_handler_result_t __rmnet_deliver_skb(struct sk_buff *skb,
++					 struct rmnet_logical_ep_conf_s *ep)
++{
++	trace___rmnet_deliver_skb(skb);
++	switch (ep->rmnet_mode) {
++	case RMNET_EPMODE_NONE:
++		return RX_HANDLER_PASS;
++
++	case RMNET_EPMODE_BRIDGE:
++		return rmnet_bridge_handler(skb, ep);
++
++	case RMNET_EPMODE_VND:
++		skb_reset_transport_header(skb);
++		skb_reset_network_header(skb);
++		switch (rmnet_vnd_rx_fixup(skb, skb->dev)) {
++		case RX_HANDLER_CONSUMED:
++			return RX_HANDLER_CONSUMED;
++
++		case RX_HANDLER_PASS:
++			skb->pkt_type = PACKET_HOST;
++			netif_receive_skb(skb);
++			return RX_HANDLER_CONSUMED;
++		}
++		return RX_HANDLER_PASS;
++
++	default:
++		LOGD("Unkown ep mode %d", ep->rmnet_mode);
++		rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_DELIVER_NO_EP);
++		return RX_HANDLER_CONSUMED;
++	}
++}
++
++/**
++ * rmnet_ingress_deliver_packet() - Ingress handler for raw IP and bridged
++ *                                  MAP packets.
++ * @skb:     Packet needing a destination.
++ * @config:  Physical end point configuration that the packet arrived on.
++ *
++ * Return:
++ *      - RX_HANDLER_CONSUMED if packet forwarded/dropped
++ *      - RX_HANDLER_PASS if packet should be passed up the stack by caller
++ */
++static rx_handler_result_t rmnet_ingress_deliver_packet(struct sk_buff *skb,
++					    struct rmnet_phys_ep_conf_s *config)
++{
++	if (!config) {
++		LOGD("%s", "NULL physical EP provided");
++		kfree_skb(skb);
++		return RX_HANDLER_CONSUMED;
++	}
++
++	if (!(config->local_ep.refcount)) {
++		LOGD("Packet on %s has no local endpoint configuration",
++			skb->dev->name);
++		rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_IPINGRESS_NO_EP);
++		return RX_HANDLER_CONSUMED;
++	}
++
++	skb->dev = config->local_ep.egress_dev;
++
++	return __rmnet_deliver_skb(skb, &(config->local_ep));
++}
++
++/* ***************** MAP handler ******************************************** */
++
++/**
++ * _rmnet_map_ingress_handler() - Actual MAP ingress handler
++ * @skb:        Packet being received
++ * @config:     Physical endpoint configuration for the ingress device
++ *
++ * Most MAP ingress functions are processed here. Packets are processed
++ * individually; aggregates packets should use rmnet_map_ingress_handler()
++ *
++ * Return:
++ *      - RX_HANDLER_CONSUMED if packet is dropped
++ *      - result of __rmnet_deliver_skb() for all other cases
++ */
++static rx_handler_result_t _rmnet_map_ingress_handler(struct sk_buff *skb,
++					    struct rmnet_phys_ep_conf_s *config)
++{
++	struct rmnet_logical_ep_conf_s *ep;
++	uint8_t mux_id;
++	uint16_t len;
++	int ckresult;
++
++	mux_id = RMNET_MAP_GET_MUX_ID(skb);
++	len = RMNET_MAP_GET_LENGTH(skb)
++			- RMNET_MAP_GET_PAD(skb)
++			- config->tail_spacing;
++
++	if (mux_id >= RMNET_DATA_MAX_LOGICAL_EP) {
++		LOGD("Got packet on %s with bad mux id %d",
++			skb->dev->name, mux_id);
++		rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_MAPINGRESS_BAD_MUX);
++			return RX_HANDLER_CONSUMED;
++	}
++
++	ep = &(config->muxed_ep[mux_id]);
++
++	if (!ep->refcount) {
++		LOGD("Packet on %s:%d; has no logical endpoint config",
++		     skb->dev->name, mux_id);
++
++		rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_MAPINGRESS_MUX_NO_EP);
++		return RX_HANDLER_CONSUMED;
++	}
++
++	if (config->ingress_data_format & RMNET_INGRESS_FORMAT_DEMUXING)
++		skb->dev = ep->egress_dev;
++
++	if (config->ingress_data_format & RMNET_INGRESS_FORMAT_MAP_CKSUMV3) {
++		ckresult = rmnet_map_checksum_downlink_packet(skb);
++		trace_rmnet_map_checksum_downlink_packet(skb, ckresult);
++		rmnet_stats_dl_checksum(ckresult);
++		if (likely(ckresult == RMNET_MAP_CHECKSUM_OK))
++			skb->ip_summed |= CHECKSUM_UNNECESSARY;
++		else if (ckresult != RMNET_MAP_CHECKSUM_ERR_UNKNOWN_IP_VERSION
++			&& ckresult != RMNET_MAP_CHECKSUM_ERR_UNKNOWN_TRANSPORT
++			&& ckresult != RMNET_MAP_CHECKSUM_VALID_FLAG_NOT_SET
++			&& ckresult != RMNET_MAP_CHECKSUM_FRAGMENTED_PACKET) {
++			rmnet_kfree_skb(skb,
++				RMNET_STATS_SKBFREE_INGRESS_BAD_MAP_CKSUM);
++			return RX_HANDLER_CONSUMED;
++		}
++	}
++
++	/* Subtract MAP header */
++	skb_pull(skb, sizeof(struct rmnet_map_header_s));
++	skb_trim(skb, len);
++	__rmnet_data_set_skb_proto(skb);
++
++	return __rmnet_deliver_skb(skb, ep);
++}
++
++/**
++ * rmnet_map_ingress_handler() - MAP ingress handler
++ * @skb:        Packet being received
++ * @config:     Physical endpoint configuration for the ingress device
++ *
++ * Called if and only if MAP is configured in the ingress device's ingress data
++ * format. Deaggregation is done here, actual MAP processing is done in
++ * _rmnet_map_ingress_handler().
++ *
++ * Return:
++ *      - RX_HANDLER_CONSUMED for aggregated packets
++ *      - RX_HANDLER_CONSUMED for dropped packets
++ *      - result of _rmnet_map_ingress_handler() for all other cases
++ */
++static rx_handler_result_t rmnet_map_ingress_handler(struct sk_buff *skb,
++					    struct rmnet_phys_ep_conf_s *config)
++{
++	struct sk_buff *skbn;
++	int rc, co = 0;
++
++	if (config->ingress_data_format & RMNET_INGRESS_FORMAT_DEAGGREGATION) {
++		trace_rmnet_start_deaggregation(skb);
++		while ((skbn = rmnet_map_deaggregate(skb, config)) != 0) {
++			_rmnet_map_ingress_handler(skbn, config);
++			co++;
++		}
++		trace_rmnet_end_deaggregation(skb, co);
++		LOGD("De-aggregated %d packets", co);
++		rmnet_stats_deagg_pkts(co);
++		rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_MAPINGRESS_AGGBUF);
++		rc = RX_HANDLER_CONSUMED;
++	} else {
++		rc = _rmnet_map_ingress_handler(skb, config);
++	}
++
++	return rc;
++}
++
++/**
++ * rmnet_map_egress_handler() - MAP egress handler
++ * @skb:        Packet being sent
++ * @config:     Physical endpoint configuration for the egress device
++ * @ep:         logical endpoint configuration of the packet originator
++ *              (e.g.. RmNet virtual network device)
++ *
++ * Called if and only if MAP is configured in the egress device's egress data
++ * format. Will expand skb if there is insufficient headroom for MAP protocol.
++ * Note: headroomexpansion will incur a performance penalty.
++ *
++ * Return:
++ *      - 0 on success
++ *      - 1 on failure
++ */
++static int rmnet_map_egress_handler(struct sk_buff *skb,
++				    struct rmnet_phys_ep_conf_s *config,
++				    struct rmnet_logical_ep_conf_s *ep)
++{
++	int required_headroom, additional_header_length;
++	struct rmnet_map_header_s *map_header;
++
++	additional_header_length = 0;
++
++	required_headroom = sizeof(struct rmnet_map_header_s);
++
++	LOGD("headroom of %d bytes", required_headroom);
++
++	if (skb_headroom(skb) < required_headroom) {
++		if (pskb_expand_head(skb, required_headroom, 0, GFP_KERNEL)) {
++			LOGD("Failed to add headroom of %d bytes",
++			     required_headroom);
++			return 1;
++		}
++	}
++
++	map_header = rmnet_map_add_map_header(skb, additional_header_length);
++
++	if (!map_header) {
++		LOGD("%s", "Failed to add MAP header to egress packet");
++		return 1;
++	}
++
++	if (config->egress_data_format & RMNET_EGRESS_FORMAT_MUXING) {
++		if (ep->mux_id == 0xff)
++			map_header->mux_id = 0;
++		else
++			map_header->mux_id = ep->mux_id;
++	}
++
++	skb->protocol = htons(ETH_P_MAP);
++
++	if (config->egress_data_format & RMNET_EGRESS_FORMAT_AGGREGATION) {
++		rmnet_map_aggregate(skb, config);
++		return RMNET_MAP_CONSUMED;
++	}
++
++	return RMNET_MAP_SUCCESS;
++}
++/* ***************** Ingress / Egress Entry Points ************************** */
++
++/**
++ * rmnet_ingress_handler() - Ingress handler entry point
++ * @skb: Packet being received
++ *
++ * Processes packet as per ingress data format for receiving device. Logical
++ * endpoint is determined from packet inspection. Packet is then sent to the
++ * egress device listed in the logical endpoint configuration.
++ *
++ * Return:
++ *      - RX_HANDLER_PASS if packet is not processed by handler (caller must
++ *        deal with the packet)
++ *      - RX_HANDLER_CONSUMED if packet is forwarded or processed by MAP
++ */
++rx_handler_result_t rmnet_ingress_handler(struct sk_buff *skb)
++{
++	struct rmnet_phys_ep_conf_s *config;
++	struct net_device *dev;
++	int rc;
++
++	if (!skb)
++		BUG();
++
++	dev = skb->dev;
++	trace_rmnet_ingress_handler(skb);
++	rmnet_print_packet(skb, dev->name, 'r');
++
++	config = (struct rmnet_phys_ep_conf_s *)
++		rcu_dereference(skb->dev->rx_handler_data);
++
++	if (!config) {
++		LOGD("%s is not associated with rmnet_data", skb->dev->name);
++		kfree_skb(skb);
++		return RX_HANDLER_CONSUMED;
++	}
++
++	/* Sometimes devices operate in ethernet mode even thouth there is no
++	 * ethernet header. This causes the skb->protocol to contain a bogus
++	 * value and the skb->data pointer to be off by 14 bytes. Fix it if
++	 * configured to do so
++	 */
++	if (config->ingress_data_format & RMNET_INGRESS_FIX_ETHERNET) {
++		skb_push(skb, RMNET_ETHERNET_HEADER_LENGTH);
++		__rmnet_data_set_skb_proto(skb);
++	}
++
++	if (config->ingress_data_format & RMNET_INGRESS_FORMAT_MAP) {
++		if (RMNET_MAP_GET_CD_BIT(skb)) {
++			if (config->ingress_data_format
++			    & RMNET_INGRESS_FORMAT_MAP_COMMANDS) {
++				rc = rmnet_map_command(skb, config);
++			} else {
++				LOGM("MAP command packet on %s; %s", dev->name,
++				     "Not configured for MAP commands");
++				rmnet_kfree_skb(skb,
++				   RMNET_STATS_SKBFREE_INGRESS_NOT_EXPECT_MAPC);
++				return RX_HANDLER_CONSUMED;
++			}
++		} else {
++			rc = rmnet_map_ingress_handler(skb, config);
++		}
++	} else {
++		switch (ntohs(skb->protocol)) {
++		case ETH_P_MAP:
++			if (config->local_ep.rmnet_mode ==
++				RMNET_EPMODE_BRIDGE) {
++				rc = rmnet_ingress_deliver_packet(skb, config);
++			} else {
++				LOGD("MAP packet on %s; MAP not set",
++					dev->name);
++				rmnet_kfree_skb(skb,
++				   RMNET_STATS_SKBFREE_INGRESS_NOT_EXPECT_MAPD);
++				rc = RX_HANDLER_CONSUMED;
++			}
++			break;
++
++		case ETH_P_ARP:
++		case ETH_P_IP:
++		case ETH_P_IPV6:
++			rc = rmnet_ingress_deliver_packet(skb, config);
++			break;
++
++		default:
++			LOGD("Unknown skb->proto 0x%04X\n",
++				ntohs(skb->protocol) & 0xFFFF);
++			rc = RX_HANDLER_PASS;
++		}
++	}
++
++	return rc;
++}
++
++/**
++ * rmnet_rx_handler() - Rx handler callback registered with kernel
++ * @pskb: Packet to be processed by rx handler
++ *
++ * Standard kernel-expected footprint for rx handlers. Calls
++ * rmnet_ingress_handler with correctly formatted arguments
++ *
++ * Return:
++ *      - Whatever rmnet_ingress_handler() returns
++ */
++rx_handler_result_t rmnet_rx_handler(struct sk_buff **pskb)
++{
++	return rmnet_ingress_handler(*pskb);
++}
++
++/**
++ * rmnet_egress_handler() - Egress handler entry point
++ * @skb:        packet to transmit
++ * @ep:         logical endpoint configuration of the packet originator
++ *              (e.g.. RmNet virtual network device)
++ *
++ * Modifies packet as per logical endpoint configuration and egress data format
++ * for egress device configured in logical endpoint. Packet is then transmitted
++ * on the egress device.
++ */
++void rmnet_egress_handler(struct sk_buff *skb,
++			  struct rmnet_logical_ep_conf_s *ep)
++{
++	struct rmnet_phys_ep_conf_s *config;
++	struct net_device *orig_dev;
++	int rc;
++	orig_dev = skb->dev;
++	skb->dev = ep->egress_dev;
++
++	config = (struct rmnet_phys_ep_conf_s *)
++		rcu_dereference(skb->dev->rx_handler_data);
++
++	if (!config) {
++		LOGD("%s is not associated with rmnet_data", skb->dev->name);
++		kfree_skb(skb);
++		return;
++	}
++
++	LOGD("Packet going out on %s with egress format 0x%08X",
++	     skb->dev->name, config->egress_data_format);
++
++	if (config->egress_data_format & RMNET_EGRESS_FORMAT_MAP) {
++		switch (rmnet_map_egress_handler(skb, config, ep)) {
++		case RMNET_MAP_CONSUMED:
++			LOGD("%s", "MAP process consumed packet");
++			return;
++
++		case RMNET_MAP_SUCCESS:
++			break;
++
++		default:
++			LOGD("MAP egress failed on packet on %s",
++			     skb->dev->name);
++			rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_EGR_MAPFAIL);
++			return;
++		}
++	}
++
++	if (ep->rmnet_mode == RMNET_EPMODE_VND)
++		rmnet_vnd_tx_fixup(skb, orig_dev);
++
++	rmnet_print_packet(skb, skb->dev->name, 't');
++	trace_rmnet_egress_handler(skb);
++	rc = dev_queue_xmit(skb);
++	if (rc != 0) {
++		LOGD("Failed to queue packet for transmission on [%s]",
++		      skb->dev->name);
++	}
++	rmnet_stats_queue_xmit(rc, RMNET_STATS_QUEUE_XMIT_EGRESS);
++}
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_handlers.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_handlers.h	2016-04-14 18:54:58.455730284 +0800
+@@ -0,0 +1,25 @@
++/*
++ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * RMNET Data ingress/egress handler
++ *
++ */
++
++#ifndef _RMNET_DATA_HANDLERS_H_
++#define _RMNET_DATA_HANDLERS_H_
++
++void rmnet_egress_handler(struct sk_buff *skb,
++			  struct rmnet_logical_ep_conf_s *ep);
++
++rx_handler_result_t rmnet_rx_handler(struct sk_buff **pskb);
++
++#endif /* _RMNET_DATA_HANDLERS_H_ */
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_main.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_main.c	2016-04-14 18:54:58.455730284 +0800
+@@ -0,0 +1,62 @@
++/*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ *
++ * RMNET Data generic framework
++ *
++ */
++
++#include <linux/module.h>
++#include <linux/kernel.h>
++#include <linux/export.h>
++#include "rmnet_data_private.h"
++#include "rmnet_data_config.h"
++#include "rmnet_data_vnd.h"
++
++/* ***************** Trace Points ******************************************* */
++#define CREATE_TRACE_POINTS
++#include "rmnet_data_trace.h"
++
++/* ***************** Module Parameters ************************************** */
++unsigned int rmnet_data_log_level = RMNET_LOG_LVL_ERR | RMNET_LOG_LVL_HI;
++module_param(rmnet_data_log_level, uint,  S_IRUGO | S_IWUSR);
++MODULE_PARM_DESC(log_level, "Logging level");
++
++unsigned int rmnet_data_log_module_mask;
++module_param(rmnet_data_log_module_mask, uint,  S_IRUGO | S_IWUSR);
++MODULE_PARM_DESC(rmnet_data_log_module_mask, "Logging module mask");
++
++/* ***************** Startup/Shutdown *************************************** */
++
++/**
++ * rmnet_init() - Module initialization
++ *
++ * todo: check for (and init) startup errors
++ */
++static int __init rmnet_init(void)
++{
++	rmnet_config_init();
++	rmnet_vnd_init();
++
++	LOGL("%s", "RMNET Data driver loaded successfully");
++	return 0;
++}
++
++static void __exit rmnet_exit(void)
++{
++	rmnet_config_exit();
++	rmnet_vnd_exit();
++}
++
++module_init(rmnet_init)
++module_exit(rmnet_exit)
++MODULE_LICENSE("GPL v2");
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_private.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_private.h	2016-04-14 18:54:58.455730284 +0800
+@@ -0,0 +1,77 @@
++/*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#ifndef _RMNET_DATA_PRIVATE_H_
++#define _RMNET_DATA_PRIVATE_H_
++
++#define RMNET_DATA_MAX_VND              32
++#define RMNET_DATA_MAX_PACKET_SIZE      16384
++#define RMNET_DATA_DFLT_PACKET_SIZE     1500
++#define RMNET_DATA_DEV_NAME_STR         "rmnet_data"
++#define RMNET_DATA_NEEDED_HEADROOM      16
++#define RMNET_DATA_TX_QUEUE_LEN         1000
++#define RMNET_ETHERNET_HEADER_LENGTH    14
++
++extern unsigned int rmnet_data_log_level;
++extern unsigned int rmnet_data_log_module_mask;
++
++#define RMNET_INIT_OK     0
++#define RMNET_INIT_ERROR  1
++
++#define RMNET_LOG_LVL_DBG (1<<4)
++#define RMNET_LOG_LVL_LOW (1<<3)
++#define RMNET_LOG_LVL_MED (1<<2)
++#define RMNET_LOG_LVL_HI  (1<<1)
++#define RMNET_LOG_LVL_ERR (1<<0)
++
++#define RMNET_LOG_MODULE(X) \
++	static uint32_t rmnet_mod_mask = X
++
++#define RMNET_DATA_LOGMASK_CONFIG  (1<<0)
++#define RMNET_DATA_LOGMASK_HANDLER (1<<1)
++#define RMNET_DATA_LOGMASK_VND     (1<<2)
++#define RMNET_DATA_LOGMASK_MAPD    (1<<3)
++#define RMNET_DATA_LOGMASK_MAPC    (1<<4)
++
++#define LOGE(fmt, ...) do { if (rmnet_data_log_level & RMNET_LOG_LVL_ERR) \
++			pr_err("[RMNET:ERR] %s(): " fmt "\n", __func__, \
++				##__VA_ARGS__); \
++			} while (0)
++
++#define LOGH(fmt, ...) do { if (rmnet_data_log_level & RMNET_LOG_LVL_HI) \
++			pr_err("[RMNET:HI] %s(): " fmt "\n" , __func__, \
++				##__VA_ARGS__); \
++			} while (0)
++
++#define LOGM(fmt, ...) do { if (rmnet_data_log_level & RMNET_LOG_LVL_MED) \
++			pr_warn("[RMNET:MED] %s(): " fmt "\n", __func__, \
++				##__VA_ARGS__); \
++			} while (0)
++
++#define LOGL(fmt, ...) do { if (unlikely \
++			(rmnet_data_log_level & RMNET_LOG_LVL_LOW)) \
++			pr_notice("[RMNET:LOW] %s(): " fmt "\n", __func__, \
++				##__VA_ARGS__); \
++			} while (0)
++
++/* Don't use pr_debug as it is compiled out of the kernel. We can be sure of
++ * minimal impact as LOGD is not enabled by default.
++ */
++#define LOGD(fmt, ...) do { if (unlikely( \
++			    (rmnet_data_log_level & RMNET_LOG_LVL_DBG) \
++			    && (rmnet_data_log_module_mask & rmnet_mod_mask))) \
++			pr_notice("[RMNET:DBG] %s(): " fmt "\n", __func__, \
++				  ##__VA_ARGS__); \
++			} while (0)
++
++#endif /* _RMNET_DATA_PRIVATE_H_ */
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_stats.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_stats.c	2016-04-14 18:54:58.455730284 +0800
+@@ -0,0 +1,119 @@
++/*
++ * Copyright (c) 2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ *
++ * RMNET Data statistics
++ *
++ */
++
++#include <linux/module.h>
++#include <linux/kernel.h>
++#include <linux/export.h>
++#include <linux/skbuff.h>
++#include <linux/spinlock.h>
++#include <linux/netdevice.h>
++#include "rmnet_data_private.h"
++#include "rmnet_data_stats.h"
++#include "rmnet_data_config.h"
++#include "rmnet_map.h"
++
++enum rmnet_deagg_e {
++	RMNET_STATS_AGG_BUFF,
++	RMNET_STATS_AGG_PKT,
++	RMNET_STATS_AGG_MAX
++};
++
++static DEFINE_SPINLOCK(rmnet_skb_free_lock);
++unsigned long int skb_free[RMNET_STATS_SKBFREE_MAX];
++module_param_array(skb_free, ulong, 0, S_IRUGO);
++MODULE_PARM_DESC(skb_free, "SKBs dropped or freed");
++
++static DEFINE_SPINLOCK(rmnet_queue_xmit_lock);
++unsigned long int queue_xmit[RMNET_STATS_QUEUE_XMIT_MAX*2];
++module_param_array(queue_xmit, ulong, 0, S_IRUGO);
++MODULE_PARM_DESC(queue_xmit, "SKBs queued for transmit");
++
++static DEFINE_SPINLOCK(rmnet_deagg_count);
++unsigned long int deagg_count[RMNET_STATS_AGG_MAX];
++module_param_array(deagg_count, ulong, 0, S_IRUGO);
++MODULE_PARM_DESC(deagg_count, "SKBs De-aggregated");
++
++static DEFINE_SPINLOCK(rmnet_agg_count);
++unsigned long int agg_count[RMNET_STATS_AGG_MAX];
++module_param_array(agg_count, ulong, 0, S_IRUGO);
++MODULE_PARM_DESC(agg_count, "SKBs Aggregated");
++
++static DEFINE_SPINLOCK(rmnet_checksum_dl_stats);
++unsigned long int checksum_dl_stats[RMNET_MAP_CHECKSUM_ENUM_LENGTH];
++module_param_array(checksum_dl_stats, ulong, 0, S_IRUGO);
++MODULE_PARM_DESC(checksum_dl_stats, "Downlink Checksum Statistics");
++
++void rmnet_kfree_skb(struct sk_buff *skb, unsigned int reason)
++{
++	unsigned long flags;
++
++	if (reason >= RMNET_STATS_SKBFREE_MAX)
++		reason = RMNET_STATS_SKBFREE_UNKNOWN;
++
++	spin_lock_irqsave(&rmnet_skb_free_lock, flags);
++	skb_free[reason]++;
++	spin_unlock_irqrestore(&rmnet_skb_free_lock, flags);
++
++	if (skb)
++		kfree_skb(skb);
++}
++
++void rmnet_stats_queue_xmit(int rc, unsigned int reason)
++{
++	unsigned long flags;
++
++	if (rc != 0)
++		reason += RMNET_STATS_QUEUE_XMIT_MAX;
++	if (reason >= RMNET_STATS_QUEUE_XMIT_MAX*2)
++		reason = RMNET_STATS_SKBFREE_UNKNOWN;
++
++	spin_lock_irqsave(&rmnet_queue_xmit_lock, flags);
++	queue_xmit[reason]++;
++	spin_unlock_irqrestore(&rmnet_queue_xmit_lock, flags);
++}
++
++void rmnet_stats_agg_pkts(int aggcount)
++{
++	unsigned long flags;
++
++	spin_lock_irqsave(&rmnet_agg_count, flags);
++	agg_count[RMNET_STATS_AGG_BUFF]++;
++	agg_count[RMNET_STATS_AGG_PKT] += aggcount;
++	spin_unlock_irqrestore(&rmnet_agg_count, flags);
++}
++
++void rmnet_stats_deagg_pkts(int aggcount)
++{
++	unsigned long flags;
++
++	spin_lock_irqsave(&rmnet_deagg_count, flags);
++	deagg_count[RMNET_STATS_AGG_BUFF]++;
++	deagg_count[RMNET_STATS_AGG_PKT] += aggcount;
++	spin_unlock_irqrestore(&rmnet_deagg_count, flags);
++}
++
++void rmnet_stats_dl_checksum(unsigned int rc)
++{
++	unsigned long flags;
++
++	if (rc >= RMNET_MAP_CHECKSUM_ENUM_LENGTH)
++		rc = RMNET_MAP_CHECKSUM_ERR_UNKOWN;
++
++	spin_lock_irqsave(&rmnet_checksum_dl_stats, flags);
++	checksum_dl_stats[rc]++;
++	spin_unlock_irqrestore(&rmnet_checksum_dl_stats, flags);
++}
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_stats.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_stats.h	2016-04-14 18:54:58.455730284 +0800
+@@ -0,0 +1,59 @@
++/*
++ * Copyright (c) 2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ *
++ * RMNET Data statistics
++ *
++ */
++
++#ifndef _RMNET_DATA_STATS_H_
++#define _RMNET_DATA_STATS_H_
++
++enum rmnet_skb_free_e {
++	RMNET_STATS_SKBFREE_UNKNOWN,
++	RMNET_STATS_SKBFREE_BRDG_NO_EGRESS,
++	RMNET_STATS_SKBFREE_DELIVER_NO_EP,
++	RMNET_STATS_SKBFREE_IPINGRESS_NO_EP,
++	RMNET_STATS_SKBFREE_MAPINGRESS_BAD_MUX,
++	RMNET_STATS_SKBFREE_MAPINGRESS_MUX_NO_EP,
++	RMNET_STATS_SKBFREE_MAPINGRESS_AGGBUF,
++	RMNET_STATS_SKBFREE_INGRESS_NOT_EXPECT_MAPD,
++	RMNET_STATS_SKBFREE_INGRESS_NOT_EXPECT_MAPC,
++	RMNET_STATS_SKBFREE_EGR_MAPFAIL,
++	RMNET_STATS_SKBFREE_VND_NO_EGRESS,
++	RMNET_STATS_SKBFREE_MAPC_BAD_MUX,
++	RMNET_STATS_SKBFREE_MAPC_MUX_NO_EP,
++	RMNET_STATS_SKBFREE_AGG_CPY_EXPAND,
++	RMNET_STATS_SKBFREE_AGG_INTO_BUFF,
++	RMNET_STATS_SKBFREE_DEAGG_MALFORMED,
++	RMNET_STATS_SKBFREE_DEAGG_CLONE_FAIL,
++	RMNET_STATS_SKBFREE_DEAGG_UNKOWN_IP_TYP,
++	RMNET_STATS_SKBFREE_DEAGG_DATA_LEN_0,
++	RMNET_STATS_SKBFREE_INGRESS_BAD_MAP_CKSUM,
++	RMNET_STATS_SKBFREE_MAX
++};
++
++enum rmnet_queue_xmit_e {
++	RMNET_STATS_QUEUE_XMIT_UNKNOWN,
++	RMNET_STATS_QUEUE_XMIT_EGRESS,
++	RMNET_STATS_QUEUE_XMIT_AGG_FILL_BUFFER,
++	RMNET_STATS_QUEUE_XMIT_AGG_TIMEOUT,
++	RMNET_STATS_QUEUE_XMIT_AGG_CPY_EXP_FAIL,
++	RMNET_STATS_QUEUE_XMIT_MAX
++};
++
++void rmnet_kfree_skb(struct sk_buff *skb, unsigned int reason);
++void rmnet_stats_queue_xmit(int rc, unsigned int reason);
++void rmnet_stats_deagg_pkts(int aggcount);
++void rmnet_stats_agg_pkts(int aggcount);
++void rmnet_stats_dl_checksum(unsigned int rc);
++#endif /* _RMNET_DATA_STATS_H_ */
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_trace.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_trace.h	2016-04-14 18:54:58.459730277 +0800
+@@ -0,0 +1,229 @@
++/* Copyright (c) 2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#undef TRACE_SYSTEM
++#define TRACE_SYSTEM rmnet_data
++#define TRACE_INCLUDE_FILE rmnet_data_trace
++
++#if !defined(_TRACE_MSM_LOW_POWER_H_) || defined(TRACE_HEADER_MULTI_READ)
++#define _RMNET_DATA_TRACE_H_
++
++#include <linux/netdevice.h>
++#include <linux/skbuff.h>
++#include <linux/tracepoint.h>
++
++DECLARE_EVENT_CLASS(rmnet_handler_template,
++
++	TP_PROTO(struct sk_buff *skb),
++
++	TP_ARGS(skb),
++
++	TP_STRUCT__entry(
++		__field(void *, skbaddr)
++		__field(unsigned int, len)
++		__string(name, skb->dev->name)
++	),
++
++	TP_fast_assign(
++		__entry->skbaddr = skb;
++		__entry->len = skb->len;
++		__assign_str(name, skb->dev->name);
++	),
++
++	TP_printk("dev=%s skbaddr=%p len=%u",
++		__get_str(name), __entry->skbaddr, __entry->len)
++)
++
++DEFINE_EVENT(rmnet_handler_template, rmnet_egress_handler,
++
++	TP_PROTO(struct sk_buff *skb),
++
++	TP_ARGS(skb)
++);
++
++DEFINE_EVENT(rmnet_handler_template, rmnet_ingress_handler,
++
++	TP_PROTO(struct sk_buff *skb),
++
++	TP_ARGS(skb)
++);
++
++DEFINE_EVENT(rmnet_handler_template, rmnet_vnd_start_xmit,
++
++	TP_PROTO(struct sk_buff *skb),
++
++	TP_ARGS(skb)
++);
++
++DEFINE_EVENT(rmnet_handler_template, __rmnet_deliver_skb,
++
++	TP_PROTO(struct sk_buff *skb),
++
++	TP_ARGS(skb)
++);
++
++DECLARE_EVENT_CLASS(rmnet_tc_fc_template,
++
++	TP_PROTO(u32 tcm_handle, int qdisc_len, int is_enable),
++
++	TP_ARGS(tcm_handle, qdisc_len, is_enable),
++
++	TP_STRUCT__entry(
++		__field(u32, handle)
++		__field(int, qlen)
++		__field(int, enable)
++	),
++
++	TP_fast_assign(
++		__entry->handle = tcm_handle;
++		__entry->qlen = qdisc_len;
++		__entry->enable = is_enable;
++	),
++
++	TP_printk("tcm_handle=%d qdisc length=%d flow %s",
++		__entry->handle, __entry->qlen,
++		__entry->enable ? "enable" : "disable")
++)
++
++DEFINE_EVENT(rmnet_tc_fc_template, rmnet_fc_qmi,
++
++	TP_PROTO(u32 tcm_handle, int qdisc_len, int is_enable),
++
++	TP_ARGS(tcm_handle, qdisc_len, is_enable)
++);
++
++DEFINE_EVENT(rmnet_tc_fc_template, rmnet_fc_map,
++
++	TP_PROTO(u32 tcm_handle, int qdisc_len, int is_enable),
++
++	TP_ARGS(tcm_handle, qdisc_len, is_enable)
++);
++
++DECLARE_EVENT_CLASS(rmnet_aggregation_template,
++
++	TP_PROTO(struct sk_buff *skb, int num_agg_pakcets),
++
++	TP_ARGS(skb, num_agg_pakcets),
++
++	TP_STRUCT__entry(
++		__field(void *, skbaddr)
++		__field(unsigned int, len)
++		__string(name, skb->dev->name)
++		__field(int, num)
++	),
++
++	TP_fast_assign(
++		__entry->skbaddr = skb;
++		__entry->len = skb->len;
++		__assign_str(name, skb->dev->name);
++		__entry->num = num_agg_pakcets;
++	),
++
++	TP_printk("dev=%s skbaddr=%p len=%u agg_count: %d",
++		__get_str(name), __entry->skbaddr, __entry->len, __entry->num)
++)
++
++DEFINE_EVENT(rmnet_aggregation_template, rmnet_map_aggregate,
++
++	TP_PROTO(struct sk_buff *skb, int num_agg_pakcets),
++
++	TP_ARGS(skb, num_agg_pakcets)
++);
++
++DEFINE_EVENT(rmnet_aggregation_template, rmnet_map_flush_packet_queue,
++
++	TP_PROTO(struct sk_buff *skb, int num_agg_pakcets),
++
++	TP_ARGS(skb, num_agg_pakcets)
++);
++
++TRACE_EVENT(rmnet_start_aggregation,
++
++	TP_PROTO(struct sk_buff *skb),
++
++	TP_ARGS(skb),
++
++	TP_STRUCT__entry(
++		__string(name, skb->dev->name)
++	),
++
++	TP_fast_assign(
++		__assign_str(name, skb->dev->name);
++	),
++
++	TP_printk("dev: %s, aggregated first packet", __get_str(name))
++)
++
++TRACE_EVENT(rmnet_start_deaggregation,
++
++	TP_PROTO(struct sk_buff *skb),
++
++	TP_ARGS(skb),
++
++	TP_STRUCT__entry(
++		__string(name, skb->dev->name)
++	),
++
++	TP_fast_assign(
++		__assign_str(name, skb->dev->name);
++	),
++
++	TP_printk("dev: %s, deaggregated first packet", __get_str(name))
++)
++
++TRACE_EVENT(rmnet_end_deaggregation,
++
++	TP_PROTO(struct sk_buff *skb, int num_deagg_packets),
++
++	TP_ARGS(skb, num_deagg_packets),
++
++	TP_STRUCT__entry(
++		__string(name, skb->dev->name)
++		__field(int, num)
++	),
++
++	TP_fast_assign(
++		__assign_str(name, skb->dev->name);
++		__entry->num = num_deagg_packets;
++	),
++
++	TP_printk("dev: %s, deaggregate end count: %d",
++		__get_str(name), __entry->num)
++)
++
++TRACE_EVENT(rmnet_map_checksum_downlink_packet,
++
++	TP_PROTO(struct sk_buff *skb, int ckresult),
++
++	TP_ARGS(skb, ckresult),
++
++	TP_STRUCT__entry(
++		__string(name, skb->dev->name)
++		__field(int, res)
++	),
++
++	TP_fast_assign(
++		__assign_str(name, skb->dev->name);
++		__entry->res = ckresult;
++	),
++
++	TP_printk("DL checksum on dev=%s, res: %d",
++		__get_str(name), __entry->res)
++)
++
++#endif /* _RMNET_DATA_TRACE_H_ */
++
++/* This part must be outside protection */
++#undef TRACE_INCLUDE_PATH
++#define TRACE_INCLUDE_PATH .
++#include <trace/define_trace.h>
++
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_vnd.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_vnd.c	2016-04-14 18:54:58.459730277 +0800
+@@ -0,0 +1,1068 @@
++/*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ *
++ * RMNET Data virtual network driver
++ *
++ */
++
++#include <linux/types.h>
++#include <linux/rmnet_data.h>
++#include <linux/msm_rmnet.h>
++#include <linux/etherdevice.h>
++#include <linux/if_arp.h>
++#include <linux/spinlock.h>
++#include <net/pkt_sched.h>
++#include <linux/atomic.h>
++#include <linux/net_map.h>
++#include "rmnet_data_config.h"
++#include "rmnet_data_handlers.h"
++#include "rmnet_data_private.h"
++#include "rmnet_map.h"
++#include "rmnet_data_vnd.h"
++#include "rmnet_data_stats.h"
++#include "rmnet_data_trace.h"
++
++RMNET_LOG_MODULE(RMNET_DATA_LOGMASK_VND);
++
++#define RMNET_MAP_FLOW_NUM_TC_HANDLE 3
++#define RMNET_VND_UF_ACTION_ADD 0
++#define RMNET_VND_UF_ACTION_DEL 1
++enum {
++	RMNET_VND_UPDATE_FLOW_OK,
++	RMNET_VND_UPDATE_FLOW_NO_ACTION,
++	RMNET_VND_UPDATE_FLOW_NO_MORE_ROOM,
++	RMNET_VND_UPDATE_FLOW_NO_VALID_LEFT
++};
++
++struct net_device *rmnet_devices[RMNET_DATA_MAX_VND];
++
++struct rmnet_map_flow_mapping_s {
++	struct list_head list;
++	uint32_t map_flow_id;
++	uint32_t tc_flow_valid[RMNET_MAP_FLOW_NUM_TC_HANDLE];
++	uint32_t tc_flow_id[RMNET_MAP_FLOW_NUM_TC_HANDLE];
++	atomic_t v4_seq;
++	atomic_t v6_seq;
++};
++
++struct rmnet_vnd_private_s {
++	uint32_t qos_version;
++	struct rmnet_logical_ep_conf_s local_ep;
++
++	rwlock_t flow_map_lock;
++	struct list_head flow_head;
++};
++
++#define RMNET_VND_FC_QUEUED      0
++#define RMNET_VND_FC_NOT_ENABLED 1
++#define RMNET_VND_FC_KMALLOC_ERR 2
++
++/* ***************** Helper Functions *************************************** */
++
++/**
++ * rmnet_vnd_add_qos_header() - Adds QoS header to front of skb->data
++ * @skb:        Socket buffer ("packet") to modify
++ * @dev:        Egress interface
++ *
++ * Does not check for sufficient headroom! Caller must make sure there is enough
++ * headroom.
++ */
++static void rmnet_vnd_add_qos_header(struct sk_buff *skb,
++				     struct net_device *dev,
++				     uint32_t qos_version)
++{
++	struct QMI_QOS_HDR_S *qmih;
++	struct qmi_qos_hdr8_s *qmi8h;
++
++	if (qos_version & RMNET_IOCTL_QOS_MODE_6) {
++		qmih = (struct QMI_QOS_HDR_S *)
++			skb_push(skb, sizeof(struct QMI_QOS_HDR_S));
++		qmih->version = 1;
++		qmih->flags = 0;
++		qmih->flow_id = skb->mark;
++	} else if (qos_version & RMNET_IOCTL_QOS_MODE_8) {
++		qmi8h = (struct qmi_qos_hdr8_s *)
++			skb_push(skb, sizeof(struct qmi_qos_hdr8_s));
++		/* Flags are 0 always */
++		qmi8h->hdr.version = 0;
++		qmi8h->hdr.flags = 0;
++		memset(qmi8h->reserved, 0, sizeof(qmi8h->reserved));
++		qmi8h->hdr.flow_id = skb->mark;
++	} else {
++		LOGD("%s(): Bad QoS version configured\n", __func__);
++	}
++}
++
++/* ***************** RX/TX Fixup ******************************************** */
++
++/**
++ * rmnet_vnd_rx_fixup() - Virtual Network Device receive fixup hook
++ * @skb:        Socket buffer ("packet") to modify
++ * @dev:        Virtual network device
++ *
++ * Additional VND specific packet processing for ingress packets
++ *
++ * Return:
++ *      - RX_HANDLER_PASS if packet should continue to process in stack
++ *      - RX_HANDLER_CONSUMED if packet should not be processed in stack
++ *
++ */
++int rmnet_vnd_rx_fixup(struct sk_buff *skb, struct net_device *dev)
++{
++	if (unlikely(!dev || !skb))
++		BUG();
++
++	dev->stats.rx_packets++;
++	dev->stats.rx_bytes += skb->len;
++
++	return RX_HANDLER_PASS;
++}
++
++/**
++ * rmnet_vnd_tx_fixup() - Virtual Network Device transmic fixup hook
++ * @skb:      Socket buffer ("packet") to modify
++ * @dev:      Virtual network device
++ *
++ * Additional VND specific packet processing for egress packets
++ *
++ * Return:
++ *      - RX_HANDLER_PASS if packet should continue to be transmitted
++ *      - RX_HANDLER_CONSUMED if packet should not be transmitted by stack
++ */
++int rmnet_vnd_tx_fixup(struct sk_buff *skb, struct net_device *dev)
++{
++	struct rmnet_vnd_private_s *dev_conf;
++	dev_conf = (struct rmnet_vnd_private_s *) netdev_priv(dev);
++
++	if (unlikely(!dev || !skb))
++		BUG();
++
++	dev->stats.tx_packets++;
++	dev->stats.tx_bytes += skb->len;
++
++	return RX_HANDLER_PASS;
++}
++
++/* ***************** Network Device Operations ****************************** */
++
++/**
++ * rmnet_vnd_start_xmit() - Transmit NDO callback
++ * @skb:        Socket buffer ("packet") being sent from network stack
++ * @dev:        Virtual Network Device
++ *
++ * Standard network driver operations hook to transmit packets on virtual
++ * network device. Called by network stack. Packet is not transmitted directly
++ * from here; instead it is given to the rmnet egress handler.
++ *
++ * Return:
++ *      - NETDEV_TX_OK under all cirumstances (cannot block/fail)
++ */
++static netdev_tx_t rmnet_vnd_start_xmit(struct sk_buff *skb,
++					struct net_device *dev)
++{
++	struct rmnet_vnd_private_s *dev_conf;
++	trace_rmnet_vnd_start_xmit(skb);
++	dev_conf = (struct rmnet_vnd_private_s *) netdev_priv(dev);
++	if (dev_conf->local_ep.egress_dev) {
++		/* QoS header should come after MAP header */
++		if (dev_conf->qos_version)
++			rmnet_vnd_add_qos_header(skb,
++						 dev,
++						 dev_conf->qos_version);
++		rmnet_egress_handler(skb, &dev_conf->local_ep);
++	} else {
++		dev->stats.tx_dropped++;
++		rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_VND_NO_EGRESS);
++	}
++	return NETDEV_TX_OK;
++}
++
++/**
++ * rmnet_vnd_change_mtu() - Change MTU NDO callback
++ * @dev:         Virtual network device
++ * @new_mtu:     New MTU value to set (in bytes)
++ *
++ * Standard network driver operations hook to set the MTU. Called by kernel to
++ * set the device MTU. Checks if desired MTU is less than zero or greater than
++ * RMNET_DATA_MAX_PACKET_SIZE;
++ *
++ * Return:
++ *      - 0 if successful
++ *      - -EINVAL if new_mtu is out of range
++ */
++static int rmnet_vnd_change_mtu(struct net_device *dev, int new_mtu)
++{
++	if (new_mtu < 0 || new_mtu > RMNET_DATA_MAX_PACKET_SIZE)
++		return -EINVAL;
++
++	dev->mtu = new_mtu;
++	return 0;
++}
++
++#ifdef CONFIG_RMNET_DATA_FC
++static int _rmnet_vnd_do_qos_ioctl(struct net_device *dev,
++				   struct ifreq *ifr,
++				   int cmd)
++{
++	struct rmnet_vnd_private_s *dev_conf;
++	int rc, qdisc_len = 0;
++	struct rmnet_ioctl_data_s ioctl_data;
++	rc = 0;
++	dev_conf = (struct rmnet_vnd_private_s *) netdev_priv(dev);
++
++	switch (cmd) {
++
++	case RMNET_IOCTL_SET_QOS_ENABLE:
++		LOGM("RMNET_IOCTL_SET_QOS_ENABLE on %s", dev->name);
++		if (!dev_conf->qos_version)
++			dev_conf->qos_version = RMNET_IOCTL_QOS_MODE_6;
++		break;
++
++	case RMNET_IOCTL_SET_QOS_DISABLE:
++		LOGM("RMNET_IOCTL_SET_QOS_DISABLE on %s", dev->name);
++		dev_conf->qos_version = 0;
++		break;
++
++	case RMNET_IOCTL_GET_QOS:           /* Get QoS header state    */
++		LOGM("RMNET_IOCTL_GET_QOS on %s", dev->name);
++		ioctl_data.u.operation_mode = (dev_conf->qos_version ==
++						RMNET_IOCTL_QOS_MODE_6);
++		if (copy_to_user(ifr->ifr_ifru.ifru_data, &ioctl_data,
++			sizeof(struct rmnet_ioctl_data_s)))
++			rc = -EFAULT;
++		break;
++
++	case RMNET_IOCTL_FLOW_ENABLE:
++		LOGL("RMNET_IOCTL_FLOW_ENABLE on %s", dev->name);
++		if (copy_from_user(&ioctl_data, ifr->ifr_ifru.ifru_data,
++			sizeof(struct rmnet_ioctl_data_s))) {
++			rc = -EFAULT;
++			break;
++		}
++		qdisc_len = tc_qdisc_flow_control(dev,
++						  ioctl_data.u.tcm_handle, 1);
++		trace_rmnet_fc_qmi(ioctl_data.u.tcm_handle, qdisc_len, 1);
++		break;
++
++	case RMNET_IOCTL_FLOW_DISABLE:
++		LOGL("RMNET_IOCTL_FLOW_DISABLE on %s", dev->name);
++		if (copy_from_user(&ioctl_data, ifr->ifr_ifru.ifru_data,
++			sizeof(struct rmnet_ioctl_data_s))) {
++			rc = -EFAULT;
++		break;
++		}
++		qdisc_len = tc_qdisc_flow_control(dev,
++						  ioctl_data.u.tcm_handle, 0);
++		trace_rmnet_fc_qmi(ioctl_data.u.tcm_handle, qdisc_len, 0);
++		break;
++
++	default:
++		rc = -EINVAL;
++	}
++
++	return rc;
++}
++
++struct rmnet_vnd_fc_work {
++	struct work_struct work;
++	struct net_device *dev;
++	uint32_t tc_handle;
++	int enable;
++};
++
++static void _rmnet_vnd_wq_flow_control(struct work_struct *work)
++{
++	struct rmnet_vnd_fc_work *fcwork;
++	int qdisc_len = 0;
++	fcwork = (struct rmnet_vnd_fc_work *)work;
++
++	rtnl_lock();
++	qdisc_len = tc_qdisc_flow_control(fcwork->dev, fcwork->tc_handle,
++				     fcwork->enable);
++	trace_rmnet_fc_map(fcwork->tc_handle, qdisc_len, fcwork->enable);
++	rtnl_unlock();
++
++	LOGL("[%s] handle:%08X enable:%d",
++	     fcwork->dev->name, fcwork->tc_handle, fcwork->enable);
++
++	kfree(work);
++}
++
++static int _rmnet_vnd_do_flow_control(struct net_device *dev,
++					     uint32_t tc_handle,
++					     int enable)
++{
++	struct rmnet_vnd_fc_work *fcwork;
++
++	fcwork = (struct rmnet_vnd_fc_work *)
++			kmalloc(sizeof(struct rmnet_vnd_fc_work), GFP_ATOMIC);
++	if (!fcwork)
++		return RMNET_VND_FC_KMALLOC_ERR;
++	memset(fcwork, 0, sizeof(struct rmnet_vnd_fc_work));
++
++	INIT_WORK((struct work_struct *)fcwork, _rmnet_vnd_wq_flow_control);
++	fcwork->dev = dev;
++	fcwork->tc_handle = tc_handle;
++	fcwork->enable = enable;
++
++	schedule_work((struct work_struct *)fcwork);
++	return RMNET_VND_FC_QUEUED;
++}
++#else
++static int _rmnet_vnd_do_qos_ioctl(struct net_device *dev,
++				   struct ifreq *ifr,
++				   int cmd)
++{
++	return -EINVAL;
++}
++
++static inline int _rmnet_vnd_do_flow_control(struct net_device *dev,
++					     uint32_t tc_handle,
++					     int enable)
++{
++	LOGD("[%s] called with no QoS support", dev->name);
++	return RMNET_VND_FC_NOT_ENABLED;
++}
++#endif /* CONFIG_RMNET_DATA_FC */
++
++static int rmnet_vnd_ioctl_extended(struct net_device *dev, struct ifreq *ifr)
++{
++	struct rmnet_vnd_private_s *dev_conf;
++	struct rmnet_ioctl_extended_s ext_cmd;
++	int rc = 0;
++	dev_conf = (struct rmnet_vnd_private_s *) netdev_priv(dev);
++
++	rc = copy_from_user(&ext_cmd, ifr->ifr_ifru.ifru_data,
++			    sizeof(struct rmnet_ioctl_extended_s));
++	if (rc) {
++		LOGM("%s(): copy_from_user() failed\n", __func__);
++		return rc;
++	}
++
++	switch (ext_cmd.extended_ioctl) {
++	case RMNET_IOCTL_GET_SUPPORTED_FEATURES:
++		ext_cmd.u.data = 0;
++		break;
++
++	case RMNET_IOCTL_GET_DRIVER_NAME:
++		strlcpy(ext_cmd.u.if_name, "rmnet_data",
++			sizeof(ext_cmd.u.if_name));
++		break;
++
++	case RMNET_IOCTL_GET_SUPPORTED_QOS_MODES:
++		ext_cmd.u.data = RMNET_IOCTL_QOS_MODE_6
++				 | RMNET_IOCTL_QOS_MODE_8;
++		break;
++
++	case RMNET_IOCTL_GET_QOS_VERSION:
++		ext_cmd.u.data = dev_conf->qos_version;
++		break;
++
++	case RMNET_IOCTL_SET_QOS_VERSION:
++		if (ext_cmd.u.data == RMNET_IOCTL_QOS_MODE_6
++		    || ext_cmd.u.data == RMNET_IOCTL_QOS_MODE_8
++		    ||  ext_cmd.u.data == 0) {
++			dev_conf->qos_version = ext_cmd.u.data;
++		} else {
++			rc = -EINVAL;
++			goto done;
++		}
++		break;
++
++	default:
++		rc = -EINVAL;
++		goto done;
++		break;
++	}
++
++	rc = copy_to_user(ifr->ifr_ifru.ifru_data, &ext_cmd,
++			  sizeof(struct rmnet_ioctl_extended_s));
++	if (rc)
++		LOGM("%s(): copy_to_user() failed\n", __func__);
++
++done:
++	return rc;
++}
++
++
++/**
++ * rmnet_vnd_ioctl() - IOCTL NDO callback
++ * @dev:         Virtual network device
++ * @ifreq:       User data
++ * @cmd:         IOCTL command value
++ *
++ * Standard network driver operations hook to process IOCTLs. Called by kernel
++ * to process non-stanard IOCTLs for device
++ *
++ * Return:
++ *      - 0 if successful
++ *      - -EINVAL if unknown IOCTL
++ */
++static int rmnet_vnd_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
++{
++	struct rmnet_vnd_private_s *dev_conf;
++	int rc;
++	struct rmnet_ioctl_data_s ioctl_data;
++	rc = 0;
++	dev_conf = (struct rmnet_vnd_private_s *) netdev_priv(dev);
++
++	rc = _rmnet_vnd_do_qos_ioctl(dev, ifr, cmd);
++	if (rc != -EINVAL)
++		return rc;
++	rc = 0; /* Reset rc as it may contain -EINVAL from above */
++
++	switch (cmd) {
++
++	case RMNET_IOCTL_OPEN: /* Do nothing. Support legacy behavior */
++		LOGM("RMNET_IOCTL_OPEN on %s (ignored)", dev->name);
++		break;
++
++	case RMNET_IOCTL_CLOSE: /* Do nothing. Support legacy behavior */
++		LOGM("RMNET_IOCTL_CLOSE on %s (ignored)", dev->name);
++		break;
++
++	case RMNET_IOCTL_SET_LLP_ETHERNET:
++		LOGM("RMNET_IOCTL_SET_LLP_ETHERNET on %s (no support)",
++		     dev->name);
++		rc = -EINVAL;
++		break;
++
++	case RMNET_IOCTL_SET_LLP_IP: /* Do nothing. Support legacy behavior */
++		LOGM("RMNET_IOCTL_SET_LLP_IP on %s (ignored)", dev->name);
++		break;
++
++	case RMNET_IOCTL_GET_LLP: /* Always return IP mode */
++		LOGM("RMNET_IOCTL_GET_LLP on %s", dev->name);
++		ioctl_data.u.operation_mode = RMNET_MODE_LLP_IP;
++		if (copy_to_user(ifr->ifr_ifru.ifru_data, &ioctl_data,
++			sizeof(struct rmnet_ioctl_data_s)))
++			rc = -EFAULT;
++		break;
++
++	case RMNET_IOCTL_EXTENDED:
++		rc = rmnet_vnd_ioctl_extended(dev, ifr);
++		break;
++
++	default:
++		LOGH("Unkown IOCTL 0x%08X", cmd);
++		rc = -EINVAL;
++	}
++
++	return rc;
++}
++
++static const struct net_device_ops rmnet_data_vnd_ops = {
++	.ndo_init = 0,
++	.ndo_start_xmit = rmnet_vnd_start_xmit,
++	.ndo_do_ioctl = rmnet_vnd_ioctl,
++	.ndo_change_mtu = rmnet_vnd_change_mtu,
++	.ndo_set_mac_address = 0,
++	.ndo_validate_addr = 0,
++};
++
++/**
++ * rmnet_vnd_setup() - net_device initialization callback
++ * @dev:      Virtual network device
++ *
++ * Called by kernel whenever a new rmnet_data<n> device is created. Sets MTU,
++ * flags, ARP type, needed headroom, etc...
++ *
++ * todo: What is watchdog_timeo? Do we need to explicitly set it?
++ */
++static void rmnet_vnd_setup(struct net_device *dev)
++{
++	struct rmnet_vnd_private_s *dev_conf;
++	LOGM("Setting up device %s", dev->name);
++
++	/* Clear out private data */
++	dev_conf = (struct rmnet_vnd_private_s *) netdev_priv(dev);
++	memset(dev_conf, 0, sizeof(struct rmnet_vnd_private_s));
++
++	dev->netdev_ops = &rmnet_data_vnd_ops;
++	dev->mtu = RMNET_DATA_DFLT_PACKET_SIZE;
++	dev->needed_headroom = RMNET_DATA_NEEDED_HEADROOM;
++	random_ether_addr(dev->dev_addr);
++	dev->watchdog_timeo = 1000;
++	dev->tx_queue_len = RMNET_DATA_TX_QUEUE_LEN;
++
++	/* Raw IP mode */
++	dev->header_ops = 0;  /* No header */
++	dev->type = ARPHRD_RAWIP;
++	dev->hard_header_len = 0;
++	dev->flags &= ~(IFF_BROADCAST | IFF_MULTICAST);
++
++	/* Flow control */
++	rwlock_init(&dev_conf->flow_map_lock);
++	INIT_LIST_HEAD(&dev_conf->flow_head);
++}
++
++/* ***************** Exposed API ******************************************** */
++
++/**
++ * rmnet_vnd_exit() - Shutdown cleanup hook
++ *
++ * Called by RmNet main on module unload. Cleans up data structures and
++ * unregisters/frees net_devices.
++ */
++void rmnet_vnd_exit(void)
++{
++	int i;
++	for (i = 0; i < RMNET_DATA_MAX_VND; i++)
++		if (rmnet_devices[i]) {
++			unregister_netdev(rmnet_devices[i]);
++			free_netdev(rmnet_devices[i]);
++	}
++}
++
++/**
++ * rmnet_vnd_init() - Init hook
++ *
++ * Called by RmNet main on module load. Initializes data structures
++ */
++int rmnet_vnd_init(void)
++{
++	memset(rmnet_devices, 0,
++	       sizeof(struct net_device *) * RMNET_DATA_MAX_VND);
++	return 0;
++}
++
++/**
++ * rmnet_vnd_create_dev() - Create a new virtual network device node.
++ * @id:         Virtual device node id
++ * @new_device: Pointer to newly created device node
++ * @prefix:     Device name prefix
++ *
++ * Allocates structures for new virtual network devices. Sets the name of the
++ * new device and registers it with the network stack. Device will appear in
++ * ifconfig list after this is called. If the prefix is null, then
++ * RMNET_DATA_DEV_NAME_STR will be assumed.
++ *
++ * Return:
++ *      - 0 if successful
++ *      - RMNET_CONFIG_BAD_ARGUMENTS if id is out of range or prefix is too long
++ *      - RMNET_CONFIG_DEVICE_IN_USE if id already in use
++ *      - RMNET_CONFIG_NOMEM if net_device allocation failed
++ *      - RMNET_CONFIG_UNKNOWN_ERROR if register_netdevice() fails
++ */
++int rmnet_vnd_create_dev(int id, struct net_device **new_device,
++			 const char *prefix)
++{
++	struct net_device *dev;
++	char dev_prefix[IFNAMSIZ];
++	int p, rc = 0;
++
++	if (id < 0 || id >= RMNET_DATA_MAX_VND) {
++		*new_device = 0;
++		return RMNET_CONFIG_BAD_ARGUMENTS;
++	}
++
++	if (rmnet_devices[id] != 0) {
++		*new_device = 0;
++		return RMNET_CONFIG_DEVICE_IN_USE;
++	}
++
++	if (!prefix)
++		p = scnprintf(dev_prefix, IFNAMSIZ, "%s%%d",
++			  RMNET_DATA_DEV_NAME_STR);
++	else
++		p = scnprintf(dev_prefix, IFNAMSIZ, "%s%%d",
++			  prefix);
++	if (p >= (IFNAMSIZ-1)) {
++		LOGE("Specified prefix longer than IFNAMSIZ");
++		return RMNET_CONFIG_BAD_ARGUMENTS;
++	}
++
++	dev = alloc_netdev(sizeof(struct rmnet_vnd_private_s),
++			   dev_prefix,
++			   rmnet_vnd_setup);
++	if (!dev) {
++		LOGE("Failed to to allocate netdev for id %d", id);
++		*new_device = 0;
++		return RMNET_CONFIG_NOMEM;
++	}
++
++	rc = register_netdevice(dev);
++	if (rc != 0) {
++		LOGE("Failed to to register netdev [%s]", dev->name);
++		free_netdev(dev);
++		*new_device = 0;
++		return RMNET_CONFIG_UNKNOWN_ERROR;
++	} else {
++		rmnet_devices[id] = dev;
++		*new_device = dev;
++	}
++
++	LOGM("Registered device %s", dev->name);
++	return rc;
++}
++
++/**
++ * rmnet_vnd_free_dev() - free a virtual network device node.
++ * @id:         Virtual device node id
++ *
++ * Unregisters the virtual network device node and frees it.
++ * unregister_netdev locks the rtnl mutex, so the mutex must not be locked
++ * by the caller of the function. unregister_netdev enqueues the request to
++ * unregister the device into a TODO queue. The requests in the TODO queue
++ * are only done after rtnl mutex is unlocked, therefore free_netdev has to
++ * called after unlocking rtnl mutex.
++ *
++ * Return:
++ *      - 0 if successful
++ *      - RMNET_CONFIG_NO_SUCH_DEVICE if id is invalid or not in range
++ *      - RMNET_CONFIG_DEVICE_IN_USE if device has logical ep that wasn't unset
++ */
++int rmnet_vnd_free_dev(int id)
++{
++	struct rmnet_logical_ep_conf_s *epconfig_l;
++	struct net_device *dev;
++
++	rtnl_lock();
++	if ((id < 0) || (id >= RMNET_DATA_MAX_VND) || !rmnet_devices[id]) {
++		rtnl_unlock();
++		LOGM("Invalid id [%d]", id);
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++	}
++
++	epconfig_l = rmnet_vnd_get_le_config(rmnet_devices[id]);
++	if (epconfig_l && epconfig_l->refcount) {
++		rtnl_unlock();
++		return RMNET_CONFIG_DEVICE_IN_USE;
++	}
++
++	dev = rmnet_devices[id];
++	rmnet_devices[id] = 0;
++	rtnl_unlock();
++
++	if (dev) {
++		unregister_netdev(dev);
++		free_netdev(dev);
++		return 0;
++	} else {
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++	}
++}
++
++/**
++ * rmnet_vnd_get_name() - Gets the string name of a VND based on ID
++ * @id:         Virtual device node id
++ * @name:       Buffer to store name of virtual device node
++ * @name_len:   Length of name buffer
++ *
++ * Copies the name of the virtual device node into the users buffer. Will throw
++ * an error if the buffer is null, or too small to hold the device name.
++ *
++ * Return:
++ *      - 0 if successful
++ *      - -EINVAL if name is null
++ *      - -EINVAL if id is invalid or not in range
++ *      - -EINVAL if name is too small to hold things
++ */
++int rmnet_vnd_get_name(int id, char *name, int name_len)
++{
++	int p;
++
++	if (!name) {
++		LOGM("%s", "Bad arguments; name buffer null");
++		return -EINVAL;
++	}
++
++	if ((id < 0) || (id >= RMNET_DATA_MAX_VND) || !rmnet_devices[id]) {
++		LOGM("Invalid id [%d]", id);
++		return -EINVAL;
++	}
++
++	p = strlcpy(name, rmnet_devices[id]->name, name_len);
++	if (p >= name_len) {
++		LOGM("Buffer to small (%d) to fit device name", name_len);
++		return -EINVAL;
++	}
++	LOGL("Found mapping [%d]->\"%s\"", id, name);
++
++	return 0;
++}
++
++/**
++ * rmnet_vnd_is_vnd() - Determine if net_device is RmNet owned virtual devices
++ * @dev:        Network device to test
++ *
++ * Searches through list of known RmNet virtual devices. This function is O(n)
++ * and should not be used in the data path.
++ *
++ * Return:
++ *      - 0 if device is not RmNet virtual device
++ *      - 1 if device is RmNet virtual device
++ */
++int rmnet_vnd_is_vnd(struct net_device *dev)
++{
++	/*
++	 * This is not an efficient search, but, this will only be called in
++	 * a configuration context, and the list is small.
++	 */
++	int i;
++
++	if (!dev)
++		BUG();
++
++	for (i = 0; i < RMNET_DATA_MAX_VND; i++)
++		if (dev == rmnet_devices[i])
++			return i+1;
++
++	return 0;
++}
++
++/**
++ * rmnet_vnd_get_le_config() - Get the logical endpoint configuration
++ * @dev:      Virtual device node
++ *
++ * Gets the logical endpoint configuration for a RmNet virtual network device
++ * node. Caller should confirm that devices is a RmNet VND before calling.
++ *
++ * Return:
++ *      - Pointer to logical endpoint configuration structure
++ *      - 0 (null) if dev is null
++ */
++struct rmnet_logical_ep_conf_s *rmnet_vnd_get_le_config(struct net_device *dev)
++{
++	struct rmnet_vnd_private_s *dev_conf;
++	if (!dev)
++		return 0;
++
++	dev_conf = (struct rmnet_vnd_private_s *) netdev_priv(dev);
++	if (!dev_conf)
++		BUG();
++
++	return &dev_conf->local_ep;
++}
++
++/**
++ * _rmnet_vnd_get_flow_map() - Gets object representing a MAP flow handle
++ * @dev_conf: Private configuration structure for virtual network device
++ * @map_flow: MAP flow handle IF
++ *
++ * Loops through available flow mappings and compares the MAP flow handle.
++ * Returns when mapping is found.
++ *
++ * Return:
++ *      - Null if no mapping was found
++ *      - Pointer to mapping otherwise
++ */
++static struct rmnet_map_flow_mapping_s *_rmnet_vnd_get_flow_map
++					(struct rmnet_vnd_private_s *dev_conf,
++					 uint32_t map_flow)
++{
++	struct list_head *p;
++	struct rmnet_map_flow_mapping_s *itm;
++
++	list_for_each(p, &(dev_conf->flow_head)) {
++		itm = list_entry(p, struct rmnet_map_flow_mapping_s, list);
++
++		if (unlikely(!itm))
++			BUG();
++
++		if (itm->map_flow_id == map_flow)
++			return itm;
++	}
++	return 0;
++}
++
++/**
++ * _rmnet_vnd_update_flow_map() - Add or remove individual TC flow handles
++ * @action: One of RMNET_VND_UF_ACTION_ADD / RMNET_VND_UF_ACTION_DEL
++ * @itm: Flow mapping object
++ * @map_flow: TC flow handle
++ *
++ * RMNET_VND_UF_ACTION_ADD:
++ * Will check for a free mapping slot in the mapping object. If one is found,
++ * valid for that slot will be set to 1 and the value will be set.
++ *
++ * RMNET_VND_UF_ACTION_DEL:
++ * Will check for matching tc handle. If found, valid for that slot will be
++ * set to 0 and the value will also be zeroed.
++ *
++ * Return:
++ *      - RMNET_VND_UPDATE_FLOW_OK tc flow handle is added/removed ok
++ *      - RMNET_VND_UPDATE_FLOW_NO_MORE_ROOM if there are no more tc handles
++ *      - RMNET_VND_UPDATE_FLOW_NO_VALID_LEFT if flow mapping is now empty
++ *      - RMNET_VND_UPDATE_FLOW_NO_ACTION if no action was taken
++ */
++static int _rmnet_vnd_update_flow_map(uint8_t action,
++				      struct rmnet_map_flow_mapping_s *itm,
++				      uint32_t tc_flow)
++{
++	int rc, i, j;
++	rc = RMNET_VND_UPDATE_FLOW_OK;
++
++	switch (action) {
++	case RMNET_VND_UF_ACTION_ADD:
++		rc = RMNET_VND_UPDATE_FLOW_NO_MORE_ROOM;
++		for (i = 0; i < RMNET_MAP_FLOW_NUM_TC_HANDLE; i++) {
++			if (itm->tc_flow_valid[i] == 0) {
++				itm->tc_flow_valid[i] = 1;
++				itm->tc_flow_id[i] = tc_flow;
++				rc = RMNET_VND_UPDATE_FLOW_OK;
++				LOGD("{%p}->tc_flow_id[%d]=%08X",
++				     itm, i, tc_flow);
++				break;
++			}
++		}
++		break;
++
++	case RMNET_VND_UF_ACTION_DEL:
++		j = 0;
++		rc = RMNET_VND_UPDATE_FLOW_OK;
++		for (i = 0; i < RMNET_MAP_FLOW_NUM_TC_HANDLE; i++) {
++			if (itm->tc_flow_valid[i] == 1) {
++				if (itm->tc_flow_id[i] == tc_flow) {
++					itm->tc_flow_valid[i] = 0;
++					itm->tc_flow_id[i] = 0;
++					j++;
++					LOGD("{%p}->tc_flow_id[%d]=0", itm, i);
++				}
++			} else {
++				j++;
++			}
++		}
++		if (j == RMNET_MAP_FLOW_NUM_TC_HANDLE)
++			rc = RMNET_VND_UPDATE_FLOW_NO_VALID_LEFT;
++		break;
++
++	default:
++		rc = RMNET_VND_UPDATE_FLOW_NO_ACTION;
++		break;
++	}
++	return rc;
++}
++
++/**
++ * rmnet_vnd_add_tc_flow() - Add a MAP/TC flow handle mapping
++ * @id: Virtual network device ID
++ * @map_flow: MAP flow handle
++ * @tc_flow: TC flow handle
++ *
++ * Checkes for an existing flow mapping object corresponding to map_flow. If one
++ * is found, then it will try to add to the existing mapping object. Otherwise,
++ * a new mapping object is created.
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful
++ *      - RMNET_CONFIG_TC_HANDLE_FULL if there is no more room in the map object
++ *      - RMNET_CONFIG_NOMEM failed to allocate a new map object
++ */
++int rmnet_vnd_add_tc_flow(uint32_t id, uint32_t map_flow, uint32_t tc_flow)
++{
++	struct rmnet_map_flow_mapping_s *itm;
++	struct net_device *dev;
++	struct rmnet_vnd_private_s *dev_conf;
++	int r;
++	unsigned long flags;
++
++	if ((id < 0) || (id >= RMNET_DATA_MAX_VND) || !rmnet_devices[id]) {
++		LOGM("Invalid VND id [%d]", id);
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++	}
++
++	dev = rmnet_devices[id];
++	dev_conf = (struct rmnet_vnd_private_s *) netdev_priv(dev);
++
++	if (!dev_conf)
++		BUG();
++
++	write_lock_irqsave(&dev_conf->flow_map_lock, flags);
++	itm = _rmnet_vnd_get_flow_map(dev_conf, map_flow);
++	if (itm) {
++		r = _rmnet_vnd_update_flow_map(RMNET_VND_UF_ACTION_ADD,
++					       itm, tc_flow);
++		if (r != RMNET_VND_UPDATE_FLOW_OK) {
++			write_unlock_irqrestore(&dev_conf->flow_map_lock,
++						flags);
++			return RMNET_CONFIG_TC_HANDLE_FULL;
++		}
++		write_unlock_irqrestore(&dev_conf->flow_map_lock, flags);
++		return RMNET_CONFIG_OK;
++	}
++	write_unlock_irqrestore(&dev_conf->flow_map_lock, flags);
++
++	itm = (struct rmnet_map_flow_mapping_s *)
++		kmalloc(sizeof(struct rmnet_map_flow_mapping_s), GFP_KERNEL);
++
++	if (!itm) {
++		LOGM("%s", "Failure allocating flow mapping");
++		return RMNET_CONFIG_NOMEM;
++	}
++	memset(itm, 0, sizeof(struct rmnet_map_flow_mapping_s));
++
++	itm->map_flow_id = map_flow;
++	itm->tc_flow_valid[0] = 1;
++	itm->tc_flow_id[0] = tc_flow;
++
++	/* How can we dynamically init these safely? Kernel only provides static
++	 * initializers for atomic_t
++	 */
++	itm->v4_seq.counter =  0; /* Init is broken: ATOMIC_INIT(0); */
++	itm->v6_seq.counter =  0; /* Init is broken: ATOMIC_INIT(0); */
++
++	write_lock_irqsave(&dev_conf->flow_map_lock, flags);
++	list_add(&(itm->list), &(dev_conf->flow_head));
++	write_unlock_irqrestore(&dev_conf->flow_map_lock, flags);
++
++	LOGD("Created flow mapping [%s][0x%08X][0x%08X]@%p",
++	     dev->name, itm->map_flow_id, itm->tc_flow_id[0], itm);
++
++	return RMNET_CONFIG_OK;
++}
++
++/**
++ * rmnet_vnd_del_tc_flow() - Delete a MAP/TC flow handle mapping
++ * @id: Virtual network device ID
++ * @map_flow: MAP flow handle
++ * @tc_flow: TC flow handle
++ *
++ * Checkes for an existing flow mapping object corresponding to map_flow. If one
++ * is found, then it will try to remove the existing tc_flow mapping. If the
++ * mapping object no longer contains any mappings, then it is freed. Otherwise
++ * the mapping object is left in the list
++ *
++ * Return:
++ *      - RMNET_CONFIG_OK if successful or if there was no such tc_flow
++ *      - RMNET_CONFIG_INVALID_REQUEST if there is no such map_flow
++ */
++int rmnet_vnd_del_tc_flow(uint32_t id, uint32_t map_flow, uint32_t tc_flow)
++{
++	struct rmnet_vnd_private_s *dev_conf;
++	struct net_device *dev;
++	struct rmnet_map_flow_mapping_s *itm;
++	int r;
++	unsigned long flags;
++	int rc = RMNET_CONFIG_OK;
++
++	if ((id < 0) || (id >= RMNET_DATA_MAX_VND) || !rmnet_devices[id]) {
++		LOGM("Invalid VND id [%d]", id);
++		return RMNET_CONFIG_NO_SUCH_DEVICE;
++	}
++
++	dev = rmnet_devices[id];
++	dev_conf = (struct rmnet_vnd_private_s *) netdev_priv(dev);
++
++	if (!dev_conf)
++		BUG();
++
++	r = RMNET_VND_UPDATE_FLOW_NO_ACTION;
++	write_lock_irqsave(&dev_conf->flow_map_lock, flags);
++	itm = _rmnet_vnd_get_flow_map(dev_conf, map_flow);
++	if (!itm) {
++		rc = RMNET_CONFIG_INVALID_REQUEST;
++	} else {
++		r = _rmnet_vnd_update_flow_map(RMNET_VND_UF_ACTION_DEL,
++					       itm, tc_flow);
++		if (r ==  RMNET_VND_UPDATE_FLOW_NO_VALID_LEFT)
++			list_del(&(itm->list));
++	}
++	write_unlock_irqrestore(&dev_conf->flow_map_lock, flags);
++
++	if (r ==  RMNET_VND_UPDATE_FLOW_NO_VALID_LEFT) {
++		if (itm)
++			LOGD("Removed flow mapping [%s][0x%08X]@%p",
++			     dev->name, itm->map_flow_id, itm);
++		kfree(itm);
++	}
++
++	return rc;
++}
++
++/**
++ * rmnet_vnd_do_flow_control() - Process flow control request
++ * @dev: Virtual network device node to do lookup on
++ * @map_flow_id: Flow ID from MAP message
++ * @v4_seq: pointer to IPv4 indication sequence number
++ * @v6_seq: pointer to IPv6 indication sequence number
++ * @enable: boolean to enable/disable flow.
++ *
++ * Return:
++ *      - 0 if successful
++ *      - 1 if no mapping is found
++ *      - 2 if dev is not RmNet virtual network device node
++ */
++int rmnet_vnd_do_flow_control(struct net_device *dev,
++			       uint32_t map_flow_id,
++			       uint16_t v4_seq,
++			       uint16_t v6_seq,
++			       int enable)
++{
++	struct rmnet_vnd_private_s *dev_conf;
++	struct rmnet_map_flow_mapping_s *itm;
++	int do_fc, error, i;
++	error = 0;
++	do_fc = 0;
++
++	if (unlikely(!dev))
++		BUG();
++
++	if (!rmnet_vnd_is_vnd(dev)) {
++		return 2;
++	} else {
++		dev_conf = (struct rmnet_vnd_private_s *) netdev_priv(dev);
++	}
++
++	if (unlikely(!dev_conf))
++		BUG();
++
++	read_lock(&dev_conf->flow_map_lock);
++	itm = _rmnet_vnd_get_flow_map(dev_conf, map_flow_id);
++
++	if (!itm) {
++		LOGL("Got flow control request for unknown flow %08X",
++		     map_flow_id);
++		goto fcdone;
++	}
++	if (v4_seq == 0 || v4_seq >= atomic_read(&(itm->v4_seq))) {
++		atomic_set(&(itm->v4_seq), v4_seq);
++		for (i = 0; i < RMNET_MAP_FLOW_NUM_TC_HANDLE; i++) {
++			if (itm->tc_flow_valid[i] == 1) {
++				LOGD("Found [%s][0x%08X][%d:0x%08X]",
++				     dev->name, itm->map_flow_id, i,
++				     itm->tc_flow_id[i]);
++
++				_rmnet_vnd_do_flow_control(dev,
++							   itm->tc_flow_id[i],
++							   enable);
++			}
++		}
++	} else {
++		LOGD("Internal seq(%hd) higher than called(%hd)",
++		     atomic_read(&(itm->v4_seq)), v4_seq);
++	}
++
++fcdone:
++	read_unlock(&dev_conf->flow_map_lock);
++
++	return error;
++}
++
++/**
++ * rmnet_vnd_get_by_id() - Get VND by array index ID
++ * @id: Virtual network deice id [0:RMNET_DATA_MAX_VND]
++ *
++ * Return:
++ *      - 0 if no device or ID out of range
++ *      - otherwise return pointer to VND net_device struct
++ */
++struct net_device *rmnet_vnd_get_by_id(int id)
++{
++	if (id < 0 || id >= RMNET_DATA_MAX_VND) {
++		pr_err("Bug; VND ID out of bounds");
++		BUG();
++		return 0;
++	}
++	return rmnet_devices[id];
++}
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_vnd.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_data_vnd.h	2016-04-14 18:54:58.459730277 +0800
+@@ -0,0 +1,41 @@
++/*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * RMNET Data Virtual Network Device APIs
++ *
++ */
++
++#include <linux/types.h>
++
++#ifndef _RMNET_DATA_VND_H_
++#define _RMNET_DATA_VND_H_
++
++int rmnet_vnd_do_flow_control(struct net_device *dev,
++			       uint32_t map_flow_id,
++			       uint16_t v4_seq,
++			       uint16_t v6_seq,
++			       int enable);
++struct rmnet_logical_ep_conf_s *rmnet_vnd_get_le_config(struct net_device *dev);
++int rmnet_vnd_get_name(int id, char *name, int name_len);
++int rmnet_vnd_create_dev(int id, struct net_device **new_device,
++			 const char *prefix);
++int rmnet_vnd_free_dev(int id);
++int rmnet_vnd_rx_fixup(struct sk_buff *skb, struct net_device *dev);
++int rmnet_vnd_tx_fixup(struct sk_buff *skb, struct net_device *dev);
++int rmnet_vnd_is_vnd(struct net_device *dev);
++int rmnet_vnd_add_tc_flow(uint32_t id, uint32_t map_flow, uint32_t tc_flow);
++int rmnet_vnd_del_tc_flow(uint32_t id, uint32_t map_flow, uint32_t tc_flow);
++int rmnet_vnd_init(void);
++void rmnet_vnd_exit(void);
++struct net_device *rmnet_vnd_get_by_id(int id);
++
++#endif /* _RMNET_DATA_VND_H_ */
+Index: linux-3.4.11/net/rmnet_data/rmnet_map.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_map.h	2016-04-14 18:54:58.459730277 +0800
+@@ -0,0 +1,132 @@
++/*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <linux/types.h>
++#include <linux/spinlock.h>
++
++#ifndef _RMNET_MAP_H_
++#define _RMNET_MAP_H_
++
++struct rmnet_map_control_command_s {
++	uint8_t command_name;
++#if defined(__LITTLE_ENDIAN_BITFIELD)
++	uint8_t  cmd_type:2;
++	uint8_t  reserved:6;
++#elif defined(__BIG_ENDIAN_BITFIELD)
++	uint8_t  reserved:6;
++	uint8_t  cmd_type:2;
++#else
++#error "Please fix <asm/byteorder.h>"
++#endif
++	uint16_t reserved2;
++	uint32_t   transaction_id;
++	union {
++		uint8_t  data[65528];
++		struct {
++#if defined(__LITTLE_ENDIAN_BITFIELD)
++			uint16_t  ip_family:2;
++			uint16_t  reserved:14;
++#elif defined(__BIG_ENDIAN_BITFIELD)
++			uint16_t  reserved:14;
++			uint16_t  ip_family:2;
++#else
++#error "Please fix <asm/byteorder.h>"
++#endif
++			uint16_t  flow_control_seq_num;
++			uint32_t  qos_id;
++		} flow_control;
++	};
++}  __aligned(1);
++
++struct rmnet_map_dl_checksum_trailer_s {
++	unsigned char  reserved_h;
++#if defined(__LITTLE_ENDIAN_BITFIELD)
++	unsigned char  valid:1;
++	unsigned char  reserved_l:7;
++#elif defined(__BIG_ENDIAN_BITFIELD)
++	unsigned char  reserved_l:7;
++	unsigned char  valid:1;
++#else
++#error "Please fix <asm/byteorder.h>"
++#endif
++	unsigned short checksum_start_offset;
++	unsigned short checksum_length;
++	unsigned short checksum_value;
++} __aligned(1);
++
++enum rmnet_map_results_e {
++	RMNET_MAP_SUCCESS,
++	RMNET_MAP_CONSUMED,
++	RMNET_MAP_GENERAL_FAILURE,
++	RMNET_MAP_NOT_ENABLED,
++	RMNET_MAP_FAILED_AGGREGATION,
++	RMNET_MAP_FAILED_MUX
++};
++
++enum rmnet_map_mux_errors_e {
++	RMNET_MAP_MUX_SUCCESS,
++	RMNET_MAP_MUX_INVALID_MUX_ID,
++	RMNET_MAP_MUX_INVALID_PAD_LENGTH,
++	RMNET_MAP_MUX_INVALID_PKT_LENGTH,
++	/* This should always be the last element */
++	RMNET_MAP_MUX_ENUM_LENGTH
++};
++
++enum rmnet_map_checksum_errors_e {
++	RMNET_MAP_CHECKSUM_OK,
++	RMNET_MAP_CHECKSUM_VALID_FLAG_NOT_SET,
++	RMNET_MAP_CHECKSUM_VALIDATION_FAILED,
++	RMNET_MAP_CHECKSUM_ERR_UNKOWN,
++	RMNET_MAP_CHECKSUM_ERR_NOT_DATA_PACKET,
++	RMNET_MAP_CHECKSUM_ERR_BAD_BUFFER,
++	RMNET_MAP_CHECKSUM_ERR_UNKNOWN_IP_VERSION,
++	RMNET_MAP_CHECKSUM_ERR_UNKNOWN_TRANSPORT,
++	RMNET_MAP_CHECKSUM_FRAGMENTED_PACKET,
++	/* This should always be the last element */
++	RMNET_MAP_CHECKSUM_ENUM_LENGTH
++};
++
++enum rmnet_map_commands_e {
++	RMNET_MAP_COMMAND_NONE,
++	RMNET_MAP_COMMAND_FLOW_DISABLE,
++	RMNET_MAP_COMMAND_FLOW_ENABLE,
++	/* These should always be the last 2 elements */
++	RMNET_MAP_COMMAND_UNKNOWN,
++	RMNET_MAP_COMMAND_ENUM_LENGTH
++};
++
++enum rmnet_map_agg_state_e {
++	RMNET_MAP_AGG_IDLE,
++	RMNET_MAP_TXFER_SCHEDULED
++};
++
++#define RMNET_MAP_COMMAND_REQUEST     0
++#define RMNET_MAP_COMMAND_ACK         1
++#define RMNET_MAP_COMMAND_UNSUPPORTED 2
++#define RMNET_MAP_COMMAND_INVALID     3
++
++uint8_t rmnet_map_demultiplex(struct sk_buff *skb);
++struct sk_buff *rmnet_map_deaggregate(struct sk_buff *skb,
++				      struct rmnet_phys_ep_conf_s *config);
++
++struct rmnet_map_header_s *rmnet_map_add_map_header(struct sk_buff *skb,
++						    int hdrlen);
++rx_handler_result_t rmnet_map_command(struct sk_buff *skb,
++				      struct rmnet_phys_ep_conf_s *config);
++void rmnet_map_aggregate(struct sk_buff *skb,
++			 struct rmnet_phys_ep_conf_s *config);
++
++int rmnet_map_checksum_downlink_packet(struct sk_buff *skb);
++
++
++#endif /* _RMNET_MAP_H_ */
+Index: linux-3.4.11/net/rmnet_data/rmnet_map_command.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_map_command.c	2016-04-14 18:54:58.459730277 +0800
+@@ -0,0 +1,179 @@
++/*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include <linux/module.h>
++#include <linux/kernel.h>
++#include <linux/skbuff.h>
++#include <linux/netdevice.h>
++#include <linux/rmnet_data.h>
++#include <linux/net_map.h>
++#include <net/pkt_sched.h>
++#include "rmnet_data_config.h"
++#include "rmnet_map.h"
++#include "rmnet_data_private.h"
++#include "rmnet_data_vnd.h"
++#include "rmnet_data_stats.h"
++
++RMNET_LOG_MODULE(RMNET_DATA_LOGMASK_MAPC);
++
++unsigned long int rmnet_map_command_stats[RMNET_MAP_COMMAND_ENUM_LENGTH];
++module_param_array(rmnet_map_command_stats, ulong, 0, S_IRUGO);
++MODULE_PARM_DESC(rmnet_map_command_stats, "MAP command statistics");
++
++/**
++ * rmnet_map_do_flow_control() - Process MAP flow control command
++ * @skb: Socket buffer containing the MAP flow control message
++ * @config: Physical end-point configuration of ingress device
++ * @enable: boolean for enable/disable
++ *
++ * Process in-band MAP flow control messages. Assumes mux ID is mapped to a
++ * RmNet Data vitrual network device.
++ *
++ * Return:
++ *      - RMNET_MAP_COMMAND_UNSUPPORTED on any error
++ *      - RMNET_MAP_COMMAND_ACK on success
++ */
++static uint8_t rmnet_map_do_flow_control(struct sk_buff *skb,
++					 struct rmnet_phys_ep_conf_s *config,
++					 int enable)
++{
++	struct rmnet_map_control_command_s *cmd;
++	struct net_device *vnd;
++	struct rmnet_logical_ep_conf_s *ep;
++	uint8_t mux_id;
++	uint16_t  ip_family;
++	uint16_t  fc_seq;
++	uint32_t  qos_id;
++	int r;
++
++	if (unlikely(!skb || !config))
++		BUG();
++
++	mux_id = RMNET_MAP_GET_MUX_ID(skb);
++	cmd = RMNET_MAP_GET_CMD_START(skb);
++
++	if (mux_id >= RMNET_DATA_MAX_LOGICAL_EP) {
++		LOGD("Got packet on %s with bad mux id %d",
++		     skb->dev->name, mux_id);
++		rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_MAPC_BAD_MUX);
++		return RX_HANDLER_CONSUMED;
++	}
++
++	ep = &(config->muxed_ep[mux_id]);
++
++	if (!ep->refcount) {
++		LOGD("Packet on %s:%d; has no logical endpoint config",
++		     skb->dev->name, mux_id);
++
++		rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_MAPC_MUX_NO_EP);
++			return RX_HANDLER_CONSUMED;
++	}
++
++	vnd = ep->egress_dev;
++
++	ip_family = cmd->flow_control.ip_family;
++	fc_seq = ntohs(cmd->flow_control.flow_control_seq_num);
++	qos_id = ntohl(cmd->flow_control.qos_id);
++
++	/* Ignore the ip family and pass the sequence number for both v4 and v6
++	 * sequence. User space does not support creating dedicated flows for
++	 * the 2 protocols
++	 */
++	r = rmnet_vnd_do_flow_control(vnd, qos_id, fc_seq, fc_seq, enable);
++	LOGD("dev:%s, qos_id:0x%08X, ip_family:%hd, fc_seq %hd, en:%d",
++	     skb->dev->name, qos_id, ip_family & 3, fc_seq, enable);
++
++	if (r)
++		return RMNET_MAP_COMMAND_UNSUPPORTED;
++	else
++		return RMNET_MAP_COMMAND_ACK;
++}
++
++/**
++ * rmnet_map_send_ack() - Send N/ACK message for MAP commands
++ * @skb: Socket buffer containing the MAP command message
++ * @type: N/ACK message selector
++ *
++ * skb is modified to contain the message type selector. The message is then
++ * transmitted on skb->dev. Note that this function grabs global Tx lock on
++ * skb->dev for latency reasons.
++ *
++ * Return:
++ *      - void
++ */
++static void rmnet_map_send_ack(struct sk_buff *skb,
++			       unsigned char type)
++{
++	struct net_device *dev;
++	struct rmnet_map_control_command_s *cmd;
++	unsigned long flags;
++	int xmit_status;
++
++	if (!skb)
++		BUG();
++
++	dev = skb->dev;
++
++	cmd = RMNET_MAP_GET_CMD_START(skb);
++	cmd->cmd_type = type & 0x03;
++
++	spin_lock_irqsave(&(skb->dev->tx_global_lock), flags);
++	xmit_status = skb->dev->netdev_ops->ndo_start_xmit(skb, skb->dev);
++	spin_unlock_irqrestore(&(skb->dev->tx_global_lock), flags);
++}
++
++/**
++ * rmnet_map_command() - Entry point for handling MAP commands
++ * @skb: Socket buffer containing the MAP command message
++ * @config: Physical end-point configuration of ingress device
++ *
++ * Process MAP command frame and send N/ACK message as appropriate. Message cmd
++ * name is decoded here and appropriate handler is called.
++ *
++ * Return:
++ *      - RX_HANDLER_CONSUMED. Command frames are always consumed.
++ */
++rx_handler_result_t rmnet_map_command(struct sk_buff *skb,
++				      struct rmnet_phys_ep_conf_s *config)
++{
++	struct rmnet_map_control_command_s *cmd;
++	unsigned char command_name;
++	unsigned char rc = 0;
++
++	if (unlikely(!skb))
++		BUG();
++
++	cmd = RMNET_MAP_GET_CMD_START(skb);
++	command_name = cmd->command_name;
++
++	if (command_name < RMNET_MAP_COMMAND_ENUM_LENGTH)
++		rmnet_map_command_stats[command_name]++;
++
++	switch (command_name) {
++	case RMNET_MAP_COMMAND_FLOW_ENABLE:
++		rc = rmnet_map_do_flow_control(skb, config, 1);
++		break;
++
++	case RMNET_MAP_COMMAND_FLOW_DISABLE:
++		rc = rmnet_map_do_flow_control(skb, config, 0);
++		break;
++
++	default:
++		rmnet_map_command_stats[RMNET_MAP_COMMAND_UNKNOWN]++;
++		LOGM("Uknown MAP command: %d", command_name);
++		rc = RMNET_MAP_COMMAND_UNSUPPORTED;
++		break;
++	}
++	rmnet_map_send_ack(skb, rc);
++	return RX_HANDLER_CONSUMED;
++}
+Index: linux-3.4.11/net/rmnet_data/rmnet_map_data.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/rmnet_data/rmnet_map_data.c	2016-04-14 18:54:58.459730277 +0800
+@@ -0,0 +1,569 @@
++/*
++ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * RMNET Data MAP protocol
++ *
++ */
++
++#include <linux/module.h>
++#include <linux/kernel.h>
++#include <linux/skbuff.h>
++#include <linux/netdevice.h>
++#include <linux/rmnet_data.h>
++#include <linux/spinlock.h>
++#include <linux/workqueue.h>
++#include <linux/net_map.h>
++#include <linux/ip.h>
++#include <linux/ipv6.h>
++#include <linux/udp.h>
++#include <linux/tcp.h>
++#include <linux/in.h>
++#include <net/ip.h>
++#include <net/checksum.h>
++#include <net/ip6_checksum.h>
++#include "rmnet_data_config.h"
++#include "rmnet_map.h"
++#include "rmnet_data_private.h"
++#include "rmnet_data_stats.h"
++#include "rmnet_data_trace.h"
++
++RMNET_LOG_MODULE(RMNET_DATA_LOGMASK_MAPD);
++
++/* ***************** Local Definitions ************************************** */
++struct agg_work {
++	struct delayed_work work;
++	struct rmnet_phys_ep_conf_s *config;
++};
++
++/******************************************************************************/
++
++/**
++ * rmnet_map_add_map_header() - Adds MAP header to front of skb->data
++ * @skb:        Socket buffer ("packet") to modify
++ * @hdrlen:     Number of bytes of header data which should not be included in
++ *              MAP length field
++ *
++ * Padding is calculated and set appropriately in MAP header. Mux ID is
++ * initialized to 0.
++ *
++ * Return:
++ *      - Pointer to MAP structure
++ *      - 0 (null) if insufficient headroom
++ *      - 0 (null) if insufficient tailroom for padding bytes
++ *
++ * todo: Parameterize skb alignment
++ */
++struct rmnet_map_header_s *rmnet_map_add_map_header(struct sk_buff *skb,
++						    int hdrlen)
++{
++	uint32_t padding, map_datalen;
++	uint8_t *padbytes;
++	struct rmnet_map_header_s *map_header;
++
++	if (skb_headroom(skb) < sizeof(struct rmnet_map_header_s))
++		return 0;
++
++	map_datalen = skb->len - hdrlen;
++	map_header = (struct rmnet_map_header_s *)
++			skb_push(skb, sizeof(struct rmnet_map_header_s));
++	memset(map_header, 0, sizeof(struct rmnet_map_header_s));
++
++	padding = ALIGN(map_datalen, 4) - map_datalen;
++
++	if (skb_tailroom(skb) < padding)
++		return 0;
++
++	padbytes = (uint8_t *) skb_put(skb, padding);
++	LOGD("pad: %d", padding);
++	memset(padbytes, 0, padding);
++
++	map_header->pkt_len = htons(map_datalen + padding);
++	map_header->pad_len = padding&0x3F;
++
++	return map_header;
++}
++
++/**
++ * rmnet_map_deaggregate() - Deaggregates a single packet
++ * @skb:        Source socket buffer containing multiple MAP frames
++ * @config:     Physical endpoint configuration of the ingress device
++ *
++ * Source skb is cloned with skb_clone(). The new skb data and tail pointers are
++ * modified to contain a single MAP frame. Clone happens with GFP_ATOMIC flags
++ * set. User should keep calling deaggregate() on the source skb until 0 is
++ * returned, indicating that there are no more packets to deaggregate.
++ *
++ * Return:
++ *     - Pointer to new skb
++ *     - 0 (null) if no more aggregated packets
++ */
++struct sk_buff *rmnet_map_deaggregate(struct sk_buff *skb,
++				      struct rmnet_phys_ep_conf_s *config)
++{
++	struct sk_buff *skbn;
++	struct rmnet_map_header_s *maph;
++	uint32_t packet_len;
++	uint8_t ip_byte;
++
++	if (skb->len == 0)
++		return 0;
++
++	maph = (struct rmnet_map_header_s *) skb->data;
++	packet_len = ntohs(maph->pkt_len) + sizeof(struct rmnet_map_header_s);
++
++	if ((((int)skb->len) - ((int)packet_len)) < 0) {
++		LOGM("%s", "Got malformed packet. Dropping");
++		return 0;
++	}
++
++	skbn = skb_clone(skb, GFP_ATOMIC);
++	if (!skbn)
++		return 0;
++
++	LOGD("Trimming to %d bytes", packet_len);
++	LOGD("before skbn->len = %d", skbn->len);
++	skb_trim(skbn, packet_len);
++	skb_pull(skb, packet_len);
++	LOGD("after skbn->len = %d", skbn->len);
++
++	/* Some hardware can send us empty frames. Catch them */
++	if (ntohs(maph->pkt_len) == 0) {
++		LOGD("Dropping empty MAP frame");
++		rmnet_kfree_skb(skbn, RMNET_STATS_SKBFREE_DEAGG_DATA_LEN_0);
++		return 0;
++	}
++
++	/* Sanity check */
++	ip_byte = (skbn->data[4]) & 0xF0;
++	if (ip_byte != 0x40 && ip_byte != 0x60) {
++		LOGM("Unknown IP type: 0x%02X", ip_byte);
++		rmnet_kfree_skb(skbn, RMNET_STATS_SKBFREE_DEAGG_UNKOWN_IP_TYP);
++		return 0;
++	}
++
++	return skbn;
++}
++
++/**
++ * rmnet_map_flush_packet_queue() - Transmits aggregeted frame on timeout
++ * @work:        struct agg_work containing delayed work and skb to flush
++ *
++ * This function is scheduled to run in a specified number of jiffies after
++ * the last frame transmitted by the network stack. When run, the buffer
++ * containing aggregated packets is finally transmitted on the underlying link.
++ *
++ */
++static void rmnet_map_flush_packet_queue(struct work_struct *work)
++{
++	struct agg_work *real_work;
++	struct rmnet_phys_ep_conf_s *config;
++	unsigned long flags;
++	struct sk_buff *skb;
++	int rc, agg_count = 0;
++
++	skb = 0;
++	real_work = (struct agg_work *)work;
++	config = real_work->config;
++	LOGD("%s", "Entering flush thread");
++	spin_lock_irqsave(&config->agg_lock, flags);
++	if (likely(config->agg_state == RMNET_MAP_TXFER_SCHEDULED)) {
++		/* Buffer may have already been shipped out */
++		if (likely(config->agg_skb)) {
++			rmnet_stats_agg_pkts(config->agg_count);
++			if (config->agg_count > 1)
++				LOGL("Agg count: %d", config->agg_count);
++			skb = config->agg_skb;
++			agg_count = config->agg_count;
++			config->agg_skb = 0;
++		}
++		config->agg_state = RMNET_MAP_AGG_IDLE;
++	} else {
++		/* How did we get here? */
++		LOGE("Ran queued command when state %s",
++			"is idle. State machine likely broken");
++	}
++
++	spin_unlock_irqrestore(&config->agg_lock, flags);
++	if (skb) {
++		trace_rmnet_map_flush_packet_queue(skb, agg_count);
++		rc = dev_queue_xmit(skb);
++		rmnet_stats_queue_xmit(rc, RMNET_STATS_QUEUE_XMIT_AGG_TIMEOUT);
++	}
++	kfree(work);
++}
++
++/**
++ * rmnet_map_aggregate() - Software aggregates multiple packets.
++ * @skb:        current packet being transmitted
++ * @config:     Physical endpoint configuration of the ingress device
++ *
++ * Aggregates multiple SKBs into a single large SKB for transmission. MAP
++ * protocol is used to separate the packets in the buffer. This funcion consumes
++ * the argument SKB and should not be further processed by any other function.
++ */
++void rmnet_map_aggregate(struct sk_buff *skb,
++			 struct rmnet_phys_ep_conf_s *config) {
++	uint8_t *dest_buff;
++	struct agg_work *work;
++	unsigned long flags;
++	struct sk_buff *agg_skb;
++	int size, rc, agg_count = 0;
++
++
++	if (!skb || !config)
++		BUG();
++	size = config->egress_agg_size-skb->len;
++
++	if (size < 2000) {
++		LOGL("Invalid length %d", size);
++		return;
++	}
++
++new_packet:
++	spin_lock_irqsave(&config->agg_lock, flags);
++	if (!config->agg_skb) {
++		config->agg_skb = skb_copy_expand(skb, 0, size, GFP_ATOMIC);
++		if (!config->agg_skb) {
++			config->agg_skb = 0;
++			config->agg_count = 0;
++			spin_unlock_irqrestore(&config->agg_lock, flags);
++			rmnet_stats_agg_pkts(1);
++			trace_rmnet_map_aggregate(skb, 0);
++			rc = dev_queue_xmit(skb);
++			rmnet_stats_queue_xmit(rc,
++				RMNET_STATS_QUEUE_XMIT_AGG_CPY_EXP_FAIL);
++			return;
++		}
++		config->agg_count = 1;
++		trace_rmnet_start_aggregation(skb);
++		rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_AGG_CPY_EXPAND);
++		goto schedule;
++	}
++
++	if (skb->len > (config->egress_agg_size - config->agg_skb->len)) {
++		rmnet_stats_agg_pkts(config->agg_count);
++		if (config->agg_count > 1)
++			LOGL("Agg count: %d", config->agg_count);
++		agg_skb = config->agg_skb;
++		agg_count = config->agg_count;
++		config->agg_skb = 0;
++		config->agg_count = 0;
++		spin_unlock_irqrestore(&config->agg_lock, flags);
++		trace_rmnet_map_aggregate(skb, agg_count);
++		rc = dev_queue_xmit(agg_skb);
++		rmnet_stats_queue_xmit(rc,
++					RMNET_STATS_QUEUE_XMIT_AGG_FILL_BUFFER);
++		goto new_packet;
++	}
++
++	dest_buff = skb_put(config->agg_skb, skb->len);
++	memcpy(dest_buff, skb->data, skb->len);
++	config->agg_count++;
++	rmnet_kfree_skb(skb, RMNET_STATS_SKBFREE_AGG_INTO_BUFF);
++
++schedule:
++	if (config->agg_state != RMNET_MAP_TXFER_SCHEDULED) {
++		work = (struct agg_work *)
++			kmalloc(sizeof(struct agg_work), GFP_ATOMIC);
++		if (!work) {
++			LOGE("Failed to allocate work item for packet %s",
++			     "transfer. DATA PATH LIKELY BROKEN!");
++			config->agg_state = RMNET_MAP_AGG_IDLE;
++			spin_unlock_irqrestore(&config->agg_lock, flags);
++			return;
++		}
++		INIT_DELAYED_WORK((struct delayed_work *)work,
++				  rmnet_map_flush_packet_queue);
++		work->config = config;
++		config->agg_state = RMNET_MAP_TXFER_SCHEDULED;
++		schedule_delayed_work((struct delayed_work *)work, 1);
++	}
++	spin_unlock_irqrestore(&config->agg_lock, flags);
++	return;
++}
++
++
++/* ***************** Checksum Offload ************************************** */
++
++static inline uint16_t *rmnet_map_get_checksum_field(unsigned char protocol,
++						 const void *txporthdr)
++{
++	uint16_t *check = 0;
++	switch (protocol) {
++	case IPPROTO_TCP:
++		check = &(((struct tcphdr *)txporthdr)->check);
++		break;
++
++	case IPPROTO_UDP:
++		check = &(((struct udphdr *)txporthdr)->check);
++		break;
++
++	default:
++		check = 0;
++		break;
++	}
++
++	return check;
++}
++
++static inline uint16_t rmnet_map_add_checksums(uint16_t val1, uint16_t val2)
++{
++	int sum = val1+val2;
++	sum = (((sum&0xFFFF0000)>>16) + sum) & 0x0000FFFF;
++	return (uint16_t) (sum&0x0000FFFF);
++}
++
++static inline uint16_t rmnet_map_subtract_checksums(uint16_t val1,
++	uint16_t val2)
++{
++	return rmnet_map_add_checksums(val1, ~val2);
++}
++
++/**
++ * rmnet_map_validate_ipv4_packet_checksum() - Validates TCP/UDP checksum
++ *	value for IPv4 packet
++ * @map_payload:	Pointer to the beginning of the map payload
++ * @cksum_trailer:	Pointer to the checksum trailer
++ *
++ * Validates the TCP/UDP checksum for the packet using the checksum value
++ * from the checksum trailer added to the packet.
++ * The validation formula is the following:
++ * 1. Performs 1's complement over the checksum value from the trailer
++ * 2. Computes 1's complement checksum over IPv4 header and subtracts it from
++ *    the value from step 1
++ * 3. Computes 1's complement checksum over IPv4 pseudo header and adds it to
++ *    the value from step 2
++ * 4. Subtracts the checksum value from the TCP/UDP header from the value from
++ *    step 3
++ * 5. Compares the value from step 4 to the checksum value from the TCP/UDP
++ *    header
++ *
++ * Fragmentation and tunneling are not supported.
++ *
++ * Return: 0 is validation succeeded.
++ */
++static int rmnet_map_validate_ipv4_packet_checksum(unsigned char *map_payload,
++	struct rmnet_map_dl_checksum_trailer_s *cksum_trailer)
++{
++	struct iphdr *ip4h;
++	uint16_t *checksum_field;
++	void *txporthdr;
++	uint16_t pseudo_checksum;
++	uint16_t ip_hdr_checksum;
++	uint16_t checksum_value;
++	uint16_t ip_payload_checksum;
++	uint16_t ip_pseudo_payload_checksum;
++	uint16_t checksum_value_final;
++
++	ip4h = (struct iphdr *) map_payload;
++	if ((ntohs(ip4h->frag_off) & IP_MF)
++		|| ((ntohs(ip4h->frag_off) & IP_OFFSET) > 0))
++		return RMNET_MAP_CHECKSUM_FRAGMENTED_PACKET;
++
++	txporthdr = map_payload + ip4h->ihl*4;
++
++	checksum_field = rmnet_map_get_checksum_field(ip4h->protocol,
++		txporthdr);
++
++	if (unlikely(!checksum_field))
++		return RMNET_MAP_CHECKSUM_ERR_UNKNOWN_TRANSPORT;
++
++	checksum_value = ~ntohs(cksum_trailer->checksum_value);
++	ip_hdr_checksum = ~ip_fast_csum(ip4h, (int)ip4h->ihl);
++	ip_payload_checksum = rmnet_map_subtract_checksums(checksum_value,
++		ip_hdr_checksum);
++
++	pseudo_checksum = ~ntohs(csum_tcpudp_magic(ip4h->saddr, ip4h->daddr,
++		(uint16_t)(ntohs(ip4h->tot_len) - ip4h->ihl*4),
++		(uint16_t)ip4h->protocol, 0));
++	ip_pseudo_payload_checksum = rmnet_map_add_checksums(
++		ip_payload_checksum, pseudo_checksum);
++
++	checksum_value_final = ~rmnet_map_subtract_checksums(
++		ip_pseudo_payload_checksum, ntohs(*checksum_field));
++
++	if (unlikely(checksum_value_final == 0)) {
++		switch (ip4h->protocol) {
++		case IPPROTO_UDP:
++			/* RFC 768 */
++			LOGD("DL4 1's complement rule for UDP checksum 0");
++			checksum_value_final = ~checksum_value_final;
++			break;
++
++		case IPPROTO_TCP:
++			if (*checksum_field == 0xFFFF) {
++				LOGD(
++				"DL4 Non-RFC compliant TCP checksum found");
++				checksum_value_final = ~checksum_value_final;
++			}
++			break;
++		}
++	}
++
++	LOGD(
++	"DL4 cksum: ~HW: %04X, field: %04X, pseudo header: %04X, final: %04X",
++	~ntohs(cksum_trailer->checksum_value), ntohs(*checksum_field),
++	pseudo_checksum, checksum_value_final);
++
++	if (checksum_value_final == ntohs(*checksum_field))
++		return RMNET_MAP_CHECKSUM_OK;
++	else
++		return RMNET_MAP_CHECKSUM_VALIDATION_FAILED;
++}
++
++/**
++ * rmnet_map_validate_ipv6_packet_checksum() - Validates TCP/UDP checksum
++ *	value for IPv6 packet
++ * @map_payload:	Pointer to the beginning of the map payload
++ * @cksum_trailer:	Pointer to the checksum trailer
++ *
++ * Validates the TCP/UDP checksum for the packet using the checksum value
++ * from the checksum trailer added to the packet.
++ * The validation formula is the following:
++ * 1. Performs 1's complement over the checksum value from the trailer
++ * 2. Computes 1's complement checksum over IPv6 header and subtracts it from
++ *    the value from step 1
++ * 3. Computes 1's complement checksum over IPv6 pseudo header and adds it to
++ *    the value from step 2
++ * 4. Subtracts the checksum value from the TCP/UDP header from the value from
++ *    step 3
++ * 5. Compares the value from step 4 to the checksum value from the TCP/UDP
++ *    header
++ *
++ * Fragmentation, extension headers and tunneling are not supported.
++ *
++ * Return: 0 is validation succeeded.
++ */
++static int rmnet_map_validate_ipv6_packet_checksum(unsigned char *map_payload,
++	struct rmnet_map_dl_checksum_trailer_s *cksum_trailer)
++{
++	struct ipv6hdr *ip6h;
++	uint16_t *checksum_field;
++	void *txporthdr;
++	uint16_t pseudo_checksum;
++	uint16_t ip_hdr_checksum;
++	uint16_t checksum_value;
++	uint16_t ip_payload_checksum;
++	uint16_t ip_pseudo_payload_checksum;
++	uint16_t checksum_value_final;
++	uint32_t length;
++
++	ip6h = (struct ipv6hdr *) map_payload;
++
++	txporthdr = map_payload + sizeof(struct ipv6hdr);
++	checksum_field = rmnet_map_get_checksum_field(ip6h->nexthdr,
++		txporthdr);
++
++	if (unlikely(!checksum_field))
++		return RMNET_MAP_CHECKSUM_ERR_UNKNOWN_TRANSPORT;
++
++	checksum_value = ~ntohs(cksum_trailer->checksum_value);
++	ip_hdr_checksum = ~ntohs(ip_compute_csum(ip6h,
++		(int)(txporthdr - (void *)map_payload)));
++	ip_payload_checksum = rmnet_map_subtract_checksums(checksum_value,
++		ip_hdr_checksum);
++
++	length = (ip6h->nexthdr == IPPROTO_UDP) ?
++		ntohs(((struct udphdr *)txporthdr)->len) :
++		ntohs(ip6h->payload_len);
++	pseudo_checksum = ~ntohs(csum_ipv6_magic(&ip6h->saddr, &ip6h->daddr,
++		length, ip6h->nexthdr, 0));
++	ip_pseudo_payload_checksum = rmnet_map_add_checksums(
++		ip_payload_checksum, pseudo_checksum);
++
++	checksum_value_final = ~rmnet_map_subtract_checksums(
++		ip_pseudo_payload_checksum, ntohs(*checksum_field));
++
++	if (unlikely(checksum_value_final == 0)) {
++		switch (ip6h->nexthdr) {
++		case IPPROTO_UDP:
++			/* RFC 2460 section 8.1 */
++			LOGD("DL6 One's complement rule for UDP checksum 0");
++			checksum_value_final = ~checksum_value_final;
++			break;
++
++		case IPPROTO_TCP:
++			if (*checksum_field == 0xFFFF) {
++				LOGD(
++				"DL6 Non-RFC compliant TCP checksum found");
++				checksum_value_final = ~checksum_value_final;
++			}
++			break;
++		}
++	}
++
++	LOGD(
++	"DL6 cksum: ~HW: %04X, field: %04X, pseudo header: %04X, final: %04X",
++	~ntohs(cksum_trailer->checksum_value), ntohs(*checksum_field),
++	pseudo_checksum, checksum_value_final);
++
++	if (checksum_value_final == ntohs(*checksum_field))
++		return RMNET_MAP_CHECKSUM_OK;
++	else
++		return RMNET_MAP_CHECKSUM_VALIDATION_FAILED;
++	}
++
++/**
++ * rmnet_map_checksum_downlink_packet() - Validates checksum on
++ * a downlink packet
++ * @skb:	Pointer to the packet's skb.
++ *
++ * Validates packet checksums. Function takes a pointer to
++ * the beginning of a buffer which contains the entire MAP
++ * frame: MAP header + IP payload + padding + checksum trailer.
++ * Currently, only IPv4 and IPv6 are supported along with
++ * TCP & UDP. Fragmented or tunneled packets are not supported.
++ *
++ * Return:
++ *   - RMNET_MAP_CHECKSUM_OK: Validation of checksum succeeded.
++ *   - RMNET_MAP_CHECKSUM_ERR_BAD_BUFFER: Skb buffer given is corrupted.
++ *   - RMNET_MAP_CHECKSUM_VALID_FLAG_NOT_SET: Valid flag is not set in the
++ *					      checksum trailer.
++ *   - RMNET_MAP_CHECKSUM_FRAGMENTED_PACKET: The packet is a fragment.
++ *   - RMNET_MAP_CHECKSUM_ERR_UNKNOWN_TRANSPORT: The transport header is
++ *						   not TCP/UDP.
++ *   - RMNET_MAP_CHECKSUM_ERR_UNKNOWN_IP_VERSION: Unrecognized IP header.
++ *   - RMNET_MAP_CHECKSUM_VALIDATION_FAILED: In case the validation failed.
++ */
++int rmnet_map_checksum_downlink_packet(struct sk_buff *skb)
++{
++	struct rmnet_map_dl_checksum_trailer_s *cksum_trailer;
++	unsigned int data_len;
++	unsigned char *map_payload;
++	unsigned char ip_version;
++
++	data_len = RMNET_MAP_GET_LENGTH(skb);
++
++	if (unlikely(skb->len < (sizeof(struct rmnet_map_header_s) + data_len +
++	    sizeof(struct rmnet_map_dl_checksum_trailer_s))))
++		return RMNET_MAP_CHECKSUM_ERR_BAD_BUFFER;
++
++	cksum_trailer = (struct rmnet_map_dl_checksum_trailer_s *)
++			(skb->data + data_len
++			+ sizeof(struct rmnet_map_header_s));
++
++	if (unlikely(!ntohs(cksum_trailer->valid)))
++		return RMNET_MAP_CHECKSUM_VALID_FLAG_NOT_SET;
++
++	map_payload = (unsigned char *)(skb->data
++		+ sizeof(struct rmnet_map_header_s));
++
++	ip_version = (*map_payload & 0xF0) >> 4;
++	if (ip_version == 0x04)
++		return rmnet_map_validate_ipv4_packet_checksum(map_payload,
++			cksum_trailer);
++	else if (ip_version == 0x06)
++		return rmnet_map_validate_ipv6_packet_checksum(map_payload,
++			cksum_trailer);
++
++	return RMNET_MAP_CHECKSUM_ERR_UNKNOWN_IP_VERSION;
++}
+Index: linux-3.4.11/net/sched/sch_api.c
+===================================================================
+--- linux-3.4.11.orig/net/sched/sch_api.c	2016-04-14 18:30:43.767781027 +0800
++++ linux-3.4.11/net/sched/sch_api.c	2016-04-14 18:54:58.459730277 +0800
+@@ -1030,6 +1030,38 @@
+ }
+ 
+ /*
++ * enable/disable flow on qdisc.
++ */
++int
++tc_qdisc_flow_control(struct net_device *dev, u32 tcm_handle, int enable_flow)
++{
++	struct Qdisc *q;
++	int qdisc_len = 0;
++	struct __qdisc_change_req {
++		struct nlattr attr;
++		struct tc_prio_qopt data;
++	} req =	{
++		.attr = {sizeof(struct __qdisc_change_req), TCA_OPTIONS},
++		.data = {3, {1, 2, 2, 2, 1, 2, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1}, 1}
++		};
++
++	/* override flow bit */
++	req.data.enable_flow = enable_flow;
++
++	/* look up using tcm handle */
++	q = qdisc_lookup(dev, tcm_handle);
++
++	/* call registered change function */
++	if (q) {
++		qdisc_len = q->q.qlen;
++		if (q->ops->change(q, &(req.attr)) != 0)
++			pr_err("tc_qdisc_flow_control: qdisc change failed");
++	}
++	return qdisc_len;
++}
++EXPORT_SYMBOL(tc_qdisc_flow_control);
++
++/*
+  * Create/change qdisc.
+  */
+ 
+Index: linux-3.4.11/net/sched/sch_prio.c
+===================================================================
+--- linux-3.4.11.orig/net/sched/sch_prio.c	2016-04-14 18:30:43.767781027 +0800
++++ linux-3.4.11/net/sched/sch_prio.c	2016-04-14 18:54:58.467730274 +0800
+@@ -27,6 +27,7 @@
+ 	struct tcf_proto *filter_list;
+ 	u8  prio2band[TC_PRIO_MAX+1];
+ 	struct Qdisc *queues[TCQ_PRIO_BANDS];
++	u8 enable_flow;
+ };
+ 
+ 
+@@ -96,6 +97,9 @@
+ 	struct prio_sched_data *q = qdisc_priv(sch);
+ 	int prio;
+ 
++	if (!q->enable_flow)
++		return NULL;
++
+ 	for (prio = 0; prio < q->bands; prio++) {
+ 		struct Qdisc *qdisc = q->queues[prio];
+ 		struct sk_buff *skb = qdisc->ops->peek(qdisc);
+@@ -110,6 +114,9 @@
+ 	struct prio_sched_data *q = qdisc_priv(sch);
+ 	int prio;
+ 
++	if (!q->enable_flow)
++		return NULL;
++
+ 	for (prio = 0; prio < q->bands; prio++) {
+ 		struct Qdisc *qdisc = q->queues[prio];
+ 		struct sk_buff *skb = qdisc_dequeue_peeked(qdisc);
+@@ -150,6 +157,7 @@
+ 	for (prio = 0; prio < q->bands; prio++)
+ 		qdisc_reset(q->queues[prio]);
+ 	sch->q.qlen = 0;
++	q->enable_flow = 1;
+ }
+ 
+ static void
+@@ -182,6 +190,7 @@
+ 	}
+ 
+ 	sch_tree_lock(sch);
++	q->enable_flow = qopt->enable_flow;
+ 	q->bands = qopt->bands;
+ 	memcpy(q->prio2band, qopt->priomap, TC_PRIO_MAX+1);
+ 
+@@ -245,6 +254,7 @@
+ 	struct tc_prio_qopt opt;
+ 
+ 	opt.bands = q->bands;
++	opt.enable_flow = q->enable_flow;
+ 	memcpy(&opt.priomap, q->prio2band, TC_PRIO_MAX + 1);
+ 
+ 	NLA_PUT(skb, TCA_OPTIONS, sizeof(opt), &opt);

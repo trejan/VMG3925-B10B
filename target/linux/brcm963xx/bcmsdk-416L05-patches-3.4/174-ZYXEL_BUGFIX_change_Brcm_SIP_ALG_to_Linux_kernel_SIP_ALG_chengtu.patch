@@ -1,0 +1,121 @@
+Index: linux-3.4.11/Kconfig.zyxel
+===================================================================
+--- linux-3.4.11.orig/Kconfig.zyxel	2017-10-26 11:19:10.701629713 +0800
++++ linux-3.4.11/Kconfig.zyxel	2017-10-26 13:56:07.932327238 +0800
+@@ -15,3 +15,7 @@
+ 	default n
+ 	help
+ 	  Use Realtek Switch.
++
++config ZYXEL_USE_LINUX_SIP_ALG
++	bool "Use Linux original SIP ALG"
++	default y
+Index: linux-3.4.11/include/linux/netfilter/nf_conntrack_sip.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/netfilter/nf_conntrack_sip.h	2017-10-26 11:19:09.585624179 +0800
++++ linux-3.4.11/include/linux/netfilter/nf_conntrack_sip.h	2017-10-26 11:19:10.905630725 +0800
+@@ -5,7 +5,7 @@
+ #define SIP_PORT	5060
+ #define SIP_TIMEOUT	3600
+ 
+-#if defined(CONFIG_BCM_KF_NETFILTER)
++#if defined(CONFIG_BCM_KF_NETFILTER) && !defined(CONFIG_ZYXEL_USE_LINUX_SIP_ALG)
+ 
+ /* Classes defined by Broadcom */
+ #define SIP_EXPECT_CLASS_SIGNALLING	0
+Index: linux-3.4.11/net/ipv4/netfilter/nf_nat_sip.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv4/netfilter/nf_nat_sip.c	2017-10-26 11:19:10.133626896 +0800
++++ linux-3.4.11/net/ipv4/netfilter/nf_nat_sip.c	2017-10-26 13:52:57.671383785 +0800
+@@ -39,7 +39,7 @@
+ MODULE_DESCRIPTION("SIP NAT helper");
+ MODULE_ALIAS("ip_nat_sip");
+ 
+-#if defined(CONFIG_BCM_KF_NETFILTER)
++#if defined(CONFIG_BCM_KF_NETFILTER) && !defined(CONFIG_ZYXEL_USE_LINUX_SIP_ALG)
+ static void nf_nat_redirect(struct nf_conn *new,
+ 			    struct nf_conntrack_expect *exp)
+ {
+@@ -479,6 +479,8 @@
+ 	rcu_assign_pointer(nf_nat_rtp_hook, nf_nat_rtp);
+ 	rcu_assign_pointer(nf_nat_snat_hook, nf_nat_snat);
+ 	rcu_assign_pointer(nf_nat_addr_hook, nf_nat_addr);
++
++	printk("Broadcom nat_sip init\n");
+ 	return 0;
+ }
+ 
+@@ -735,6 +737,22 @@
+ 			= ct->master->tuplehash[!exp->dir].tuple.dst.u3.ip;
+ 		nf_nat_setup_info(ct, &range, NF_NAT_MANIP_SRC);
+ 	}
++#if defined(CONFIG_BCM_KF_NETFILTER)
++
++	/*
++	 * added iqos here
++	 */
++
++	iqos_add_L4port(IPPROTO_UDP,
++			ct->tuplehash[IP_CT_DIR_REPLY].tuple.dst.u.udp.port, 
++						IQOS_ENT_DYN, IQOS_PRIO_HIGH );
++	iqos_add_L4port( IPPROTO_UDP,
++				 ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.udp.port, 
++							 IQOS_ENT_DYN,
++							 IQOS_PRIO_HIGH );
++
++	//set_bit(IPS_IQOS_BIT, &ct->status);
++#endif
+ }
+ 
+ static unsigned int ip_nat_sip_expect(struct sk_buff *skb, unsigned int dataoff,
+@@ -1040,6 +1058,8 @@
+ 	RCU_INIT_POINTER(nf_nat_sdp_session_hook, ip_nat_sdp_session);
+ 	RCU_INIT_POINTER(nf_nat_sdp_media_hook, ip_nat_sdp_media);
+ 	nf_ct_helper_expectfn_register(&sip_nat);
++
++	printk("Linux nat_sip init\n");
+ 	return 0;
+ }
+ 
+Index: linux-3.4.11/net/netfilter/nf_conntrack_sip.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_sip.c	2017-10-26 11:19:10.133626896 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_sip.c	2017-10-26 13:52:57.671383785 +0800
+@@ -25,7 +25,8 @@
+ #include <net/netfilter/nf_conntrack_helper.h>
+ #include <net/netfilter/nf_conntrack_zones.h>
+ #include <linux/netfilter/nf_conntrack_sip.h>
+-#if defined(CONFIG_BCM_KF_NETFILTER)
++
++#if defined(CONFIG_BCM_KF_NETFILTER) && !defined(CONFIG_ZYXEL_USE_LINUX_SIP_ALG)
+ #include <net/netfilter/nf_conntrack_tuple.h>
+ #include <linux/iqos.h>
+ #endif
+@@ -47,8 +48,7 @@
+ module_param(sip_timeout, uint, 0600);
+ MODULE_PARM_DESC(sip_timeout, "timeout for the master SIP session");
+ 
+-#if defined(CONFIG_BCM_KF_NETFILTER)
+-
++#if defined(CONFIG_BCM_KF_NETFILTER) && !defined(CONFIG_ZYXEL_USE_LINUX_SIP_ALG)
+ int (*nf_nat_addr_hook)(struct sk_buff *skb, unsigned int protoff,
+ 			struct nf_conn *ct, enum ip_conntrack_info ctinfo,
+ 			char **dptr, int *dlen, char **addr_begin,
+@@ -1068,6 +1068,8 @@
+ 	int i, j, ret;
+ 	char *tmpname;
+ 
++	printk("Broadcom conntrack_sip init\n");
++
+ 	if (ports_c == 0)
+ 		ports[ports_c++] = SIP_PORT;
+ 
+@@ -2629,6 +2631,8 @@
+ 	int i, j, ret;
+ 	char *tmpname;
+ 
++	printk("Linux conntrack_sip init\n");
++
+ 	if (ports_c == 0)
+ 		ports[ports_c++] = SIP_PORT;
+ 

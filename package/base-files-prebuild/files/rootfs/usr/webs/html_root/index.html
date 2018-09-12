@@ -1,0 +1,44 @@
+<!DOCTYPE html">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Broadcom BCM963xx DMS 2.0</title>
+    <link rel="stylesheet" type="text/css" href="css/bmc.css" />
+      <script type="text/javascript" src="js/class.js"></script>
+	<script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript" src="js/add.js"></script>
+
+    
+</head>
+<body>
+	<div id="panel-top">
+	</div>
+    <div id="panel-left">
+
+	</div>
+	<div id="panel-bottom">
+		
+	</div>
+
+     <video id="videoPlayer" src="" controls="controls"></video>	
+
+</body>
+<script type="text/javascript">
+    function Run() {
+
+    }
+    window.onload = function () {
+        addVideos();
+        mainMenu.run();
+        mainMenu.setItemFocus(0);
+    }
+    
+    window.addEvent('domready', Run);
+
+    function click(value) {
+        mainMenu.setItemFocus(value);
+        mainMenu.selectFocusItem(value);
+    }
+
+</script>
+</html>

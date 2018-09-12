@@ -1,0 +1,13 @@
+Index: linux-3.4.11/drivers/tty/tty_ldisc.c
+===================================================================
+--- linux-3.4.11.orig/drivers/tty/tty_ldisc.c	2014-08-25 13:51:52.039427648 +0800
++++ linux-3.4.11/drivers/tty/tty_ldisc.c	2014-08-25 13:54:36.975421333 +0800
+@@ -658,7 +658,7 @@
+ 		goto enable;
+ 	}
+ 
+-	if (test_bit(TTY_HUPPED, &tty->flags)) {
++	if (test_bit(TTY_HUPPING, &tty->flags)) {
+ 		/* We were raced by the hangup method. It will have stomped
+ 		   the ldisc data and closed the ldisc down */
+ 		clear_bit(TTY_LDISC_CHANGING, &tty->flags);

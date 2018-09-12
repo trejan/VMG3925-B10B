@@ -1,0 +1,36 @@
+Index: linux-3.4.11/include/linux/bcm_skb_defines.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/bcm_skb_defines.h	2015-11-20 11:45:16.392746469 +0800
++++ linux-3.4.11/include/linux/bcm_skb_defines.h	2015-11-20 11:48:05.251207079 +0800
+@@ -36,6 +36,7 @@
+ #define SKBMARK_Q_M             (0x1F << SKBMARK_Q_S)
+ #define SKBMARK_GET_Q(MARK)     ((MARK & SKBMARK_Q_M) >> SKBMARK_Q_S)
+ #define SKBMARK_SET_Q(MARK, Q)  ((MARK & ~SKBMARK_Q_M) | (Q << SKBMARK_Q_S))
++#if 0
+ /* traffic_class_id = mark[10:5] */
+ #define SKBMARK_TC_ID_S         5
+ #define SKBMARK_TC_ID_M         (0x3F << SKBMARK_TC_ID_S)
+@@ -49,6 +50,7 @@
+     ((MARK & SKBMARK_FLOW_ID_M) >> SKBMARK_FLOW_ID_S)
+ #define SKBMARK_SET_FLOW_ID(MARK, FLOW) \
+     ((MARK & ~SKBMARK_FLOW_ID_M) | (FLOW << SKBMARK_FLOW_ID_S))
++#endif	
+ /* iq_prio = mark[19]; for Ingress QoS used when TX is WLAN */
+ #define SKBMARK_IQPRIO_MARK_S    19
+ #define SKBMARK_IQPRIO_MARK_M    (0x01 << SKBMARK_IQPRIO_MARK_S)
+@@ -56,6 +58,7 @@
+     ((MARK & SKBMARK_IQPRIO_MARK_M) >> SKBMARK_IQPRIO_MARK_S)
+ #define SKBMARK_SET_IQPRIO_MARK(MARK, IQPRIO_MARK) \
+     ((MARK & ~SKBMARK_IQPRIO_MARK_M) | (IQPRIO_MARK << SKBMARK_IQPRIO_MARK_S))
++#if 0	
+ /* port = mark[26:20]; for enet driver of gpon port, this is gem_id */
+ #define SKBMARK_PORT_S          20
+ #define SKBMARK_PORT_M          (0x7F << SKBMARK_PORT_S)
+@@ -86,6 +89,7 @@
+     ((MARK & SKBMARK_POLICY_RTNG_M) >> SKBMARK_POLICY_RTNG_S)
+ #define SKBMARK_SET_POLICY_RTNG(MARK, POLICY) \
+     ((MARK & ~SKBMARK_POLICY_RTNG_M) | (POLICY << SKBMARK_POLICY_RTNG_S))
++#endif
+ 
+ /* The enet driver subdivides queue field (mark[4:0]) in the skb->mark into
+    priority and channel */

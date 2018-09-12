@@ -1,0 +1,41 @@
+Index: linux-3.4.11/net/ipv4/netfilter/nf_nat_ipsec.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv4/netfilter/nf_nat_ipsec.c	2015-06-08 19:44:49.259106670 +0800
++++ linux-3.4.11/net/ipv4/netfilter/nf_nat_ipsec.c	2015-06-08 19:44:50.495106638 +0800
+@@ -46,8 +46,10 @@
+    struct iphdr *iph = ip_hdr(skb);
+    struct udphdr *udph = (void *)iph + iph->ihl * 4;
+ 
++#if 0 //PeterSu
+    /* make sure source port is 500 */
+    udph->source = htons(IPSEC_PORT);
++#endif
+    udph->check = 0;
+    
+    return NF_ACCEPT;
+Index: linux-3.4.11/include/linux/netfilter/nf_conntrack_tuple_common.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/netfilter/nf_conntrack_tuple_common.h	2015-06-08 19:44:48.987106677 +0800
++++ linux-3.4.11/include/linux/netfilter/nf_conntrack_tuple_common.h	2015-06-08 19:45:58.855104827 +0800
+@@ -35,7 +35,7 @@
+ #if defined(CONFIG_BCM_KF_PROTO_ESP) && \
+ 	(defined(CONFIG_NF_CT_PROTO_ESP) || defined(CONFIG_NF_CT_PROTO_ESP_MODULE))
+ 	struct {
+-		__be32 spi;
++		__be16 spi;
+ 	} esp;
+ #endif
+ };
+Index: linux-3.4.11/include/net/netfilter/nf_conntrack_tuple.h
+===================================================================
+--- linux-3.4.11.orig/include/net/netfilter/nf_conntrack_tuple.h	2015-06-08 19:44:50.255106644 +0800
++++ linux-3.4.11/include/net/netfilter/nf_conntrack_tuple.h	2015-06-08 19:45:35.975105433 +0800
+@@ -64,7 +64,7 @@
+ #if defined(CONFIG_BCM_KF_PROTO_ESP) && \
+ 	(defined(CONFIG_NF_CT_PROTO_ESP) || defined(CONFIG_NF_CT_PROTO_ESP_MODULE))
+ 			struct {
+-				__be32 spi;
++				__be16 spi;
+ 			} esp;
+ #endif
+ 		} u;

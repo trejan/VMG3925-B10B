@@ -1,0 +1,73 @@
+#! /bin/sh
+
+PATH=/sbin:/bin:/usr/bin:/usr/sbin
+export PATH
+
+mount -t proc proc /proc
+/bin/mount -a
+#/sbin/inetd
+
+#enable ipv4 forwarding, ZyXEL, John
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+#disable ipv6 on all interface by default, Pochao
+echo 1 > /proc/sys/net/ipv6/conf/default/disable_ipv6
+#set default accept_ra when IPv6 is enable, ChihYuan
+echo 0 > /proc/sys/net/ipv6/conf/default/accept_ra
+#symlink for telnetd and dropbear, ZyXEL, John
+#__ZYXEL__, Chi-Hsiang cannot work on XMG3512  
+#ln -s /dev/pts/ptmx /dev/ptmx
+
+#mkdir -p /var/spool/cron/crontabs/root
+
+# for zcfg_msg sock
+mkdir -p /var/lib/.sock
+chmod 713 /var/lib/.sock
+#chmod 711 /var/lib/
+
+#show USB info, ZyXEL, I-Wei
+mount -t usbfs usbfs /proc/bus/usb/
+
+# pppd lock dir
+mkdir /var/lock
+
+# 3G WWAN
+mkdir /var/wwan
+# 4G LTE WNC
+test -e /etc/malmanager.cfg && cp /etc/malmanager.cfg /var/
+
+# usb
+mkdir /var/mount
+mkdir /var/usb
+
+#logrotate
+mkdir -m 755 -p /var/lib
+
+# ZyXEL,Cj, TCP timestamp response Vulnerabilities
+# echo 0 > /proc/sys/net/ipv4/tcp_timestamps
+
+# ZyXEL, Mark, set unix socket maximun queue
+echo 64 > /proc/sys/net/unix/max_dgram_qlen
+
+#ZyXEL, Bell, set and update module.dep before zcmd and zcfg_be
+depmod
+
+#Zyxel, Howard, set watchdog
+[ -e /proc/watchdog ] && echo "1 5000000 1 60" >> /proc/watchdog
+
+#ZyXEL, Chi-Hsiang enable ipv6 in zcmd
+for i in /etc/rc3.d/S*; do
+	if [ -z ${i##*zcmd*} ]; then
+		echo 0 > /proc/sys/net/ipv6/conf/default/disable_ipv6
+	fi
+	$i start
+done
+
+#ZyXEL, Bell, set printk log level at 2 (KERN_ALET)
+echo 2 > /proc/sys/kernel/printk
+
+#Zyxel, in the USB samba upload/download stress, it will cause system has low free-memory
+#Prevent the low free-memory to cause system unstable
+if [ `cat /proc/meminfo | grep 'MemTotal:' | awk '{print $2}'` -gt 110000 ]; then
+	echo 5120 > /proc/sys/vm/min_free_kbytes
+fi

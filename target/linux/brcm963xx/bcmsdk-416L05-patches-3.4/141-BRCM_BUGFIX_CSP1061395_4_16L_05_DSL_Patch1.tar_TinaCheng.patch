@@ -1,0 +1,188 @@
+Index: linux-3.4.11/include/linux/mroute.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/mroute.h	2016-06-24 18:20:19.204613640 +0800
++++ linux-3.4.11/include/linux/mroute.h	2016-06-24 18:20:23.904613673 +0800
+@@ -247,7 +247,7 @@
+ #if defined(CONFIG_BCM_KF_IGMP)
+ int ipmr_get_route(struct net *net, struct sk_buff *skb,
+ 		   __be32 saddr, __be32 daddr,
+-		   struct rtmsg *rtm, int nowait, unsigned short ifIndex);
++		   struct rtmsg *rtm, int nowait, int ifIndex);
+ #else
+ extern int ipmr_get_route(struct net *net, struct sk_buff *skb,
+ 			  __be32 saddr, __be32 daddr,
+Index: linux-3.4.11/net/bridge/br_ioctl.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_ioctl.c	2016-06-24 18:20:23.000613670 +0800
++++ linux-3.4.11/net/bridge/br_ioctl.c	2016-06-24 20:38:31.860671651 +0800
+@@ -446,17 +446,19 @@
+ 		return -EPERM;
+ 
+ 	rxdev = dev_get_by_index(dev_net(br->dev), rxifindex);
+-	if (rxdev == NULL)
++	if (rxdev == NULL) {
+ 		return -EINVAL;
+-
++	}
+ 	txdev = dev_get_by_index(dev_net(br->dev), txifindex);
+-	if (txdev == NULL)
++	if (txdev == NULL) {
++		dev_put(rxdev);
+ 		return -EINVAL;
++	}
+ 
+    br_flow_blog_rules(br, rxdev, txdev);
+ 
+-   dev_put(rxdev);
+-   dev_put(txdev);
++	dev_put(rxdev);
++	dev_put(txdev);
+ 
+ 	return ret;
+ }
+Index: linux-3.4.11/net/core/blog.c
+===================================================================
+--- linux-3.4.11.orig/net/core/blog.c	2016-06-24 18:20:23.016613666 +0800
++++ linux-3.4.11/net/core/blog.c	2016-06-24 18:20:23.904613673 +0800
+@@ -1548,8 +1548,9 @@
+         {
+             blog_assertr( ((BlogIpv4Hdr_t *)param1 != NULL), 0 );
+ 
+-            return blog_gre_xmit_update_fn(net_p, (BlogIpv4Hdr_t *)param1,
+-                        param2);
++            if (blog_gre_xmit_update_fn != NULL)
++                return blog_gre_xmit_update_fn(net_p, (BlogIpv4Hdr_t *)param1,
++                            param2);
+         }
+ #endif
+ 
+@@ -1884,8 +1885,6 @@
+          blog_assertr( (fkb_p->blog_p != BLOG_NULL), PKT_NORM );
+          fkb_p->blog_p->skb_p = skb_p;
+     } 
+-    else
+-         fkb_p->blog_p = NULL;
+ 
+ bypass:
+     return action;
+@@ -2119,15 +2118,19 @@
+     fkb_p->flags = _set_in_skb_n_chk_iq_prio_tag_(0); 
+     action = blog_finit( fkb_p, dummy_dev_p, encap, channel, phyHdr );
+ 
++	/* blog_iq_prio should return only PKT_BLOG, PKT_DROP or PKT_NORM*/
++
+     if ( action == PKT_BLOG )
+     {
+-         blog_assertr( (fkb_p->blog_p != BLOG_NULL), PKT_NORM );
++         blog_assertr( (fkb_p->blog_p != BLOG_NULL), iq_prio);
+          fkb_p->blog_p->skb_p = skb_p;
+          iq_prio = fkb_p->blog_p->iq_prio;
+          blog_free( skb_p );
+     } 
+     else
+-         fkb_p->blog_p = NULL;
++    {
++         blog_assertr(((action == PKT_NORM) || (action == PKT_DROP)), iq_prio);
++    }
+ 
+ bypass:
+     return iq_prio;
+@@ -3211,9 +3214,10 @@
+         if ( ip_p->proto == BLOG_IPPROTO_GRE ) 
+         {
+             blog_print( "BLOG PARSE GRE:" );
+-            ret = blog_gre_rcv_check_fn( dev_p, ip_p, 
+-                fkb_p->len - ((uint32_t)ip_p - (uint32_t)fkb_p->data), 
+-                tunl_pp, pkt_seqno_p );
++            if (blog_gre_rcv_check_fn != NULL)
++                ret = blog_gre_rcv_check_fn( dev_p, ip_p,
++                    fkb_p->len - ((uint32_t)ip_p - (uint32_t)fkb_p->data),
++                    tunl_pp, pkt_seqno_p );
+         }
+     }
+ 
+@@ -3242,8 +3246,9 @@
+                 skb_p->tunl, skb_p, skb_p->data, skb_p->len, ip_p, 
+                 skb_p->len - ((uint32_t) ip_p - (uint32_t) skb_p->data)); 
+ 
+-            blog_gre_xmit_update_fn(skb_p->tunl, ip_p, 
+-                skb_p->len - ((uint32_t) ip_p - (uint32_t) skb_p->data)); 
++            if (blog_gre_xmit_update_fn != NULL)
++                blog_gre_xmit_update_fn(skb_p->tunl, ip_p,
++                    skb_p->len - ((uint32_t) ip_p - (uint32_t) skb_p->data));
+         }
+     }
+ }
+@@ -3307,7 +3312,8 @@
+                 	blog_print( "rcv_pktAck = %d \n", rcv_pktAck );
+                 }
+                 
+-            	ret = blog_pptp_rcv_check_fn(call_id, rcv_pktSeq, 
++            	if (blog_pptp_rcv_check_fn != NULL)
++            	    ret = blog_pptp_rcv_check_fn(call_id, rcv_pktSeq,
+             	                             rcv_pktAck, saddr );
+             	
+             }
+@@ -3360,8 +3366,9 @@
+                 	ackNum = *(uint32_t*) (grehdr_p + 6);
+                 	blog_print( "ackNum = %d \n", ackNum );
+                 }
+-            	
+-            	blog_pptp_xmit_update_fn(call_id, seqNum, ackNum, daddr);
++
++            	if (blog_pptp_xmit_update_fn != NULL)
++            	    blog_pptp_xmit_update_fn(call_id, seqNum, ackNum, daddr);
+             } 
+         }
+     }
+Index: linux-3.4.11/net/ipv4/ipmr.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv4/ipmr.c	2016-06-24 18:20:23.048613668 +0800
++++ linux-3.4.11/net/ipv4/ipmr.c	2016-06-24 18:20:23.908613674 +0800
+@@ -2151,7 +2151,7 @@
+ #if defined(CONFIG_BCM_KF_IGMP)
+ int ipmr_get_route(struct net *net, struct sk_buff *skb,
+ 		   __be32 saddr, __be32 daddr,
+-		   struct rtmsg *rtm, int nowait, unsigned short ifIndex)
++		   struct rtmsg *rtm, int nowait, int ifIndex)
+ #else
+ int ipmr_get_route(struct net *net, struct sk_buff *skb,
+ 		   __be32 saddr, __be32 daddr,
+@@ -2176,8 +2176,13 @@
+ 	    (ip_hdr(skb)->protocol == IPPROTO_UDP))
+ 	{
+ 		struct net_device *dev = dev_get_by_index(net, ifIndex);
+-		vifi_t vifi = ipmr_find_vif(mrt, dev);
+-		cache = ipmr_cache_find(mrt, saddr, daddr, vifi);
++		if (dev) {
++			vifi_t vifi = ipmr_find_vif(mrt, dev);
++			cache = ipmr_cache_find(mrt, saddr, daddr, vifi);
++			dev_put(dev);
++		} else {
++			cache = NULL;
++		}
+ 	}
+ 	else
+ 	{
+Index: linux-3.4.11/net/ipv6/ip6mr.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/ip6mr.c	2016-06-24 18:20:23.120613668 +0800
++++ linux-3.4.11/net/ipv6/ip6mr.c	2016-06-24 18:20:23.908613674 +0800
+@@ -2235,9 +2235,14 @@
+ 	    (ipv6_hdr(skb)->nexthdr == IPPROTO_UDP) )
+ 	{
+ 		struct net_device *dev = dev_get_by_index(net, ifIndex);
+-		mifi_t mifi = ip6mr_find_vif(mrt, dev);
+-		cache = ip6mr_cache_find(mrt, &rt->rt6i_src.addr, 
+-		                         &rt->rt6i_dst.addr, mifi);
++		if (dev) {
++			mifi_t mifi = ip6mr_find_vif(mrt, dev);
++			cache = ip6mr_cache_find(mrt, &rt->rt6i_src.addr,
++			                         &rt->rt6i_dst.addr, mifi);
++			dev_put(dev);
++		} else {
++			cache = NULL;
++		}
+ 	}
+ 	else
+ 	{

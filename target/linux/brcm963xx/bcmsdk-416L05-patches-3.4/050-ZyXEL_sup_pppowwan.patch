@@ -1,0 +1,53 @@
+Index: linux-3.4.11/drivers/net/ppp/ppp_generic.c
+===================================================================
+--- linux-3.4.11.orig/drivers/net/ppp/ppp_generic.c	2016-04-22 15:26:25.259105691 +0800
++++ linux-3.4.11/drivers/net/ppp/ppp_generic.c	2016-04-22 15:27:45.911408999 +0800
+@@ -3099,7 +3099,7 @@
+      * num[1] == 1:  vlanMux mode: ppp0.100, ppp1.200...  
+      * num[1] == 2:  msc (multiple service mode) ppp0_1, ppp1_3...
+      * num[1] == 3:  pppoa0, pppoa1...
+-     *
++     * num[1] == 4:  pppowwan
+      */
+       num[0] = u<<(32-(FIELD2+FIELD1+FIELD0))>>(32-FIELD0);
+       num[1] = u<<(32-(FIELD2+FIELD1))>>(32-FIELD1);
+@@ -3120,6 +3120,11 @@
+       {
+          sprintf(dev->name, "pppoa%d", num[0]);
+       }
++#if 1 /* support pppowwan */
++      else if (num[1] == 4){ /* pppowwan */
++         sprintf(dev->name, "pppowwan%d", num[0]);
++      }
++#endif
+    }
+ #else
+ 	sprintf(dev->name, "ppp%d", unit);
+@@ -3178,14 +3183,19 @@
+ 	ppp_lock(ppp);
+ 	if (!ppp->closing) {
+ #if defined(CONFIG_BCM_KF_PPP)
+-                int err;
+-                err = netdev_path_remove(ppp->dev);
+-                if(err)
+-                {
+-                    printk(KERN_ERR "PPP: Failed to remove %s from Interface path (%d)",
+-                           ppp->dev->name, err);
+-                    netdev_path_dump(ppp->dev);
+-                }
++#if 1 /* support pppowwan */
++		if(!strstr(ppp->dev->name,"pppowwan")){
++#endif
++			int err;
++			err = netdev_path_remove(ppp->dev);
++			if(err)
++			{
++				printk(KERN_ERR "PPP: Failed to remove %s from Interface path (%d)", ppp->dev->name, err);
++				netdev_path_dump(ppp->dev);
++			}
++#if 1 /* support pppowwan */
++		}
++#endif
+ #endif
+ 		ppp->closing = 1;
+ 		ppp_unlock(ppp);

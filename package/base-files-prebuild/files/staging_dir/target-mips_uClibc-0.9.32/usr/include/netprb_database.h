@@ -1,0 +1,50 @@
+#ifndef _NETPRB_DATABASE_H
+#define _NETPRB_DATABASE_H
+
+enum dev_db_column_index {
+    DEV_TYPE = 0,
+    CONN_TYPE,
+    DEV_NAME,
+    IP_ADDR,
+    AL_MAC,
+    DEV_MAC,
+    SIGNAL_STRENGTH,
+    LINK_RATE,
+    OS_TYPE,
+    ALIVE,
+    NEIGHBOR,
+    HOST_TYPE,
+    HOST_NAME,
+	N_NOT_ALIVE,
+    RSSI,
+    EXTRA_INFO,
+    MANUFACTURE,
+	CONN_GUEST,
+	TX_DATA,
+	RX_DATA,
+	CHANNEL,
+	CURRENT_BAND,
+	SUPPORT_BAND,
+	COL_NUM
+};
+
+enum dev_db_hosttype {
+	UNKNOWN = 0,
+	DESKTOP,
+	LAPTOP,
+	AP,
+	NAS,
+	POWERLINE,
+	REPEATER,
+	SMART_PHONE,
+	CAMERA,
+	TABLET,
+	ROUTER,
+	WATCH,
+	GAME
+};
+
+#define DB_WIFI_BAND_24G (1 << 0)
+#define DB_WIFI_BAND_5G  (1 << 1)
+
+#endif

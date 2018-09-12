@@ -1,0 +1,2326 @@
+Index: linux-3.4.11/include/linux/gen_stats.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/gen_stats.h	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/include/linux/gen_stats.h	2015-11-17 10:46:33.244505371 +0800
+@@ -25,6 +25,9 @@
+ struct gnet_stats_basic_packed {
+ 	__u64	bytes;
+ 	__u32	packets;
++#if 1 /* ZyXEL QoS, porting from MSTC */
++	__u64	dropbytes;
++#endif
+ } __attribute__ ((packed));
+ 
+ /**
+@@ -35,6 +38,9 @@
+ struct gnet_stats_rate_est {
+ 	__u32	bps;
+ 	__u32	pps;
++#if 1 /* ZyXEL QoS, porting from MSTC */
++	__u32	dropbps;
++#endif
+ };
+ 
+ /**
+Index: linux-3.4.11/include/linux/netfilter/xt_AUTOMAP.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/include/linux/netfilter/xt_AUTOMAP.h	2015-11-17 10:46:33.244505371 +0800
+@@ -0,0 +1,65 @@
++/* x_tables module for setting the IPv4/IPv6 DSCP field
++ *
++ * (C) 2002 Harald Welte <laforge@gnumonks.org>
++ * based on ipt_FTOS.c (C) 2000 by Matthew G. Marsh <mgm@paktronix.com>
++ * This software is distributed under GNU GPL v2, 1991
++ *
++ * See RFC2474 for a description of the DSCP field within the IP Header.
++ *
++ * xt_DSCP.h,v 1.7 2002/03/14 12:03:13 laforge Exp
++*/
++#ifndef _XT_AUTOMAP_TARGET_H
++#define _XT_AUTOMAP_TARGET_H
++
++#define XT_AUTO_TYPE	0x1
++//#define XT_AUTO_MARK	0x2
++//#define XT_AUTO_DSCP	0x4
++//#define XT_AUTO_ETHPRI	0x8
++
++/*Automapping Type*/
++#define AUTOMAP_TYPE_8021P	0x1
++#define AUTOMAP_TYPE_DSCP		0x2
++#define AUTOMAP_TYPE_PKTLEN	0x4
++
++#define DSCP_MASK_SHIFT   5
++#define ETHERPRI_MARK_SHIFT   12
++
++		/*
++		Auto Priority Mapping Table
++
++
++			DSCP	|   Packet Length	| 802.1P	|     Queue     |
++		   ---------------------------------------------
++					|				|   001	|       0 		|
++					|				|		|			|
++					|				|   010	|       1		|
++					|				|		|			|
++			0x00       |       >1100		|   000	|       2		|
++					|				|		|			|
++			0x08       |       250-1100	|   011	|       3		|
++					|				|		|			|
++			0x10       |				|   100	|       4		|
++					|				|		|			|
++			0x18       |       <250		|   101	|       5		|
++					|				|		|			|
++		0x20,0x28	|				|   110	|       6		|
++					|				|		|			|
++		0x30,0x38  	|				|   111	|       7		|
++		*/
++
++
++/* accoding to tr181 8021p to DSCP mapping table(upstream) higher value higher priority */
++unsigned short vlan8021pToDSCP[8]= {0x00,0x00,0x00,0x08,0x10,0x18,0x28,0x38};
++unsigned short dscpPrecedenceTo8021p[8] = {0,3,4,5,6,6,7,7};
++
++unsigned short vlan8021pToPriorityQueue[8] = {2,0,1,3,4,5,6,7};
++unsigned short dscpPrecedenceToPriorityQueue[8] = {2,3,4,5,6,6,7,7};
++
++/* target info */
++struct xt_automap_target_info {
++	int type;
++	int marktable[8];
++	int flags;
++};
++
++#endif /* _XT_AUTOMAP_TARGET_H */
+Index: linux-3.4.11/include/linux/netfilter/xt_mark.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/netfilter/xt_mark.h	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/include/linux/netfilter/xt_mark.h	2015-11-17 10:46:33.244505371 +0800
+@@ -3,8 +3,21 @@
+ 
+ #include <linux/types.h>
+ 
++/* Version 1 */
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++enum {
++        XT_MARK_SET=0,
++        XT_MARK_AND,
++        XT_MARK_OR,
++	XT_MARK_VTAG_SET
++};
++#endif
++
+ struct xt_mark_tginfo2 {
+ 	__u32 mark, mask;
++#if 1 /* ZyXEL QoS, John */
++	__u8 mode;
++#endif
+ };
+ 
+ struct xt_mark_mtinfo1 {
+Index: linux-3.4.11/include/linux/netfilter/xt_policer.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/include/linux/netfilter/xt_policer.h	2015-11-17 10:46:33.244505371 +0800
+@@ -0,0 +1,38 @@
++#ifndef _XT_RATE_H
++#define _XT_RATE_H
++
++#define BITS_PER_BYTE 8
++#define KILO_SCALE 1000
++
++struct xt_policerinfo {
++#if 1//__MSTC__, Jones For compilation
++    int policerMode;
++
++    /* For srTCM and trTCM, rate means cRate and burst means cbsBurst.
++    For srTCM, pbsBurst means ebsBurst. */
++    u_int32_t rate, pRate;
++    u_int32_t burst, pbsBurst;  /* Period multiplier for upper limit. */
++
++    /* Used internally by the kernel */
++    unsigned long prev;
++
++    /* For srTCM and trTCM, credit means cbsCredit and creditCap means cbsCreditCap.
++    For srTCM, pbsCreditCap means ebsCreditCap. */
++    u_int32_t credit, pbsCredit;
++    u_int32_t creditCap, pbsCreditCap;
++
++    struct xt_policerinfo *master;
++#else
++    u_int32_t avg;    /* Average secs between packets * scale */
++    u_int32_t burst;  /* Period multiplier for upper limit. */
++
++    /* Used internally by the kernel */
++    unsigned long prev;
++    u_int32_t credit;
++    u_int32_t credit_cap, cost;
++
++    struct xt_policerinfo *master;
++#endif
++};
++
++#endif /*_XT_RATE_H*/
+Index: linux-3.4.11/include/linux/netfilter_bridge/ebt_AUTOMAP.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/include/linux/netfilter_bridge/ebt_AUTOMAP.h	2015-11-17 10:46:33.244505371 +0800
+@@ -0,0 +1,50 @@
++/* Used by ebt_AUTOMAP.c, MitraStar Jeff, 20110114*/
++#ifndef __LINUX_BRIDGE_EBT_AUTOMAP_H
++#define __LINUX_BRIDGE_EBT_AUTOMAP_H
++
++#define EBT_AUTOMAP_TARGET "AUTOMAP"
++
++#define AUTOMAP_TYPE_8021P  0x1
++#define AUTOMAP_TYPE_DSCP   0x2
++#define AUTOMAP_TYPE_PKTLEN 0x4
++
++#define DSCP_MASK_SHIFT   5
++#define ETHERPRI_MARK_SHIFT   12
++
++
++		/*
++		Auto Priority Mapping Table
++
++
++			DSCP	|   Packet Length	| 802.1P	|     Queue     |
++		   ---------------------------------------------
++					|				|   001	|       0 		|
++					|				|		|			|
++					|				|   010	|       1		|
++					|				|		|			|
++			0x00       |       >1100		|   000	|       2		|
++					|				|		|			|
++			0x08       |       250-1100	|   011	|       3		|
++					|				|		|			|
++			0x10       |				|   100	|       4		|
++					|				|		|			|
++			0x18       |       <250		|   101	|       5		|
++					|				|		|			|
++		0x20,0x28	|				|   110	|       6		|
++					|				|		|			|
++		0x30,0x38  	|				|   111	|       7		|
++		*/
++		
++
++/* accoding to tr181 8021p to DSCP mapping table(upstream), higher value higher priority*/
++unsigned short vlan8021pToPriorityQueue[8] = {2,0,1,3,4,5,6,7};
++unsigned short dscpPrecedenceToPriorityQueue[8] = {2,3,4,5,6,6,7,7};
++
++
++/* target info */
++struct ebt_automap_t_info {
++	int type;	
++	int marktable[8];
++};
++
++#endif
+Index: linux-3.4.11/include/linux/netfilter_bridge/ebt_ip.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/netfilter_bridge/ebt_ip.h	2015-11-17 10:45:40.000000000 +0800
++++ linux-3.4.11/include/linux/netfilter_bridge/ebt_ip.h	2015-11-17 10:46:33.244505371 +0800
+@@ -23,6 +23,55 @@
+ #define EBT_IP_PROTO 0x08
+ #define EBT_IP_SPORT 0x10
+ #define EBT_IP_DPORT 0x20
++
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++#if defined(CONFIG_BCM_KF_NETFILTER) || !defined(CONFIG_BCM_IN_KERNEL)
++#define EBT_IP_DSCP  0x40
++#endif
++#define EBT_IP_LENGTH 0x80
++#define EBT_IP_TCP_FLAGS 0x100
++#define EBT_IP_DHCP_OPT60 0x200
++#define EBT_IP_DHCP_OPT61 0x400
++#define EBT_IP_DHCP_OPT77 0x800
++#define EBT_IP_DHCP_OPT125 0x1000
++#if defined(CONFIG_BCM_KF_NETFILTER) || !defined(CONFIG_BCM_IN_KERNEL)
++#define EBT_IP_MASK (EBT_IP_SOURCE | EBT_IP_DEST | EBT_IP_TOS | EBT_IP_PROTO |\
++ EBT_IP_SPORT | EBT_IP_DPORT | EBT_IP_DSCP | EBT_IP_LENGTH | EBT_IP_TCP_FLAGS |\
++ EBT_IP_DHCP_OPT60 | EBT_IP_DHCP_OPT61 | EBT_IP_DHCP_OPT77 | EBT_IP_DHCP_OPT125)
++#else
++#define EBT_IP_MASK (EBT_IP_SOURCE | EBT_IP_DEST | EBT_IP_TOS | EBT_IP_PROTO |\
++ EBT_IP_SPORT | EBT_IP_DPORT | EBT_IP_LENGTH | EBT_IP_TCP_FLAGS |\
++ EBT_IP_DHCP_OPT60 | EBT_IP_DHCP_OPT61 | EBT_IP_DHCP_OPT77 | EBT_IP_DHCP_OPT125)
++#endif
++#define DHCP_OPTION_MAX_LEN 556 /* IP header(20) + UDP header(8)+ DHCP header(528) */
++
++#define DHCP_PADDING                            0x00
++#define DHCP_VENDOR                             0x3c    /*option 60 */
++#define DHCP_CLIENT_ID                          0x3d    /*option 61 */
++#define DHCP_USER_CLASS_ID                      0x4d    /*option 77 */
++#define DHCP_VENDOR_IDENTIFYING 				0x7d    /*option 125 */
++#define DHCP_OPTION_OVER                        0x34
++#define DHCP_END                                0xFF
++
++#define OPTION_FIELD            0
++#define FILE_FIELD              1
++#define SNAME_FIELD             2
++
++
++
++/* miscellaneous defines */
++#define OPT_CODE 0
++#define OPT_LEN 1
++#define OPT_DATA 2
++
++#define OPTION_MAC_ENTRY 32
++
++/* each option data shift length */
++#define DHCP_OPT_LEN_FIELD_LEN  1
++#define DHCP_OPT125_ENTERPRISE_NUM_LEN 4
++#define DHCP_OPT125_DATA_SHIFT DHCP_OPT125_ENTERPRISE_NUM_LEN + DHCP_OPT_LEN_FIELD_LEN
++
++#else
+ #if defined(CONFIG_BCM_KF_NETFILTER) || !defined(CONFIG_BCM_IN_KERNEL)
+ #define EBT_IP_DSCP  0x40
+ #define EBT_IP_MASK (EBT_IP_SOURCE | EBT_IP_DEST | EBT_IP_TOS | EBT_IP_PROTO |\
+@@ -31,9 +80,61 @@
+ #define EBT_IP_MASK (EBT_IP_SOURCE | EBT_IP_DEST | EBT_IP_TOS | EBT_IP_PROTO |\
+  EBT_IP_SPORT | EBT_IP_DPORT )
+ #endif
++#endif
+ #define EBT_IP_MATCH "ip"
+ 
+ /* the same values are used for the invflags */
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++struct cfgopt{
++        uint8_t len;
++        char cfgdata[254];
++};
++
++struct dhcpMessage {
++        uint8_t op;
++        uint8_t htype;
++        uint8_t hlen;
++        uint8_t hops;
++        uint32_t xid;
++        uint16_t secs;
++        uint16_t flags;
++        uint32_t ciaddr;
++        uint32_t yiaddr;
++        uint32_t siaddr;
++        uint32_t giaddr;
++        uint8_t chaddr[16];
++        uint8_t sname[64];
++        uint8_t file[128];
++        uint32_t cookie;
++        uint8_t options[308]; /* 312 - cookie */
++};
++
++struct ebt_ip_info
++{
++	__be32 saddr;
++	__be32 daddr;
++	__be32 smsk;
++	__be32 dmsk;
++	__u8  tos;
++#if defined(CONFIG_BCM_KF_NETFILTER) || !defined(CONFIG_BCM_IN_KERNEL)
++	__u8  dscp; /* brcm */
++#endif
++	__u8  protocol;
++	__u16  bitmask;
++	__u16  invflags;
++	__u8  tcp_flg_mask;
++	__u8  tcp_flg_cmp;
++	__u16 sport[2];
++	__u16 dport[2];
++	__u16 length[2];
++	struct cfgopt cfg60; //option 60
++    struct cfgopt cfg61; //option 61
++    struct cfgopt cfg77; //option 77
++    struct cfgopt cfg125; //option 125
++    char SrcMacArray[OPTION_MAC_ENTRY][ETH_ALEN];
++};
++#else
++/* the same values are used for the invflags */
+ struct ebt_ip_info {
+ 	__be32 saddr;
+ 	__be32 daddr;
+@@ -49,5 +150,6 @@
+ 	__u16 sport[2];
+ 	__u16 dport[2];
+ };
++#endif
+ 
+ #endif
+Index: linux-3.4.11/include/linux/netfilter_bridge/ebt_ip6.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/netfilter_bridge/ebt_ip6.h	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/include/linux/netfilter_bridge/ebt_ip6.h	2015-11-17 10:46:33.244505371 +0800
+@@ -21,10 +21,19 @@
+ #define EBT_IP6_SPORT 0x10
+ #define EBT_IP6_DPORT 0x20
+ #define EBT_IP6_ICMP6 0x40
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++#define EBT_IP6_LENGTH 0x80
++#endif
+ 
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++#define EBT_IP6_MASK (EBT_IP6_SOURCE | EBT_IP6_DEST | EBT_IP6_TCLASS |\
++		      EBT_IP6_PROTO | EBT_IP6_SPORT | EBT_IP6_DPORT | \
++		      EBT_IP6_ICMP6 | EBT_IP6_LENGTH)
++#else
+ #define EBT_IP6_MASK (EBT_IP6_SOURCE | EBT_IP6_DEST | EBT_IP6_TCLASS |\
+ 		      EBT_IP6_PROTO | EBT_IP6_SPORT | EBT_IP6_DPORT | \
+ 		      EBT_IP6_ICMP6)
++#endif
+ #define EBT_IP6_MATCH "ip6"
+ 
+ /* the same values are used for the invflags */
+@@ -45,6 +54,9 @@
+ 		__u16 dport[2];
+ 		__u8 icmpv6_code[2];
+ 	};
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++	__u16 length[2];
++#endif
+ };
+ 
+ #endif
+Index: linux-3.4.11/include/linux/netfilter_bridge/ebt_policer.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/include/linux/netfilter_bridge/ebt_policer.h	2015-11-17 10:46:33.244505371 +0800
+@@ -0,0 +1,39 @@
++/* Used by ebt_policer.c, ZyXEL Stan, 20100107*/
++#ifndef __LINUX_BRIDGE_EBT_POLICER_H
++#define __LINUX_BRIDGE_EBT_POLICER_H
++
++#define EBT_POLICER_MATCH "policer"  
++
++#define BITS_PER_BYTE 8 
++#define KILO_SCALE    1000 
++
++struct ebt_policer_info
++{
++#if 1//__MSTC__, Jones For compilation
++       int policerMode;
++
++	/* For srTCM and trTCM, rate means cRate and burst means cbsBurst.
++       For srTCM, pbsBurst means ebsBurst. */
++       u_int32_t rate, pRate;    
++	u_int32_t burst, pbsBurst;  /* Period multiplier for upper limit. */
++
++       /* Used internally by the kernel */
++       unsigned long prev;
++
++	/* For srTCM and trTCM, credit means cbsCredit and creditCap means cbsCreditCap.
++	   For srTCM, pbsCreditCap means ebsCreditCap. */
++	u_int32_t credit, pbsCredit;
++	u_int32_t creditCap, pbsCreditCap;
++#else
++	u_int32_t avg;    /* Average secs between packets * scale */
++	u_int32_t burst;  /* Period multiplier for upper limit. */
++
++	/* Used internally by the kernel */
++	unsigned long prev;
++	u_int32_t credit;
++	u_int32_t credit_cap, cost;
++#endif	
++};
++
++#endif
++
+Index: linux-3.4.11/net/bridge/netfilter/Kconfig
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/Kconfig	2015-11-17 10:45:41.000000000 +0800
++++ linux-3.4.11/net/bridge/netfilter/Kconfig	2015-11-17 10:46:33.244505371 +0800
+@@ -220,6 +220,22 @@
+ 
+ 	  To compile it as a module, choose M here.  If unsure, say N.
+ 
++config BRIDGE_EBT_AUTOMAP
++        tristate "ebt: auto priority mapping and DSCP marking support"
++        depends on BRIDGE_NF_EBTABLES
++        help
++          This option adds Auto Priority Mapping target on ebtables
++
++          To compile it as a module, choose M here.  If unsure, say N.
++
++config BRIDGE_EBT_POLICER
++        tristate "ebt: policy rate limit support"
++        depends on BRIDGE_NF_EBTABLES
++        help
++          This option adds the policy rate limit support
++
++          To compile it as a module, choose M here.  If unsure, say N.
++
+ #
+ # watchers
+ #
+Index: linux-3.4.11/net/bridge/netfilter/Makefile
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/Makefile	2015-11-17 10:45:41.000000000 +0800
++++ linux-3.4.11/net/bridge/netfilter/Makefile	2015-11-17 10:46:33.244505371 +0800
+@@ -1,6 +1,8 @@
+ #
+ # Makefile for the netfilter modules for Link Layer filtering on a bridge.
+ #
++# /* ZyXEL QoS, Mark (porting from MSTC) */
++EXTRA_CFLAGS    += -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD)
+ 
+ obj-$(CONFIG_BRIDGE_NF_EBTABLES) += ebtables.o
+ 
+@@ -34,6 +36,11 @@
+ obj-$(CONFIG_BRIDGE_EBT_FTOS_T) += ebt_ftos.o
+ obj-$(CONFIG_BRIDGE_EBT_SKIPLOG_T) += ebt_skiplog.o
+ obj-$(CONFIG_BRIDGE_EBT_WMM_MARK) += ebt_wmm_mark.o 
++# /* ZyXEL QoS, John (porting from MSTC) */
++obj-$(CONFIG_BRIDGE_EBT_AUTOMAP) += ebt_AUTOMAP.o
++
++# /* ZyXEL QoS, Mark (porting from MSTC) */
++obj-$(CONFIG_BRIDGE_EBT_POLICER) += ebt_policer.o
+ endif # BCM_KF # CONFIG_BCM_KF_NETFILTER
+ 
+ # watchers
+Index: linux-3.4.11/net/bridge/netfilter/ebt_AUTOMAP.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/bridge/netfilter/ebt_AUTOMAP.c	2015-11-17 10:46:33.244505371 +0800
+@@ -0,0 +1,149 @@
++/* Kernel module to control the rate in kbps. */
++/* This program is free software; you can redistribute it and/or modify 
++ * it under the terms of the GNU General Public License version 2 as 
++ * published by the Free Software Foundation. */
++/*  MitraStar Jeff, 20110114*/
++
++#include <linux/module.h>
++#include <linux/skbuff.h>
++#include <linux/ip.h>
++#include <linux/if_vlan.h>
++
++#include <linux/netfilter/x_tables.h>
++#include <linux/netfilter_bridge/ebtables.h>
++#include <linux/netfilter_bridge/ebt_AUTOMAP.h>
++
++
++static int getVlanPrioAndIpHeader(struct sk_buff *skb, unsigned char *prio, struct iphdr **iph){
++	unsigned short TCI;
++	unsigned short id;	/* VLAN ID, given from frame TCI */
++	 /* Need to recalculate IP header checksum after altering TOS byte */
++	const struct vlan_hdr *fp;
++	struct vlan_hdr _frame;
++	struct iphdr *ih = NULL;
++
++	/* get ip header */
++	if (skb->protocol == __constant_htons(ETH_P_IP))
++		ih = (struct iphdr *)(skb->network_header);
++    else if (skb->protocol == __constant_htons(ETH_P_8021Q)) {
++        if (*(unsigned short *)(skb->network_header + VLAN_HLEN - 2) == __constant_htons(ETH_P_IP))
++			ih = (struct iphdr *)(skb->network_header + VLAN_HLEN);
++    }
++	*iph = ih;
++	
++	if(ntohs(((struct vlan_hdr *)(skb->vlan_header))->h_vlan_encapsulated_proto) == 0){
++		if(skb->protocol == ETH_P_8021Q) {
++			fp = skb_header_pointer(skb, 0, sizeof(_frame), &_frame);
++			if (fp == NULL)
++				return EBT_CONTINUE;
++			/* Tag Control Information (TCI) consists of the following elements:
++			 * - User_priority. The user_priority field is three bits in length,
++			 *   interpreted as a binary number.
++			 * - Canonical Format Indicator (CFI). The Canonical Format Indicator
++			 *   (CFI) is a single bit flag value. Currently ignored.
++			 * - VLAN Identifier (VID). The VID is encoded as
++			 *   an unsigned binary number. */
++			TCI = ntohs(fp->h_vlan_TCI);
++			id = TCI & VLAN_VID_MASK;
++			*prio = (TCI >> 13) & 0x7;
++		}
++		//Packet with no VLAN tag
++		else {
++			TCI = 0;
++			id = 0;
++			//Packet with no VLAN tag will be sent to default queue just like 1p value is 1
++			*prio = 1;
++		}
++	}
++	else {
++		// for new broadcom vlan device
++		TCI = ntohs(((struct vlan_hdr *)(skb->vlan_header))->h_vlan_TCI);
++		id = TCI & VLAN_VID_MASK;
++		*prio = (TCI >> 13) & 0x7;
++	}
++
++	return 0;
++}
++
++
++static unsigned int
++ebt_automap_tg(struct sk_buff *skb, const struct xt_action_param *par) 
++{
++	const struct ebt_automap_t_info *aminfo = par->targinfo;
++	struct iphdr *iph = NULL;
++	unsigned char prio = 0;
++	unsigned char dscpPrecedence = 0;
++
++	
++	getVlanPrioAndIpHeader(skb, &prio, &iph);
++	
++	switch(aminfo->type){
++		case AUTOMAP_TYPE_8021P:
++			/* mark value for priority queue */
++			skb->mark |= vlan8021pToPriorityQueue[prio];
++
++			/* should mark DSCP here */
++			break;
++		case AUTOMAP_TYPE_DSCP:
++			
++			if(iph==NULL)
++				skb->mark|=0x0;
++			else {
++				/* get dscp precedence */
++				dscpPrecedence = ((iph->tos)>>5)&0x7;
++
++				/* mark value for priority queue */
++				skb->mark |= dscpPrecedenceToPriorityQueue[dscpPrecedence];
++			}
++			break;
++		case AUTOMAP_TYPE_PKTLEN:
++			if(iph==NULL)
++				skb->mark|=0x0;
++			else {
++				if(iph->tot_len > 1100){
++					skb->mark|=vlan8021pToPriorityQueue[0]; /* queue prio 2 */
++				}else if(iph->tot_len < 250){
++					skb->mark|=vlan8021pToPriorityQueue[5]; /* queue prio 5 */
++				}else{  /*250~1100*/
++					skb->mark|=vlan8021pToPriorityQueue[3]; /* queue prio 3 */
++				}
++			}
++			break;
++		default:
++			break;
++	}
++	
++	return EBT_CONTINUE;
++}
++
++/* As a policer rule added, this function will be executed */ 
++static int ebt_automap_tg_check(const struct xt_tgchk_param *par)
++{
++	return 0;
++}
++
++static struct xt_target ebt_automap_tg_reg __read_mostly =
++{
++    .name = EBT_AUTOMAP_TARGET,
++    .revision	= 0,
++    .family		= NFPROTO_BRIDGE,
++    .target  = ebt_automap_tg,
++    .checkentry  = ebt_automap_tg_check,
++    .targetsize	= XT_ALIGN(sizeof(struct ebt_automap_t_info)),
++    .me     = THIS_MODULE,
++};
++
++static int __init ebt_automap_init(void)
++{
++   return xt_register_target(&ebt_automap_tg_reg);
++}
++
++static void __exit ebt_automap_fini(void)
++{
++   xt_unregister_target(&ebt_automap_tg_reg);
++}
++
++module_init(ebt_automap_init);
++module_exit(ebt_automap_fini);
++MODULE_LICENSE("GPL");
++
+Index: linux-3.4.11/net/bridge/netfilter/ebt_ip.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/ebt_ip.c	2015-11-17 10:45:41.000000000 +0800
++++ linux-3.4.11/net/bridge/netfilter/ebt_ip.c	2015-11-17 10:46:33.244505371 +0800
+@@ -18,12 +18,205 @@
+ #include <linux/netfilter/x_tables.h>
+ #include <linux/netfilter_bridge/ebtables.h>
+ #include <linux/netfilter_bridge/ebt_ip.h>
+-
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++#include <linux/tcp.h>
++#include <linux/udp.h>
++#endif
+ struct tcpudphdr {
+ 	__be16 src;
+ 	__be16 dst;
+ };
+ 
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++
++unsigned char *get_DhcpOption(struct dhcpMessage *packet, int code)
++{
++	int i, length;
++	unsigned char *optionptr;
++	int over = 0, done = 0, curr = OPTION_FIELD;
++
++	optionptr = packet->options;
++	i = 0;
++	length = 308;
++
++	while (!done) {
++		if (i >= length){
++			return NULL;
++		}
++		if (optionptr[i + OPT_CODE] == code) {
++			if (i + 1 + optionptr[i + OPT_LEN] >= length) {
++				return NULL;
++			}
++			return optionptr + i + 2;
++		}
++		switch (optionptr[i + OPT_CODE]) {
++			case DHCP_PADDING:
++				i++;
++				break;
++			case DHCP_OPTION_OVER:
++				if (i + 1 + optionptr[i + OPT_LEN] >= length) {
++					return NULL;
++				}
++				over = optionptr[i + 3];
++				i += optionptr[OPT_LEN] + 2;
++				break;
++			case DHCP_END:
++				if (curr == OPTION_FIELD && over & FILE_FIELD) {
++					optionptr = packet->file;
++					i = 0;
++					length = 128;
++					curr = FILE_FIELD;
++				} else if (curr == FILE_FIELD && over & SNAME_FIELD) {
++					optionptr = packet->sname;
++					i = 0;
++					length = 64;
++					curr = SNAME_FIELD;
++				} else done = 1;
++				break;
++			default:
++				i += optionptr[OPT_LEN + i] + 2;
++		}
++	}
++	return NULL;
++}
++
++/* If match, return value is 0 */
++static int cmp_option60(char *optval60, const struct ebt_ip_info *info)
++{
++	int len;
++	char optionData[254];
++	const struct cfgopt *cfgptr = NULL;
++	printk("%s %d\n", __FUNCTION__, __LINE__);
++
++	if (optval60 == NULL)
++		return false;
++
++	cfgptr = &(info->cfg60);
++
++	/* Compare option data length */
++	len = (int)(*((unsigned char *)optval60 - 1));
++	if(len != cfgptr->len)
++		return false;
++
++	/* Compare option data content */
++	memset(optionData, 0, 254);
++	strncpy(optionData, optval60, len);
++	printk("%s %d: cfgdata[%s] optionData[%s]\n", __FUNCTION__, __LINE__, cfgptr->cfgdata, optionData);
++	if(strcmp(cfgptr->cfgdata, optionData) == 0)
++		return true;
++
++	return 1;
++}
++
++/* If match, return value is 0 */
++static int cmp_option61(char *optval61, const struct ebt_ip_info *info)
++{
++        int len;
++        char optionData[254];
++        const struct cfgopt *cfgptr = NULL;
++
++
++
++        if (optval61 == NULL)
++                return false;
++
++        cfgptr = &(info->cfg61);
++
++        /* Compare option data length */
++        len = (int)(*((unsigned char *)optval61 - 1));
++
++        if(len != cfgptr->len)
++                return false;
++
++        /* Compare option data content */
++        memset(optionData, 0, 254);
++        memcpy(optionData, optval61, len);
++
++        if(!memcmp(cfgptr->cfgdata, optionData, len))
++                return true;
++
++        return 1;
++}
++
++/* If match, return value is 0 */
++static int cmp_option77(char *optval77, const struct ebt_ip_info *info)
++{
++        uint8_t len = 0, total_len = 0, current_len = 0;
++        char optionData[254];
++        const struct cfgopt *cfgptr = NULL;
++
++
++        if (optval77 == NULL)
++                return false;
++
++        cfgptr = &(info->cfg77);
++
++        /* Record option 77 total length */
++        total_len = (uint8_t)(*((unsigned char *)optval77 - 1));
++
++        while(total_len != current_len){
++                len = (uint8_t)*((unsigned char *)optval77);    /* For option 77, one data length */
++
++                if(len != cfgptr->len)
++                        return false;
++
++                /* Compare option data content */
++                memset(optionData, 0, 254);
++                memcpy(optionData, optval77 + DHCP_OPT_LEN_FIELD_LEN, len );
++                if(!memcmp(cfgptr->cfgdata, optionData, len))
++                        return true;
++
++                /* shift to next vendor class data in option 125 */
++                current_len += (len + DHCP_OPT_LEN_FIELD_LEN);
++                optval77 += (len + DHCP_OPT_LEN_FIELD_LEN);
++        }
++        return false;
++}
++
++
++/* If match, return value is 0 */
++static int cmp_option125(char *optval125, const struct ebt_ip_info *info)
++{
++        int len = 0,  total_len = 0, current_len = 0;
++        char optionData[254];
++        const struct cfgopt *cfgptr = NULL;
++
++        if (optval125 == NULL)
++                return false;
++
++        cfgptr = &(info->cfg125);
++
++        /* Record option 125 total length */
++        total_len = (int)(*((unsigned char *)optval125 - 1));
++
++        while(total_len != current_len){
++
++                len = (int)(*((unsigned char *)optval125 +DHCP_OPT125_ENTERPRISE_NUM_LEN));     /* For option 125, one data length */
++
++
++                if(len + DHCP_OPT125_DATA_SHIFT != cfgptr->len) /* Add 5 is for enterprise-number(4 bytes) and data length represent(1 byte) */
++                        return false;
++
++                /* Compare option data content */
++                memset(optionData, 0, 254);
++                memcpy(optionData, optval125, len + DHCP_OPT125_DATA_SHIFT);
++
++                if(!memcmp(cfgptr->cfgdata, optionData, len + DHCP_OPT125_DATA_SHIFT))
++                        return true;
++
++                /* shift to next vendor class data in option 125 */
++                current_len += (len + DHCP_OPT125_DATA_SHIFT);
++                optval125 += (len + DHCP_OPT125_DATA_SHIFT);
++        }
++        return false;
++
++}
++
++
++
++
++
++#endif
+ static bool
+ ebt_ip_mt(const struct sk_buff *skb, struct xt_action_param *par)
+ {
+@@ -32,10 +225,112 @@
+ 	struct iphdr _iph;
+ 	const struct tcpudphdr *pptr;
+ 	struct tcpudphdr _ports;
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++	struct tcphdr _tcph, *th;
++#endif
+ 
+ 	ih = skb_header_pointer(skb, 0, sizeof(_iph), &_iph);
+ 	if (ih == NULL)
+ 		return false;
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++	if((info->bitmask & EBT_IP_DHCP_OPT60)||(info->bitmask & EBT_IP_DHCP_OPT61)||
++       (info->bitmask & EBT_IP_DHCP_OPT77)||(info->bitmask & EBT_IP_DHCP_OPT125)){
++		 unsigned char payload[DHCP_OPTION_MAX_LEN];
++        struct dhcpMessage *dhcpPtr;
++        struct iphdr _iph, *ih;
++        struct tcpudphdr _ports, *pptr;
++        int     skb_data_len=0, i, LastEntry = -1;
++        bool OptMatch = 0;
++        char TmpMac[ETH_ALEN];
++
++        memset(TmpMac , 0, sizeof(TmpMac));
++
++        ih = skb_header_pointer(skb, 0, sizeof(_iph), &_iph);
++        if (ih == NULL)
++                return false;
++
++        pptr = skb_header_pointer(skb, ih->ihl*4,  sizeof(_ports), &_ports);
++
++        /* not DHCP packet, then try to compared with recoded mac */
++        if(pptr->src!=67 && pptr->src!=68 && pptr->dst!=67 && pptr->dst!=68){
++			for(i=0;i<OPTION_MAC_ENTRY;i++){
++		        if(!compare_ether_addr(eth_hdr(skb)->h_source, info->SrcMacArray[i])){
++					/* if match, continue to check other conditions */
++		        	goto CONTINUE;
++		        }
++		        if(!memcmp(TmpMac,info->SrcMacArray[i],ETH_ALEN)){
++		        	break;
++		        }
++			}
++            return false;
++        }else{
++            /* If packet is dhcp packet */
++            memset(payload, 0, sizeof(payload));
++            skb_data_len = skb->len;
++
++            if (skb_copy_bits(skb, 0, payload, skb_data_len))
++                            printk("Copy packet is failed by ebtables of filtering DHCP Option\n\r");
++
++            dhcpPtr = (struct dhcpMessage *)(payload + sizeof(struct iphdr) + sizeof(struct udphdr));
++
++            if(info->bitmask & EBT_IP_DHCP_OPT60){
++                char *opt60 = get_DhcpOption(dhcpPtr, DHCP_VENDOR);
++                if(cmp_option60(opt60, info)^ !!(info->invflags & EBT_IP_DHCP_OPT60))
++                	OptMatch = 1;
++            }
++
++            if(info->bitmask & EBT_IP_DHCP_OPT61){
++                char *opt61 = get_DhcpOption(dhcpPtr, DHCP_CLIENT_ID);
++                if(cmp_option61(opt61, info)^ !!(info->invflags & EBT_IP_DHCP_OPT61))
++                	OptMatch = 1;
++            }
++
++            if(info->bitmask & EBT_IP_DHCP_OPT77){
++                char *opt77 = get_DhcpOption(dhcpPtr, DHCP_USER_CLASS_ID);
++                if(cmp_option77(opt77, info)^ !!(info->invflags & EBT_IP_DHCP_OPT77))
++                	OptMatch = 1;
++            }
++
++            if(info->bitmask & EBT_IP_DHCP_OPT125){
++                char *opt125 = get_DhcpOption(dhcpPtr, DHCP_VENDOR_IDENTIFYING);
++                if(cmp_option125(opt125, info)^ !!(info->invflags & EBT_IP_DHCP_OPT125))
++                	OptMatch = 1;
++            }
++
++//                              printk("\nOptMatch is %d\n",OptMatch);
++
++            if(OptMatch){
++				/* match dhcp option, then record its MAC addr for future filter */
++				for(i=0;i<OPTION_MAC_ENTRY;i++){
++					if(!memcmp(TmpMac,info->SrcMacArray[i],ETH_ALEN)){
++				        memcpy((void *)(info->SrcMacArray[i]), eth_hdr(skb)->h_source, ETH_ALEN);
++				        break;
++					}else if(!memcmp(eth_hdr(skb)->h_source, info->SrcMacArray[i], ETH_ALEN)){
++					    break;
++					}
++				}
++            }else{
++            	/* not match, need to check current list whether this MAC hace once been matched, if so, clear this entry from this DHCP
++            				  option criteria (client might change another vendor information, ex different vendor ID string) */
++                for(i=0;i<OPTION_MAC_ENTRY;i++){
++                    if(!memcmp(TmpMac,info->SrcMacArray[i],ETH_ALEN)){
++                        if(LastEntry!=-1){
++                            memcpy((void *)(info->SrcMacArray[LastEntry]),  info->SrcMacArray[i-1], ETH_ALEN);
++                            memset((void *)(info->SrcMacArray[i-1]), 0, ETH_ALEN);
++                        }
++                        break;
++                    }else if(!memcmp(eth_hdr(skb)->h_source, info->SrcMacArray[i], ETH_ALEN)){
++                        LastEntry = i;//Record clear entry
++                    }
++                }
++
++                return false;
++            }
++		}
++
++	}
++CONTINUE:
++#endif
+ 	if (info->bitmask & EBT_IP_TOS &&
+ 	   FWINV(info->tos != ih->tos, EBT_IP_TOS))
+ 		return false;
+@@ -43,7 +338,7 @@
+ 	if (info->bitmask & EBT_IP_DSCP &&
+ 	   FWINV(info->dscp != (ih->tos & 0xFC), EBT_IP_DSCP))
+ 		return false;
+-#endif      
++#endif
+ 	if (info->bitmask & EBT_IP_SOURCE &&
+ 	   FWINV((ih->saddr & info->smsk) !=
+ 	   info->saddr, EBT_IP_SOURCE))
+@@ -52,11 +347,26 @@
+ 	   FWINV((ih->daddr & info->dmsk) !=
+ 	   info->daddr, EBT_IP_DEST))
+ 		return false;
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++	if(info->bitmask & EBT_IP_LENGTH) { /* IP Length */
++		u16 len = ntohs(ih->tot_len);
++			if (FWINV(len < info->length[0] ||
++					  len > info->length[1],
++					  EBT_IP_LENGTH))
++		return false;
++	}
++#endif
+ 	if (info->bitmask & EBT_IP_PROTO) {
+ 		if (FWINV(info->protocol != ih->protocol, EBT_IP_PROTO))
+ 			return false;
++#if 0 /* ZyXEL QoS, John (porting from MSTC) */
+ 		if (!(info->bitmask & EBT_IP_DPORT) &&
+ 		    !(info->bitmask & EBT_IP_SPORT))
++#else
++		if (!(info->bitmask & EBT_IP_DPORT) &&
++		    !(info->bitmask & EBT_IP_SPORT) &&
++		    !(info->bitmask & EBT_IP_TCP_FLAGS))
++#endif
+ 			return true;
+ 		if (ntohs(ih->frag_off) & IP_OFFSET)
+ 			return false;
+@@ -78,6 +388,19 @@
+ 				  EBT_IP_SPORT))
+ 			return false;
+ 		}
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++        if (info->bitmask & EBT_IP_TCP_FLAGS) {
++			th = skb_header_pointer(skb, ih->ihl*4, sizeof(_tcph), &_tcph);
++			if (th == NULL) {
++				/* We've been asked to examine this packet, and we
++				   can't.  Hence, no choice but to drop. */
++				printk("Dropping evil TCP offset=0 tinygram.\n");
++				return 0;
++			}
++			if (FWINV((((unsigned char *)th)[13] & info->tcp_flg_mask) != info->tcp_flg_cmp, EBT_IP_TCP_FLAGS))
++				return false;
++		}
++#endif
+ 	}
+ 	return true;
+ }
+@@ -106,6 +429,10 @@
+ 		return -EINVAL;
+ 	if (info->bitmask & EBT_IP_SPORT && info->sport[0] > info->sport[1])
+ 		return -EINVAL;
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++        if (info->bitmask & EBT_IP_LENGTH && info->length[0] > info->length[1])
++		return false;
++#endif
+ 	return 0;
+ }
+ 
+Index: linux-3.4.11/net/bridge/netfilter/ebt_ip6.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/ebt_ip6.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/net/bridge/netfilter/ebt_ip6.c	2015-11-17 10:46:33.244505371 +0800
+@@ -53,6 +53,15 @@
+ 	    FWINV(ipv6_masked_addr_cmp(&ih6->daddr, &info->dmsk,
+ 				       &info->daddr), EBT_IP6_DEST))
+ 		return false;
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++	if(info->bitmask & EBT_IP6_LENGTH) {
++		u16 len = ntohs(ih6->payload_len);
++		if (FWINV(len < info->length[0] ||
++					len > info->length[1],
++					EBT_IP6_LENGTH))
++			return false;
++	}
++#endif
+ 	if (info->bitmask & EBT_IP6_PROTO) {
+ 		uint8_t nexthdr = ih6->nexthdr;
+ 		__be16 frag_off;
+@@ -126,6 +135,10 @@
+ 		    info->icmpv6_code[0] > info->icmpv6_code[1])
+ 			return -EINVAL;
+ 	}
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++        if (info->bitmask & EBT_IP6_LENGTH && info->length[0] > info->length[1])
++		return false;
++#endif
+ 	return 0;
+ }
+ 
+Index: linux-3.4.11/net/bridge/netfilter/ebt_mark.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/ebt_mark.c	2015-11-17 10:45:41.000000000 +0800
++++ linux-3.4.11/net/bridge/netfilter/ebt_mark.c	2015-11-17 10:46:33.244505371 +0800
+@@ -65,6 +65,7 @@
+ 
+ 		      frame->h_vlan_TCI = htons(TCI);
+    	   }
++#if 0 /* ZyXEL QoS, change VLAM header process to vlanCtl driver instead of ebtables module, John (porting from MSTC)*/
+          else
+          {
+             if ((skb->mac_header - skb->head) < VLAN_HLEN)
+@@ -97,6 +98,7 @@
+             }
+          }
+          skb->vtag = 0;
++#endif
+       }
+    }
+ #endif // CONFIG_BCM_KF_NETFILTER
+Index: linux-3.4.11/net/bridge/netfilter/ebt_policer.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/bridge/netfilter/ebt_policer.c	2015-11-17 10:46:33.244505371 +0800
+@@ -0,0 +1,328 @@
++/* Kernel module to control the rate in kbps. */
++/* This program is free software; you can redistribute it and/or modify 
++ * it under the terms of the GNU General Public License version 2 as 
++ * published by the Free Software Foundation. */
++/*  ZyXEL Stan, 20100105*/
++
++#include <linux/module.h>
++#if 1 // __MSTC__, ZyXEL richard, QoS
++#include <linux/netfilter/x_tables.h>
++#endif // __MSTC__, ZyXEL richard, QoS
++#include <linux/netfilter_bridge/ebtables.h>
++#include <linux/netfilter_bridge/ebt_policer.h>
++
++#include <linux/netdevice.h>
++#include <linux/spinlock.h>
++#if 1 //__MSTC__, Eric, Qos policer.
++#include "skb_defines.h"
++#define RED		1
++#define YELLOW	2
++#define GREEN 	3
++#endif
++#if 1//__MSTC__, Jones For compilation
++#define MODE_TBF   0
++#define MODE_SRTCM 1
++#define MODE_TRTCM 2
++#endif
++static DEFINE_SPINLOCK(policer_lock);
++#if 1//__MSTC__, Jones For compilation
++static bool 
++ebt_policer_match(const struct sk_buff *skb, struct xt_action_param *par)
++                             
++{
++       struct ebt_policer_info *r = (struct ebt_policer_info *)par->matchinfo;
++	unsigned long now = jiffies;
++	unsigned long timePassed = 0;
++	struct sk_buff *tmp;
++	u_int32_t cost = 0;
++	u_int32_t extraCredit = 0; 
++	spin_lock_bh(&policer_lock);
++	
++#if 1 //__OBM__, Jones
++#if defined(CONFIG_MIPS_BRCM) && defined(CONFIG_BLOG)
++				blog_skip((struct sk_buff *)skb);
++#endif
++#endif
++
++		//printk(KERN_EMERG "111__skb->mark=%x\n\r", skb->mark);
++	switch(r->policerMode) {
++	/* Token Bucket Filter (tbf) mode */
++	/* The algorithm used is the Simple Token Bucket Filter (TBF)
++	   see net/sched/sch_tbf.c in the linux source tree. */
++	case MODE_TBF: 
++		r->credit += (now - xchg(&r->prev, now)) * r->rate; /* Add TBF cerdit */ 
++		if (r->credit > r->creditCap) {
++			r->credit = r->creditCap;
++		}
++		cost = (skb->len + skb->mac_len) * BITS_PER_BYTE;
++		if (r->credit >= cost) {
++			/* We're not limited. (Match) */
++			r->credit -= cost;						        /* Take out credit */ 	
++			spin_unlock_bh(&policer_lock);
++		//printk(KERN_EMERG "222__skb->mark=%x\n\r", skb->mark);
++			return true;
++			break;
++		}
++		/* We're limited. (Not Match) */
++		spin_unlock_bh(&policer_lock);
++		//printk(KERN_EMERG "333__skb->mark=%x\n\r", skb->mark);
++		return false;
++		break;
++
++	/* Single Rate Three Color Marker (srTCM) Mode */
++	case MODE_SRTCM:
++		/* Add CBS first */
++		r->credit += (now - xchg(&r->prev, now)) * r->rate; /* Add CBS cerdit */
++		if (r->credit > r->creditCap) {
++			extraCredit = r->credit - r->creditCap;
++			r->credit = r->creditCap;
++		}
++		if (r->pbsCredit < r->pbsCreditCap && extraCredit > 0) {
++			r->pbsCredit += extraCredit;                        /* Add EBS cerdit */
++			if (r->pbsCredit > r->pbsCreditCap) {
++				r->pbsCredit = r->pbsCreditCap;
++			}
++		}
++		cost = (skb->len + skb->mac_len) * BITS_PER_BYTE;
++		tmp = (struct sk_buff *)skb;
++		if (r->credit >= cost) {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , GREEN);    /* Green */
++			r->credit -= cost;
++		}
++		else if (r->pbsCredit >= cost) {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , YELLOW);    /* Yellow */
++			r->pbsCredit -= cost;
++		}
++		else {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , RED);    /* Red */
++		}
++		spin_unlock_bh(&policer_lock);
++		return true;
++		break;
++
++	/* Two Rate Three Color Marker (srTCM) Mode */
++	case MODE_TRTCM:
++		timePassed = (now - xchg(&r->prev, now));
++		r->credit += timePassed * r->rate;            /* Add CBS cerdit */
++		r->pbsCredit += timePassed * r->pRate;        /* Add PBS cerdit */
++		if (r->credit > r->creditCap) {
++			r->credit = r->creditCap;
++		}
++		if (r->pbsCredit > r->pbsCreditCap) {
++			r->pbsCredit = r->pbsCreditCap;
++		}
++		cost = (skb->len + skb->mac_len) * BITS_PER_BYTE;
++		tmp = (struct sk_buff *)skb;
++		if (r->pbsCredit < cost) {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , RED);    /* Red */
++		}
++		else if (r->credit < cost) {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , YELLOW);    /* Yellow */
++			r->pbsCredit -= cost;
++		}
++		else {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , GREEN);    /* Green */
++			r->pbsCredit -= cost;
++			r->credit -= cost;
++		}
++		spin_unlock_bh(&policer_lock);
++		return true;
++		break;
++
++	default:
++		return false;
++	}
++}
++/* end ipt_policer_match */
++#else
++#if 0 // __MSTC__, ZyXEL richard, QoS
++static int ebt_policer_match(const struct sk_buff *skb,
++                             const struct net_device *in,
++                             const struct net_device *out,
++                             const void *data,
++                             unsigned int datalen)
++{
++	struct ebt_policer_info *info = (struct ebt_policer_info *)data;
++	unsigned long now = jiffies;
++
++	spin_lock_bh(&policer_lock);
++	info->credit += (now - xchg(&info->prev, now)) * info->avg; /* Add credit. */
++	if (info->credit > info->credit_cap) {
++		info->credit = info->credit_cap;
++	}
++	u_int32_t temp_cost = 0;
++	temp_cost = (skb->len + skb->mac_len) * info->cost;
++	if (info->credit >= temp_cost) {
++		/* We're not limited. */
++		info->credit -= temp_cost; /* Take out credit */
++		spin_unlock_bh(&policer_lock);
++		return EBT_MATCH;
++	}
++
++	spin_unlock_bh(&policer_lock);
++	return EBT_NOMATCH;
++}
++#else
++static bool ebt_policer_match(const struct sk_buff *skb, const struct xt_match_param *par)
++{
++	struct ebt_policer_info *info = par->matchinfo;
++	unsigned long now = jiffies;
++
++	spin_lock_bh(&policer_lock);
++	info->credit += (now - xchg(&info->prev, now)) * info->avg; /* Add credit. */
++	if (info->credit > info->credit_cap) {
++		info->credit = info->credit_cap;
++	}
++   
++	u_int32_t temp_cost;
++	temp_cost = (skb->len + skb->mac_len) * info->cost;
++	if (info->credit >= temp_cost) {
++		/* We're not limited. */
++		info->credit -= temp_cost; /* Take out credit */
++		spin_unlock_bh(&policer_lock);
++		return true;
++		////return false;
++	}
++
++	spin_unlock_bh(&policer_lock);
++   
++	return false;
++	////return true;
++}
++#endif // __MSTC__, ZyXEL richard, QoS
++#endif
++
++#if 1//__MSTC__, Jones For compilation
++/* Precision saver. */
++/* As a policer rule added, this function will be executed */ 
++static int ebt_policer_check(const struct xt_mtchk_param *par)
++{
++	struct ebt_policer_info *r = par->matchinfo;
++	
++	/* pRate must be equal or greater than crate. */
++	if (r->policerMode == 2) {
++		if (r->rate > r->pRate) {
++			return -EINVAL;	
++		}
++	}
++
++	if (r->creditCap == 0) { /* Check if policer initiate or not. */ 
++		switch(r->policerMode) {
++		case MODE_TBF:
++			r->prev = jiffies;
++			r->creditCap = r->burst * BITS_PER_BYTE * KILO_SCALE;       /* TBF Credits full */
++			r->credit = r->creditCap;                                   /* TBF Credits full */		
++			break;
++
++		case MODE_SRTCM:
++			r->prev = jiffies;
++			r->creditCap = r->burst * BITS_PER_BYTE * KILO_SCALE;       /* CBS Credits full */
++			r->credit = r->creditCap;                                   /* CBS Credits full */
++			r->pbsCreditCap = r->pbsBurst * BITS_PER_BYTE * KILO_SCALE; /* EBS Credits full */
++			r->pbsCredit = r->pbsCreditCap;                             /* EBS Credits full */
++			break;
++			
++		case MODE_TRTCM:	
++			r->prev = jiffies;
++			r->creditCap = r->burst * BITS_PER_BYTE * KILO_SCALE;       /* CBS Credits full. */
++			r->credit = r->creditCap;                                   /* CBS Credits full. */
++			r->pbsCreditCap = r->pbsBurst * BITS_PER_BYTE * KILO_SCALE; /* PBS Credits full. */
++			r->pbsCredit = r->pbsCreditCap;                             /* PBS Credits full. */ 
++			break;
++
++		default:
++			return -EINVAL;				
++		}
++	}
++	return 0;
++}
++#else
++/* Precision saver. */
++/* As a policer rule added, this function will be executed */ 
++#if 0 // __MSTC__, ZyXEL richard, QoS
++static int ebt_policer_check(const char *tablename, 
++                             unsigned int hookmask,
++                             const struct ebt_entry *e,
++                             void *data,
++                             unsigned int datalen)
++{
++	struct ebt_policer_info *info = (struct ebt_policer_info *)data;
++
++	if (datalen != EBT_ALIGN(sizeof(struct ebt_policer_info))) {
++		return -EINVAL;
++	}
++	
++	info->prev = jiffies;
++	info->credit_cap = info->burst * BITS_PER_BYTE * KILO_SCALE; /*Credits full.*/
++	info->credit = info->burst * BITS_PER_BYTE * KILO_SCALE; /*Credits full.*/
++	info->cost = BITS_PER_BYTE;
++	
++	return 0;
++}
++#else
++static bool ebt_policer_check(const struct xt_mtchk_param *par)
++{
++	struct ebt_policer_info *info = par->matchinfo;
++
++	/***if (par->datalen != EBT_ALIGN(sizeof(struct ebt_policer_info))) {
++		return -EINVAL;
++	}***/
++	
++	info->prev = jiffies;
++	info->credit_cap = info->burst * BITS_PER_BYTE * KILO_SCALE; /*Credits full.*/
++	info->credit = info->burst * BITS_PER_BYTE * KILO_SCALE; /*Credits full.*/
++	info->cost = BITS_PER_BYTE;
++	
++	return true;
++}
++#endif // __MSTC__, ZyXEL richard, QoS
++#endif
++
++#if 0 // __MSTC__, ZyXEL richard, QoS
++static struct ebt_match ebt_policer_reg =
++#else
++static struct xt_match ebt_policer_reg __read_mostly =
++#endif
++{
++    .name = EBT_POLICER_MATCH,
++#if 1 // __MSTC__, ZyXEL richard, QoS
++    .revision	= 0,
++    .family		= NFPROTO_BRIDGE,
++    .match  = ebt_policer_match,
++    .checkentry  = ebt_policer_check,
++    .matchsize	= XT_ALIGN(sizeof(struct ebt_policer_info)),
++#else
++    .check  = ebt_policer_check,
++    .match  = ebt_policer_match,
++#endif // __MSTC__, ZyXEL richard, QoS
++    .me     = THIS_MODULE,
++};
++
++static int __init ebt_policer_init(void)
++{
++#if 0 // __MSTC__, ZyXEL richard, QoS
++    return ebt_register_match(&ebt_policer_reg);
++#else
++   return xt_register_match(&ebt_policer_reg);
++#endif // __MSTC__, ZyXEL richard, QoS
++}
++
++static void __exit ebt_policer_fini(void)
++{
++#if 0 // __MSTC__, ZyXEL richard, QoS
++    ebt_unregister_match(&ebt_policer_reg);
++#else
++   xt_unregister_match(&ebt_policer_reg);
++#endif
++}
++
++module_init(ebt_policer_init);
++module_exit(ebt_policer_fini);
++MODULE_LICENSE("GPL");
++
+Index: linux-3.4.11/net/bridge/netfilter/ebt_vlan.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/ebt_vlan.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/net/bridge/netfilter/ebt_vlan.c	2015-11-17 10:46:33.244505371 +0800
+@@ -130,7 +130,9 @@
+ 			 * Any value of user_priority are acceptable,
+ 			 * but should be ignored according to 802.1Q Std.
+ 			 * So we just drop the prio flag. */
++#if 0 /* ZyXEL QoS, John (porting from MSTC) */
+ 			info->bitmask &= ~EBT_VLAN_PRIO;
++#endif
+ 		}
+ 		/* Else, id=0 (null VLAN ID)  => user_priority range (any?) */
+ 	}
+Index: linux-3.4.11/net/bridge/netfilter/ebtables.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/ebtables.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/net/bridge/netfilter/ebtables.c	2015-11-17 10:46:33.248505320 +0800
+@@ -30,6 +30,10 @@
+ /* needed for logical [in,out]-dev filtering */
+ #include "../br_private.h"
+ 
++#if 1 /* ZyXEL QoS, John */
++#include <linux/if_vlan.h>
++#endif
++
+ #define BUGPRINT(format, args...) printk("kernel msg: ebtables bug: please "\
+ 					 "report to author: "format, ## args)
+ /* #define BUGPRINT(format, args...) */
+@@ -123,10 +127,16 @@
+ 
+ #define FWINV2(bool,invflg) ((bool) ^ !!(e->invflags & invflg))
+ /* process standard matches */
+-static inline int
+-ebt_basic_match(const struct ebt_entry *e, const struct sk_buff *skb,
++
++#if 0 /* ZyXEL QoS, in order to filter VLAN, John (porting from MSTC) */
++static inline int ebt_basic_match(struct ebt_entry *e, struct ethhdr *h,
++   const struct net_device *in, const struct net_device *out)
++{
++#else
++static inline int ebt_basic_match(struct ebt_entry *e, struct sk_buff *skb,
+                 const struct net_device *in, const struct net_device *out)
+ {
++#endif
+ 	const struct ethhdr *h = eth_hdr(skb);
+ 	const struct net_bridge_port *p;
+ 	__be16 ethproto;
+@@ -137,13 +147,29 @@
+ 	else
+ 		ethproto = h->h_proto;
+ 
++#if 0 /* ZyXEL QoS, in order to filter VLAN, John (porting from MSTC) */
+ 	if (e->bitmask & EBT_802_3) {
+ 		if (FWINV2(ntohs(ethproto) >= 1536, EBT_IPROTO))
+ 			return 1;
+ 	} else if (!(e->bitmask & EBT_NOPROTO) &&
+ 	   FWINV2(e->ethproto != ethproto, EBT_IPROTO))
+ 		return 1;
+-
++#else
++        h = eth_hdr(skb);
++        if (e->bitmask & EBT_802_3) {
++		if (FWINV2(ntohs(h->h_proto) >= 1536, EBT_IPROTO))
++			return 1;
++	} else if (!(e->bitmask & EBT_NOPROTO) ){
++		if(e->ethproto == ETH_P_8021Q && ethproto!=ETH_P_8021Q) {/*If protocol type of rule is 802.1q and packet header is not 802.1q*/
++                     /* for new broadcom vlan device */
++                     if(FWINV2(!(ntohs(((struct vlan_hdr *)(skb->vlan_header))->h_vlan_encapsulated_proto)), EBT_IPROTO))
++		        return 1;
++		}else{
++		     if(FWINV2(e->ethproto != ethproto, EBT_IPROTO))
++			return 1;
++		}
++	}
++#endif
+ 	if (FWINV2(ebt_dev_check(e->in, in), EBT_IIN))
+ 		return 1;
+ 	if (FWINV2(ebt_dev_check(e->out, out), EBT_IOUT))
+@@ -219,9 +245,13 @@
+ 	base = private->entries;
+ 	i = 0;
+ 	while (i < nentries) {
++#if 0 /* ZyXEL QoS, in order to filter VLAN, John(porting from MSTC) */
++		if (ebt_basic_match(point, eth_hdr(skb), in, out))
++			goto letscontinue;
++#else
+ 		if (ebt_basic_match(point, skb, in, out))
+ 			goto letscontinue;
+-
++#endif
+ 		if (EBT_MATCH_ITERATE(point, ebt_do_match, skb, &acpar) != 0)
+ 			goto letscontinue;
+ 		if (acpar.hotdrop) {
+Index: linux-3.4.11/net/core/gen_estimator.c
+===================================================================
+--- linux-3.4.11.orig/net/core/gen_estimator.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/net/core/gen_estimator.c	2015-11-17 10:46:33.248505320 +0800
+@@ -86,9 +86,15 @@
+ 	spinlock_t		*stats_lock;
+ 	int			ewma_log;
+ 	u64			last_bytes;
++#if 1 /* ZyXEL QoS, porting from MSTC */
++	u64			last_dropbytes;
++#endif
+ 	u64			avbps;
+ 	u32			last_packets;
+ 	u32			avpps;
++#if 1 /* ZyXEL QoS, porting from MSTC */
++	u32			avdropbps;
++#endif
+ 	struct rcu_head		e_rcu;
+ 	struct rb_node		node;
+ };
+@@ -118,6 +124,9 @@
+ 		u64 nbytes;
+ 		u64 brate;
+ 		u32 npackets;
++#if 1 /* ZyXEL QoS, porting from MSTC */
++		u64 ndropbytes;
++#endif
+ 		u32 rate;
+ 
+ 		spin_lock(e->stats_lock);
+@@ -126,12 +135,20 @@
+ 			goto skip;
+ 
+ 		nbytes = e->bstats->bytes;
++#if 1 /* ZyXEL QoS, porting from MSTC */
++		ndropbytes = e->bstats->dropbytes;
++#endif
+ 		npackets = e->bstats->packets;
+ 		brate = (nbytes - e->last_bytes)<<(7 - idx);
+ 		e->last_bytes = nbytes;
+ 		e->avbps += (brate >> e->ewma_log) - (e->avbps >> e->ewma_log);
+ 		e->rate_est->bps = (e->avbps+0xF)>>5;
+-
++#if 1 /* ZyXEL QoS, porting from MSTC */
++		rate = (ndropbytes - e->last_dropbytes)<<(7 - idx);
++		e->last_dropbytes = ndropbytes;
++		e->avdropbps += ((long)rate - (long)e->avdropbps) >> e->ewma_log;
++		e->rate_est->dropbps = (e->avdropbps+0xF)>>5;
++#endif
+ 		rate = (npackets - e->last_packets)<<(12 - idx);
+ 		e->last_packets = npackets;
+ 		e->avpps += (rate >> e->ewma_log) - (e->avpps >> e->ewma_log);
+Index: linux-3.4.11/net/netfilter/Kconfig
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/Kconfig	2015-11-17 10:45:41.000000000 +0800
++++ linux-3.4.11/net/netfilter/Kconfig	2015-11-17 10:46:33.248505320 +0800
+@@ -436,6 +436,21 @@
+ 	"Use netfilter MARK value as routing key") and can also be used by
+ 	other subsystems to change their behavior.
+ 
++config NETFILTER_XT_TARGET_AUTOMAP
++        tristate '"AUTOMAP" target support'
++        depends on NETFILTER_XTABLES
++        help
++
++          This option adds a `AUTOMAP' target, which allows packet auto mapping to Internal Priority Queue by 8021p value, and automaically mark DSCP value.
++
++          To compile it as a module, choose M here.  If unsure, say N.
++
++config NETFILTER_XT_POLICER
++        tristate '"policer" rate limit support'
++        depends on NETFILTER_XTABLES
++        help
++          To compile it as a module, choose M here.  If unsure, say N.
++
+ config NETFILTER_XT_CONNMARK
+ 	tristate 'ctmark target and match support'
+ 	depends on NF_CONNTRACK
+Index: linux-3.4.11/net/netfilter/Makefile
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/Makefile	2015-11-17 10:45:41.000000000 +0800
++++ linux-3.4.11/net/netfilter/Makefile	2015-11-17 10:49:12.442158259 +0800
+@@ -84,6 +84,10 @@
+ obj-$(CONFIG_NETFILTER_XT_TARGET_TEE) += xt_TEE.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_TRACE) += xt_TRACE.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_IDLETIMER) += xt_IDLETIMER.o
++# ZyXEL QoS, John (porting from MSTC)
++obj-$(CONFIG_NETFILTER_XT_TARGET_AUTOMAP) += xt_AUTOMAP.o
++# ZyXEL QoS, Mark (porting from MSTC)
++obj-$(CONFIG_NETFILTER_XT_POLICER) += xt_policer.o
+ ifdef BCM_KF # defined(CONFIG_BCM_KF_NETFILTER)
+ obj-$(CONFIG_NETFILTER_XT_TARGET_SKIPLOG) += xt_SKIPLOG.o
+ obj-$(CONFIG_NETFILTER_XT_TARGET_DC)      += xt_DC.o
+Index: linux-3.4.11/net/netfilter/xt_AUTOMAP.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/netfilter/xt_AUTOMAP.c	2015-11-17 10:46:33.248505320 +0800
+@@ -0,0 +1,180 @@
++/* x_tables module for setting the IPv4/IPv6 DSCP field, Version 1.8
++ *
++ * (C) 2002 by Harald Welte <laforge@netfilter.org>
++ * based on ipt_FTOS.c (C) 2000 by Matthew G. Marsh <mgm@paktronix.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ * See RFC2474 for a description of the DSCP field within the IP Header.
++ *
++ * xt_DSCP.c,v 1.8 2002/08/06 18:41:57 laforge Exp
++*/
++
++#include <linux/module.h>
++#include <linux/skbuff.h>
++#include <linux/ip.h>
++#include <linux/ipv6.h>
++#include <net/dsfield.h>
++#include <linux/if_vlan.h>
++
++#include <linux/netfilter/x_tables.h>
++#include <linux/netfilter/xt_AUTOMAP.h>
++#include <linux/netfilter/xt_DSCP.h>
++#include <net/dsfield.h>
++
++
++MODULE_LICENSE("GPL");
++MODULE_ALIAS("ipt_AUTOMAP");
++MODULE_ALIAS("ip6t_AUTOMAP");
++
++static int getVlanPrioAndIpHeader(struct sk_buff *skb, unsigned char *prio, struct iphdr **iph){
++	unsigned short TCI;
++	unsigned short id;	/* VLAN ID, given from frame TCI */
++	 /* Need to recalculate IP header checksum after altering TOS byte */
++	const struct vlan_hdr *fp;
++	struct vlan_hdr _frame;
++	struct iphdr *ih = NULL;
++
++	/* get ip header */
++	ih = NULL;
++	ih = ip_hdr(skb);
++
++	*iph = ih;
++
++	/* check VLAN header is parsed or not ? */
++	if(ntohs(((struct vlan_hdr *)(skb->vlan_header))->h_vlan_encapsulated_proto) == 0){
++
++		/* tagged packet */
++		if(skb->protocol == ETH_P_8021Q) {
++
++             fp = skb_header_pointer(skb, 0, sizeof(_frame), &_frame);
++             if (fp == NULL)
++                return -1;
++
++          /* Tag Control Information (TCI) consists of the following elements:
++	              * - User_priority. The user_priority field is three bits in length,
++	              * 	interpreted as a binary number.
++	              * - Canonical Format Indicator (CFI). The Canonical Format Indicator
++	              *	 (CFI) is a single bit flag value. Currently ignored.
++	              * - VLAN Identifier (VID). The VID is encoded as
++	              * 	an unsigned binary number.
++	            */
++             TCI = ntohs(fp->h_vlan_TCI);
++             id = TCI & VLAN_VID_MASK;
++             *prio = (TCI >> 13) & 0x7;
++
++		}
++		else { /* untagged packet */
++			TCI = 0;
++			id = 0;
++			/* Packet with no VLAN tag will be sent to default queue just like 1p value is 1 */
++			*prio = 1;
++		}
++
++    }
++	else{
++         /* for new broadcom vlan device */
++         TCI = ntohs(((struct vlan_hdr *)(skb->vlan_header))->h_vlan_TCI);
++         id = TCI & VLAN_VID_MASK;
++         *prio = (TCI >> 13) & 0x7;
++    }
++
++	return 0;
++}
++
++//static unsigned int target(struct sk_buff **pskb, const struct xt_tgchk_param *par)
++static unsigned int AUTOMAP_target_v4(struct sk_buff *skb, const struct xt_action_param *par)
++			   //const struct net_device *in,
++			   //const struct net_device *out,
++			   //unsigned int hooknum,
++			   //const struct xt_target *target,
++			   //const void *targinfo)
++{
++		const struct xt_automap_target_info *aminfo = par->targinfo;
++		struct iphdr *iph = NULL;
++		unsigned char prio = 0;
++		unsigned char dscp = 0;
++		unsigned char dscpPrecedence = 0;
++
++		if(aminfo->flags & XT_AUTO_TYPE){
++			getVlanPrioAndIpHeader(skb, &prio, &iph);
++
++			switch(aminfo->type){
++				case AUTOMAP_TYPE_8021P:
++					/* mark priority queue */
++					skb->mark |= vlan8021pToPriorityQueue[prio];
++
++					/* lookup upstream 8021p to DSCP value table */
++					dscp = vlan8021pToDSCP[prio];
++
++					/* mark DSCP value */
++					if (!skb_make_writable(skb, sizeof(struct iphdr)))
++			                        return NF_DROP;
++
++			        ipv4_change_dsfield(ip_hdr(skb), (__u8)(~XT_DSCP_MASK), dscp << XT_DSCP_SHIFT);
++
++					break;
++				case AUTOMAP_TYPE_DSCP:
++					/* get dscp precedence */
++					dscpPrecedence = ((iph->tos)>>5)&0x7;
++
++					/* mark priority queue */
++					skb->mark |= dscpPrecedenceToPriorityQueue[dscpPrecedence];
++
++					/* it should mark 8021p here, TBD */
++
++					break;
++				case AUTOMAP_TYPE_PKTLEN:
++
++					if(iph->tot_len > 1100){
++						skb->mark|=vlan8021pToPriorityQueue[0]; /* queue priority 2 */
++                    }else if(iph->tot_len < 250){
++						skb->mark|=vlan8021pToPriorityQueue[5]; /* queue priority 5 */
++                    }else{  /*250~1100*/
++						skb->mark|=vlan8021pToPriorityQueue[3]; /* queue priority 3 */
++                    }
++					break;
++				default:
++					printk("unknown AUTOMAP type: \n");
++					break;
++			}
++		}
++
++	return XT_CONTINUE;
++}
++
++
++static int AUTOMAP_checkentry_v4(const struct xt_tgchk_param *par)
++{
++	return 0;
++}
++
++static struct xt_target xt_auto_target __read_mostly = {
++
++	.name		= "AUTOMAP",
++	.revision   = 0,
++	.family		= NFPROTO_IPV4,
++	.checkentry	= AUTOMAP_checkentry_v4,
++	.target		= AUTOMAP_target_v4,
++	.targetsize	= sizeof(struct xt_automap_target_info),
++	.table		= "mangle",
++	.me		= THIS_MODULE,
++
++};
++
++static int __init xt_automap_target_init(void)
++{
++	//return xt_register_targets(xt_auto_target, ARRAY_SIZE(xt_auto_target));
++	return xt_register_target(&xt_auto_target);
++}
++
++static void __exit xt_automap_target_fini(void)
++{
++	//xt_unregister_targets(xt_auto_target, ARRAY_SIZE(xt_auto_target));
++	xt_unregister_target(&xt_auto_target);
++}
++
++module_init(xt_automap_target_init);
++module_exit(xt_automap_target_fini);
+Index: linux-3.4.11/net/netfilter/xt_mark.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/xt_mark.c	2015-11-17 10:45:41.000000000 +0800
++++ linux-3.4.11/net/netfilter/xt_mark.c	2015-11-17 10:46:33.248505320 +0800
+@@ -24,6 +24,49 @@
+ MODULE_ALIAS("ipt_MARK");
+ MODULE_ALIAS("ip6t_MARK");
+ 
++#if 1 /* ZyXEL QoS, John (porting from MSTC) */
++#include "skb_defines.h"
++#endif
++
++#if 1 /* ZyXEL QoS, John */
++static unsigned int
++mark_tg(struct sk_buff *skb, const struct xt_action_param *par)
++{
++        const struct xt_mark_tginfo2 *markinfo = par->targinfo;
++	int mark = 0;
++
++	switch (markinfo->mode) {
++                case XT_MARK_SET:
++                        mark = markinfo->mark;
++                        break;
++
++                case XT_MARK_AND:
++                        mark = skb->mark & markinfo->mark;
++                        break;
++
++                case XT_MARK_OR:
++                        mark = skb->mark | markinfo->mark;
++                        break;
++
++                case XT_MARK_VTAG_SET:
++                        mark = skb->mark;
++                        skb->vtag = (unsigned short)(markinfo->mark);
++                        break;
++        }
++
++#if defined(CONFIG_BCM_KF_BLOG) && defined(CONFIG_BLOG_FEATURE)
++        skb->ipt_check |= IPT_TARGET_MARK;
++        skb->ipt_log.u32[BLOG_ORIGINAL_MARK_INDEX] = skb->mark;
++	skb->ipt_log.u32[BLOG_TARGET_MARK_INDEX] = mark;
++        if ( skb->ipt_check & IPT_TARGET_CHECK )
++                return XT_CONTINUE;
++#endif
++
++        skb->mark = mark;
++        return XT_CONTINUE;
++}
++
++#else
+ static unsigned int
+ mark_tg(struct sk_buff *skb, const struct xt_action_param *par)
+ {
+@@ -41,6 +84,7 @@
+ 	skb->mark = (skb->mark & ~info->mask) ^ info->mark;
+ 	return XT_CONTINUE;
+ }
++#endif
+ 
+ static bool
+ mark_mt(const struct sk_buff *skb, struct xt_action_param *par)
+Index: linux-3.4.11/net/netfilter/xt_policer.c
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/net/netfilter/xt_policer.c	2015-11-17 10:46:33.248505320 +0800
+@@ -0,0 +1,382 @@
++/* Kernel module to control the rate in kbps. */
++/* This program is free software; you can redistribute it and/or modify
++ *  * it under the terms of the GNU General Public License version 2 as
++ *   * published by the Free Software Foundation. */
++/* ZyXEL Birken, 20100107. */
++
++#include <linux/module.h>
++#include <linux/skbuff.h>
++#include <linux/spinlock.h>
++#include <linux/interrupt.h>
++#include <linux/netfilter/x_tables.h>
++#include <linux/netfilter/xt_policer.h>
++#if 1 //__MSTC__, Eric, Qos policer.
++#include "skb_defines.h"
++#define RED		1
++#define YELLOW	2
++#define GREEN 	3
++#endif
++#if 1//__MSTC__, Jones For compilation
++#define MODE_TBF   0
++#define MODE_SRTCM 1
++#define MODE_TRTCM 2
++#endif
++
++MODULE_LICENSE("GPL");
++MODULE_AUTHOR("Herve Eychenne <rv@wallfire.org>");
++MODULE_DESCRIPTION("iptables rate policer match");
++MODULE_ALIAS("ipt_policer");
++MODULE_ALIAS("ip6t_policer");
++
++/* The algorithm used is the Simple Token Bucket Filter (TBF)
++ *  * see net/sched/sch_tbf.c in the linux source tree. */
++
++static DEFINE_SPINLOCK(policer_lock);
++
++#if 0 //__MSTC__, richard, QoS
++static int
++ipt_policer_match(const struct sk_buff *skb,
++                  const struct net_device *in,
++                  const struct net_device *out,
++                  const struct xt_match *match,
++                  const void *matchinfo,
++                  int offset,
++                  unsigned int protoff,
++                  int *hotdrop)
++#else
++static bool ipt_policer_match(const struct sk_buff *skb, struct xt_action_param *par)
++#endif //__MSTC__, richard, QoS
++{
++#if 1//__MSTC__, Jones For compilation
++	struct xt_policerinfo *r = (struct xt_policerinfo *)par->matchinfo;
++	unsigned long now = jiffies;
++	unsigned long timePassed = 0;
++	struct sk_buff *tmp;
++	u_int32_t cost = 0;
++	u_int32_t extraCredit = 0;
++	spin_lock_bh(&policer_lock);
++
++#if 1 //__OBM__, Jones
++#if defined(CONFIG_MIPS_BRCM) && defined(CONFIG_BLOG)
++				blog_skip((struct sk_buff *)skb);
++#endif
++#endif
++	switch(r->policerMode) {
++	/* Token Bucket Filter (tbf) mode */
++	/* The algorithm used is the Simple Token Bucket Filter (TBF)
++	   see net/sched/sch_tbf.c in the linux source tree. */
++	case MODE_TBF:
++		r->credit += (now - xchg(&r->prev, now)) * r->rate; /* Add TBF cerdit */
++		if (r->credit > r->creditCap) {
++			r->credit = r->creditCap;
++		}
++		cost = (skb->len + skb->mac_len) * BITS_PER_BYTE;
++		if (r->credit >= cost) {
++			/* We're not limited. (Match) */
++			r->credit -= cost;						        /* Take out credit */
++			spin_unlock_bh(&policer_lock);
++			return true;
++			break;
++		}
++		/* We're limited. (Not Match) */
++		spin_unlock_bh(&policer_lock);
++		return false;
++		break;
++
++	/* Single Rate Three Color Marker (srTCM) Mode */
++	case MODE_SRTCM:
++		/* Add CBS first */
++		r->credit += (now - xchg(&r->prev, now)) * r->rate; /* Add CBS cerdit */
++		if (r->credit > r->creditCap) {
++			extraCredit = r->credit - r->creditCap;
++			r->credit = r->creditCap;
++		}
++		if (r->pbsCredit < r->pbsCreditCap && extraCredit > 0) {
++			r->pbsCredit += extraCredit;                        /* Add EBS cerdit */
++			if (r->pbsCredit > r->pbsCreditCap) {
++				r->pbsCredit = r->pbsCreditCap;
++			}
++		}
++		cost = (skb->len + skb->mac_len) * BITS_PER_BYTE;
++		tmp = (struct sk_buff *)skb;
++		if (r->credit >= cost) {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , GREEN);    /* Green */
++			r->credit -= cost;
++		}
++		else if (r->pbsCredit >= cost) {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , YELLOW);    /* Yellow */
++			r->pbsCredit -= cost;
++		}
++		else {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , RED);    /* Red */
++		}
++		spin_unlock_bh(&policer_lock);
++		return true;
++		break;
++
++	/* Two Rate Three Color Marker (srTCM) Mode */
++	case MODE_TRTCM:
++		timePassed = (now - xchg(&r->prev, now));
++		r->credit += timePassed * r->rate;            /* Add CBS cerdit */
++		r->pbsCredit += timePassed * r->pRate;        /* Add PBS cerdit */
++		if (r->credit > r->creditCap) {
++			r->credit = r->creditCap;
++		}
++		if (r->pbsCredit > r->pbsCreditCap) {
++			r->pbsCredit = r->pbsCreditCap;
++		}
++		cost = (skb->len + skb->mac_len) * BITS_PER_BYTE;
++		tmp = (struct sk_buff *)skb;
++		if (r->pbsCredit < cost) {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , RED);    /* Red */
++		}
++		else if (r->credit < cost) {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , YELLOW);    /* Yellow */
++			r->pbsCredit -= cost;
++		}
++		else {
++			tmp->mark &= ~(SKBMARK_POLICER_M); /* Reset 2 color bit */
++			tmp->mark |= SKBMARK_SET_POLICER(0 , GREEN);    /* Green */
++			r->pbsCredit -= cost;
++			r->credit -= cost;
++		}
++		spin_unlock_bh(&policer_lock);
++		return true;
++		break;
++
++	default:
++		return false;
++	}
++#else
++#if 0 //__MSTC__, richard, QoS
++	struct xt_policerinfo *r = ((struct xt_policerinfo *)matchinfo)->master;
++#else
++   struct xt_policerinfo *r = (struct xt_policerinfo *)par->matchinfo;
++#endif //__MSTC__, richard, QoS
++
++	unsigned long now = jiffies;
++	spin_lock_bh(&policer_lock);
++	r->credit += (now - xchg(&r->prev, now)) * r->avg; /* Add cerdit */
++	if (r->credit > r->credit_cap) {
++		r->credit = r->credit_cap;
++	}
++	u_int32_t temp_cost = 0;
++	temp_cost = (skb->len + skb->mac_len) * r->cost;
++	if (r->credit >= temp_cost) {
++		/* We're not limited. */
++		r->credit -= temp_cost;                        /* Take out credit */
++		spin_unlock_bh(&policer_lock);
++#if 0 //__MSTC__, richard, QoS
++      return 1;
++#else
++		return true;
++		////return false;
++#endif //__MSTC__, richard, QoS
++	}
++	spin_unlock_bh(&policer_lock);
++
++#if 0 //__MSTC__, richard, QoS
++   return 0;
++#else
++	return false;
++	////return true;
++#endif //__MSTC__, richard, QoS
++#endif
++}
++
++
++#if 1//__MSTC__, Jones For compilation
++/* Precision saver. */
++/* As a policer rule added, this function will be executed */
++static int
++ipt_policer_checkentry(const struct xt_mtchk_param *par)
++{
++       struct xt_policerinfo *r = (struct xt_policerinfo *)par->matchinfo;
++	/* For SMP, we only want to use one set of counters. */
++	r->master = r;
++
++	/* pRate must be equal or greater than crate. */
++	if (r->policerMode == 2) {
++		if (r->rate > r->pRate) {
++			return -EINVAL;
++		}
++	}
++
++	if (r->creditCap == 0) { /* Check if policer initiate or not. */
++		switch(r->policerMode) {
++		case MODE_TBF:
++			r->prev = jiffies;
++			r->creditCap = r->burst * BITS_PER_BYTE * KILO_SCALE;       /* TBF Credits full */
++			r->credit = r->creditCap;                                   /* TBF Credits full */
++			break;
++
++		case MODE_SRTCM:
++			r->prev = jiffies;
++			r->creditCap = r->burst * BITS_PER_BYTE * KILO_SCALE;       /* CBS Credits full */
++			r->credit = r->creditCap;                                   /* CBS Credits full */
++			r->pbsCreditCap = r->pbsBurst * BITS_PER_BYTE * KILO_SCALE; /* EBS Credits full */
++			r->pbsCredit = r->pbsCreditCap;                             /* EBS Credits full */
++			break;
++
++		case MODE_TRTCM:
++			r->prev = jiffies;
++			r->creditCap = r->burst * BITS_PER_BYTE * KILO_SCALE;       /* CBS Credits full. */
++			r->credit = r->creditCap;                                   /* CBS Credits full. */
++			r->pbsCreditCap = r->pbsBurst * BITS_PER_BYTE * KILO_SCALE; /* PBS Credits full. */
++			r->pbsCredit = r->pbsCreditCap;                             /* PBS Credits full. */
++			break;
++
++		default:
++			return -EINVAL;
++		}
++	}
++	return 0;
++}
++/* end ipt_policer_checkentry */
++#else
++/* Precision saver. */
++/* As a policer rule added, this function will be executed */
++#if 0 //__MSTC__, richard, QoS
++static int
++ipt_policer_checkentry(const char *tablename,
++                       const void *inf,
++                       const struct xt_match *match,
++                       void *matchinfo,
++                       unsigned int hook_mask)
++#else
++static bool
++ipt_policer_checkentry(const struct xt_mtchk_param *par)
++#endif //__MSTC__, richard, QoS
++{
++#if 0 //__MSTC__, richard, QoS
++	struct xt_policerinfo *r = matchinfo;
++#else
++   struct xt_policerinfo *r = (struct xt_policerinfo *)par->matchinfo;
++#endif //__MSTC__, richard, QoS
++
++	/* For SMP, we only want to use one set of counters. */
++	r->master = r;
++	if (r->cost == 0) {
++		r->prev = jiffies;
++		r->credit_cap = r->burst * BITS_PER_BYTE * KILO_SCALE; /*Credits full.*/
++		r->credit = r->credit_cap;                             /*Credits full.*/
++		r->cost = BITS_PER_BYTE;
++	}
++#if 0 //__MSTC__, richard, QoS
++   return 1;
++#else
++	return true;
++#endif //__MSTC__, richard, QoS
++}
++#endif
++
++////#if 0 /* We do not know what this is for. Comment it temporarily. ZyXEL Birken, 20100107. */
++#ifdef CONFIG_COMPAT
++struct compat_xt_rateinfo {
++	u_int32_t avg;
++	u_int32_t burst;
++
++	compat_ulong_t prev;
++	u_int32_t credit;
++	u_int32_t credit_cap, cost;
++
++	u_int32_t master;
++};
++
++/* To keep the full "prev" timestamp, the upper 32 bits are stored in the
++ *  * master pointer, which does not need to be preserved. */
++static void compat_from_user(void *dst, void *src)
++{
++	struct compat_xt_rateinfo *cm = src;
++	struct xt_policerinfo m = {
++		.avg	             = cm->avg,
++		.burst            = cm->burst,
++		.prev             = cm->prev | (unsigned long)cm->master << 32,
++		.credit           = cm->credit,
++		.credit_cap     = cm->credit_cap,
++		.cost             = cm->cost,
++	};
++	memcpy(dst, &m, sizeof(m));
++}
++
++static int compat_to_user(void __user *dst, void *src)
++{
++	struct xt_policerinfo *m = src;
++	struct compat_xt_rateinfo cm = {
++		.avg              = m->avg,
++		.burst            = m->burst,
++		.prev             = m->prev,
++		.credit           = m->credit,
++#if 1//__MSTC__, Jones For compilation
++		.credit_cap     = m->creditCap,
++#else
++		.credit_cap     = m->credit_cap,
++#endif
++		.cost             = m->cost,
++		.master          = m->prev >> 32,
++	};
++	return copy_to_user(dst, &cm, sizeof(cm)) ? -EFAULT : 0;
++}
++#endif /* CONFIG_COMPAT */
++////#endif
++
++#if 0 //__MSTC__, richard, QoS
++static struct xt_match xt_policer_match[] __read_mostly = {
++    {
++#else
++static struct xt_match xt_policer_match __read_mostly = {
++#endif //__MSTC__, richard, QoS
++        .name              = "policer",
++#if 0 //__MSTC__, richard, QoS
++        .family            = AF_INET,
++#else
++        .family            = NFPROTO_UNSPEC,
++#endif //__MSTC__, richard, QoS
++        .checkentry        = ipt_policer_checkentry,
++        .match             = ipt_policer_match,
++        .matchsize         = sizeof(struct xt_policerinfo),
++#ifdef CONFIG_COMPAT
++        .compatsize        = sizeof(struct compat_xt_rateinfo),
++        .compat_from_user  = compat_from_user,
++        .compat_to_user    = compat_to_user,
++#endif
++        .me                = THIS_MODULE,
++#if 0 //__MSTC__, richard, QoS
++    },
++    {
++        .name              = "policer",
++        .family            = AF_INET6,
++        .checkentry        = ipt_policer_checkentry,
++        .match             = ipt_policer_match,
++        .matchsize         = sizeof(struct xt_policerinfo),
++        .me                = THIS_MODULE,
++    },
++#endif //__MSTC__, richard, QoS
++};
++
++static int __init xt_policer_init(void)
++{
++#if 0 //__MSTC__, richard, QoS
++	return xt_register_matches(xt_policer_match, ARRAY_SIZE(xt_policer_match));
++#else
++   return xt_register_match(&xt_policer_match);
++#endif //__MSTC__, richard, QoS
++}
++
++static void __exit xt_policer_fini(void)
++{
++#if 0 //__MSTC__, richard, QoS
++	xt_unregister_matches(xt_policer_match, ARRAY_SIZE(xt_policer_match));
++#else
++   xt_unregister_match(&xt_policer_match);
++#endif //__MSTC__, richard, QoS
++}
++
++module_init(xt_policer_init);
++module_exit(xt_policer_fini);
++
+Index: linux-3.4.11/net/sched/sch_htb.c
+===================================================================
+--- linux-3.4.11.orig/net/sched/sch_htb.c	2015-11-17 10:45:41.000000000 +0800
++++ linux-3.4.11/net/sched/sch_htb.c	2015-11-17 10:46:33.248505320 +0800
+@@ -563,6 +563,9 @@
+ 		} else {
+ 			kfree_skb(skb);
+ 			sch->qstats.drops++;
++#if 1 /* ZyXEL QoS, porting from MSTC */
++		    sch->bstats.dropbytes += skb->len;
++#endif
+ 			return NET_XMIT_DROP;
+ 		}
+ #ifdef CONFIG_NET_CLS_ACT
+@@ -576,6 +579,9 @@
+ 		if (net_xmit_drop_count(ret)) {
+ 			sch->qstats.drops++;
+ 			cl->qstats.drops++;
++#if 1 /* ZyXEL QoS, porting from MSTC */
++		    sch->bstats.dropbytes += skb->len;
++#endif
+ 		}
+ 		return ret;
+ 	} else {
+Index: linux-3.4.11/net/sched/sch_sfq.c
+===================================================================
+--- linux-3.4.11.orig/net/sched/sch_sfq.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/net/sched/sch_sfq.c	2015-11-17 10:46:33.248505320 +0800
+@@ -330,6 +330,9 @@
+ 		len = qdisc_pkt_len(skb);
+ 		slot->backlog -= len;
+ 		sfq_dec(q, x);
++#if 1 /* ZyXEL QoS, porting from MSTC */
++		sch->bstats.dropbytes += skb->len;
++#endif
+ 		kfree_skb(skb);
+ 		sch->q.qlen--;
+ 		sch->qstats.drops++;
+@@ -381,6 +384,9 @@
+ 	if (hash == 0) {
+ 		if (ret & __NET_XMIT_BYPASS)
+ 			sch->qstats.drops++;
++#if 1 /* ZyXEL QoS, porting from MSTC */
++		sch->bstats.dropbytes += skb->len;
++#endif
+ 		kfree_skb(skb);
+ 		return ret;
+ 	}
+@@ -447,6 +453,9 @@
+ 
+ 	if (slot->qlen >= q->maxdepth) {
+ congestion_drop:
++#if 1 /* ZyXEL QoS, porting from MSTC */
++                sch->bstats.dropbytes += skb->len;
++#endif
+ 		if (!sfq_headdrop(q))
+ 			return qdisc_drop(skb, sch);
+ 
+Index: linux-3.4.11/net/sched/sch_tbf.c
+===================================================================
+--- linux-3.4.11.orig/net/sched/sch_tbf.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/net/sched/sch_tbf.c	2015-11-17 10:46:33.248505320 +0800
+@@ -20,6 +20,9 @@
+ #include <linux/skbuff.h>
+ #include <net/netlink.h>
+ #include <net/pkt_sched.h>
++#if defined(CONFIG_BCM_KF_BLOG) && defined(CONFIG_BLOG) /* ZyXEL QoS, porting from MSTC */
++#include <linux/blog.h>
++#endif
+ 
+ 
+ /*	Simple Token Bucket Filter.
+@@ -127,8 +130,16 @@
+ 
+ 	ret = qdisc_enqueue(skb, q->qdisc);
+ 	if (ret != NET_XMIT_SUCCESS) {
++#if 1 /* ZyXEL QoS, porting from MSTC */
+ 		if (net_xmit_drop_count(ret))
++		 {
+ 			sch->qstats.drops++;
++			sch->bstats.dropbytes += skb->len;
++		}
++#else
++		if (net_xmit_drop_count(ret))
++			sch->qstats.drops++;
++#endif
+ 		return ret;
+ 	}
+ 
+@@ -186,6 +197,9 @@
+ 			sch->q.qlen--;
+ 			qdisc_unthrottled(sch);
+ 			qdisc_bstats_update(sch, skb);
++#if defined(CONFIG_BCM_KF_BLOG) && defined(CONFIG_BLOG) /* ZyXEL QoS, porting from MSTC */
++			blog_skip(skb);
++#endif
+ 			return skb;
+ 		}
+ 

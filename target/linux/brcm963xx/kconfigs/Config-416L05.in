@@ -1,0 +1,4336 @@
+# This file is translate from <BRCM SDK 4.16L.05>/bcm963xx/targets/config.in
+# This file only be verified for BCM63268 platform.
+# you should double check/compile with original PROFILE if you use this file to generate PROFILE for other platforms.
+
+menu "Broadcom SDK Configuration"
+	depends on BRCM963xx_SDK_VER_416L05
+
+menu "Chip and Board configuration selection"
+choice
+	prompt "Broadcom Commengine chip"
+	default BRCMSDK416L05_BRCM_63138
+	help
+		This option decides which chip will be supported.
+
+	config BRCMSDK416L05_BRCM_63268
+		bool "63268"
+		help
+			Support BCM963268
+
+	config BRCMSDK416L05_BRCM_6328
+		bool "6328"
+		help
+			Support BCM96328
+
+	config BRCMSDK416L05_BRCM_6362
+		bool "6362"
+		help
+			Support BCM96362
+
+	config BRCMSDK416L05_BRCM_6318
+		bool "6318"
+		help
+			Support BCM96318
+
+	config BRCMSDK416L05_BRCM_6838
+		bool "6838"
+		help
+			Support BCM96838
+
+	config BRCMSDK416L05_BRCM_6848
+		bool "6848"
+		help
+			Support BCM96848
+
+	config BRCMSDK416L05_BRCM_60333
+		bool "60333"
+		help
+			Support BCM960333
+
+	config BRCMSDK416L05_BRCM_63138
+		bool "63138"
+		help
+			Support BCM963138
+
+	config BRCMSDK416L05_BRCM_63148
+		bool "63148"
+		help
+			Support BCM963148
+
+	config BRCMSDK416L05_BRCM_63381
+		bool "63381"
+		help
+			Support BCM963381
+
+endchoice
+
+config BRCMSDK416L05_BRCM_CHIP
+	string
+	default "63268"		if BRCMSDK416L05_BRCM_63268
+	default "6328"		if BRCMSDK416L05_BRCM_6328
+	default "6362"		if BRCMSDK416L05_BRCM_6362
+	default "6318"		if BRCMSDK416L05_BRCM_6318
+	default "6838"		if BRCMSDK416L05_BRCM_6838
+	default "6848"		if BRCMSDK416L05_BRCM_6848
+	default "60333"		if BRCMSDK416L05_BRCM_60333
+	default "63138"		if BRCMSDK416L05_BRCM_63138
+	default "63148"		if BRCMSDK416L05_BRCM_63148
+	default "63381"		if BRCMSDK416L05_BRCM_63381
+
+config BRCM416L05_RM_QUOTES_BRCM_CHIP
+	def_bool y
+
+config BRCMSDK416L05_PROFILE_ARCH
+	string
+	default "mipsel" if BRCMSDK416L05_BRCM_60333
+	default "arm" if BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+	default "mips"
+
+config BRCM416L05_RM_QUOTES_PROFILE_ARCH
+	def_bool y
+
+if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+config BRCMSDK416L05_RDPA_PLATFORM
+	string
+	default "oren" if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+	default "dsl" if BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+
+config BRCM416L05_RM_QUOTES_RDPA_PLATFORM
+	def_bool y
+
+endif
+
+config BRCMSDK416L05_BRCM_BOARD_ID
+	string "Board ID"
+
+config BRCMSDK416L05_BRCM_VOICE_BOARD_ID
+	string "Voice Board ID"
+
+config BRCMSDK416L05_BRCM_GPON_SERIAL_NUMBER
+	string
+	default ""
+
+config BRCM416L05_RM_QUOTES_BRCM_GPON_SERIAL_NUMBER
+	def_bool y
+
+config BRCMSDK416L05_BRCM_GPON_PASSWORD
+	string
+	default ""
+
+config BRCM416L05_RM_QUOTES_BRCM_GPON_PASSWORD
+	def_bool y
+
+config BRCMSDK416L05_BRCM_GPON_CT_LOID
+	string
+	default ""
+
+config BRCM416L05_RM_QUOTES_BRCM_GPON_CT_LOID
+	def_bool y
+
+config BRCMSDK416L05_BRCM_GPON_CT_PASSWORD
+	string
+	default ""
+
+config BRCM416L05_RM_QUOTES_BRCM_GPON_CT_PASSWORD
+	def_bool y
+
+if BRCMSDK416L05_BRCM_6838
+config BRCMSDK416L05_BUILD_BRCM_FTTDP
+	bool "FTTDP support"
+
+config BRCMSDK416L05_BUILD_BRCM_XDSL_DISTPOINT
+	string "XDSL_DISTPOINT support"
+	default ""
+
+if BRCMSDK416L05_BUILD_BRCM_XDSL_DISTPOINT!=""
+choice
+	prompt "XDSL tacana interface"
+	default BRCMSDK416L05_BRCM_XDSL_DISTPOINT_USE_RGMII0
+
+config BRCMSDK416L05_BRCM_XDSL_DISTPOINT_USE_RGMII0
+	bool "RGMII0"
+
+config BRCMSDK416L05_BRCM_XDSL_DISTPOINT_USE_RGMII1
+	bool "RGMII1"
+endchoice
+
+config BRCMSDK416L05_BRCM_XDSL_DISTPOINT_USE_G9991
+	bool "XDSL_DISTPOINT G.999.1"
+
+if BRCMSDK416L05_BRCM_XDSL_DISTPOINT_USE_G9991
+config BRCMSDK416L05_BRCM_XDSL_DISTPOINT_INBAND_ADDRESS
+	int "XDSL_DISTPOINT inband address"
+endif
+endif
+
+endif
+
+if BRCMSDK416L05_BRCM_6838
+config BRCMSDK416L05_BRCM_DRIVER_OPTICALDET
+	tristate "Optical WAN detect"
+endif
+
+config BRCMSDK416L05_BRCM_FLASHBLK_SIZE
+	int "Flash memory block size in Kbytes"
+
+config BRCMSDK416L05_BRCM_AUXFS_PERCENT
+	int "Percent of Flash for auxillary file system 0-80"
+
+config BRCMSDK416L05_BRCM_NUM_MAC_ADDRESSES
+	int "Number of Mac addresses"
+
+config BRCMSDK416L05_BRCM_BASE_MAC_ADDRESS
+	string "Base Mac address"
+
+config BRCMSDK416L05_BRCM_PSI_SIZE
+	int "PSI Size"
+	default 0
+
+# there is also a BUILD_BACKUP_PSI below.  Consolidate these two?
+config BRCMSDK416L05_BRCM_BACKUP_PSI
+	int "Backup Psi Support: 0-not support,1-support"
+	default 0
+
+config BRCMSDK416L05_BRCM_MAIN_TP_NUM
+	int "Main Thread Number for CMT core"
+
+config BRCMSDK416L05_BRCM_MISC1_PARTITION_SIZE
+	int "MISC1 partition SIZE"
+	default 0
+
+config BRCMSDK416L05_BRCM_MISC2_PARTITION_SIZE
+	int "MISC2 partition SIZE"
+	default 0
+
+config BRCMSDK416L05_BRCM_MISC3_PARTITION_SIZE
+	int "MISC3 partition SIZE"
+	default 0
+
+config BRCMSDK416L05_BRCM_MISC4_PARTITION_SIZE
+	int "MISC4(Data) partition SIZE"
+	default 4
+
+endmenu
+
+choice
+        prompt "Toolchain selection"
+        default BRCMSDK416L05_BRCM_UCLIBC if USE_UCLIBC
+
+config BRCMSDK416L05_BRCM_UCLIBC
+	bool "UCLIBC"
+
+endchoice
+
+menu "Root file system selection"
+
+choice
+	prompt "Root file system"
+	default BRCMSDK416L05_BRCM_ROOTFS_SQUASHFS
+
+config BRCMSDK416L05_BRCM_ROOTFS_SQUASHFS
+	bool "SQUASHFS"
+
+config BRCMSDK416L05_BRCM_ROOTFS_ALL
+	bool "JFFS2+UBIFS+SQUASHFS"
+
+endchoice
+
+config BRCMSDK416L05_BRCM_SQUASHFS_FRAGMENT_CACHE_SIZE
+	int "SquashFS fragment cache size in # of blocks"
+	default 1
+
+choice
+	prompt "NOR Flash Kernel Image Compression"
+	default BRCMSDK416L05_BUILD_NOR_KERNEL_LZMA
+
+config BRCMSDK416L05_BUILD_NOR_KERNEL_LZMA
+	bool "LZMA"
+
+config BRCMSDK416L05_BUILD_NOR_KERNEL_LZ4
+	bool "LZ4"
+
+endchoice
+
+config BRCMSDK416L05_BRCM_KERNEL_ROOTFS
+	string
+	default "squashfs" if BRCMSDK416L05_BRCM_ROOTFS_SQUASHFS
+	default "all"    if BRCMSDK416L05_BRCM_ROOTFS_ALL
+
+config BRCM416L05_RM_QUOTES_BRCM_KERNEL_ROOTFS
+	def_bool y
+
+config BRCMSDK416L05_BUILD_NAND_IMG_BLKSIZE_16KB
+	bool "NAND image with 16KB block size"
+	depends on BRCMSDK416L05_BRCM_ROOTFS_ALL || !BRCMSDK416L05_BRCM_6838 || !BRCMSDK416L05_BRCM_63138 || !BRCMSDK416L05_BRCM_63148
+
+config BRCMSDK416L05_BUILD_NAND_KERNEL_LZMA
+	bool "NAND image with lzma kernel"
+	depends on BRCMSDK416L05_BRCM_ROOTFS_ALL
+
+config BRCMSDK416L05_BUILD_NAND_KERNEL_LZ4
+	bool "NAND image with lz4 kernel"
+	depends on BRCMSDK416L05_BRCM_ROOTFS_ALL
+
+config BRCMSDK416L05_BUILD_NAND_IMG_BLKSIZE_128KB
+	bool "NAND image with 128KB block size"
+	depends on BRCMSDK416L05_BRCM_ROOTFS_ALL
+
+config BRCMSDK416L05_BUILD_NAND_IMG_BLKSIZE_256KB
+	bool "NAND image with 256KB block size"
+	depends on BRCMSDK416L05_BRCM_ROOTFS_ALL
+
+config BRCMSDK416L05_BUILD_NAND_IMG_BLKSIZE_512KB
+	bool "NAND image with 512KB block size"
+	depends on BRCMSDK416L05_BRCM_ROOTFS_ALL
+
+config BRCMSDK416L05_BUILD_NAND_IMG_BLKSIZE_1024KB
+	bool "NAND image with 1024KB block size"
+	depends on BRCMSDK416L05_BRCM_ROOTFS_ALL	
+
+config BRCMSDK416L05_BRCM_ROOTFS_RW
+	bool "Mount UBI and JFFS2 ROOTFS as read-write (required by Modular Software Update and OSGi)"
+	depends on BRCMSDK416L05_BRCM_ROOTFS_ALL
+
+config BRCMSDK416L05_BUILD_MTDUTILS
+	bool "Include MTD UTILS diagnostics on device"
+	depends on BRCMSDK416L05_BRCM_ROOTFS_ALL
+
+config BRCMSDK416L05_BRCM_RAMDISK_BOOT_EN
+	bool "Enable boot from RAMDISK support"
+
+config BRCMSDK416L05_BRCM_RAMDISK_SIZE
+	int "RAMDISK size (if not used, kernel will release it automatically)"
+	default 8192
+	depends on BRCMSDK416L05_BRCM_RAMDISK_BOOT_EN
+
+config BRCMSDK416L05_BRCM_NFS_MOUNT_EN
+	bool "Enable NFS Mount"
+
+config BRCMSDK416L05_BRCM_INCREMENTAL_IMAGE_LOAD
+	bool "Enable Incremental Image loading"
+
+endmenu
+
+menu "Kernel configuration selection"
+choice
+	prompt "Linux Version"
+	default BRCMSDK416L05_LINUX_3_4_0_RT
+	help
+		select kernel version
+
+config BRCMSDK416L05_LINUX_3_4_0_RT
+	bool "Linux_3.4_Rt"
+
+endchoice
+
+if BRCMSDK416L05_LINUX_3_4_0_RT
+config BRCMSDK416L05_PROFILE_KERNEL_VER
+	string
+	default "LINUX_3_4_0_RT"
+
+config BRCM416L05_RM_QUOTES_PROFILE_KERNEL_VER
+	def_bool y
+endif
+
+config BRCMSDK416L05_BRCM_SMP_EN
+	bool "Enable kernel SMP support"
+
+config BRCMSDK416L05_BRCM_KERNEL_PREEMPT
+	bool "Enable kernel preemption"
+
+config BRCMSDK416L05_BRCM_SCHED_RT_PERIOD
+	int "Scheduler RT period"
+	default 1000000
+
+config BRCMSDK416L05_BRCM_SCHED_RT_RUNTIME
+	int "Scheduler RT runtime"
+	default 1000000
+
+config BRCMSDK416L05_BRCM_SCHED_RT_SHARE
+	bool "Scheduler RT RQ sharing"
+
+config BRCMSDK416L05_BRCM_CONFIG_HIGH_RES_TIMERS
+	bool "High resolution timer support"
+
+config BRCMSDK416L05_BCM_HARDIRQ_COUNT_CYCLES
+	bool "Count cycles spent in HardIRQ"
+
+config BRCMSDK416L05_BCM_CGROUPS
+	bool "CGROUPS"
+
+config BRCMSDK416L05_BCM_CGROUP_BCM
+	bool "Broadcom CGROUPS modifications"
+	depends on BRCMSDK416L05_BCM_CGROUPS
+
+config BRCMSDK416L05_BCM_KERNEL_CMDLINE_BOOL
+	bool "Enable compiled-in kernel cmdline"
+
+config BRCMSDK416L05_BCM_KERNEL_CMDLINE
+	string "CMDLINE"
+	depends on BRCMSDK416L05_BCM_KERNEL_CMDLINE_BOOL
+
+config BRCMSDK416L05_BCM_KERNEL_CMDLINE_OVERRIDE
+	bool "Override cmdline from bootloader with this cmdline"
+	depends on BRCMSDK416L05_BCM_KERNEL_CMDLINE_BOOL
+	
+config BRCMSDK416L05_BRCM_ANDROID
+	bool "Enable Android support"
+
+if BRCMSDK416L05_BRCM_6838
+config BRCMSDK416L05_BCM_SUPPORT_512MB_DDR
+	bool "Support 512MB DDR"
+endif
+
+menu "Kernel Cryptographic selection"
+
+config BRCMSDK416L05_BRCM_KERNEL_CRYPTO
+	bool "Cryptographic API"
+
+config BRCMSDK416L05_BRCM_KERNEL_CRYPTO_HMAC
+	bool "HMAC support"           if BRCMSDK416L05_BRCM_KERNEL_CRYPTO
+
+config BRCMSDK416L05_BRCM_KERNEL_CRYPTO_NULL
+	bool "Null algorithms"        if BRCMSDK416L05_BRCM_KERNEL_CRYPTO
+
+config BRCMSDK416L05_BRCM_KERNEL_CRYPTO_MD5
+	bool "MD5 digest algorithms"  if BRCMSDK416L05_BRCM_KERNEL_CRYPTO
+
+config BRCMSDK416L05_BRCM_KERNEL_CRYPTO_SHA1
+	bool "SHA1 digest algorithms" if BRCMSDK416L05_BRCM_KERNEL_CRYPTO
+
+config BRCMSDK416L05_BRCM_KERNEL_CRYPTO_DES
+	bool "DES and Triple DES EDE cipher algorithms" if BRCMSDK416L05_BRCM_KERNEL_CRYPTO
+
+config BRCMSDK416L05_BRCM_KERNEL_CRYPTO_AES
+	bool "AES cipher algorithms"   if BRCMSDK416L05_BRCM_KERNEL_CRYPTO
+
+endmenu
+
+menu "Misc Drivers (other drivers are grouped with their features)"
+
+config BRCMSDK416L05_BRCM_DRIVER_PCI
+	bool "PCI"
+
+config BRCMSDK416L05_BRCM_PCIE_SSC
+	bool "Enable Spread Spectrum Clocking"
+
+config BRCMSDK416L05_BRCM_PCIE_PLATFORM
+	bool "PCI Express repower module"
+	depends on BRCMSDK416L05_BRCM_DRIVER_PCI && (BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148)
+
+config BRCMSDK416L05_BRCM_DRIVER_PCI_MSI
+	bool "Use PCI MSI Interrupts"
+	depends on BRCMSDK416L05_BRCM_DRIVER_PCI && (BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148)
+
+config BRCMSDK416L05_BRCM_DRIVER_I2C
+	tristate "I2C"
+	depends on BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_63148 || BRCMSDK416L05_BRCM_63138
+
+config BRCMSDK416L05_BRCM_DRIVER_HS_UART
+	tristate "High Speed UART' BRCM_DRIVER_HS_UART"
+	depends on BRCMSDK416L05_BRCM_63138
+
+config BRCMSDK416L05_BRCM_DRIVER_EMMC
+	tristate "EMMC"
+	depends on BRCMSDK416L05_BRCM_63138
+
+config BRCMSDK416L05_BRCM_DRIVER_I2S
+	tristate "I2S"
+	depends on BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+
+config BRCMSDK416L05_BRCM_DRIVER_ISDN
+	tristate "ISDN"
+
+config BRCMSDK416L05_BRCM_DRIVER_EXT_TIMER
+	bool "EXT_TIMER"
+
+config BRCMSDK416L05_BRCM_DRIVER_WATCHDOG_TIMER
+	bool "WATCHDOG_TIMER"
+
+config BRCMSDK416L05_BRCM_DRIVER_PMC
+	bool "PMC"
+	depends on BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+
+config BRCMSDK416L05_BRCM_DRIVER_ACP
+	bool "ACP"
+	depends on BRCMSDK416L05_BRCM_63138 && BRCMSDK416L05_BRCM_SMP_EN
+	
+endmenu
+endmenu
+
+menu "Major Feature Selection"
+
+config BRCMSDK416L05_BUILD_BRCM_CMS
+	bool "Use Broadcom Configuration Mgmt System (CMS)"
+
+choice
+	prompt "Data Model Selection"
+	default BRCMSDK416L05_BUILD_DM_HYBRID
+	depends on BRCMSDK416L05_BUILD_BRCM_CMS
+
+config BRCMSDK416L05_BUILD_DM_LEGACY98
+	bool "TR98"
+
+config BRCMSDK416L05_BUILD_DM_HYBRID
+	bool "Hybrid_TR98+TR181"
+
+config BRCMSDK416L05_BUILD_DM_PURE181
+	bool "Pure_TR181"
+
+config BRCMSDK416L05_BUILD_DM_DETECT
+	bool "DM_Detect"
+
+endchoice
+
+config BRCMSDK416L05_DESKTOP_LINUX
+	bool "Build CMS for DESKTOP LINUX"
+	depends on BRCMSDK416L05_BUILD_BRCM_CMS
+if BRCMSDK416L05_DESKTOP_LINUX
+config BRCMSDK416L05_PROFILE_ARCH
+	string
+	default "i386"
+endif
+
+config BRCMSDK416L05_BUILD_GENCFG_TOOLS
+	bool "Build Generic Config tools" if !BRCMSDK416L05_BUILD_BRCM_CMS
+	
+choice
+	prompt "Busybox build type"
+	default BRCM416L05_BUSYBOX_DONT_BUILD
+
+config BRCM416L05_BUSYBOX_DONT_BUILD
+	bool "don't build"
+
+config BRCM416L05_BUSYBOX_DYNAMIC_BUILD
+	bool "dynamic"
+
+config BRCM416L05_BUSYBOX_STATIC_BUILD
+	bool "static"
+
+endchoice
+
+if BRCM416L05_BUSYBOX_DYNAMIC_BUILD || BRCM416L05_BUSYBOX_STATIC_BUILD
+config BRCMSDK416L05_BUILD_BUSYBOX
+	string
+	default "dynamic" if BRCM416L05_BUSYBOX_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_BUSYBOX_STATIC_BUILD
+
+config BRCM416L05_RM_QUOTES_BUILD_BUSYBOX
+	def_bool y
+
+choice
+	prompt "Busybox Feature Group"
+	default BRCMSDK416L05_BUILD_BUSYBOX_BRCM_FULL
+
+config BRCMSDK416L05_BUILD_BUSYBOX_BRCM_LITE
+	bool "Lite"
+
+config BRCMSDK416L05_BUILD_BUSYBOX_BRCM_FULL
+	bool "Full"
+
+config BRCMSDK416L05_BUILD_BUSYBOX_BRCM_VANILLA
+	bool "Vanilla"
+	
+endchoice
+
+config BRCMSDK416L05_BUILD_WGET_HTTPS
+	bool "Support Wget Https in busybox"
+
+config BRCMSDK416L05_BUILD_BUSYBOX_GUNZIP
+	bool "Support gunzip in busybox"
+
+config BRCMSDK416L05_BUILD_BUSYBOX_GZIP
+	bool "Support gzip in busybox"
+
+config BRCMSDK416L05_BUILD_BUSYBOX_UNTAR
+	bool "Support untar in busybox"
+
+config BRCMSDK416L05_BUILD_BUSYBOX_TAR
+	bool "Support tar in busybox"
+
+config BRCMSDK416L05_BUILD_BUSYBOX_TELNET
+	bool "Support telnet in busybox"
+
+config BRCMSDK416L05_BUILD_BUSYBOX_VI
+	bool "Support vi in busybox"
+
+config BRCMSDK416L05_BUILD_BUSYBOX_AWK
+	bool "Support awk in busybox"
+
+config BRCMSDK416L05_BUILD_BUSYBOX_PIDOF
+	bool "Support pidof in busybox"
+
+endif
+
+config BRCMSDK416L05_BUILD_IPV6
+	bool "Enable IPV6"
+
+# tristate2 -----start (18 lines)
+choice
+	prompt "Interface Grouping(vconfig)"
+	default BRCM416L05_VCONFIG_DONT_BUILD
+config BRCM416L05_VCONFIG_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_VCONFIG_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_VCONFIG_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_VCONFIG_DYNAMIC_BUILD || BRCM416L05_VCONFIG_STATIC_BUILD
+config BRCMSDK416L05_BUILD_VCONFIG
+	string
+	default "dynamic" if BRCM416L05_VCONFIG_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_VCONFIG_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_VCONFIG
+	def_bool y
+endif
+# tristate2 -----end
+
+config BRCMSDK416L05_BUILD_BRCM_INTERNAL
+	bool "Prompt for internal Broadcom Engineering Parameters"
+
+config BRCMSDK416L05_BRCM_DRIVER_SPDSVC
+	tristate "Broadcom Speed Service"
+
+endmenu
+
+if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6318 || BRCMSDK416L05_BRCM_6328 || BRCM_CHIP_6326 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63148
+
+menu "DSL/XTM selection"
+
+choice
+	prompt "xDSL PHY"
+	default BRCMSDK416L05_BUILD_PHY_ADSL if BRCMSDK416L05_BRCM_6328 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_6318
+	default BRCMSDK416L05_BUILD_PHY_MULTIMODE
+
+config BRCMSDK416L05_BUILD_PHY_ADSL
+	bool "ADSL"
+
+config BRCMSDK416L05_BUILD_PHY_VDSL
+	bool "VDSL"
+	depends on BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63148
+
+config BRCMSDK416L05_BUILD_PHY_MULTIMODE
+	bool "Multi-mode"
+	depends on BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63148
+
+endchoice
+
+config BRCMSDK416L05_BRCM_PHY_BONDING
+	bool "Support xDSL Bonding"
+	depends on BRCMSDK416L05_BRCM_6368 || BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63148
+
+config BRCMSDK416L05_BRCM_MULTI_PHY
+	bool "Support xDSL Multi-PHY"
+	depends on BRCMSDK416L05_BRCM_6368 || BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63148
+
+
+config BRCMSDK416L05_BRCM_EXT_PHY_BONDING
+	bool "Support xDSL External Bonding"
+	depends on BRCMSDK416L05_BRCM_6368 || BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63148
+
+
+config BRCMSDK416L05_BRCM_PHY_BONDING5B
+	bool "Support xDSL 5-band Bonding"
+	depends on BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63148
+
+
+config BRCMSDK416L05_BRCM_PHY_GINP_RTX
+	bool "Support xDSL G.inp Retransmission"
+	depends on BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63148
+
+
+config BRCMSDK416L05_BRCM_PHY_BONDING_C0
+	bool "Support xDSL Multiple Bonding PHY"
+	depends on BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63148
+
+
+config BRCMSDK416L05_BRCM_PHY_GFAST
+	bool "Support xDSL G.fast"
+	depends on BRCMSDK416L05_BRCM_63138
+
+config BRCMSDK416L05_BRCM_PHY_GFASTCOMBO
+	bool "Support xDSL G.fast Combo"
+	depends on BRCMSDK416L05_BRCM_PHY_GFAST
+
+choice
+	prompt "xDSL standard"
+	default BRCMSDK416L05_BRCM_ADSL_ANNEX_A
+
+config BRCMSDK416L05_BRCM_ADSL_ANNEX_A
+	bool "ANNEX_A"
+
+config BRCMSDK416L05_BRCM_ADSL_ANNEX_B
+	bool "ANNEX_B"
+
+config BRCMSDK416L05_BRCM_ADSL_ANNEX_C
+	bool "ANNEX_C"
+
+config BRCMSDK416L05_BRCM_ADSL_SADSL
+	bool "SADSL"
+endchoice
+
+if BRCMSDK416L05_BRCM_ADSL_ANNEX_A
+config BRCMSDK416L05_BRCM_ADSL_STANDARD
+	string
+	default "ANNEX_A"
+
+config BRCMSDK416L05_CPE_ANNEX_A
+	def_bool y
+
+config BRCMSDK416L05_BRCM_ANNEXAB_COMBO
+	bool "Support ADSL AnnexAB Combo"
+
+endif
+
+if BRCMSDK416L05_BRCM_ADSL_ANNEX_B
+config BRCMSDK416L05_BRCM_ADSL_STANDARD
+	string
+	default "ANNEX_B"
+
+config BRCMSDK416L05_CPE_ANNEX_B
+	def_bool y
+endif
+
+if BRCMSDK416L05_BRCM_ADSL_ANNEX_C
+config BRCMSDK416L05_BRCM_ADSL_STANDARD
+	string
+	default "ANNEX_C"
+endif
+
+if BRCMSDK416L05_BRCM_ADSL_SADSL
+config BRCMSDK416L05_BRCM_ADSL_STANDARD
+	string
+	default "SADSL"
+endif
+
+config BRCM416L05_RM_QUOTES_BRCM_ADSL_STANDARD
+	def_bool y
+
+config BRCMSDK416L05_BRCM_DRIVER_ADSL
+	tristate "xDSL Driver"
+
+if BRCMSDK416L05_BRCM_DRIVER_ADSL
+config BRCMSDK416L05_BUILD_DSL
+	def_bool y
+
+choice
+	prompt "xDSL Control Utility"
+	default BRCM416L05_XDSLCTL_DYNAMIC_BUILD
+
+config BRCM416L05_XDSLCTL_DYNAMIC_BUILD
+	bool "dynamic"
+
+config BRCM416L05_XDSLCTL_STATIC_BUILD
+	bool "static"
+
+endchoice
+
+config BRCMSDK416L05_BUILD_XDSLCTL
+	string
+	default "dynamic" if BRCM416L05_XDSLCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_XDSLCTL_STATIC_BUILD
+
+config BRCM416L05_RM_QUOTES_BUILD_XDSLCTL
+	def_bool y
+
+config BRCMSDK416L05_BUILD_DSLDIAGD
+	bool "DSL Diag daemon"
+
+config BRCMSDK416L05_BUILD_DSL_LOOP_DIAG
+	bool "DSL Loop Diagnostics"
+
+config BRCMSDK416L05_BRCM_PHY_LOOPBACK
+	bool "Support xDSL Phy Loopback"
+
+config BRCMSDK416L05_BUILD_DSL_SELT_TEST
+	bool "DSL SELT TEST"
+
+config BRCMSDK416L05_BRCM_DRIVER_XTM
+	tristate "XTM Driver"
+	default m
+
+choice
+	prompt "XTM Control Utility"
+	default BRCM416L05_XTMCTL_DYNAMIC_BUILD
+
+config BRCM416L05_XTMCTL_DYNAMIC_BUILD
+	bool "dynamic"
+
+config BRCM416L05_XTMCTL_STATIC_BUILD
+	bool "static"
+
+endchoice
+
+config BRCMSDK416L05_BUILD_XTMCTL
+	string
+	default "dynamic" if BRCM416L05_XTMCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_XTMCTL_STATIC_BUILD
+
+config BRCM416L05_RM_QUOTES_BUILD_XTMCTL
+	def_bool y
+
+config BRCMSDK416L05_BUILD_ATMWAN
+	bool "ATM as WAN Interface"
+
+config BRCMSDK416L05_BUILD_PTMWAN
+	bool "PTM as WAN Interface"
+
+config BRCMSDK416L05_BUILD_ATMLOOPBACK
+	bool
+	default y if BRCMSDK416L05_BUILD_ATMWAN
+
+config BRCMSDK416L05_BRCM_DRIVER_P8021AG
+	tristate "IEEE8021AG"
+	default n if !BRCMSDK416L05_BUILD_PTMWAN
+
+if BRCMSDK416L05_BRCM_EXT_PHY_BONDING
+config BRCMSDK416L05_BRCM_DRIVER_EXT_BONDING
+	tristate 'External xDSL Bonding Driver'
+	default n
+endif
+config BRCMSDK416L05_BRCM_DSL_TX_RX_IUDMA
+	bool "Support xDSL/XTM Tx/Rx IUDMA"
+	default n if !BRCMSDK416L05_BUILD_DSL
+	depends on BRCMSDK416L05_BRCM_63138
+
+endif
+
+if !BRCMSDK416L05_BRCM_DRIVER_ADSL
+config BRCMSDK416L05_BUILD_DSL
+	def_bool n
+
+config BRCMSDK416L05_BUILD_XDSLCTL
+	string
+	default "n"
+
+config BRCM416L05_RM_QUOTES_BUILD_XDSLCTL
+	def_bool y
+
+config BRCMSDK416L05_BUILD_DSLDIAGD
+	bool
+	default n
+
+config BRCMSDK416L05_BUILD_DSL_LOOP_DIAG
+	bool
+	default n
+
+config BRCMSDK416L05_BRCM_DRIVER_XTM
+	tristate
+	default n
+
+config BRCMSDK416L05_BUILD_XTMCTL
+	string
+	default "n"
+
+config BRCM416L05_RM_QUOTES_BUILD_XTMCTL
+	def_bool y
+
+config BRCMSDK416L05_BUILD_ATMWAN
+	def_bool n
+
+config BRCMSDK416L05_BUILD_PTMWAN
+	def_bool n
+
+config BRCMSDK416L05_BUILD_ATMLOOPBACK
+	def_bool n
+
+config BRCMSDK416L05_BRCM_DRIVER_P8021AG
+	def_tristate n
+
+config BRCMSDK416L05_BRCM_DRIVER_EXT_BONDING
+	def_tristate n
+endif
+endmenu
+endif
+
+#######################################################################
+
+if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+
+comment "WAN Selection"
+
+menu "GPON Selection"
+
+if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+config BRCMSDK416L05_BRCM_DRIVER_GPON
+	tristate "GPON Driver"
+
+if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+config BRCMSDK416L05_BCM_MAX_GEM_PORTS
+	int "Number of GEM Ports (32-256)"
+	default 256
+endif
+
+if BRCMSDK416L05_BRCM_DRIVER_GPON
+config BRCMSDK416L05_BUILD_GPON
+	def_bool y
+
+config BRCMSDK416L05_BRCM_GPON
+	def_bool y
+
+config BRCMSDK416L05_BRCM_OMCI
+	def_bool y
+endif
+
+config BRCMSDK416L05_BUILD_OMCI
+	bool "Support GPON OMCI"
+
+if BRCMSDK416L05_BUILD_OMCI
+choice
+	prompt "OMCI Type"
+	default BRCMSDK416L05_BUILD_BRCM_OMCI
+	config BRCM416L05_BUILD_BRCM_OMCI
+	bool "BRCM"
+
+	config BRCM416L05_BUILD_PONWIZ
+	bool "PONWIZ"
+endchoice
+endif
+
+choice
+	prompt "GPONIF Utility"
+	default BRCM416L05_GPONIF_DONT_BUILD
+
+config BRCM416L05_GPONIF_DONT_BUILD
+	bool "don't build"
+
+config BRCM416L05_GPONIF_DYNAMIC_BUILD
+	bool "dynamic"
+
+config BRCM416L05_GPONIF_STATIC_BUILD
+	bool "static"
+endchoice
+config BRCMSDK416L05_BUILD_GPONIF
+	string
+	default "dynamic" if BRCM416L05_GPONIF_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_GPONIF_STATIC_BUILD
+
+config BRCM416L05_RM_QUOTES_BUILD_GPONIF
+	def_bool y
+
+choice
+	prompt "GPOND Utility"
+	default BRCM416L05_GPOND_DONT_BUILD
+
+config BRCM416L05_GPOND_DONT_BUILD
+	bool "don't build"
+
+config BRCM416L05_GPOND_DYNAMIC_BUILD
+	bool "dynamic"
+
+config BRCM416L05_GPOND_STATIC_BUILD
+	bool "static"
+endchoice
+config BRCMSDK416L05_BUILD_GPOND
+	string
+	default "dynamic" if BRCM416L05_GPOND_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_GPOND_STATIC_BUILD
+
+config BRCM416L05_RM_QUOTES_BUILD_GPOND
+	def_bool y
+
+choice
+	prompt "GPONCTL Utility"
+	default BRCM416L05_GPONCTL_DONT_BUILD
+
+config BRCM416L05_GPONCTL_DONT_BUILD
+	bool "don't build"
+
+config BRCM416L05_GPONCTL_DYNAMIC_BUILD
+	bool "dynamic"
+
+config BRCM416L05_GPONCTL_STATIC_BUILD
+	bool "static"
+endchoice
+config BRCMSDK416L05_BUILD_GPONCTL
+	string
+	default "dynamic" if BRCM416L05_GPONCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_GPONCTL_STATIC_BUILD
+
+config BRCM416L05_RM_QUOTES_BUILD_GPONCTL
+	def_bool y
+
+choice
+	prompt "GponRG"
+	default BRCMSDK416L05_USE_GPONRG_OMCI_LIGHT
+
+config BRCMSDK416L05_USE_GPONRG_OMCI_LIGHT
+	bool "GponRGt-OMCI-Light"
+
+config BRCMSDK416L05_USE_GPONRG_OMCI_FULL
+	bool "GponRG-OMCI-Full"
+
+config BRCMSDK416L05_USE_GONRG_NONE
+	bool "None"
+
+endchoice
+
+config BRCMSDK416L05_BUILD_GPONRG_OMCI_LIGHT
+	string
+	default "y" if BRCMSDK416L05_USE_GPONRG_OMCI_LIGHT
+	default "" if !BRCMSDK416L05_USE_GPONRG_OMCI_LIGHT
+
+config BRCM416L05_RM_QUOTES_BUILD_GPONRG_OMCI_LIGHT
+	def_bool y
+
+choice
+	prompt "GPON ONU Type"
+	default BRCMSDK416L05_BRCM_GPON_HGU
+
+config BRCMSDK416L05_BRCM_GPON_SFU
+	bool "SFU"
+
+config BRCMSDK416L05_BRCM_GPON_HGU
+	bool "HGU"
+
+config BRCMSDK416L05_BRCM_GPON_NONE
+	bool "None"
+
+endchoice
+
+config BRCMSDK416L05_GPON_ONU_TYPE
+	string
+	default "GPON_HGU" if BRCMSDK416L05_BRCM_GPON_HGU
+	default "GPON_SFU" if BRCMSDK416L05_BRCM_GPON_SFU
+	depends on BRCMSDK416L05_BRCM_GPON_HGU || BRCMSDK416L05_BRCM_GPON_SFU
+config BRCM416L05_RM_QUOTES_GPON_ONU_TYPE
+	def_bool y
+	depends on BRCMSDK416L05_BRCM_GPON_HGU || BRCMSDK416L05_BRCM_GPON_SFU
+
+config BRCMSDK416L05_BUILD_GPONRG_OMCI_FULL
+	string
+	default "y" if BRCMSDK416L05_USE_GPONRG_OMCI_FULL
+	default "" if !BRCMSDK416L05_USE_GPONRG_OMCI_FULL
+
+config BRCM416L05_RM_QUOTES_BUILD_GPONRG_OMCI_FULL
+	def_bool y
+
+config BRCMSDK416L05_BUILD_OMCI_TR69_DUAL_STACK
+	bool "Support GPON OMCI TR69 dual stack"
+	depends on BRCMSDK416L05_USE_GPONRG_OMCI_FULL || BRCMSDK416L05_USE_GPONRG_NONE
+
+config BRCMSDK416L05_BRCM_NO_LAN_PORTS_MIXED_MODE
+	bool "Disable RG/ONT mixed mode for LAN ports"
+	depends on BRCMSDK416L05_USE_GPONRG_OMCI_FULL
+
+config BRCMSDK416L05_BUILD_GPON_ONU
+	string
+	default "y" if BRCMSDK416L05_USE_GPONRG_NONE
+	default "" if !BRCMSDK416L05_USE_GPONRG_NONE
+
+config BRCM416L05_RM_QUOTES_BUILD_GPON_ONU
+	def_bool y
+
+config BRCMSDK416L05_BCM_GPON_802_1Q_ENABLED
+	bool "Enable 802.1Q mode"
+	depends on !BRCMSDK416L05_USE_GPONRG_OMCI_LIGHT
+
+config BRCMSDK416L05_BCM_GPON_AE_AUTO_SWITCH
+	bool "Enable GPON-ActiveE Auto Switch"
+endif
+
+endmenu
+endif
+
+if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BUILD_BRCM_INTERNAL
+menu "EPON Selection"
+if BRCMSDK416L05_BUILD_BRCM_INTERNAL
+config BRCMSDK416L05_BRCM_DRIVER_EPON
+	tristate "EPON LUE Driver"
+
+config BRCMSDK416L05_BUILD_EPONCTL
+	tristate "EPON Control Utility"
+
+endif
+
+if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+config BRCMSDK416L05_BRCM_EPON_STACK
+	tristate "EPON Stack Driver"
+
+config BRCMSDK416L05_BRCM_EPON_STACK_IMPL
+	int "EPON Stack Driver Implementation"
+
+config BRCMSDK416L05_BUILD_EPONCTL
+	tristate "EPON Control Utility"
+
+config BRCMSDK416L05_BUILD_EPON_CLOCK_TRANSPORT
+	bool "EPON Clock Transport Support"
+
+endif
+
+config BRCMSDK416L05_BUILD_EPON_SDK
+	bool "EPON SDK"
+
+if BRCMSDK416L05_BUILD_EPON_SDK
+menu "OAM Stack Selection"
+config BRCMSDK416L05_BUILD_EPON_BCM_OAM
+	bool "Broadcom  "
+config BRCMSDK416L05_BUILD_EPON_CTC_OAM
+	bool "CTC      "
+config BRCMSDK416L05_BUILD_EPON_DPOE_OAM
+	bool "DPoE     "	
+endmenu
+	
+config BRCMSDK416L05_BUILD_EPON_SDK_VOICE_OAM
+	bool "EPON SDK VOICE OAM"
+
+config BRCMSDK416L05_BUILD_EPONWAN
+	bool "EPON as WAN"
+
+config BRCMSDK416L05_OVERRIDE_EPON_MAC_ADDR
+	bool "Override EPON MAC Address In Personality"
+
+if BRCMSDK416L05_OVERRIDE_EPON_MAC_ADDR
+config BRCMSDK416L05_MLLID_SUPPORTED
+	bool "Multiple LLID SUpport"
+endif
+
+choice
+	prompt "EPON ONU Type"
+	default BRCMSDK416L05_BRCM_EPON_SFU
+
+config BRCMSDK416L05_BRCM_EPON_SFU
+	bool "SFU"
+
+config BRCMSDK416L05_BRCM_EPON_SBU
+	bool "SBU"
+
+config BRCMSDK416L05_BRCM_EPON_HGU
+	bool "HGU"
+
+endchoice
+
+config BRCMSDK416L05_EPON_ONU_TYPE
+	string
+	default "EPON_SFU" if BRCMSDK416L05_BRCM_EPON_SFU
+	default "EPON_SBU" if BRCMSDK416L05_BRCM_EPON_SBU
+	default "EPON_HGU" if BRCMSDK416L05_BRCM_EPON_HGU
+	
+config BRCM416L05_RM_QUOTES_EPON_ONU_TYPE
+	def_bool y
+
+if BRCMSDK416L05_BUILD_BRCM_INTERNAL
+config BRCMSDK416L05_EPON_UNI_UNI_ENABLED
+	bool "UNI 2 UNI Communication"
+
+config BRCMSDK416L05_EPON_DS_DLF_FORWARD
+	bool "Unresolved Downstream Forward"
+endif
+endif
+
+endmenu
+endif
+
+##############################################################################3
+menu "Ethernet, Switch, and VLAN Selection"
+
+config BRCMSDK416L05_BRCM_DRIVER_ETHERNET
+	tristate "Ethernet Driver"
+
+if BRCMSDK416L05_BRCM_DRIVER_ETHERNET
+config BRCMSDK416L05_BRCM_DRIVER_ETHERNET_CONFIG
+	bool "Support Configuration for Ethernet Speed/Type"
+
+config BRCMSDK416L05_BUILD_ETHWAN
+	bool "Ethernet as WAN"
+
+endif
+
+if BRCMSDK416L05_BRCM_6362
+if !BRCMSDK416L05_BUILD_SWMDK || !BRCMSDK416L05_BRCM_EXT_SWITCH || BRCMSDK416L05_BRCM_PORTS_ON_INT_EXT_SW
+if BRCMSDK416L05_BRCM_DRIVER_FAP
+config BRCM416L05_IUDMA_RX_SPLITTING
+	bool "Iudma Rx Splitting"
+
+config BRCM416L05_IUDMA_TX_SPLITTING
+	bool "Iudma Tx Splitting"
+endif
+config BRCMSDK416L05_BCM_IUDMA_RX_SPLITTING
+	string
+	default "y" if BRCM416L05_IUDMA_RX_SPLITTING
+	default "n"
+
+config BRCMSDK416L05_BCM_IUDMA_TX_SPLITTING
+	string
+	default "y" if BRCM416L05_IUDMA_TX_SPLITTING
+	default "n"
+
+if !BRCMSDK416L05_BRCM_DRIVER_FAP
+config BRCMSDK416L05_BCM_IUDMA_RX_SPLITTING
+	string
+	default ""
+
+config BRCMSDK416L05_BCM_IUDMA_TX_SPLITTING
+	string
+	default ""
+
+endif
+endif # !BRCMSDK416L05_BUILD_SWMDK || !BRCMSDK416L05_BRCM_EXT_SWITCH || BRCMSDK416L05_BRCM_PORTS_ON_INT_EXT_SW
+if !(!BRCMSDK416L05_BUILD_SWMDK || !BRCMSDK416L05_BRCM_EXT_SWITCH || BRCMSDK416L05_BRCM_PORTS_ON_INT_EXT_SW)
+config BRCMSDK416L05_BCM_IUDMA_RX_SPLITTING
+	string
+	default ""
+
+config BRCMSDK416L05_BCM_IUDMA_TX_SPLITTING
+	string
+	default ""
+
+endif # !(!BRCMSDK416L05_BUILD_SWMDK || !BRCMSDK416L05_BRCM_EXT_SWITCH || BRCMSDK416L05_BRCM_PORTS_ON_INT_EXT_SW)
+config BRCM416L05_RM_QUOTES_BCM_IUDMA_TX_SPLITTING
+	def_bool y
+
+config BRCM416L05_RM_QUOTES_BCM_IUDMA_RX_SPLITTING
+	def_bool y
+
+endif # if BRCMSDK416L05_BRCM_6362
+ 
+if BRCMSDK416L05_BRCM_6328
+menu "DMA Channel Configuration"
+config BRCMSDK416L05_BCM_DEF_NR_RX_DMA_CHANNELS
+	int "Number of RX DMA channels (1-4)"
+
+config BRCMSDK416L05_BCM_DEF_NR_TX_DMA_CHANNELS
+	int "Number of TX DMA channels (1-4)"
+
+endmenu
+endif
+
+if BRCMSDK416L05_BRCM_6362
+  config BRCMSDK416L05_BCM_DEF_NR_RX_DMA_CHANNELS
+	int
+	default 2 if BRCM416L05_IUDMA_RX_SPLITTING
+	default 1
+
+  config BRCMSDK416L05_BCM_DEF_NR_TX_DMA_CHANNELS
+	int
+	default 2 if BRCM416L05_IUDMA_TX_SPLITTING
+	default 1
+
+endif
+if BRCMSDK416L05_BRCM_63268
+  config BRCMSDK416L05_BCM_DEF_NR_RX_DMA_CHANNELS
+	int
+	default 2
+
+  config BRCMSDK416L05_BCM_DEF_NR_TX_DMA_CHANNELS
+	int
+	default 2
+endif
+
+if BRCMSDK416L05_BRCM_6318 || BRCMSDK416L05_BRCM_63381
+  config BRCMSDK416L05_BCM_DEF_NR_RX_DMA_CHANNELS
+	int
+	default 1
+
+  config BRCMSDK416L05_BCM_DEF_NR_TX_DMA_CHANNELS
+	int
+	default 1
+endif
+
+if BRCMSDK416L05_BRCM_DRIVER_ETHERNET
+  config BRCMSDK416L05_BRCM_GMAC
+	tristate "Support for GMAC"
+	depends on BRCMSDK416L05_BRCM_63268
+
+  if BRCMSDK416L05_BRCM_GMAC
+     choice
+	prompt "GMAC Control Utility"
+	default BRCM416L05_GMACCTL_DONT_BUILD
+
+     config BRCM416L05_GMACCTL_DONT_BUILD
+	bool "don't build"
+
+     config BRCM416L05_GMACCTL_DYNAMIC_BUILD
+	bool "dynamic"
+
+     config BRCM416L05_GMACCTL_STATIC_BUILD
+	bool "static"
+     endchoice
+     config BRCMSDK416L05_BUILD_GMACCTL
+	string
+	default "dynamic" if BRCM416L05_GMACCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_GMACCTL_STATIC_BUILD
+
+     config BRCM416L05_RM_QUOTES_BUILD_GMACCTL
+	def_bool y
+  endif
+endif
+
+choice
+	prompt "Switch Scheduling Mode (SP = strict priority, WRR = weighted round robin)"
+	default BRCMSDK416L05_BRCM_SWITCH_SCHED_SP
+
+config BRCMSDK416L05_BRCM_SWITCH_SCHED_SP
+	bool "SP"
+
+config BRCMSDK416L05_BRCM_SWITCH_SCHED_WRR
+	bool "WRR"
+endchoice
+
+config BRCMSDK416L05_BUILD_BCM_ALLOW_REAL_HW_SWITCHING
+	bool "Allow Real HW Switching (using physical HW switch)"
+
+config BRCMSDK416L05_BUILD_ETHSWCTL
+	bool "ETHSWCTL Utility"
+
+config BRCMSDK416L05_BUILD_SWMDK
+	bool "SWITCHMDK"
+	depends on BRCMSDK416L05_BUILD_ETHSWCTL
+
+if BRCMSDK416L05_BUILD_SWMDK
+config BRCMSDK416L05_BRCM_EXT_SWITCH
+	bool "External Switch Present"
+
+config BRCMSDK416L05_BRCM_EXT_SWITCH_TYPE
+	int "External Switch Number" if BRCMSDK416L05_BRCM_EXT_SWITCH
+	default 53115 if BRCMSDK416L05_BRCM_EXT_SWITCH
+	default 0
+
+config BRCMSDK416L05_BRCM_EXT_SWITCH_REV
+	string "External Switch Revision" if BRCMSDK416L05_BRCM_EXT_SWITCH
+	default "a0" if BRCMSDK416L05_BRCM_EXT_SWITCH
+	default ""
+
+if BRCMSDK416L05_BRCM_EXT_SWITCH_REV=""
+config BRCM416L05_RM_QUOTES_BRCM_EXT_SWITCH_REV
+	def_bool y
+endif
+
+if BRCMSDK416L05_BRCM_EXT_SWITCH
+if BRCMSDK416L05_BRCM_6362
+config BRCMSDK416L05_BRCM_PORTS_ON_INT_EXT_SW
+	bool "Ports on both Internal and External Switch"
+endif
+if !BRCMSDK416L05_BRCM_6362
+config BRCMSDK416L05_BRCM_PORTS_ON_INT_EXT_SW
+	default y if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63381
+	default n
+endif
+
+config BRCMSDK416L05_BRCM_SWITCH_PORT_TRUNK_SUPPORT
+	bool "MAC Based Port Trunking (LAG)"
+endif
+
+config BRCMSDK416L05_BCM_PHY_54616
+	bool "54616 PHY Support"
+
+config BRCMSDK416L05_BUILD_MDK_SHELL
+	bool "MDKSHELL"
+	depends on BRCMSDK416L05_BUILD_SWMDK
+
+endif
+
+config BRCMSDK416L05_BRCM_DRIVER_VLAN
+	tristate "VLAN Driver"
+
+choice
+	prompt "VLAN Control Utility"
+	default BRCM416L05_VLANCTL_DONT_BUILD
+
+config BRCM416L05_VLANCTL_DONT_BUILD
+	bool "don't build"
+
+config BRCM416L05_VLANCTL_DYNAMIC_BUILD
+	bool "dynamic"
+
+config BRCM416L05_VLANCTL_STATIC_BUILD
+        bool "static"
+endchoice
+
+config BRCMSDK416L05_BUILD_VLANCTL
+	string
+	default "dynamic" if BRCM416L05_VLANCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_VLANCTL_STATIC_BUILD
+
+config BRCM416L05_RM_QUOTES_BUILD_VLANCTL
+	def_bool y
+
+config BRCMSDK416L05_BUILD_LANVLAN
+	bool "Support LAN Side Vlan"
+	depends on BRCM416L05_VLANCTL_DYNAMIC_BUILD || BRCM416L05_VLANCTL_STATIC_BUILD
+	
+
+config BRCMSDK416L05_BUILD_VLAN_AGGR
+	bool "Support VLAN Aggregation"
+	depends on BRCM416L05_VLANCTL_DYNAMIC_BUILD || BRCM416L05_VLANCTL_STATIC_BUILD
+
+config BRCMSDK416L05_BRCM_VLAN_ROUTED_WAN_USES_ROOT_DEV_MAC
+	bool "Assign Same MAC address to Routed WAN Interface as root"
+	depends on BRCM416L05_VLANCTL_DYNAMIC_BUILD || BRCM416L05_VLANCTL_STATIC_BUILD
+
+config BRCMSDK416L05_SUPPORT_RTK_SWITCH
+	bool "Support Realtek Switch"
+	default n
+
+config BRCMSDK416L05_BUILD_ETHTOOL
+	bool "Ethtool Support"
+
+config BRCMSDK416L05_BUILD_ETHTOOL_APP
+	bool "Build Ethtool Application"
+	depends on BRCMSDK416L05_BUILD_ETHTOOL
+endmenu
+
+menu "USB, SATA and Storage Options Selection"
+config BRCMSDK416L05_BUILD_SATA
+	bool "SATA support"
+
+config BRCMSDK416L05_BRCM_DRIVER_SATA_TEST
+	tristate "SATA compliance test utility"
+	depends on BRCMSDK416L05_BUILD_SATA
+
+config BRCMSDK416L05_BUILD_SATA_TEST
+	string
+	default "y"
+	depends on BRCMSDK416L05_BRCM_DRIVER_SATA_TEST
+
+config BRCMSDK416L05_LINUX_DRIVER_USB_HOST
+	bool "USB Host"
+	depends on BRCMSDK416L05_BRCM_DRIVER_PCI
+
+config BRCMSDK416L05_LINUX_DRIVER_USB3_HOST
+	bool "USB 3.0 Host"
+	depends on BRCMSDK416L05_LINUX_DRIVER_USB_HOST
+
+config BRCMSDK416L05_LINUX_DRIVER_USBNET
+	bool "USB Network Communication Class device support"
+	depends on BRCMSDK416L05_LINUX_DRIVER_USB_HOST
+
+config BRCMSDK416L05_BRCM_DRIVER_PKTFLOW_USBNET
+	bool "USBNET/LTE SW Acceleration Support"   
+	depends on BRCMSDK416L05_LINUX_DRIVER_USBNET && BRCMSDK416L05_BRCM_DRIVER_PKTFLOW
+
+config BRCMSDK416L05_LINUX_KERNEL_USBMASS
+	bool "USB Mass Storage Support (experimental)"
+	depends on BRCMSDK416L05_LINUX_DRIVER_USB_HOST
+
+config BRCMSDK416L05_LINUX_KERNEL_USB_DEVICEFS
+	bool "USB DeviceFS"
+	depends on BRCMSDK416L05_LINUX_DRIVER_USB_HOST
+
+config BRCMSDK416L05_BUILD_LIBUSB
+	bool "LIBUSB support"
+
+choice
+	prompt "Ftp Server"
+	default BRCM416L05_FTPD_DONT_BUILD
+
+config BRCM416L05_FTPD_DONT_BUILD
+	bool "don't build"
+
+config BRCM416L05_FTPD_DYNAMIC_BUILD
+        bool "dynamic"
+
+config BRCM416L05_FTPD_STATIC_BUILD
+	bool "static"
+
+endchoice
+
+config BRCMSDK416L05_BUILD_FTPD
+	string
+	default "dynamic" if BRCM416L05_FTPD_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_FTPD_STATIC_BUILD
+
+if BRCM416L05_FTPD_DYNAMIC_BUILD || BRCM416L05_FTPD_STATIC_BUILD
+	
+config BRCM416L05_RM_QUOTES_BUILD_FTPD
+	def_bool y
+
+config BRCM416L05_BUILD_FTPD_STORAGE
+	bool "Support for storage"
+
+config BRCMSDK416L05_BUILD_FTPD_STORAGE
+	string
+
+endif
+
+if BRCM416L05_BUILD_FTPD_STORAGE || BRCM416L05_FTPD_DONT_BUILD
+config BRCMSDK416L05_BUILD_FTPD_STORAGE
+	string
+	default "y" if BRCM416L05_BUILD_FTPD_STORAGE
+	default "" if BRCM416L05_FTPD_DONT_BUILD
+
+config BRCM416L05_RM_QUOTES_BUILD_FTPD_STORAGE
+	def_bool y
+endif
+
+config BRCMSDK416L05_BUILD_STORAGESERVICE
+	bool "TR140-Storage Service"
+
+config BRCMSDK416L05_BUILD_NTFS_3G
+	bool "NTFS-3G support"
+	depends on BRCMSDK416L05_BUILD_STORAGESERVICE
+
+config BRCMSDK416L05_BUILD_SAMBA
+	bool "Samba support"
+	depends on BRCMSDK416L05_BUILD_STORAGESERVICE
+
+config BRCMSDK416L05_BRCM_DRIVER_USB
+	tristate "USB Device"
+
+endmenu	# USB, SATA and Storage Options Selection
+
+menu "Auxillary flash file system selection"
+
+config BRCMSDK416L05_BUILD_AUXFS_JFFS2
+	bool "JFFS2"
+
+if BRCMSDK416L05_BUILD_AUXFS_JFFS2
+config BRCMSDK416L05_BRCM_KERNEL_AUXFS_JFFS2
+	string
+	default "y"
+
+config BRCM416L05_RM_QUOTES_BRCM_KERNEL_AUXFS_JFFS2
+	def_bool y
+
+endif
+endmenu
+
+if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148 || BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+  menu "Moca Selection"
+
+  config BRCMSDK416L05_BRCM_DRIVER_MoCA
+	tristate "MoCA"
+
+  if BRCMSDK416L05_BRCM_DRIVER_MoCA
+	config BRCMSDK416L05_BRCM_DRIVER_MoCA_CTP_CANDIDATE
+		bool "CTP Candidate"
+	config BRCMSDK416L05_BUILD_MoCACTL
+		string
+		default "y"
+	config BRCM416L05_RM_QUOTES_BUILD_MoCACTL
+		def_bool y
+	config BRCMSDK416L05_BUILD_MOCAWAN
+		bool "MOCA as WAN"
+
+	config BRCMSDK416L05_BUILD_6802_MOCA
+		bool "Support 6802 Moca"
+	config BRCMSDK416L05_BRCM_MOCA_AVS
+		bool "Support 6802 AVS"
+		depends on BRCMSDK416L05_BUILD_6802_MOCA		
+
+	config BRCMSDK416L05_MOCA_LAN_DISCONN
+		bool "MoCA LAN Disconnected"
+	config BRCMSDK416L05_MOCA_WAN_DISCONN
+		bool "MoCA WAN Disconnected"
+	choice
+		prompt "MoCA Daemon"
+		default BRCM416L05_MoCAD_DONT_BUILD
+	config BRCM416L05_MoCAD_DONT_BUILD
+		bool "don't build"
+	config BRCM416L05_MoCAD_DYNAMIC_BUILD
+		bool "dynamic"
+	config BRCM416L05_MoCAD_STATIC_BUILD
+		bool "static"
+	endchoice
+	config BRCMSDK416L05_BUILD_MoCAD
+		string
+		default "dynamic" if BRCM416L05_MoCAD_DYNAMIC_BUILD
+		default "static"  if BRCM416L05_MoCAD_STATIC_BUILD
+	config BRCM416L05_RM_QUOTES_BUILD_MoCAD
+		def_bool y
+
+	choice
+		prompt "MoCA Programmer"
+		default BRCM416L05_MoCAP_DONT_BUILD
+	config BRCM416L05_MoCAP_DONT_BUILD
+		bool "don't build"
+	config BRCM416L05_MoCAP_DYNAMIC_BUILD
+		bool "dynamic"
+	config BRCM416L05_MoCAP_STATIC_BUILD
+		bool "static"
+	endchoice
+	config BRCMSDK416L05_BUILD_MoCAP
+		string
+		default "dynamic" if BRCM416L05_MoCAP_DYNAMIC_BUILD
+		default "static"  if BRCM416L05_MoCAP_STATIC_BUILD
+	config BRCM416L05_RM_QUOTES_BUILD_MoCAP
+		def_bool y
+	config BRCMSDK416L05_BUILD_MoCACTL2
+		string
+		default "y" if BRCM416L05_MoCAD_DYNAMIC_BUILD || BRCM416L05_MoCAD_STATIC_BUILD
+		default ""
+	config BRCM416L05_RM_QUOTES_BUILD_MoCACTL2
+		def_bool y
+  endif # BRCMSDK416L05_BRCM_DRIVER_MoCA
+  endmenu # Moca Selection
+endif # BRCMSDK416L05_BRCM_6816 || BRCMSDK416L05_BRCM_6818 || BRCMSDK416L05_BRCM_63268
+
+####################################################
+if BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63381 
+menu "LTE Selection"
+
+config BRCMSDK416L05_BRCM_DRIVER_LTE
+	bool "LTE"
+
+config BRCMSDK416L05_BRCM_DRIVER_LTE_PCI
+	tristate "LTE on PCI"
+	depends on BRCMSDK416L05_BRCM_DRIVER_LTE && BRCMSDK416L05_BRCM_DRIVER_PCI
+
+config BRCM416L05_BRCM_DRIVER_LTE_PCI_MODEM_BOOT
+	bool "Modem Boot device node"
+	depends on BRCMSDK416L05_BRCM_DRIVER_LTE_PCI
+
+config BRCMSDK416L05_BRCM_DRIVER_LTE_USB
+	tristate "LTE on USB"
+	depends on BRCMSDK416L05_BRCM_DRIVER_LTE && BRCMSDK416L05_LINUX_DRIVER_USB_HOST
+
+choice
+	prompt "Modem firmware selection"
+	depends on BRCMSDK416L05_BRCM_DRIVER_LTE
+	default BRCMSDK416L05_BRCM_LTE_FIRMWARE_SAMOS_WGE_MPCIE_US_EDN011	
+config BRCMSDK416L05_BRCM_LTE_FIRMWARE_SAMOS_WGE_MPCIE_EU
+	bool "samos_wge_mPCIe_EU"
+config BRCMSDK416L05_BRCM_LTE_FIRMWARE_SAMOS_WGE_MPCIE_EU_EDN010
+	bool "samos_wge_mPCIe_EU_EDN010"
+config BRCMSDK416L05_BRCM_LTE_FIRMWARE_SAMOS_WGE_MPCIE_US
+	bool "samos_wge_mPCIe_US"
+config BRCMSDK416L05_BRCM_LTE_FIRMWARE_SAMOS_WGE_MPCIE_US_EDN011
+	bool "samos_wge_mPCIe_US_EDN011"	
+config BRCMSDK416L05_BRCM_LTE_FIRMWARE_SAMOS_WGE_PCIE
+	bool "samos_wge_pcie"	
+endchoice
+
+	config BRCMSDK416L05_BRCM_LTE_FIRMWARE
+		string
+		depends on BRCMSDK416L05_BRCM_DRIVER_LTE
+		default "samos_wge_mPCIe_EU" if BRCM_LTE_FIRMWARE_SAMOS_WGE_MPCIE_EU
+	config BRCMSDK416L05_BRCM_LTE_FIRMWARE
+		string
+		depends on BRCMSDK416L05_BRCM_DRIVER_LTE
+		default "samos_wge_mPCIe_EU_EDN010" if BRCMSDK416L05_BRCM_LTE_FIRMWARE_SAMOS_WGE_MPCIE_EU_EDN010
+	config BRCMSDK416L05_BRCM_LTE_FIRMWARE
+		string
+		depends on BRCMSDK416L05_BRCM_DRIVER_LTE
+		default "samos_wge_mPCIe_US" if BRCMSDK416L05_BRCM_LTE_FIRMWARE_SAMOS_WGE_MPCIE_US
+	config BRCMSDK416L05_BRCM_LTE_FIRMWARE
+		string
+		depends on BRCMSDK416L05_BRCM_DRIVER_LTE
+		default "samos_wge_mPCIe_US_EDN011" if BRCMSDK416L05_BRCM_LTE_FIRMWARE_SAMOS_WGE_MPCIE_US_EDN011
+	config BRCMSDK416L05_BRCM_LTE_FIRMWARE
+		string
+		depends on BRCMSDK416L05_BRCM_DRIVER_LTE
+		default "samos_wge_pcie" if BRCMSDK416L05_BRCM_LTE_FIRMWARE_SAMOS_WGE_PCIE
+
+endmenu # LTE Selection
+endif
+
+menu "WLAN Selection"
+
+config BRCMSDK416L05_BRCM_DRIVER_WIRELESS
+	tristate "WIRELESS Driver"
+	depends on BRCMSDK416L05_BRCM_DRIVER_PCI
+
+config BRCMSDK416L05_BRCM_DRIVER_DHD
+	tristate "Wireless DHD driver support"
+	depends on BRCMSDK416L05_BRCM_DRIVER_PCI
+
+config BRCMSDK416L05_BRCM_WAPI
+	bool "Wireless WAPI support"
+
+config BRCMSDK416L05_BRCM_WLALTBLD
+	string "Wireless Alternate Build"
+	depends on BRCMSDK416L05_BRCM_DRIVER_WIRELESS
+
+config BRCM416L05_BUILD_WIFIWAN
+	bool "WiFi as WAN"  if BRCMSDK416L05_BRCM_WLALTBLD="apsta"
+	default n
+
+config BRCMSDK416L05_BUILD_WIFIWAN
+	string
+	default "y" if BRCM416L05_BUILD_WIFIWAN
+	default ""  if BRCMSDK416L05_BRCM_WLALTBLD!="apsta"
+
+config BRCM416L05_RM_QUOTES_BUILD_WIFIWAN
+	def_bool y  if BRCMSDK416L05_BUILD_WIFIWAN!="n"
+
+choice
+	prompt "Wireless brand selection"
+	default BRCMSDK416L05_BRCM_WLMEDIA
+config BRCMSDK416L05_BRCM_WLMEDIA
+	bool "MEDIA"
+config BRCMSDK416L05_WLBRAND_none
+	bool "none"
+endchoice
+config BRCMSDK416L05_BRCM_WLBRAND
+	string
+	default "MEDIA" if BRCMSDK416L05_BRCM_WLMEDIA
+	default ""
+
+config BRCM416L05_RM_QUOTES_BRCM_WLBRAND
+	def_bool y
+
+comment "WLAN IMPL selection"
+config BRCMSDK416L05_BCM_WLIMPL
+	int "Use IMPL selection"
+
+choice
+	prompt "Wireless Control Utility"
+	default BRCM416L05_WLCTL_DONT_BUILD
+config BRCM416L05_WLCTL_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_WLCTL_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_WLCTL_STATIC_BUILD
+	bool "static"
+endchoice
+config BRCMSDK416L05_BUILD_WLCTL
+	string
+	default "dynamic" if BRCM416L05_WLCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_WLCTL_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_WLCTL
+	def_bool y
+
+choice
+	prompt "DHD Control Utility"
+	default BRCM416L05_DHDCTL_DONT_BUILD
+config BRCM416L05_DHDCTL_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_DHDCTL_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_DHDCTL_STATIC_BUILD
+	bool "static"
+endchoice	
+config BRCMSDK416L05_BUILD_DHDCTL
+	string
+	default "dynamic" if BRCM416L05_DHDCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_DHDCTL_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_DHDCTL
+	def_bool y
+
+config BRCMSDK416L05_BUILD_WLHSPOT
+	bool "Wireless HSPOT V2.0"
+
+config BRCMSDK416L05_BUILD_WLVISUALIZATION
+	bool "WiFi Insight"
+
+choice
+	prompt "Wireless Network Authentication Service"
+	default BRCM416L05_NAS_DONT_BUILD
+config BRCM416L05_NAS_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_NAS_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_NAS_STATIC_BUILD
+	bool "static"
+endchoice
+config BRCMSDK416L05_BUILD_NAS
+	string
+	default "dynamic" if BRCM416L05_NAS_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_NAS_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_NAS
+	def_bool y
+
+choice
+	prompt "Wireless LAN configuration method"
+	default BRCMSDK416L05_WLSETUP_NONE
+config BRCMSDK416L05_WLSETUP_WPS
+	bool "WPS"
+config BRCMSDK416L05_WLSETUP_NONE
+	bool "none"
+endchoice
+config BRCMSDK416L05_BUILD_WPS_BTN
+	string
+	default "dynamic" if BRCMSDK416L05_WLSETUP_WPS
+	default ""
+config BRCM416L05_RM_QUOTES_BUILD_WPS_BTN
+	def_bool y
+config BRCMSDK416L05_BUILD_LLTD
+	string
+	default "dynamic" if BRCMSDK416L05_WLSETUP_WPS
+	default ""
+config BRCM416L05_RM_QUOTES_BUILD_LLTD
+	def_bool y
+config BRCMSDK416L05_BUILD_WSC
+	string
+	default "dynamic" if BRCMSDK416L05_WLSETUP_WPS
+	default ""
+config BRCM416L05_RM_QUOTES_BUILD_WSC
+	def_bool y
+
+choice
+	prompt "NVRAM emulation"
+	default BRCM416L05_NVRAM_DONT_BUILD
+config BRCM416L05_NVRAM_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_NVRAM_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_NVRAM_STATIC_BUILD
+	bool "static"
+endchoice
+config BRCMSDK416L05_BUILD_NVRAM
+	string
+	default "dynamic" if BRCM416L05_NVRAM_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_NVRAM_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_NVRAM
+        def_bool y
+
+if BRCMSDK416L05_LINUX_DRIVER_USB_HOST
+	config BRCMSDK416L05_BRCM_DRIVER_WIRELESS_USBAP
+	tristate "USB Dongle Wireless"
+	def_tristate y if BRCMSDK416L05_LINUX_KERNEL_USB_DEVICEFS
+endif
+endmenu # WLAN Selection
+
+menu "Voice/Phone Selection"
+config BRCMSDK416L05_BRCM_DRIVER_PHONE
+	tristate "PHONE"
+choice
+	prompt "Voice application"
+	default BRCM416L05_VODSL_DONT_BUILD
+config BRCM416L05_VODSL_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_VODSL_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_VODSL_STATIC_BUILD
+	bool "static"
+endchoice
+config BRCMSDK416L05_BUILD_VODSL
+	string
+	default "dynamic" if BRCM416L05_VODSL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_VODSL_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_VODSL
+        def_bool y  if BRCM416L05_VODSL_DYNAMIC_BUILD || BRCM416L05_VODSL_STATIC_BUILD
+if BRCM416L05_VODSL_DYNAMIC_BUILD || BRCM416L05_VODSL_STATIC_BUILD
+  if BRCM_DRIVER_BCMPROF
+     config BRCMSDK416L05_BRCM_PROFILER_ENABLED
+	string
+	default "y"
+     config BRCM416L05_RM_QUOTES_BRCM_PROFILER_ENABLED
+	def_bool y
+  endif
+
+config BRCMSDK416L05_BRCM_DRIVER_PCMSHIM
+	string
+	default "m"
+config BRCM416L05_RM_QUOTES_BRCM_DRIVER_PCMSHIM
+	def_bool y
+
+choice
+	prompt "Call signalling protocol"
+	config BRCMSDK416L05_BRCM_APP_PHONE_SIP
+		bool "SIP"
+	config BRCMSDK416L05_BRCM_APP_PHONE_MGCP
+		bool "MGCP"
+	config BRCMSDK416L05_BRCM_APP_PHONE_EPTAPP
+		bool "EPTAPP(NO_CALL_SIGNALLING)"
+endchoice
+
+if BRCMSDK416L05_BRCM_APP_PHONE_SIP
+  config BRCMSDK416L05_BRCM_APP_PHONE
+	string
+	default "sip"
+  config BRCM416L05_RM_QUOTES_BRCM_APP_PHONE
+	def_bool y
+  config BRCMSDK416L05_BUILD_G168
+	bool "G.168 Test Mode"
+  config BRCMSDK416L05_BRCM_VODSL_SRTP
+	bool "Secure RTP Support"
+  config BRCMSDK416L05_BRCM_VODSL_TLS
+	bool "TLS Support"
+
+  choice
+	prompt "SIP CallManager Selection"
+	config BRCMSDK416L05_BRCM_SIP_CMGR_CCTK
+		bool "CallManager_CCTK_2.x"
+	config BRCMSDK416L05_BRCM_CELL_CMGR
+		bool "CallManager_Cellular"
+  endchoice
+# CCTK mode selection
+  if BRCMSDK416L05_BRCM_SIP_CMGR_CCTK
+     choice
+	prompt "SIP CCTK Mode Selection"
+	config BRCMSDK416L05_BRCM_SIP_CCTK_RFC3261
+		bool "RFC3261"
+	config BRCMSDK416L05_BRCM_SIP_CCTK_IMS
+		bool "IMS"
+     endchoice
+  endif # BRCMSDK416L05_BRCM_SIP_CMGR_CCTK
+
+  if BRCMSDK416L05_BRCM_CELL_CMGR
+     config BRCMSDK416L05_BRCM_2G3G_VOICE_SUPPORT
+		bool "2G/3G voice Support"
+  endif # BRCMSDK416L05_BRCM_CELL_CMGR
+
+endif # BRCMSDK416L05_BRCM_APP_PHONE_SIP
+
+if BRCMSDK416L05_BRCM_APP_PHONE_EPTAPP
+  config BRCMSDK416L05_BRCM_APP_PHONE
+	string
+	default "eptapp"
+  config BRCM416L05_RM_QUOTES_BRCM_APP_PHONE
+	def_bool y
+  if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+     config BRCMSDK416L05_BRCM_PBDT_SUPPORT
+	bool "PBDT CLI Support"
+  endif # BRCMSDK416L05_BRCM_6816 || BRCMSDK416L05_BRCM_6828 || BRCMSDK416L05_BRCM_6818 || BRCMSDK416L05_BRCM_6838
+
+  config BRCMSDK416L05_BRCM_TPD_SUPPORT
+	bool "MLT CLI Support"
+endif # BRCMSDK416L05_BRCM_APP_PHONE_EPTAPP
+
+if BRCMSDK416L05_BRCM_APP_PHONE_MGCP
+  config BRCMSDK416L05_BRCM_APP_PHONE
+	string
+	default "mgcp"
+  config BRCM416L05_RM_QUOTES_BRCM_APP_PHONE
+	def_bool y
+endif
+
+config BRCMSDK416L05_BRCM_IDLE_VOICE_SUPPORT
+	bool "Idle voice Support"
+
+config BRCMSDK416L05_BRCM_HAL_CAP_SUPPORT
+	bool "HAL Capture Support"
+
+#
+# List and set LDX application choice.
+#
+#
+# List codec support
+#
+
+config BRCMSDK416L05_BRCM_VOIP_UNI
+	def_bool n
+
+if BRCMSDK416L05_BRCM_6838
+  choice
+	prompt "6838 app configuration selection"
+	config BRCM416L05_6838_BRCM_VOIP_UNI
+		select BRCMSDK416L05_BRCM_VOIP_UNI
+		bool "96838UNI"
+  endchoice
+endif
+
+if BRCMSDK416L05_BRCM_6848
+  choice
+	prompt "6848 app configuration selection"
+	config BRCM416L05_6848_BRCM_VOIP_UNI
+		select BRCMSDK416L05_BRCM_VOIP_UNI
+		bool "96848UNI"
+  endchoice
+endif
+
+if BRCMSDK416L05_BRCM_6362
+  choice
+	prompt "6362 app configuration selection"
+	config BRCM416L05_6362_BRCM_VOIP_UNI
+		select BRCMSDK416L05_BRCM_VOIP_UNI
+		bool "96362UNI"
+  endchoice
+endif
+
+if BRCMSDK416L05_BRCM_63268
+  choice
+	prompt "63268 app configuration selection"
+	config BRCM416L05_63268_BRCM_VOIP_UNI
+		select BRCMSDK416L05_BRCM_VOIP_UNI
+		bool "963268UNI"
+  endchoice
+endif
+
+if BRCMSDK416L05_BRCM_6328
+  choice
+	prompt "6328 app configuration selection"
+	config BRCM416L05_6328_BRCM_VOIP_UNI
+		select BRCMSDK416L05_BRCM_VOIP_UNI
+		bool "96328UNI"
+  endchoice
+endif
+
+if BRCMSDK416L05_BRCM_63138
+  choice
+	prompt "63138 app configuration selection"
+	config BRCM416L05_63138_BRCM_VOIP_UNI
+		select BRCMSDK416L05_BRCM_VOIP_UNI
+		bool "963138UNI"
+  endchoice
+endif
+
+if BRCMSDK416L05_BRCM_63148
+  choice
+	prompt "63148 app configuration selection"
+	config BRCM416L05_63148_BRCM_VOIP_UNI
+		select BRCMSDK416L05_BRCM_VOIP_UNI
+		bool "963148UNI"
+  endchoice
+endif
+
+if BRCMSDK416L05_BRCM_63381
+  choice
+	prompt "63381 app configuration selection"
+	config BRCM416L05_63381_BRCM_VOIP_UNI
+		select BRCMSDK416L05_BRCM_VOIP_UNI
+		bool "963381UNI"
+  endchoice
+endif
+
+config BRCMSDK416L05_BRCM_VOICE_NONDIST
+	def_bool y  if (BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148 || BRCMSDK416L05_BRCM_63381)
+
+config BRCMSDK416L05_BRCM_VOICE_NONDIST
+	def_bool y  if BRCMSDK416L05_BRCM_SMP_EN && (BRCMSDK416L05_BRCM_6838 ||BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6328)
+	bool "Non-distributed DSP" if !(BRCMSDK416L05_BRCM_SMP_EN)
+
+config BRCMSDK416L05_BRCM_G729_DSPTEST_APP
+      bool "Enable G729 TEST application"
+      depends on BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6328
+
+config BRCMSDK416L05_BRCM_6328_NTR
+	bool "Enable NTR"
+	depends on BRCMSDK416L05_BRCM_6328
+
+if BRCMSDK416L05_BRCM_VOIP_UNI
+   config BRCMSDK416L05_BRCM_HW_NTR
+	bool "Enable Hardware NTR"
+	depends on BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148 || BRCMSDK416L05_BRCM_63381
+  
+   config BRCMSDK416L05_BUILD_DECT
+	bool "DECT Support"
+	depends on BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+   if BRCMSDK416L05_BUILD_DECT
+	config BRCMSDK416L05_BRCM_DRIVER_DECT
+		def_tristate m
+     	config BRCMSDK416L05_BRCM_DRIVER_DECTSHIM
+		def_tristate m
+   endif
+
+   config BRCMSDK416L05_BRCM_6362_DECTTEST
+	bool "Low-level DECT TEST"
+	depends on BRCMSDK416L05_BRCM_6362
+   config BRCMSDK416L05_BRCM_63268_DECTTEST
+	bool "Low-level DECT TEST"
+	depends on BRCMSDK416L05_BRCM_63268
+   config BRCMSDK416L05_BRCM_63138_DECTTEST
+	bool "Low-level DECT TEST"
+	depends on BRCMSDK416L05_BRCM_63138
+   config BRCMSDK416L05_BRCM_63148_DECTTEST
+	bool "Low-level DECT TEST"
+	depends on BRCMSDK416L05_BRCM_63148
+
+   config BRCMSDK416L05_BRCM_6362_NTR
+	bool "Enable NTR"
+	depends on BRCMSDK416L05_BRCM_6362
+   config BRCMSDK416L05_BRCM_63268_NTR
+	bool "Enable NTR"
+	depends on BRCMSDK416L05_BRCM_63268
+endif
+
+if BRCMSDK416L05_BRCM_6362_NTR
+     config BRCMSDK416L05_BRCM_6362_NTR_MDM_SUPPORT
+	bool "Enable NTR MDM (Highly Recommended)"
+     choice
+	prompt "NTR Mode - Required Choice"
+	config BRCMSDK416L05_BRCM_6362_NTR_SUPPORT
+		bool "6362Native"
+	config BRCMSDK416L05_BRCM_6362_NTR_SUPPORT_COMP
+		bool "6362Compatibility"
+	config BRCMSDK416L05_BRCM_6362_NTR_SUPPORT_INT
+		bool "6362Internal"
+     endchoice
+endif
+
+if BRCMSDK416L05_BRCM_63268_NTR
+     config BRCMSDK416L05_BRCM_63268_NTR_MDM_SUPPORT
+	bool "Enable NTR MDM (Highly Recommended)"
+     choice
+	prompt "NTR Mode - Required Choice"
+	config BRCMSDK416L05_BRCM_63268_NTR_SUPPORT
+		bool "63268Native"
+	config BRCMSDK416L05_BRCM_63268_NTR_SUPPORT_COMP
+		bool "63268Compatibility"
+	config BRCMSDK416L05_BRCM_63268_NTR_SUPPORT_INT
+		bool "63268Internal"
+	config BRCMSDK416L05_BRCM_63268_NTR_SUPPORT_BONDING
+		bool "63268Native-Bonding"
+	config BRCMSDK416L05_BRCM_63268_NTR_SUPPORT_COMP_BONDING
+		bool "63268Compatibility-Bonding"
+	config BRCMSDK416L05_BRCM_63268_NTR_SUPPORT_INT_BONDING
+		bool "63268Internal-Bonding"
+     endchoice
+endif
+
+if BRCMSDK416L05_BRCM_6328_NTR
+     config BRCMSDK416L05_BRCM_6328_NTR_MDM_SUPPORT
+	bool "Enable NTR MDM (Highly Recommended)"
+     choice
+	prompt "NTR Mode - Required Choice"
+	config BRCMSDK416L05_BRCM_6328_NTR_SUPPORT
+		bool "6328Native"
+	config BRCMSDK416L05_BRCM_6328_NTR_SUPPORT_COMP
+		bool "6328Compatibility"
+	config BRCMSDK416L05_BRCM_6328_NTR_SUPPORT_INT
+		bool "6328Internal"
+     endchoice
+endif
+
+config BRCMSDK416L05_BRCM_VOIP_TO_FXO
+     bool "Support VOIP to FXO calls"
+     depends on BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6328 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148 || BRCMSDK416L05_BRCM_63381
+
+config BRCMSDK416L05_BRCM_VODSL_PSTN_LIFE_LINE_SUPPORT
+      bool "Support PSTN lifeline switch"
+      depends on BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6328 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148 || BRCMSDK416L05_BRCM_63381
+
+config BRCMSDK416L05_BRCM_PSTN_SUPPORT
+      def_bool y
+      depends on BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6328 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148 || BRCMSDK416L05_BRCM_63381
+
+config BRCMSDK416L05_BRCM_VODSL_RANDOMP
+	bool "Support Randomized Port Numbers"
+
+if BRCMSDK416L05_BRCM_APP_PHONE="sip"	
+   config BRCMSDK416L05_BRCM_VODSL_VOICE_ANNOUNCEMENT
+	bool "Support Voice Announcement"
+   config BRCMSDK416L05_BRCM_VODSL_CALL_FEATURE_PERSIST_STORE_SUPPORT
+	bool "Support Saving Voice Call Feature in Flash"
+endif # BRCMSDK416L05_BRCM_APP_PHONE="sip"
+
+if BRCMSDK416L05_BRCM_APP_PHONE="eptapp"
+   config BRCMSDK416L05_BRCM_VODSL_VOICE_ANNOUNCEMENT
+	bool "Support Voice Announcement"
+endif # BRCMSDK416L05_BRCM_APP_PHONE="eptapp"
+
+choice
+	prompt "PCM SLAC vendor selection"
+	config BRCMSDK416L05_BRCM_VRG_SLACVENDOR_CFG_ZARLINK
+		bool "Microsemi"
+	config BRCMSDK416L05_BRCM_VRG_SLACVENDOR_CFG_SILABS
+		bool "SILABS"
+	config BRCMSDK416L05_BRCM_VRG_SLACVENDOR_CFG_ALL
+		bool "All"
+endchoice
+
+choice
+	prompt "Voice Locale Selection"
+	config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_ALL_COUNTRIES
+		bool "All_Countries"
+	config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_CUSTOM
+		bool "Customize"
+endchoice
+
+if BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_CUSTOM
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_NORTH_AMERICA
+	bool "North America"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_AUSTRALIA
+	bool "Australia"
+#  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_AUSTRIA
+#	bool "Austria"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_BELGIUM
+	bool "Belgium"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_BRAZIL
+	bool "Brazil"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_CHILE
+	bool "Chile"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_CHINA
+	bool "China"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_CZECH
+	bool "Czech Republic"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_DENMARK
+	bool "Denmark"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_ETSI
+	bool "ETSI"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_FINLAND
+	bool "Finland"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_FRANCE
+	bool "France"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_GERMANY
+	bool "Germany"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_HUNGARY
+	bool "Hungary"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_INDIA
+	bool "India"
+#  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_IRELAND
+#	bool "Ireland"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_ITALY
+	bool "Italy"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_JAPAN
+	bool "Japan"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_NETHERLANDS
+	bool "Netherlands"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_ZEALAND
+	bool "New Zealand"
+#  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_POLAND
+#	bool "Poland"
+#  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_ROMANIA
+#	bool "Romania"
+#  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_SLOVAKIA
+#	bool "Slovak Republic"
+#  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_SLOVENIA
+#	bool "Republic of Slovenia"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_SPAIN
+	bool "Spain"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_SWEDEN
+	bool "Sweden"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_NORWAY
+	bool "Norway"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_SWITZERLAND
+	bool "Switzerland"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_TR57
+	bool "TR57"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_UK
+	bool "United Kingdom"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_TAIWAN
+	bool "Taiwan"
+  config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_CYPRUS
+	bool "Cyprus"
+endif # BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_CUSTOM
+
+config BRCMSDK416L05_BRCM_VRG_COUNTRY_ALL_PROFILES
+	string
+	default "y" if BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_ALL_COUNTRIES
+	default "n" if !BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_ALL_COUNTRIES
+
+config BRCM416L05_RM_QUOTES_BRCM_VRG_COUNTRY_ALL_PROFILES
+	def_bool y
+endif
+
+if BRCMSDK416L05_BRCM_DRIVER_PHONE=m
+  if BRCMSDK416L05_BRCM_VOICE_NONDIST!=y
+	config BRCMSDK416L05_BRCM_DRIVER_BCMDSP
+		def_tristate m 
+  endif
+endif # BRCMSDK416L05_BRCM_DRIVER_PHONE=m
+endmenu # Voice/Phone Selection
+
+menu "WAN Protocols and VPN"
+choice
+	prompt "PPP Daemon"
+	default BRCM416L05_PPPD_DONT_BUILD
+config BRCM416L05_PPPD_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_PPPD_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_PPPD_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_PPPD_DYNAMIC_BUILD || BRCM416L05_PPPD_STATIC_BUILD
+   config BRCMSDK416L05_BUILD_PPPD
+	string
+	default "dynamic" if BRCM416L05_PPPD_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_PPPD_STATIC_BUILD
+   config BRCM416L05_RM_QUOTES_BUILD_PPPD
+	def_bool y
+endif
+
+config BRCMSDK416L05_PPP_AUTODISCONN
+	bool "Turn on Autodisconn in PPP"
+
+config BRCMSDK416L05_BUILD_WANVLANMUX
+	bool "Support Multiple WAN Connections using VLAN ID (VLAN MUX)"
+
+choice
+	prompt "IPSec"
+	default BRCM416L05_IPSEC_TOOLS_DONT_BUILD
+config BRCM416L05_IPSEC_TOOLS_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_IPSEC_TOOLS_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_IPSEC_TOOLS_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_IPSEC_TOOLS_DYNAMIC_BUILD || BRCM416L05_IPSEC_TOOLS_STATIC_BUILD
+  config BRCMSDK416L05_BUILD_IPSEC_TOOLS
+	string
+	default "dynamic" if BRCM416L05_IPSEC_TOOLS_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_IPSEC_TOOLS_STATIC_BUILD
+  config BRCM416L05_RM_QUOTES_BUILD_IPSEC_TOOLS
+	def_bool y
+endif
+
+if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+  config BRCMSDK416L05_BRCM_DRIVER_SPU
+	tristate "SPU Driver"
+
+choice
+	prompt "SPUCTL"
+	default BRCM416L05_SPUCTL_DONT_BUILD
+	config BRCM416L05_SPUCTL_DONT_BUILD
+		bool "don't build"
+	config BRCM416L05_SPUCTL_DYNAMIC_BUILD
+		bool "dynamic"
+	config BRCM416L05_SPUCTL_STATIC_BUILD
+		bool "static"
+endchoice
+
+if BRCM416L05_SPUCTL_DYNAMIC_BUILD || BRCM416L05_SPUCTL_TOOLS_STATIC_BUILD
+  config BRCMSDK416L05_BUILD_SPUCTL
+	string
+	default "dynamic" if BRCM416L05_SPUCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_SPUCTL_STATIC_BUILD
+  config BRCM416L05_RM_QUOTES_BUILD_SPUCTL
+	def_bool y
+endif
+
+  config BRCMSDK416L05_BRCM_DRIVER_SPU_TEST
+	bool "SPU Test"
+	depends on BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6362
+
+endif # BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6318 || BRCMSDK416L05_BRCM_6328 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_6368 || BRCMSDK416L05_BRCM_6816 || BRCMSDK416L05_BRCM_6818
+
+config BRCMSDK416L05_BUILD_L2TPAC
+	bool "Enable L2TP AC tunnel (Client side)"
+
+config BRCMSDK416L05_BUILD_PPTPAC
+	bool "Enable PPTP AC tunnel (Client side)"
+
+config BRCMSDK416L05_BUILD_ACCEL_PPTP
+	bool "ACCEL_PPTP"
+
+config BRCMSDK416L05_BUILD_GRE_TUNNEL
+	bool "GRE"
+endmenu # "WAN Protocols and VPN"
+
+menu "Firewall, ALGs, and Networking Features"
+
+menu "Netfilter and firewall selection"
+  config BRCMSDK416L05_BRCM_KERNEL_NETFILTER
+	tristate "Netfilter/firewall/mangling/nat"
+
+  config BRCMSDK416L05_BRCM_KERNEL_NF_FIREWALL
+	tristate "Firewall support"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NETFILTER
+  config BRCMSDK416L05_BRCM_KERNEL_NF_MANGLE
+	tristate "Packet mangling support"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NETFILTER
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+	tristate "NAT support"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NETFILTER
+  config BRCMSDK416L05_BRCM_KERNEL_NF_DYNDSCP
+	tristate "Dynamic DSCP mangling support"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NETFILTER
+  config BRCMSDK416L05_BRCM_KERNEL_NF_LAYER7_FILTER
+	tristate "Layer 7 filtering support"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NETFILTER
+
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_FTP
+	tristate "FTP ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_SIP
+	tristate "SIP ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_TFTP
+	tristate "TFTP ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_H323
+	tristate "H323 ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_H323_SIGNAL_PROXY
+	tristate "H323 ALG-SIGNAL PROXY"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_H323
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_IRC
+	tristate "IRC ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_WM
+	tristate "Windows Media Player ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_PT
+	tristate "Port Triggering ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_PPTP
+	tristate "PPTP ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_IPSEC
+	tristate "IPSec ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_RTSP
+	tristate "RTSP ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_SNMP
+	tristate "SNMP ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+  config BRCMSDK416L05_BRCM_KERNEL_NF_NAT_ALG_TALK
+	tristate "TALK ALG"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NF_NAT
+
+  config BRCMSDK416L05_BRCM_KERNEL_NF_LOG
+	tristate "Logging event"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NETFILTER
+  config BRCMSDK416L05_BRCM_KERNEL_NF_PPPREMOTE
+	tristate "Remote access support in PPP IP extension"
+	depends on BRCMSDK416L05_BRCM_KERNEL_NETFILTER
+endmenu # Netfilter and firewall selection
+
+config BRCMSDK416L05_BUILD_CONNTRACK_TOOLS
+	bool "Conntrack-tools"
+if BRCMSDK416L05_BUILD_CONNTRACK_TOOLS
+	config BRCMSDK416L05_BUILD_LIBNFNETLINK
+		def_bool y
+	config BRCMSDK416L05_BUILD_LIBMNL
+		def_bool y
+	config BRCMSDK416L05_BUILD_LIBNETFILTER_QUEUE
+		def_bool y
+	config BRCMSDK416L05_BUILD_LIBNETFILTER_CTIMEOUT
+		def_bool y
+	config BRCMSDK416L05_BUILD_LIBNETFILTER_CTHELPER
+		def_bool y
+	config BRCMSDK416L05_BUILD_LIBNETFILTER_CONNTRACK
+		def_bool y
+endif # BRCMSDK416L05_BUILD_CONNTRACK_TOOLS
+
+choice
+	prompt "IP Firewall"
+	default BRCM416L05_IPTABLES_DONT_BUILD
+config BRCM416L05_IPTABLES_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_IPTABLES_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_IPTABLES_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_IPTABLES_DYNAMIC_BUILD || BRCM416L05_IPTABLES_STATIC_BUILD
+config BRCMSDK416L05_BUILD_IPTABLES
+	string
+	default "dynamic" if BRCM416L05_IPTABLES_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_IPTABLES_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_IPTABLES
+	def_bool y
+endif
+
+choice
+	prompt "Bridge Firewall"
+	default BRCM416L05_EBTABLES_DONT_BUILD
+config BRCM416L05_EBTABLES_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_EBTABLES_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_EBTABLES_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_EBTABLES_DYNAMIC_BUILD || BRCM416L05_EBTABLES_STATIC_BUILD
+config BRCMSDK416L05_BUILD_EBTABLES
+	string
+	default "dynamic" if BRCM416L05_EBTABLES_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_EBTABLES_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_EBTABLES
+	def_bool y
+endif
+
+choice
+	prompt "Dynamic ALG Load/Unload Helper"
+	default BRCM416L05_DYNAHELPER_DONT_BUILD
+config BRCM416L05_DYNAHELPER_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_DYNAHELPER_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_DYNAHELPER_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_DYNAHELPER_DYNAMIC_BUILD || BRCM416L05_DYNAHELPER_STATIC_BUILD
+config BRCMSDK416L05_BUILD_DYNAHELPER
+	string
+	default "dynamic" if BRCM416L05_DYNAHELPER_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_DYNAHELPER_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_DYNAHELPER
+	def_bool y
+endif
+
+choice
+	prompt "Time of Day restrictions"
+	default BRCM416L05_TOD_DONT_BUILD
+config BRCM416L05_TOD_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_TOD_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_TOD_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_TOD_DYNAMIC_BUILD || BRCM416L05_TOD_STATIC_BUILD
+config BRCMSDK416L05_BUILD_TOD
+	string
+	default "dynamic" if BRCM416L05_TOD_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_TOD_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_TOD
+	def_bool y
+endif
+
+choice
+	prompt "Url Filtering"
+	default BRCM416L05_URLFILTER_DONT_BUILD
+config BRCM416L05_URLFILTER_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_URLFILTER_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_URLFILTER_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_URLFILTER_DYNAMIC_BUILD || BRCM416L05_URLFILTER_STATIC_BUILD
+config BRCMSDK416L05_BUILD_URLFILTER
+	string
+	default "dynamic" if BRCM416L05_URLFILTER_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_URLFILTER_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_URLFILTER
+	def_bool y
+endif
+
+choice
+	prompt "Bridge Control Utility"
+	default BRCM416L05_BRCTL_DONT_BUILD
+config BRCM416L05_BRCTL_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_BRCTL_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_BRCTL_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_BRCTL_DYNAMIC_BUILD || BRCM416L05_BRCTL_STATIC_BUILD
+config BRCMSDK416L05_BUILD_BRCTL
+	string
+	default "dynamic" if BRCM416L05_BRCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_BRCTL_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_BRCTL
+	def_bool y
+endif
+
+choice
+	prompt "DHCP(server and client)"
+	default BRCM416L05_UDHCP_DONT_BUILD
+config BRCM416L05_UDHCP_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_UDHCP_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_UDHCP_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_UDHCP_DYNAMIC_BUILD || BRCM416L05_UDHCP_STATIC_BUILD
+config BRCMSDK416L05_BUILD_UDHCP
+	string
+	default "dynamic" if BRCM416L05_UDHCP_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_UDHCP_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_UDHCP
+	def_bool y
+config BRCMSDK416L05_BUILD_UDHCP_RELAY
+	bool "Support for DHCP relay"
+config BRCMSDK416L05_BRCM_DHCP_SERVER_DEFAULT
+	bool "Server enabled by default"
+config BRCMSDK416L05_BRCM_DHCP_CLIENT_DEFAULT
+	bool "Client enabled by default"
+endif
+
+choice
+	prompt "SNTP support"
+	default BRCM416L05_SNTP_DONT_BUILD
+config BRCM416L05_SNTP_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_SNTP_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_SNTP_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_SNTP_DYNAMIC_BUILD || BRCM416L05_SNTP_STATIC_BUILD
+config BRCMSDK416L05_BUILD_SNTP
+	string
+	default "dynamic" if BRCM416L05_SNTP_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_SNTP_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_SNTP
+	def_bool y
+endif
+
+choice
+	prompt "DNS Relay"
+	default BRCMSDK416L05_DRELAY_DPROXY
+	config BRCMSDK416L05_DRELAY_DNSPROBE
+		bool "DNS-Probe"
+	config BRCMSDK416L05_DRELAY_DPROXY
+		bool "DNS-Proxy"
+	config BRCMSDK416L05_DRELAY_DPROXYWITHPROBE
+		bool "DNS-Proxy-with-Probe"
+	config BRCMSDK416L05_DRELAY_NONE
+		bool "None"
+endchoice
+config BRCMSDK416L05_BUILD_DNSPROBE
+	string
+	default "dynamic" if BRCMSDK416L05_DRELAY_DNSPROBE
+	default ""
+config BRCM416L05_RM_QUOTES_BUILD_DNSPROBE
+	def_bool y
+config BRCMSDK416L05_BUILD_DPROXY
+	string
+	default "dynamic" if  BRCMSDK416L05_DRELAY_DPROXY || BRCMSDK416L05_DRELAY_DPROXYWITHPROBE
+	default "" if BRCMSDK416L05_DRELAY_DNSPROBE
+	default ""
+config BRCM416L05_RM_QUOTES_BUILD_DPROXY
+	def_bool y
+config BRCMSDK416L05_BUILD_DPROXYWITHPROBE
+	string
+	default "dynamic" if BRCMSDK416L05_DRELAY_DPROXYWITHPROBE
+	default ""
+config BRCM416L05_RM_QUOTES_BUILD_DPROXYWITHPROBE
+	def_bool y
+
+choice
+	prompt "DNS Redirector"
+	default BRCM416L05_DNSSPOOF_DONT_BUILD
+config BRCM416L05_DNSSPOOF_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_DNSSPOOF_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_DNSSPOOF_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_DNSSPOOF_DYNAMIC_BUILD || BRCM416L05_DNSSPOOF_STATIC_BUILD
+config BRCMSDK416L05_BUILD_DNSSPOOF
+	string
+	default "dynamic" if BRCM416L05_DNSSPOOF_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_DNSSPOOF_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_DNSSPOOF
+	def_bool y
+endif
+
+choice
+	prompt "Dynamic DNS support"
+	default BRCM416L05_DDNSD_DONT_BUILD
+config BRCM416L05_DDNSD_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_DDNSD_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_DDNSD_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_DDNSD_DYNAMIC_BUILD || BRCM416L05_DDNSD_STATIC_BUILD
+config BRCMSDK416L05_BUILD_DDNSD
+	string
+	default "dynamic" if BRCM416L05_DDNSD_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_DDNSD_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_DDNSD
+	def_bool y
+endif
+
+if BRCM416L05_VCONFIG_DYNAMIC_BUILD || !BRCM416L05_VCONFIG_STATIC_BUILD
+  config BRCMSDK416L05_BUILD_SUPERDMZ
+	bool "Advanced DMZ"
+endif 
+
+choice
+	prompt "Iproute2 Utility for Policy Routing"
+	default BRCM416L05_IPROUTE2_DONT_BUILD
+config BRCM416L05_IPROUTE2_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_IPROUTE2_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_IPROUTE2_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_IPROUTE2_DYNAMIC_BUILD || BRCM416L05_IPROUTE2_STATIC_BUILD
+config BRCMSDK416L05_BUILD_IPROUTE2
+	string
+	default "dynamic" if BRCM416L05_IPROUTE2_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_IPROUTE2_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_IPROUTE2
+	def_bool y
+endif
+
+choice
+	prompt "Dynamic Routing Daemon RIP"
+	default BRCM416L05_ZEBRA_DONT_BUILD
+config BRCM416L05_ZEBRA_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_ZEBRA_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_ZEBRA_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_ZEBRA_DYNAMIC_BUILD || BRCM416L05_ZEBRA_STATIC_BUILD
+config BRCMSDK416L05_BUILD_ZEBRA
+	string
+	default "dynamic" if BRCM416L05_ZEBRA_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_ZEBRA_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_ZEBRA
+	def_bool y
+endif
+
+choice
+	prompt "Multicast Proxy (mcpd)"
+	default BRCM416L05_MCAST_PROXY_DONT_BUILD
+config BRCM416L05_MCAST_PROXY_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_MCAST_PROXY_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_MCAST_PROXY_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_MCAST_PROXY_DYNAMIC_BUILD || BRCM416L05_MCAST_PROXY_STATIC_BUILD
+config BRCMSDK416L05_BUILD_MCAST_PROXY
+	string
+	default "dynamic" if BRCM416L05_MCAST_PROXY_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_MCAST_PROXY_STATIC_BUILD
+config BRCM416L05_RM_QUOTES_BUILD_MCAST_PROXY
+	def_bool y
+endif
+
+config BRCMSDK416L05_BUILD_MCAST_SNOOP
+	bool "Multicast Snooping"
+
+config BRCMSDK416L05_BUILD_PCP
+	bool "PCP UPnP IWF"
+
+config BRCMSDK416L05_BCM_JUMBO_FRAME
+	bool "Jumbo Frame Support (for Enet/Xtm/GPON only)"
+if BRCMSDK416L05_BCM_JUMBO_FRAME
+config BRCMSDK416L05_BCM_MAX_MTU_SIZE
+	int "Support for Maximum Payload Size"
+	depends on BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+
+config BRCMSDK416L05_BCM_USER_DEFINED_DEFAULT_MTU
+	bool "User Defined Default MTU"
+config BRCMSDK416L05_BCM_USER_DEFINED_DEFAULT_MTU_SIZE
+	int "User Defined Default MTU Size"
+	depends on BRCMSDK416L05_BCM_USER_DEFINED_DEFAULT_MTU
+config BRCMSDK416L05_BCM_IGNORE_BRIDGE_MTU
+	bool "Ignore Bridge MTU while forwarding in accelerated path"
+endif
+
+config BRCMSDK416L05_BRCM_DRIVER_TM
+	tristate "Broadcom Traffic Manager"
+if (BRCMSDK416L05_BRCM_DRIVER_TM=y || BRCMSDK416L05_BRCM_DRIVER_TM=m)
+	config BRCMSDK416L05_BUILD_BCMTM
+	bool "Broadcom Traffic Manager CLI Support"
+endif
+
+menu "Traffic Control selection"
+  config BRCMSDK416L05_BRCM_KERNEL_NETQOS
+	bool "Traffic Control"
+  config BRCMSDK416L05_BRCM_TC_RATE_LIMIT
+	bool "Rate Limit"
+	select BRCMSDK416L05_BRCM_KERNEL_NETQOS
+  config BRCMSDK416L05_BRCM_TC_POLICING
+	bool "Policing"
+	select BRCMSDK416L05_BRCM_KERNEL_NETQOS
+endmenu # Traffic Control selection
+
+config BRCMSDK416L05_BUILD_DPI
+	bool "Enable Deep Packet Inspection"
+
+if BRCMSDK416L05_BUILD_DPI
+   config BRCM_DRIVER_DPI
+	def_tristate m
+endif
+
+endmenu # Firewall, ALGs, and Networking Features
+
+menu "Packet Acceleration"
+
+config BRCMSDK416L05_BRCM_DRIVER_PKTFLOW
+	tristate "Packet Flow Accelerator"
+
+if BRCMSDK416L05_BRCM_DRIVER_PKTFLOW
+  config BRCMSDK416L05_BRCM_DRIVER_PKTFLOW_IPV6
+	bool "IPv6 Support"
+  config BRCMSDK416L05_BRCM_DRIVER_PKTFLOW_MCAST
+	bool "Multicast Support"
+  config BRCMSDK416L05_BRCM_DRIVER_PKTFLOW_GRE
+	bool "GRE Support"
+  config BRCMSDK416L05_BRCM_DRIVER_PKTFLOW_L2TP
+	bool "L2TP Support"
+  config BRCMSDK416L05_BRCM_DRIVER_PKTFLOW_FEATURE
+	bool "Per Packet Modification Support"
+  config BRCMSDK416L05_BRCM_DRIVER_PKTFLOW_DEBUG
+	bool "Debug Support"
+  choice
+	prompt "Flow Cache Control Utility"
+	default BRCM416L05_FCCTL_DONT_BUILD
+  config BRCM416L05_FCCTL_DONT_BUILD
+	bool "don't build"
+  config BRCM416L05_FCCTL_DYNAMIC_BUILD
+	bool "dynamic"
+  config BRCM416L05_FCCTL_STATIC_BUILD
+	bool "static"
+  endchoice
+  if BRCM416L05_FCCTL_STATIC_BUILD || BRCM416L05_FCCTL_DYNAMIC_BUILD
+     config BRCMSDK416L05_BUILD_FCCTL
+	string
+	default "dynamic" if BRCM416L05_FCCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_FCCTL_STATIC_BUILD
+     config BRCM416L05_RM_QUOTES_BUILD_FCCTL
+	def_bool y
+  endif
+  if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6362
+      config BRCMSDK416L05_BRCM_DRIVER_FAP
+	tristate "FAP Support"
+      if BRCMSDK416L05_BRCM_DRIVER_FAP && BRCMSDK416L05_BRCM_DRIVER_BPM
+	config BRCMSDK416L05_BRCM_DRIVER_FAP_GSO
+		bool "GSO Support"
+	config BRCMSDK416L05_BRCM_DRIVER_FAP_GSO_LOOPBACK
+		bool "FAP GSO LOOPBACK Support for WLAN"
+		depends on BRCMSDK416L05_BRCM_DRIVER_FAP_GSO
+      endif
+  endif
+
+  config BRCMSDK416L05_BRCM_DRIVER_FAP_LAYER2
+	bool "FAP Layer 2 Bridge"
+	depends on BRCMSDK416L05_BRCM_DRIVER_FAP
+
+  if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6318 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_6328
+	config BRCMSDK416L05_BRCM_DRIVER_ARL
+		tristate "ARL Support"
+		depends on !BRCMSDK416L05_BUILD_LANVLAN
+  	endif
+  if BRCMSDK416L05_BRCM_DRIVER_RDPA
+	config BRCMSDK416L05_BRCM_DRIVER_PKTRUNNER
+		tristate "Runner Packet Accelerator"
+  endif
+
+  config BRCMSDK416L05_BRCM_DRIVER_PKTRUNNER_GSO
+    bool "Runner GSO Support"
+	depends on BRCMSDK416L05_BRCM_DRIVER_PKTRUNNER
+
+  config BRCMSDK416L05_BRCM_DRIVER_PKTRUNNER_MCAST_DNAT
+    bool "Multicast DNAT Support (IPv4 only)"
+	depends on BRCMSDK416L05_BRCM_DRIVER_PKTRUNNER && (BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148)
+
+  config BRCMSDK416L05_BRCM_DRIVER_RTP_SEQ_CHECK
+    bool "RTP Sequence Check Support (IPv4 mcast only)"
+	depends on BRCMSDK416L05_BRCM_DRIVER_FAP || BRCMSDK416L05_BRCM_DRIVER_RDPA
+endif
+
+config BRCMSDK416L05_BRCM_DRIVER_FBOND
+	tristate "Packet Flow Bonding (experimental)"
+
+if BRCMSDK416L05_BRCM_DRIVER_FBOND
+   config BRCMSDK416L05_BRCM_DRIVER_FBOND_DEBUG
+	bool "Debug Support"
+  choice
+	prompt "Flow Bonding Control Utility"
+	default BRCM416L05_FBCTL_DONT_BUILD
+  config BRCM416L05_FBCTL_DONT_BUILD
+	bool "don't build"
+  config BRCM416L05_FBCTL_DYNAMIC_BUILD
+	bool "dynamic"
+  config BRCM416L05_FBCTL_STATIC_BUILD
+	bool "static"
+  endchoice
+  if BRCM416L05_FBCTL_DYNAMIC_BUILD || BRCM416L05_FBCTL_STATIC_BUILD
+     config BRCMSDK416L05_BUILD_FBCTL
+	string
+	default "dynamic" if BRCM416L05_FBCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_FBCTL_STATIC_BUILD
+     config BRCM416L05_RM_QUOTES_BUILD_FBCTL
+	def_bool y
+  endif
+endif
+
+config BRCMSDK416L05_BRCM_DRIVER_WIFI_FORWARDING_DRV
+        tristate "WIFI Forwarding Driver"
+		depends on BRCMSDK416L05_BRCM_DRIVER_FAP || BRCMSDK416L05_BRCM_DRIVER_RDPA
+		
+config BRCMSDK416L05_BRCM_DRIVER_WFD_CHAIN_SUPPORT
+        bool "WFD TX Chainning Support"
+        depends on BRCMSDK416L05_BRCM_DRIVER_WIFI_FORWARDING_DRV
+
+config BRCMSDK416L05_BRCM_DRIVER_DHD_RUNNER
+        bool "DHD Runner Acceleration Support"
+        depends on BRCMSDK416L05_BRCM_DRIVER_RDPA
+
+endmenu
+
+if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+menu "Runner Data Path API Selection"
+
+config BRCMSDK416L05_BUILD_RDPA
+	bool "Runner Data Path API"
+	default y
+
+if BRCMSDK416L05_BUILD_RDPA
+   config BRCMSDK416L05_BRCM_DRIVER_BDMF
+	def_tristate m
+   config BRCMSDK416L05_BRCM_DRIVER_RDPA
+	def_tristate m
+   config BRCMSDK416L05_BRCM_DRIVER_RDPA_GPL
+	def_tristate m
+ if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+   config BRCMSDK416L05_BRCM_DRIVER_RDPA_MW
+	def_tristate m
+ endif
+   config BRCMSDK416L05_BRCM_DRIVER_RDPA_DRV
+	def_tristate m
+   config BRCMSDK416L05_BUILD_BDMF_SHELL
+	bool "BDMF Shell"
+   if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+      config BRCMSDK416L05_BRCM_DRIVER_GPON_STACK
+	tristate "GPON Stack Driver"
+      config BRCMSDK416L05_BRCM_DRIVER_RDPA_BRIDGE
+	tristate "Runner Bridge Driver"
+      config BRCMSDK416L05_BRCM_DRIVER_LASER
+	tristate "GPON Laser Driver"
+   endif
+   if BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+      config BRCMSDK416L05_BUILD_DSL_RUNNER
+	def_bool y
+   endif
+endif
+endmenu
+endif
+
+menu "Buffer Pool Manager and Ingress QoS"
+
+config BRCMSDK416L05_BRCM_DRIVER_BPM
+	tristate "Buffer Pool Manager (BPM)"
+if BRCMSDK416L05_BRCM_DRIVER_BPM
+   config BRCMSDK416L05_BRCM_BUF_MEM_PRCNT
+	int "Buffer Memory as % of Total Memory"
+  choice
+	prompt "BPM Control Utility"
+	default BRCM416L05_BPMCTL_DONT_BUILD
+  config BRCM416L05_BPMCTL_DONT_BUILD
+	bool "don't build"
+  config BRCM416L05_BPMCTL_DYNAMIC_BUILD
+	bool "dynamic"
+  config BRCM416L05_BPMCTL_STATIC_BUILD
+	bool "static"
+  endchoice
+  if BRCM416L05_BPMCTL_DYNAMIC_BUILD || BRCM416L05_BPMCTL_STATIC_BUILD
+     config BRCMSDK416L05_BUILD_BPMCTL
+	string
+	default "dynamic" if BRCM416L05_BPMCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_BPMCTL_STATIC_BUILD
+     config BRCM416L05_RM_QUOTES_BUILD_BPMCTL
+	def_bool y
+  endif
+endif
+
+config BRCMSDK416L05_BRCM_DRIVER_INGQOS
+	tristate "Ingress QoS"
+
+if BRCMSDK416L05_BRCM_DRIVER_INGQOS
+  choice
+	prompt "Ingress QoS Control Utility"
+	default BRCM416L05_IQCTL_DONT_BUILD
+  config BRCM416L05_IQCTL_DONT_BUILD
+	bool "don't build"
+  config BRCM416L05_IQCTL_DYNAMIC_BUILD
+	bool "dynamic"
+  config BRCM416L05_IQCTL_STATIC_BUILD
+	bool "static"
+  endchoice
+  if BRCM416L05_IQCTL_DYNAMIC_BUILD || BRCM416L05_IQCTL_STATIC_BUILD
+     config BRCMSDK416L05_BUILD_IQCTL
+	string
+	default "dynamic" if BRCM416L05_IQCTL_DYNAMIC_BUILD
+	default "static"  if BRCM416L05_IQCTL_STATIC_BUILD
+     config BRCM416L05_RM_QUOTES_BUILD_IQCTL
+	def_bool y
+  endif
+endif
+endmenu
+
+menu "Modular Software (JVM, OSGI, OSGIEE, LinuxEE, LinuxPFP)"
+config BRCMSDK416L05_BUILD_JVM_CLASSPATH
+	bool "Enable Java Classpath"
+config BRCMSDK416L05_BUILD_JVM_JAMVM
+	bool "Enable JamVM JVM"
+
+if BRCMSDK416L05_BUILD_JVM_JAMVM
+   config BRCMSDK416L05_JAMVM_MIN_HEAP_SIZE
+	int "Initial Heap Size for JamVM (in kbytes, 4000=4M)"
+	default 4000
+   config BRCMSDK416L05_JAMVM_MAX_HEAP_SIZE
+	int "Maximum Heap Size for JamVM (in kbytes, 10000=10M)"
+	default 10000
+   config BRCMSDK416L05_JAMVM_STACK_SIZE_PER_THREAD
+	int "Stack Size of Each Thread (in kbytes, 256=256K)"
+	default 256
+endif
+
+config BRCMSDK416L05_BUILD_OSGI_FELIX
+	bool "Enable Felix OSGI"
+
+config BRCMSDK416L05_BUILD_MODSW_EE
+	bool "Enable TR-181 Execution Environments"
+
+if BRCMSDK416L05_BUILD_MODSW_EE
+   config BRCMSDK416L05_BUILD_MODSW_OSGIEE
+	bool "Enable OSGI Execution Env (EE)"
+   config BRCMSDK416L05_BUILD_MODSW_LINUXEE
+	bool "Enable Linux Execution Env (EE)"
+endif
+
+config BRCMSDK416L05_BUILD_MODSW_LINUXPFP
+	bool "Enable Linux Primary Firmware Patch (PFP)"
+
+config BRCMSDK416L05_BUILD_MODSW_CLI
+	bool "Enable Managment of Modular SW from CLI"
+
+config BRCMSDK416L05_BUILD_MODSW_WEBUI
+	bool "Enable Managment of Modular SW from WebUI"
+
+if BRCMSDK416L05_BUILD_MODSW_WEBUI
+   config BRCMSDK416L05_BUILD_MODSW_WEBUI_ADMIN
+	bool "Allow Admin access (LAN side)"
+   config BRCMSDK416L05_BUILD_MODSW_WEBUI_SUPPORT
+	bool "Allow Support access (WAN side)"
+endif
+endmenu
+
+############################################################################33
+
+menu "ZyXEL Features"
+config BRCMSDK416L05_ZYXEL_USE_CE_SROM_FOR_ELISA_PROJECT
+	bool 'Use CE power srom for VMG3925B'
+	def_bool n
+
+config BRCMSDK416L05_ZYXEL_WIND_ITALY_CUSTOMIZATION
+	bool 'Customization for WIND Italy'
+	def_bool n
+
+config BRCMSDK416L05_ZYXEL_ISKON_CUSTOMIZATION
+	bool 'Customization for ISKON'
+	def_bool n
+
+config BRCMSDK416L05_ZYXEL_HT_CUSTOMIZATION
+	bool 'Customization for Hawaiian Telcom'
+	def_bool n
+
+config BRCMSDK416L05_ZYXEL_ALLOW_IGMPv2_JOIN_WITH_SSM
+	bool 'Allow IGMPv2 Join with SSM'
+	def_bool n
+
+config BRCMSDK416L05_ZYXEL_FIX_WAN_MAC
+	bool 'ZyXEL Fix WAN MAC'
+
+config BRCMSDK416L05_BUILD_ZCFG
+	bool 'Use ZyXEL Configuration Mgmt System (ZCFG)'
+	default y if ZYXEL_SUPPORT_ZCFG
+
+config BRCMSDK416L05_ZCFG_TR98_COMPATIBLE
+	bool 'ZCFG is compatible with TR098'
+	depends on BRCMSDK416L05_BUILD_ZCFG
+
+config BRCMSDK416L05_ZYXEL
+	bool 'ZyXEL Product'
+
+config BRCMSDK416L05_ZYXEL_L2_WAN_SAME_MAC
+	bool "Assign same MAC (5th) for all L2 WAN interface"
+	def_bool n
+
+##############################################################################
+## Please create a new project in ascending order as best you can.
+##############################################################################
+if BRCMSDK416L05_ZYXEL
+   if BRCMSDK416L05_BRCM_63268
+   choice
+	prompt "ZyXEL product"
+	config BRCMSDK416L05_ZYXEL_3925
+		bool "VMG3925"
+	config BRCMSDK416L05_ZYXEL_VMG3925_B10C
+		bool "VMG3925-B10C"
+	config BRCMSDK416L05_ZYXEL_VMG3925_B30C
+		bool "VMG3925-B30C"
+	config BRCMSDK416L05_ZYXEL_3926
+		bool "VMG3926"
+	config BRCMSDK416L05_ZYXEL_3926B
+		bool "VMG3926B"
+	config BRCMSDK416L05_ZYXEL_5313
+		bool "VMG5313"
+	config BRCMSDK416L05_ZYXEL_5948
+		bool "VMG5948"
+	config BRCMSDK416L05_ZYXEL_8924_B10A
+		bool "VMG8924-B10A"
+	config BRCMSDK416L05_ZYXEL_8924
+		bool "VMG8924-B10B"
+	config BRCMSDK416L05_ZYXEL_8924_B10D
+		bool "VMG8924-B10D"
+	config BRCMSDK416L05_ZYXEL_8924_B30D
+		bool "VMG8924-B30D"
+	config BRCMSDK416L05_ZYXEL_8948
+		bool "VMG8948"
+	config BRCMSDK416L05_ZYXEL_9823
+		bool "VMG9823"
+   endchoice
+
+   config BRCMSDK416L05_ZYXEL_PRODUCT
+	string
+	default "VMG3925"  if BRCMSDK416L05_ZYXEL_3925
+	default "VMG3925_B10C"  if BRCMSDK416L05_ZYXEL_VMG3925_B10C
+	default "VMG3925_B30C"  if BRCMSDK416L05_ZYXEL_VMG3925_B30C
+	default "VMG3926"  if BRCMSDK416L05_ZYXEL_3926
+	default "VMG3926B"  if BRCMSDK416L05_ZYXEL_3926B
+	default "VMG5313"  if BRCMSDK416L05_ZYXEL_5313
+	default "VMG5948"  if BRCMSDK416L05_ZYXEL_5948
+	default "VMG8924_B10A"  if BRCMSDK416L05_ZYXEL_8924_B10A
+	default "VMG8924"  if BRCMSDK416L05_ZYXEL_8924
+	default "VMG8924_B10D"  if BRCMSDK416L05_ZYXEL_8924_B10D
+	default "VMG8924_B30D"  if BRCMSDK416L05_ZYXEL_8924_B30D
+	default "VMG8948"  if BRCMSDK416L05_ZYXEL_8948
+	default "VMG9823"  if BRCMSDK416L05_ZYXEL_9823
+   config BRCM416L05_RM_QUOTES_ZYXEL_PRODUCT
+	def_bool y
+
+   choice
+	prompt "Select board:"
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG3925_B10A if BRCMSDK416L05_ZYXEL_3925
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG3925_B10C if BRCMSDK416L05_ZYXEL_VMG3925_B10C
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG3925_B30C if BRCMSDK416L05_ZYXEL_VMG3925_B30C
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG3926_B10A if BRCMSDK416L05_ZYXEL_3926
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG3926B_B10A if BRCMSDK416L05_ZYXEL_3926B
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG5313_B30A if BRCMSDK416L05_ZYXEL_5313
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG5948_B10A if BRCMSDK416L05_ZYXEL_5948
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG8924_B10A if BRCMSDK416L05_ZYXEL_8924_B10A
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG8924_B10B if BRCMSDK416L05_ZYXEL_8924
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG8924_B10D if BRCMSDK416L05_ZYXEL_8924_B10D
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG8924_B30D if BRCMSDK416L05_ZYXEL_8924_B30D
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG8948_B10A if BRCMSDK416L05_ZYXEL_8948
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG9823_B10A if BRCMSDK416L05_ZYXEL_9823
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG3925_B10A
+		bool "VMG3925-B10A"
+		depends on BRCMSDK416L05_ZYXEL_3925
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG3925_B10C
+		bool "VMG3925-B10C"
+		depends on BRCMSDK416L05_ZYXEL_VMG3925_B10C
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG3925_B30C
+		bool "VMG3925-B30C"
+		depends on BRCMSDK416L05_ZYXEL_VMG3925_B30C
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG3926_B10A
+		bool "VMG3926-B10A"
+		depends on BRCMSDK416L05_ZYXEL_3926
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG3926B_B10A
+		bool "VMG3926-B10B"
+		depends on BRCMSDK416L05_ZYXEL_3926B
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG5313_B10A
+		bool "VMG5313-B10A"
+		depends on BRCMSDK416L05_ZYXEL_5313
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG5313_B30A
+		bool "VMG5313-B30A"
+		depends on BRCMSDK416L05_ZYXEL_5313
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG5948_B10A
+		bool "VMG5948-B10A"
+		depends on BRCMSDK416L05_ZYXEL_5948
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG8924_B10A
+		bool "VMG8924-B10A"
+		depends on BRCMSDK416L05_ZYXEL_8924_B10A
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG8924_B10B
+		bool "VMG8924-B10B"
+		depends on BRCMSDK416L05_ZYXEL_8924
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG8924_B10D
+		bool "VMG8924-B10D"
+		depends on BRCMSDK416L05_ZYXEL_8924_B10D
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG8924_B30D
+		bool "VMG8924-B30D"
+		depends on BRCMSDK416L05_ZYXEL_8924_B30D
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG8948_B10A
+		bool "VMG8948-B10A"
+		depends on BRCMSDK416L05_ZYXEL_8948
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG9823_B10A
+		bool "VMG9823-B10A"
+		depends on BRCMSDK416L05_ZYXEL_9823
+   endchoice
+   endif
+
+   if BRCMSDK416L05_BRCM_63138
+   choice
+	prompt "ZyXEL product"
+	config BRCMSDK416L05_ZYXEL_3086
+		bool "FMG3086"
+	config BRCMSDK416L05_ZYXEL_3586
+		bool "FMG3586"
+	config BRCMSDK416L05_ZYXEL_VMG8823_B10B
+		bool "VMG8823-B10B"
+	config BRCMSDK416L05_ZYXEL_VMG8823_B30B
+		bool "VMG8823-B30B"
+	config BRCMSDK416L05_ZYXEL_VMG8823_B50B
+		bool "VMG8823-B50B"
+	config BRCMSDK416L05_ZYXEL_VMG8823_B60B
+		bool "VMG8823-B60B"
+	config BRCMSDK416L05_ZYXEL_XMG3512
+		bool "XMG3512"
+	config BRCMSDK416L05_ZYXEL_XMG3563_B10A
+		bool "XMG3563-B10A"
+   endchoice
+
+   config BRCMSDK416L05_ZYXEL_PRODUCT
+	string
+	default "FMG3086"  if BRCMSDK416L05_ZYXEL_3086
+	default "FMG3586"  if BRCMSDK416L05_ZYXEL_3586
+	default "VMG8823_B10B"  if BRCMSDK416L05_ZYXEL_VMG8823_B10B
+	default "VMG8823_B30B"  if BRCMSDK416L05_ZYXEL_VMG8823_B30B
+	default "VMG8823_B50B"  if BRCMSDK416L05_ZYXEL_VMG8823_B50B
+	default "VMG8823_B60B"  if BRCMSDK416L05_ZYXEL_VMG8823_B60B
+	default "XMG3512"  if BRCMSDK416L05_ZYXEL_XMG3512
+	default "XMG3563_B10A"  if BRCMSDK416L05_ZYXEL_XMG3563_B10A
+   config BRCM416L05_RM_QUOTES_ZYXEL_PRODUCT
+	def_bool y
+
+   choice
+	prompt "Select board:"
+	default BRCMSDK416L05_ZYXEL_BOARD_FMG3086_B10A if BRCMSDK416L05_ZYXEL_3086
+	default BRCMSDK416L05_ZYXEL_BOARD_FMG3586_B10A if BRCMSDK416L05_ZYXEL_3586
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG8823_B10B if BRCMSDK416L05_ZYXEL_VMG8823_B10B
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG8823_B30B if BRCMSDK416L05_ZYXEL_VMG8823_B30B
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG8823_B50B if BRCMSDK416L05_ZYXEL_VMG8823_B50B
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG8823_B60B if BRCMSDK416L05_ZYXEL_VMG8823_B60B
+	default BRCMSDK416L05_ZYXEL_BOARD_XMG3512_B10A if BRCMSDK416L05_ZYXEL_XMG3512
+	default BRCMSDK416L05_ZYXEL_BOARD_XMG3563_B10A if BRCMSDK416L05_ZYXEL_XMG3563_B10A
+	config BRCMSDK416L05_ZYXEL_BOARD_FMG3086_B10A
+		bool "FMG3086_B10A"
+		depends on BRCMSDK416L05_ZYXEL_3086
+	config BRCMSDK416L05_ZYXEL_BOARD_FMG3586_B10A
+		bool "FMG3586_B10A"
+		depends on BRCMSDK416L05_ZYXEL_3586
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG8823_B10B
+		bool "VMG8823_B10B"
+		depends on BRCMSDK416L05_ZYXEL_VMG8823_B10B
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG8823_B30B
+		bool "VMG8823_B30B"
+		depends on BRCMSDK416L05_ZYXEL_VMG8823_B30B
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG8823_B50B
+		bool "VMG8823_B50B"
+		depends on BRCMSDK416L05_ZYXEL_VMG8823_B50B
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG8823_B60B
+		bool "VMG8823_B60B"
+		depends on BRCMSDK416L05_ZYXEL_VMG8823_B60B
+	config BRCMSDK416L05_ZYXEL_BOARD_XMG3512_B10A
+		bool "XMG3512_B10A"
+		depends on BRCMSDK416L05_ZYXEL_XMG3512
+	config BRCMSDK416L05_ZYXEL_BOARD_XMG3563_B10A
+		bool "XMG3563_B10A"
+		depends on BRCMSDK416L05_ZYXEL_XMG3563_B10A
+   endchoice
+
+   config BRCMSDK416L05_ZYXEL_SUPPORT_ETHWAN_AS_LAN
+	bool "Support ETHWAN can config as LAN for BCM63138"
+	default n
+
+   endif
+
+   if BRCMSDK416L05_BRCM_63381
+   choice
+	prompt "ZyXEL product"
+	config BRCMSDK416L05_ZYXEL_1312
+		bool "VMG1312"
+	config BRCMSDK416L05_ZYXEL_5313B
+		bool "VMG5313B"
+   endchoice
+
+   config BRCMSDK416L05_ZYXEL_PRODUCT
+	string
+	default "VMG1312"  if BRCMSDK416L05_ZYXEL_1312
+	default "VMG5313B"  if BRCMSDK416L05_ZYXEL_5313B
+   config BRCM416L05_RM_QUOTES_ZYXEL_PRODUCT
+	def_bool y
+
+   choice
+	prompt "Select board:"
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG1312_B10D if BRCMSDK416L05_ZYXEL_1312
+	default BRCMSDK416L05_ZYXEL_BOARD_VMG5313B_B10B if BRCMSDK416L05_ZYXEL_5313B
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG1312_B10D
+		bool "VMG1312_B10D"
+		depends on BRCMSDK416L05_ZYXEL_1312
+	config BRCMSDK416L05_ZYXEL_BOARD_VMG5313B_B10B
+		bool "VMG5313_B10B"
+		depends on BRCMSDK416L05_ZYXEL_5313B
+   endchoice
+   endif
+
+   if BRCMSDK416L05_BRCM_6838
+   choice
+	prompt "ZyXEL product"
+	config BRCMSDK416L05_ZYXEL_96838GWOV
+		bool "96838GWOV"
+   endchoice
+
+   config BRCMSDK416L05_ZYXEL_PRODUCT
+	string
+	default "96838GWOV"  if BRCMSDK416L05_ZYXEL_96838GWOV
+   config BRCM416L05_RM_QUOTES_ZYXEL_PRODUCT
+	def_bool y
+
+   choice
+	prompt "Select board:"
+	default BRCMSDK416L05_ZYXEL_BOARD_BCM96838GWOV if BRCMSDK416L05_ZYXEL_96838GWOV
+	config BRCMSDK416L05_ZYXEL_BOARD_BCM96838GWOV
+		bool "96838GWOV"
+		depends on BRCMSDK416L05_ZYXEL_96838GWOV
+   endchoice
+   endif
+
+   config BRCMSDK416L05_ZYPRJ_HARDWARE_VERSION
+	int "ZyXEL hardware version for the board(SR1 is 1, SR2 is 2,...)"
+	default 2 if BRCMSDK416L05_ZYXEL_5313
+	default 1 if BRCMSDK416L05_ZYXEL_5948 || BRCMSDK416L05_ZYXEL_8948
+	default 0
+   
+   config BRCMSDK_ZYXEL_EXTERNAL_DECT
+	def_bool y
+	depends on BUILD_ZYXEL_PHONE_DECT_SUPPORT
+	select BRCMSDK416L05_ZYXEL_EXTERNAL_DECT if BRCMSDK416L05_ZYXEL_5948 || BRCMSDK416L05_ZYXEL_8948
+
+   config BRCMSDK416L05_ZYXEL_EXTERNAL_DECT
+	bool "Support DSPG DECT module"
+	default y
+	depends on BRCMSDK416L05_ZYXEL_5948 || BRCMSDK416L05_ZYXEL_8948
+
+   config BRCMSDK416L05_ZYXEL_TEST_EXTERNAL_DECT
+	bool "Testing external DECT module"
+	default y
+	depends on BRCMSDK416L05_ZYXEL_EXTERNAL_DECT
+
+   config BRCMSDK416L05_ZYXEL_DEDICATED_START_ENDPOINT_NUM
+	int "The start num of endpoint to initial with off-hook state"
+	default 2
+        depends on BRCMSDK416L05_ZYXEL_TEST_EXTERNAL_DECT
+
+   config BRCMSDK416L05_ZYXEL_DEDICATED_END_ENDPOINT_NUM
+	int "The end num of endpoint to initial with off-hook state"
+	default 3
+        depends on BRCMSDK416L05_ZYXEL_TEST_EXTERNAL_DECT
+
+   config BRCMSDK416L05_ZYXEL_PHONE_FXS_PHONE_PORT_SWAP
+	bool "Support FXS Phone Port Swap (exchange the only two Local FXS Phone Ports)"
+	default y
+	depends on BRCMSDK416L05_ZYXEL_8948 || BRCMSDK416L05_ZYXEL_8924 || BRCMSDK416L05_ZYXEL_VMG8823_B10B || BRCMSDK416L05_ZYXEL_VMG8823_B30B || BRCMSDK416L05_ZYXEL_VMG8823_B50B || BRCMSDK416L05_ZYXEL_VMG8823_B60B || BRCMSDK416L05_ZYXEL_8924_B10D || BRCMSDK416L05_ZYXEL_8924_B30D || BRCMSDK416L05_ZYXEL_9823
+
+   config BRCMSDK_ZYXEL_VOICE_KSOCKET_RTP
+	def_bool y
+	depends on BUILD_ZYXEL_VOICE_KSOCKET_RTP
+	select BRCMSDK416L05_ZYXEL_VOICE_KSOCKET_RTP
+
+   config BRCMSDK416L05_ZYXEL_VOICE_KSOCKET_RTP
+	bool "Support Kernel Socket for the VoIP Media Stream (including RTP, RTCP & UDPTL/T38)"
+	default y
+	depends on BUILD_ZYXEL_VOICE_KSOCKET_RTP
+	help
+	    This config MUST be SYNCed to the application one: make menuconfig --> ZyXEL Voice (ZyIMS VoIP) -->
+	    Support Kernel Socket function for the VoIP Media Stream (including RTP, RTCP & UDPTL/T38)
+	    (CONFIG_BUILD_ZYXEL_VOICE_KSOCKET_RTP).
+
+   choice
+	prompt "LED pattern of 2.4G/5G WiFi"
+	default BRCMSDK416L05_ZYXEL_WIFI_LED_PATTERN_SUNRISE
+	depends on BRCMSDK416L05_ZYXEL_8948
+	config BRCMSDK416L05_ZYXEL_WIFI_LED_PATTERN_STANDARD
+		bool "Standard"
+	config BRCMSDK416L05_ZYXEL_WIFI_LED_PATTERN_SUNRISE
+		bool "Sunrise"
+   endchoice
+
+   config BRCMSDK416L05_ZYXEL_WIFI_LED_PATTERN
+	int
+	default 0 if BRCMSDK416L05_ZYXEL_WIFI_LED_PATTERN_STANDARD
+	default 1 if BRCMSDK416L05_ZYXEL_WIFI_LED_PATTERN_SUNRISE
+	default 0
+	depends on BRCMSDK416L05_ZYXEL_8948
+
+   config BRCMSDK416L05_ZYXEL_PARTITION
+	bool "ZyXEL customized flash partition"
+
+   config BRCMSDK416L05_ZYXEL_AT_COMMANDS
+	bool "ZyXEL add AT commands into CFE"
+
+   config BRCMSDK416L05_ZYXEL_DEBUG_CFERAM
+	bool "ZyXEL build CFERAM debug image for ATRB"
+
+   config BRCMSDK416L05_ZYXEL_DEBUG_ADDR
+	hex "CFERAM address"
+	default 0xd00000 if BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+	default 0x80401000
+	depends on BRCMSDK416L05_ZYXEL_DEBUG_CFERAM
+   
+   config BRCMSDK416L05_ZYXEL_RSA_FORMAT
+	bool "ZyXEL customized firmware image(RAS.bin) and upgrade mechainsm."
+
+   config BRCMSDK416L05_BUILD_ZYBTNCHK
+	bool "ZyXEL testing tool for Button"
+
+   config BRCMSDK416L05_BUILD_ZYLEDCTL
+	bool "ZyXEL testing tool for LED"
+
+   config BRCMSDK416L05_ZYXEL_SFP_HIGHER_PRIORITY
+	bool 'ZyXEL SFP has higher priority than ether wan in Crossbar model'
+	default n
+
+   config BRCMSDK416L05_ZYXEL_KERNEL_RESET_BTN
+	bool "Enable reset button function in kernel space"
+
+   config BRCMSDK416L05_NAND_READBACK_CHECK
+	bool "Enable NAND Readback Check function"
+	
+   config BRCMSDK416L05_ZYXEL_SW_INTERNET_LED_BLINK
+	bool "Enable SW Internet LED blinking control"
+	
+   config BRCMSDK416L05_ZYXEL_FW_UPGRADE_POWER_LED_BLINK
+	bool "Support FW Upgrade Power LED blinking control"
+	default n
+	
+   config BRCMSDK416L05_ZYXEL_SUPPORT_3G_LED_GREEN_AND_RED
+	bool "Support Internet LED Blink Orange When 3G Is Up"
+	default n
+	
+   choice
+	prompt "ZyXEL X-TUR_Customization"
+	config BRCMSDK416L05_NO_XTUR_CUSTOMIZATION
+		bool "No Customization"
+	config BRCMSDK416L05_SUNRISE_XTUR_CUSTOMIZATION
+		bool "Sunrise"
+   endchoice
+	
+   config BRCMSDK416L05_ZYXEL_FORCE_WIFI_SROM
+    bool 'ZyXEL Force WiFi srom from software(/etc/wlan/bcmXXXX_map.bin)'
+
+   config BRCMSDK416L05_ZYXEL_WL_PROBRESP_FLTER
+    bool 'ZyXEL wireless probe response filter'	
+
+endif
+endmenu # "ZyXEL Features"
+
+############################################################################33
+if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+menu "Secure Boot"
+#
+# Secure Boot Stuff.
+#
+comment "Secure Boot"
+
+config BRCMSDK416L05_BUILD_SECURE_BOOT
+	bool "Enable Secure Boot"
+
+config BRCMSDK416L05_SECURE_BOOT_NUM_BOOT_BLKS
+	int "Number of boot blocks ( max: 8 )"
+	depends on BRCMSDK416L05_BUILD_SECURE_BOOT && (BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148)
+
+config BRCMSDK416L05_SECURE_BOOT_NUM_BTLDR_IMAGES
+	int "Number of secure boot btldr images ( max: 3 less than the number of boot blocks )"
+	depends on BRCMSDK416L05_BUILD_SECURE_BOOT && (BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148)	
+
+config BRCM416L05_SECURE_BOOT_NOR_BOOT_SIZE
+	int "Nor Flash: boot sector size"
+	depends on BRCMSDK416L05_BUILD_SECURE_BOOT && (BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_63381 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148)
+	default 128 if BRCMSDK416L05_BRCM_63268
+	default 192 if BRCMSDK416L05_BRCM_63381
+	default 384 if BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+
+endmenu # "Secure Boot"
+endif
+############################################################################33
+
+menu "Other Features"
+#
+# Power Management Stuff.
+#
+comment "PWRMNGT Driver (remains enabled on 6318)"
+	depends on BRCMSDK416L05_BRCM_6318
+
+config BRCMSDK416L05_BRCM_DRIVER_PWRMNGT
+	def_tristate m if BRCMSDK416L05_BRCM_6318
+	tristate "PWRMNGT Driver" if !BRCMSDK416L05_BRCM_6318
+
+choice
+	prompt "PWRCTL"
+	default BRCM416L05_PWRCTL_DONT_BUILD
+	depends on BRCMSDK416L05_BRCM_6318 || BRCMSDK416L05_BRCM_DRIVER_PWRMNGT=m
+config BRCM416L05_PWRCTL_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_PWRCTL_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_PWRCTL_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_PWRCTL_DYNAMIC_BUILD || BRCM416L05_PWRCTL_STATIC_BUILD
+	config BRCMSDK416L05_BUILD_PWRCTL
+		string
+		default "dynamic" if BRCM416L05_PWRCTL_DYNAMIC_BUILD
+		default "static"  if BRCM416L05_PWRCTL_STATIC_BUILD
+	config BRCM416L05_RM_QUOTES_BUILD_PWRCTL
+		def_bool y
+endif
+
+comment "Adaptive Voltage Scaling (remains enabled on 6318)"
+	depends on BRCMSDK416L05_BRCM_6318
+
+config BRCMSDK416L05_BRCM_AVS_PWRSAVE
+	def_bool y if BRCMSDK416L05_BRCM_6318
+	bool "Adaptive Voltage Scaling" if ((BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6362) || (BRCMSDK416L05_BRCM_6816 && !BRCMSDK416L05_BUILD_MOCAWAN)) && BRCMSDK416L05_BRCM_DRIVER_PWRMNGT=m
+
+if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+   config BRCMSDK416L05_BRCM_DRIVER_SIM_CARD
+	tristate "Sim Card"
+   config BRCMSDK416L05_BRCM_DRIVER_PMD
+	string
+	default "m"
+   config BRCMSDK416L05_RDPA_IFILTER_SUPPORT
+	def_bool y
+   config BRCMSDK416L05_BRCM_MINIGW
+	bool "MINIMAL DDR GW"
+	default "n"
+endif
+
+config BRCMSDK416L05_BRCM_ETH_PWRSAVE
+	bool "Ethernet Auto Power Down and Sleep"
+	depends on !BRCMSDK416L05_BRCM_60333
+
+if !(BRCMSDK416L05_BRCM_60333 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_6328)
+	config BRCMSDK416L05_BRCM_ENERGY_EFFICIENT_ETHERNET
+	bool "Energy Efficient Ethernet"
+endif
+
+if BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+   config BRCMSDK416L05_BRCM_ETH_DEEP_GREEN_MODE
+	bool "Ethernet Deep Green Mode"
+endif
+
+if !(BRCMSDK416L05_BBRCM_6318 || BRCMSDK416L05_BBRCM_63138 || BRCMSDK416L05_BBRCM_63148 || BRCMSDK416L05_BBRCM_60333)
+   config BRCMSDK416L05_BRCM_HOSTMIPS_PWRSAVE
+	bool "Automated MIPS clk divider"
+endif
+
+if BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+   config BRCMSDK416L05_BRCM_CPU_FREQ_PWRSAVE
+	bool "Automated CPUFREQ clk divider"
+   config BRCMSDK416L05_BRCM_CPU_FREQ_TARGET_LOAD
+   	int "Interactive governor target load"
+	default 20
+	depends on BRCMSDK416L05_BRCM_CPU_FREQ_PWRSAVE
+endif
+
+if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_6328 || BRCMSDK416L05_BRCM_63381
+   config BRCMSDK416L05_BRCM_DDR_SELF_REFRESH_PWRSAVE
+	bool "DDR Self-Refresh Power Saving"
+endif
+
+if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6318 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_6328 || BRCMSDK416L05_BRCM_6318 || BRCMSDK416L05_BRCM_60333 || BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148 || BRCMSDK416L05_BRCM_63381
+   config BRCMSDK416L05_BUILD_WL_IDLE_PWRSAVE
+	bool "PCIe L1 Active State Power Management"
+endif
+
+if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6318
+   choice
+	prompt "Shutdown Internal 1.2V Regulator"
+	default BRCMSDK416L05_BRCM_1V2REG_AUTO_SHUTDOWN
+	config BRCMSDK416L05_BRCM_1V2REG_AUTO_SHUTDOWN
+		bool "Auto"
+	config BRCMSDK416L05_BRCM_1V2REG_ALWAYS_SHUTDOWN
+		bool "Always"
+	config BRCMSDK416L05_BRCM_1V2REG_NEVER_SHUTDOWN
+		bool "Never"
+   endchoice
+endif
+if BRCMSDK416L05_BRCM_6362
+   config BRCMSDK416L05_BRCM_STANDBY
+	bool "CPLD Standby Timer"
+endif
+
+if BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+   config BRCMSDK416L05_BUILD_BMU
+	bool "Battery Management Unit"
+   choice
+	prompt "Battery Configuration"
+	default BRCMSDK416L05_BUILD_BMU_0CELL
+	config BRCMSDK416L05_BUILD_BMU_2CELL
+		bool "2-Cell"
+	config BRCMSDK416L05_BUILD_BMU_3CELL
+		bool "3-Cell"
+	config BRCMSDK416L05_BUILD_BMU_0CELL
+		bool "none"
+   endchoice
+endif
+
+config  BRCMSDK416L05_BUILD_TMS
+	bool "Trunk Management (802.3ah, 802.1ag, Y.1731)"
+
+if BRCMSDK416L05_BRCM_63268 || BRCMSDK416L05_BRCM_6362 || BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+   config BRCMSDK416L05_BRCM_DRIVER_TRNG
+	tristate "TRNG Driver"
+   choice
+	prompt "RNGD"
+	default BRCM416L05_RNGD_DONT_BUILD
+   config BRCM416L05_RNGD_DONT_BUILD
+	bool "don't build"
+   config BRCM416L05_RNGD_DYNAMIC_BUILD
+	bool "dynamic"
+   config BRCM416L05_RNGD_STATIC_BUILD
+	bool "static"
+   endchoice
+   if BRCM416L05_RNGD_DYNAMIC_BUILD || BRCM416L05_RNGD_STATIC_BUILD
+	config BRCMSDK416L05_BUILD_RNGD
+		string
+		default "dynamic" if BRCM416L05_RNGD_DYNAMIC_BUILD
+		default "static"  if BRCM416L05_RNGD_STATIC_BUILD
+	config BRCM416L05_RM_QUOTES_BUILD_RNGD
+		def_bool y
+   endif
+endif
+
+config BRCMSDK416L05_BUILD_AUTODETECTION
+	bool "Enable Connection Auto Detection"
+config BRCMSDK416L05_BUILD_LEDCTL
+	bool "LED Control Utility"
+config BRCMSDK416L05_BUILD_BACKUP_PSI
+	bool "Suport Backup Config File"
+choice
+	prompt "BACKUP mode"
+	default BRCMSDK416L05_BUILD_BACKUP_PSI_MIRROR_MODE
+	depends on BRCMSDK416L05_BUILD_BACKUP_PSI
+config BRCMSDK416L05_BUILD_BACKUP_PSI_MIRROR_MODE
+	bool "MIRROR"
+config BRCMSDK416L05_BUILD_BACKUP_PSI_DEVICE_DEFAULT
+	bool "DEVICE_DEFAULT"
+endchoice
+config BRCMSDK416L05_BUILD_PSICTL
+	bool "Build PSICTL utility"
+config BRCMSDK416L05_COMPRESSED_CONFIG_FILE
+	bool "Enable Compressed Config File"
+config BRCMSDK416L05_CMS_CONFIG_COMPAT
+	bool "Enable backward compatibility of CMS Config Files"
+config BRCMSDK416L05_CMS_CONFIG_IGNORE_UNRECOGNIZED
+	bool "Ignore unrecognized objects, params, and attrs in CMS Config Files"
+
+choice
+	prompt "Internet Printing Protocol support"
+	default BRCM416L05_IPPD_DONT_BUILD
+config BRCM416L05_IPPD_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_IPPD_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_IPPD_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_IPPD_DYNAMIC_BUILD || BRCM416L05_IPPD_STATIC_BUILD
+	config BRCMSDK416L05_BUILD_IPPD
+		string
+		default "dynamic" if BRCM416L05_IPPD_DYNAMIC_BUILD
+		default "static"  if BRCM416L05_IPPD_STATIC_BUILD
+	config BRCM416L05_RM_QUOTES_BUILD_IPPD
+		def_bool y
+endif
+
+config BRCMSDK416L05_BUILD_DLNA
+	bool "DLNA support"
+
+config BRCMSDK416L05_BUILD_HOMEPLUG
+	bool "HomePlug support"
+
+if BRCMSDK416L05_BUILD_HOMEPLUG
+if !BRCMSDK416L05_BRCM_60333
+choice
+	prompt "Select the external HomePlug chip"
+	default BRCM416L05_BRCM_HOMEPLUG_EXT_CHIP_60333
+config BRCM416L05_BRCM_60333-BRCM-60500
+	bool "60333-60500"
+config BRCM416L05_BRCM_HOMEPLUG_EXT_CHIP_60333
+	bool "Ext 60333"
+config BRCM416L05_BRCM_60321
+	bool "60321"
+config BRCM416L05_BRCM_HOMEPLUG_EXT_CHIP_60321	
+	bool "Ext 60321"
+endchoice
+endif
+if BRCMSDK416L05_BRCM_60333
+config BRCM416L05_BUILD_PLC_L2UPGRADE
+	bool "Enable L2 Upgrade"
+endif
+endif
+
+config BRCMSDK416L05_BUILD_IEEE1905
+	bool "IEEE1905 support"
+
+if BRCMSDK416L05_BUILD_IEEE1905
+   config BRCMSDK416L05_BUILD_IEEE1905_GOLDENNODE
+	bool "IEEE1905 Golden Node"
+
+   config BRCMSDK416L05_BUILD_IEEE1905_REGISTRAR
+	bool "IEEE1905 Registrar"
+
+   config BRCMSDK416L05_BRCM_1905_TOPOLOGY_WEB_PAGE
+	bool "Topology Web Page"
+	
+   config BRCMSDK416L05_BRCM_1905_FM
+	bool "Flow Manager Support (experimental)"
+
+if BRCMSDK416L05_BRCM_1905_FM 
+   config BRCMSDK416L05_BRCM_1905_AUTO_WDS
+	bool "Auto-connect WDS"
+	depends on BRCMSDK416L05_BRCM_DRIVER_WIRELESS
+endif
+endif
+
+choice
+	prompt "SSL and Certificate"
+	default BRCM416L05_CERT_DYNAMIC_BUILD  if BRCMSDK416L05_BRCM_APP_PHONE_SIP
+	default BRCM416L05_CERT_DONT_BUILD
+config BRCM416L05_CERT_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_CERT_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_CERT_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_CERT_DYNAMIC_BUILD || BRCM416L05_CERT_STATIC_BUILD
+	config BRCMSDK416L05_BUILD_CERT
+		string
+		default "dynamic" if BRCM416L05_CERT_DYNAMIC_BUILD
+		default "static"  if BRCM416L05_CERT_STATIC_BUILD
+	config BRCM416L05_RM_QUOTES_BUILD_CERT
+		def_bool y
+endif
+
+config BRCMSDK416L05_BUILD_OCF_LINUX
+	bool "Build OCF Linux"
+	depends on BRCMSDK416L05_BUILD_CERT && (BRCMSDK416L05_BRCM_63148 || BRCMSDK416L05_BRCM_63138)
+config BRCMSDK416L05_BRCM_DRIVER_OCF
+	depends on BRCMSDK416L05_BUILD_OCF_LINUX
+	def_tristate m
+
+comment "Default Configuration"
+
+config BRCMSDK416L05_BRCM_DEFAULTCFG
+	string "File Name"
+
+if BRCMSDK416L05_BUILD_BRCM_INTERNAL && BRCMSDK416L05_BRCM_6328
+   config BRCMSDK416L05_BUILD_TST24_UTILS
+	bool "'Build TST24 Support"
+endif
+# Time Synchronization
+if BRCMSDK416L05_BRCM_6838 || BRCMSDK416L05_BRCM_6848
+  # Driver
+  config BRCMSDK416L05_BRCM_DRIVER_TIME_SYNC
+	tristate "Time Synchronization"
+  if BRCMSDK416L05_BRCM_DRIVER_TIME_SYNC
+     # GPON ToDD
+     config BRCMSDK416L05_BRCM_GPON_TODD
+	bool "Support GPON ToDD"
+     # PTP 1588
+     config BRCMSDK416L05_BRCM_PTP_1588
+	bool "Support PTP 1588"
+
+     # Sync Clock: 8KHz
+     config BRCM416L05_BRCM_TIME_SYNC_8KHZ
+	bool "Support Sync Clock: 8KHz"
+
+     # Sync Signal: PON Unstable
+     config BRCM416L05_BRCM_TIME_SYNC_PON_UNSTABLE
+	bool "Support Sync Signal: PON Unstable"
+  endif # if BRCMSDK416L05_BRCM_DRIVER_TIME_SYNC
+endif
+
+config BRCMSDK416L05_BUILD_LIBJSONC
+	bool "LIBJSONC library"
+config BRCMSDK416L05_BUILD_LIBXML2
+	bool "LIBXML2 library"
+config BRCMSDK416L05_BUILD_LIBSQLITE
+	bool "LIBSQLite library"
+config BRCMSDK416L05_BUILD_LIBSQLITE
+	bool "LIBCAP library"
+
+config BRCMSDK416L05_BRCM_USER_SSP
+	bool "Userspace Stack Smashing Protection support"
+choice
+	prompt "Select the Stack Smashing Protection Coverage Level"
+	default BRCMSDK416L05_BRCM_SSP_LEVEL_MIN
+	depends on BRCMSDK416L05_BRCM_USER_SSP
+	config BRCMSDK416L05_BRCM_SSP_LEVEL_MIN
+		bool "Minmum"
+	config BRCMSDK416L05_BRCM_SSP_LEVEL_TYP
+		bool "Typical"
+	config BRCMSDK416L05_BRCM_SSP_LEVEL_MAX
+		bool "Maximum"
+endchoice
+
+config BRCMSDK416L05_BUILD_LXC
+	bool "[experimental] Support Linux Containers (LXC)"
+
+config BRCMSDK416L05_BUILD_QRCODE
+	bool "QR Code Support"
+
+config BRCMSDK416L05_BRCM_DRIVER_M2M_DMA
+	bool "M2M DMA Support"
+	depends on BRCMSDK416L05_BRCM_63138
+
+config BRCMSDK416L05_BUILD_BCM_RECVFILE
+	bool "Recvfile support"
+
+config BRCMSDK416L05_BCM_SPEEDYGET
+	bool "wget speed test"
+
+endmenu
+
+menu "WPAN Features"
+config BRCMSDK416L05_BUILD_BLUETOOTH_LIB
+	bool "Bluetooth Library"
+config BRCMSDK416L05_BRCM_DRIVER_BLUETOOTH_USB
+	tristate "Bluetooth USB Driver"
+	depends on BRCMSDK416L05_BUILD_BLUETOOTH_LIB
+config BRCMSDK416L05_BRCM_BLUETOOTH_FIRMWARE_FILE
+	string "Bluetooth Firmware"
+	depends on BRCMSDK416L05_BUILD_BLUETOOTH_LIB
+
+config BRCMSDK416L05_BUILD_NFC_LIB
+	bool "NFC Library"
+if BRCMSDK416L05_BUILD_NFC_LIB
+config BRCMSDK416L05_BRCM_DRIVER_NFC
+	tristate "Broadcom NFC HW I2C Driver"
+	depends on BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+choice
+	prompt "NFC application"
+	default BRCMSDK416L05_BRCM_NFCAPP_NONE
+	config BRCMSDK416L05_BRCM_NFCAPP_NFCAPP
+		bool "nfcapp"
+	config BRCMSDK416L05_BRCM_NFCAPP_NFCD
+		bool "nfcd"
+	config BRCMSDK416L05_BRCM_NFCAPP_TAP
+		bool "tap"
+	config BRCMSDK416L05_BRCM_NFCAPP_NONE
+		bool "none"
+endchoice
+config BRCMSDK416L05_BUILD_NFC_APP
+	string
+	default "nfcapp"  if BRCMSDK416L05_BRCM_NFCAPP_NFCAPP
+	default "nfcd"  if BRCMSDK416L05_BRCM_NFCAPP_NFCD
+	default "tap"  if BRCMSDK416L05_BRCM_NFCAPP_TAP
+	default ""  if BRCMSDK416L05_BRCM_NFCAPP_NONE
+config BRCM416L05_RM_QUOTES_BUILD_NFC_APP
+	def_bool y
+endif
+endmenu
+
+menu "Management Protocols and User Interface Selection"
+
+config BRCMSDK416L05_BRCM_DRIVER_SERIAL
+	bool "SERIAL Port Driver"
+
+config BRCMSDK416L05_BUILD_CONSOLED
+	bool "consoled"
+
+config BRCMSDK416L05_BUILD_CLI_MENU
+	bool "Support Menu Driven Interface"
+
+config BRCMSDK416L05_BUILD_CLI_CMD
+	bool "Support Command Line Interface"
+
+if BRCMSDK416L05_BRCM_DRIVER_FAP
+   config BRCMSDK416L05_BUILD_FAPCTL
+	bool "FAP CLI Support"
+endif
+
+if BRCMSDK416L05_BRCM_DRIVER_RDPA
+   config BRCMSDK416L05_BUILD_RDPACTL
+	bool "RDPA CLI Support"
+endif
+
+if BRCMSDK416L05_BRCM_DRIVER_ARL
+   config BRCMSDK416L05_BUILD_ARLCTL
+	bool "ARL CLI Support"
+endif
+
+# Hmm, we only ask about telnetd and sshd if CLI is built,
+# but we ask about consoled even when there is no CLI.
+# Should telnetd and sshd also be independent of the CLI?
+if BRCMSDK416L05_BUILD_CLI_MENU || BRCMSDK416L05_BUILD_CLI_CMD
+   config BRCMSDK416L05_BUILD_TELNETD
+	bool "Telnet"
+   config BRCMSDK416L05_BUILD_SSHD
+	bool "SSHD (Secure Shell Server)"
+   if BRCMSDK416L05_BUILD_SSHD
+	config BRCMSDK416L05_BUILD_SSHD_MIPS_GENKEY
+		bool "SSHD Key Generation on target"
+   endif
+   config BRCMSDK416L05_BRCM_MAX_BSD_PTP
+	int "Maximum Sessions for Telnet and SSH(BSD Pseudo Terminals)"
+endif
+
+choice
+	prompt "httpd"
+	default BRCMSDK416L05_BUILD_HTTPD_NONE
+	config BRCMSDK416L05_BUILD_HTTPD
+		bool "basic"
+	config BRCMSDK416L05_BUILD_HTTPD_SSL
+		bool "SSL"
+	config BRCMSDK416L05_BUILD_HTTPD_BASIC_SSL
+		bool "basic+SSL"
+	config BRCMSDK416L05_BUILD_HTTPD_NONE
+		bool "none"
+endchoice
+
+if BRCMSDK416L05_BUILD_HTTPD || BRCMSDK416L05_BUILD_HTTPD_SSL
+   config BRCMSDK416L05_WEB_POPUP
+	bool "Display HTML page in pop-up window"
+endif
+
+config BRCMSDK416L05_BUILD_QUICKSETUP
+	bool "Quick Setup" if (BRCMSDK416L05_BUILD_HTTPD || BRCMSDK416L05_BUILD_HTTPD_SSL || BRCMSDK416L05_BUILD_HTTPD_BASIC_SSL) && BRCMSDK416L05_BUILD_ATMWAN
+	def_bool n
+
+config BRCMSDK416L05_BRCM_CPU_MEMORY_WEB_PAGE
+	bool "CPU & Memory Web Page"
+
+menu "WebUI language selection"
+choice
+	prompt "Supported language"
+	default BRCMSDK416L05_BRCM_LANG_EN
+	config BRCMSDK416L05_BRCM_LANG_EN
+		bool "English"
+	config BRCMSDK416L05_BRCM_LANG_CN
+		bool "Simplified_Chinese"
+	config BRCMSDK416L05_BRCM_LANG_TW
+		bool "Traditional_Chinese"
+	config BRCMSDK416L05_BRCM_LANG_KR
+		bool "Korean"
+endchoice
+config BRCMSDK416L05_BRCM_WEBUI_LANG
+	string
+	default "en_US"  if BRCMSDK416L05_BRCM_LANG_EN
+	default "zh_CN"  if BRCMSDK416L05_BRCM_LANG_CN
+	default "zh_TW"  if BRCMSDK416L05_BRCM_LANG_TW
+	default "ko_KR"  if BRCMSDK416L05_BRCM_LANG_KR
+config BRCM416L05_RM_QUOTES_BRCM_WEBUI_LANG
+	def_bool y
+endmenu
+
+choice
+	prompt "TR69 Management protocol"
+	default BRCMSDK416L05_MGMT_NONE
+	config BRCMSDK416L05_MGMT_TR69C
+		bool "TR69"
+	config BRCMSDK416L05_MGMT_TR69C_BCM_SSL
+		bool "TR69_BCM_SSL"
+	config BRCMSDK416L05_MGMT_TR69C_SSL
+		bool "TR69_SSL"
+	config BRCMSDK416L05_MGMT_NONE
+		bool "none"
+endchoice
+
+config BRCMSDK416L05_BUILD_TR69C
+	string
+	default "dynamic"  if BRCMSDK416L05_MGMT_TR69C
+	default ""
+config BRCM416L05_RM_QUOTES_BUILD_TR69C
+	def_bool y
+
+config BRCMSDK416L05_BUILD_TR69C_SSL
+	string
+	default "dynamic"  if BRCMSDK416L05_MGMT_TR69C_SSL
+	default ""
+config BRCM416L05_RM_QUOTES_BUILD_TR69C_SSL
+	def_bool y
+
+config BRCMSDK416L05_BUILD_TR69C_BCM_SSL
+	string
+	default "dynamic"  if BRCMSDK416L05_MGMT_TR69C_BCM_SSL
+	default ""
+config BRCM416L05_RM_QUOTES_BUILD_TR69C_BCM_SSL
+	def_bool y
+
+config BRCMSDK416L05_BRCM_CERT_FILE
+	string "Certificate file" if BRCMSDK416L05_MGMT_TR69C_BCM_SSL
+	default ""
+
+config BRCM416L05_RM_QUOTES_BRCM_CERT_FILE
+	def_bool y
+
+if BRCMSDK416L05_MGMT_TR69C_SSL || BRCMSDK416L05_MGMT_TR69C || BRCMSDK416L05_MGMT_TR69C_BCM_SSL
+   config BRCMSDK416L05_BUILD_TR69_XBRCM
+	bool "BRCM_PROPRIETARY"
+   config BRCMSDK416L05_BUILD_TR69_UPLOAD
+	bool "RPC_UPLOAD"
+   config BRCMSDK416L05_BUILD_TR69_QUEUED_TRANSFERS
+	bool "RPC_QUEUED_TRANSFERS"
+   config BRCMSDK416L05_BUILD_TR69_TR143
+	bool "TR143"
+   config BRCMSDK416L05_BUILD_TR69_PERIODIC_STATISTICS
+	bool "TR157 Periodic Statistics Support"
+   config BRCMSDK416L05_BUILD_TR69_VENDOR_RPC
+	bool "VENDOR SPECIFIC RPC"
+   config BRCMSDK416L05_BUILD_TR69_AUTONOMOUS_TRANSFER_COMPLETE_RPC
+	bool "RPC_AUTONOMOUS_TRANSFER_COMPLETE"
+endif
+
+config BRCMSDK416L05_BUILD_XMPP
+	bool "Extensible Messaging and Presence Protocol (XMPP)"
+
+config BRCMSDK416L05_BUILD_UPNP_IGD_HTTP_CONNREQ
+	bool "UPnP IGD and HTTP Connection Requests"
+
+choice
+	prompt "SNMP Management protocol"
+	default BRCM416L05_SNMP_DONT_BUILD
+config BRCM416L05_SNMP_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_SNMP_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_SNMP_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_SNMP_DYNAMIC_BUILD || BRCM416L05_SNMP_STATIC_BUILD
+	config BRCMSDK416L05_BUILD_SNMP
+		string
+		default "dynamic" if BRCM416L05_SNMP_DYNAMIC_BUILD
+		default "static"  if BRCM416L05_SNMP_STATIC_BUILD
+	config BRCM416L05_RM_QUOTES_BUILD_SNMP
+		def_bool y
+endif
+
+if BRCM416L05_SNMP_DYNAMIC_BUILD || BRCM416L05_SNMP_STATIC_BUILD
+   config BRCMSDK416L05_BUILD_SNMP_SET
+	bool "set operation"
+#   config BRCMSDK416L05_BUILD_SNMP_ADSL_MIB
+#	bool "ADSL mib"
+#   config BRCMSDK416L05_BUILD_SNMP_AT_MIB
+#	bool "AT mib"
+#   config BRCMSDK416L05_BUILD_SNMP_ATM_MIB
+#	bool "ATM mib"
+    config BRCMSDK416L05_BUILD_SNMP_BRIDGE_MIB
+	bool "qBridge and pBridge mib"
+#    config BRCMSDK416L05_BUILD_SNMP_ICMP_MIB
+#	bool "ICMP mib"
+#    config BRCMSDK416L05_BUILD_SNMP_IP_MIB
+#	bool "IP mib"
+    config BRCMSDK416L05_BUILD_SNMP_SNMP_MIB
+	bool "SNMP mib"
+    config BRCMSDK416L05_BUILD_SNMP_SYSOR_MIB
+	bool "SYSOR mib"
+#    config BRCMSDK416L05_BUILD_SNMP_TCP_MIB
+#	bool "TCP mib"
+#    config BRCMSDK416L05_BUILD_SNMP_UDP_MIB
+#	bool "UDP mib"
+    config BRCMSDK416L05_BUILD_SNMP_UDP
+	bool "UDP transport"
+#    config BRCMSDK416L05_BUILD_SNMP_EOC
+#	bool "EOC transport"
+#    config BRCMSDK416L05_BUILD_SNMP_AAL5
+#	bool "AAL5 transport"
+#    config BRCMSDK416L05_BUILD_SNMP_AUTO
+#	bool "AUTO transport"
+    config BRCMSDK416L05_BUILD_SNMP_CHINA_TELECOM_CPE_MIB
+	bool "CT CPE mib"
+#    config BRCMSDK416L05_BUILD_SNMP_BRCM_CPE_MIB
+#	bool "BRCM CPE mib"
+#    config BRCMSDK416L05_BUILD_SNMP_DEBUG
+#	bool "SNMP debug"
+    if BRCMSDK416L05_BUILD_SNMP_DEBUG
+	config BRCMSDK416L05_BUILD_SNMP_TRANSPORT_DEBUG
+		bool "Transport debug"
+	config BRCMSDK416L05_BUILD_SNMP_LAYER_DEBUG
+		bool "SNMP layer debug"
+    endif
+endif
+
+config BRCMSDK416L05_BUILD_TR64
+	bool "TR64 Application"
+if BRCMSDK416L05_BUILD_TR64
+   config BRCMSDK416L05_BUILD_TR64_LAYER3
+	bool "Layer3Forwarding"
+   config BRCMSDK416L05_BUILD_TR64_DEVICEINFO
+	bool "DeviceInfo"
+   config BRCMSDK416L05_BUILD_TR64_DEVICECONFIG
+	bool "DeviceConfig"
+   config BRCMSDK416L05_BUILD_TR64_MANAGEMENTSERVER
+	bool "ManagementServer"
+   config BRCMSDK416L05_BUILD_TR64_TIME
+	bool "Time"
+   config BRCMSDK416L05_BUILD_TR64_QUEUEMANAGEMENT
+	bool "QueueManagement"
+   config BRCMSDK416L05_BUILD_TR64_LAYER2BRIDGE
+	bool "Layer2Bridging"
+   config BRCMSDK416L05_BUILD_TR64_LANHOSTCONFIGMGMT
+	bool "LANHostConfigMgmt"
+   config BRCMSDK416L05_BUILD_TR64_LANETHINTERFACECONFIG
+	bool "LANEthInterfaceConfig"
+   config BRCMSDK416L05_BUILD_TR64_WLANCONFIG
+	bool "WLANConfig"
+   config BRCMSDK416L05_BUILD_TR64_LANUSBINTERFACECONFIG
+	bool "USBInterfaceConfig"
+   config BRCMSDK416L05_BUILD_TR64_LANHOSTS
+	bool "LANHosts"
+   config BRCMSDK416L05_BUILD_TR64_WANCOMMONINTERFACE
+	bool "WANCommonInterface"
+   config BRCMSDK416L05_BUILD_TR64_WANDSLINTERFACE
+	bool "WANDslInterface"
+#   config BRCMSDK416L05_BUILD_TR64_WANETHERNETCONFIG
+#	bool "WANEthernetConfig"
+   config BRCMSDK416L05_BUILD_TR64_WANDSLCONNECTIONMGMT
+	bool "WANDslConnectionMgmt"
+   config BRCMSDK416L05_BUILD_TR64_WANDSLDIAGNOSTICS
+	bool "WANDslDiagnostics"
+   config BRCMSDK416L05_BUILD_TR64_WANDSLLINKCONFIG
+	bool "WANDslLinkConfig"
+   config BRCMSDK416L05_BUILD_TR64_WANCABLELINKCONFIG
+	bool "WANCableLinkConfig"
+#   config BRCMSDK416L05_BUILD_TR64_WANETHERNETLINKCONFIG
+#	bool "WANEthernetLinkConfig"
+   config BRCMSDK416L05_BUILD_TR64_WANIPCONNECTION
+	bool "WANIPConnection"
+   config BRCMSDK416L05_BUILD_TR64_WANPPPCONNECTION
+	bool "WANPPPConnection"
+   config BRCMSDK416L05_BUILD_TR64_IPPINGDIAG
+	bool "IPPingDiagnostics"
+   config BRCMSDK416L05_BUILD_TR64_WANATMF5LOOPBACKDIAG
+	bool "WANATMF5LoopbackDiagnostics"
+endif # BRCMSDK416L05_BUILD_TR64
+
+choice
+	prompt "UPNP"
+	default BRCM416L05_UPNP_DONT_BUILD
+config BRCM416L05_UPNP_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_UPNP_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_UPNP_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_UPNP_DYNAMIC_BUILD || BRCM416L05_UPNP_STATIC_BUILD
+	config BRCMSDK416L05_BUILD_UPNP
+		string
+		default "dynamic" if BRCM416L05_UPNP_DYNAMIC_BUILD
+		default "static"  if BRCM416L05_UPNP_STATIC_BUILD
+	config BRCM416L05_RM_QUOTES_BUILD_UPNP
+		def_bool y
+endif
+
+config BRCMSDK416L05_BUILD_HASHED_PASSWORDS
+	bool "Hashed Passwords"
+endmenu
+
+menu "Debug selection"
+# EMBED_BALOO_BGN
+#------------------------------------------------------------------------------
+# Broadcom Analyzer of Linux Operation Online
+#
+# - Driver selection, enables kernel instrumentation
+# - Enabling of BRCM MIPS Performance Counters logging
+# - Daemon (transfer via UDP)  built by default
+# - Control Utility (static/dynamic selection)
+config BRCMSDK416L05_BUZZZ
+	bool "BUZZZ: Broadcom Analyzer Tool"
+if BRCMSDK416L05_BUZZZ
+   config BRCM416L05_BUZZZ_FUNC
+	bool "Enable function call tracing"
+   config BRCM416L05_BUZZZ_PMON
+	bool "Enable performance monitoring"
+   config BRCM416L05_BUZZZ_KEVT
+	bool "Enable Kernel Event call tracing"
+   config BRCMSDK416L05_BUILD_BUZZZ
+	def_bool y
+   config BRCMSDK416L05_BRCM_KTOOLS
+	def_bool y
+endif # BRCMSDK416L05_BUZZZ
+
+config BRCMSDK416L05_BRCM_PMON
+	bool "Enable PMANPMON: Poor Mans Performance Monitor"
+	select BRCMSDK416L05_BRCM_KTOOLS
+if BRCMSDK416L05_BRCM_PMON
+config BRCMSDK416L05_BUILD_PMON
+	def_bool y
+endif
+
+config BRCMSDK416L05_BRCM_BOUNCE
+	bool "Enable BOUNCE: kernel function call tracing"
+	select BRCMSDK416L05_BRCM_KTOOLS
+
+if BRCMSDK416L05_BRCM_BOUNCE
+   config BRCMSDK416L05_BRCM_BOUNCE_EXIT
+	bool "Enable function exit tracing, indentation"
+   config BRCMSDK416L05_BRCM_BOUNCE_DATAPATH
+	bool "Enable data path subsystems tracing"
+   config BRCMSDK416L05_BUILD_BOUNCE
+	def_bool y
+endif # BRCMSDK416L05_BRCM_BOUNCE
+
+config BRCMSDK416L05_BRCM_KERNEL_FTRACE
+	bool "Enable kernel tracing"
+config BRCMSDK416L05_BRCM_KERNEL_PREEMPTIRQSOFF_TRACE
+	bool "Enable preemption and irqs off tracing (additional overhead)"
+	depends on BRCMSDK416L05_BRCM_KERNEL_FTRACE
+config BRCMSDK416L05_BRCM_KERNEL_FUNCTION_TRACE
+	bool "Enable function tracing (additional overhead)"
+	depends on BRCMSDK416L05_BRCM_KERNEL_FTRACE
+config BRCMSDK416L05_BRCM_DRIVER_LOG
+	tristate "Broadcom Kernel Logging Driver"
+config BRCMSDK416L05_BRCM_KERNEL_KALLSYMS
+	bool "Enable KALLSYMS in kernel"
+config BRCMSDK416L05_BRCM_KERNEL_DEBUG
+	bool "Support GDB in kernel"
+
+choice
+	prompt "Network Transmit/Receive Utility (TTCP)"
+	default BRCM416L05_EPITTCP_DONT_BUILD
+config BRCM416L05_EPITTCP_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_EPITTCP_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_EPITTCP_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_EPITTCP_DYNAMIC_BUILD || BRCM416L05_EPITTCP_STATIC_BUILD
+	config BRCMSDK416L05_BUILD_EPITTCP
+		string
+		default "dynamic" if BRCM416L05_EPITTCP_DYNAMIC_BUILD
+		default "static"  if BRCM416L05_EPITTCP_STATIC_BUILD
+	config BRCM416L05_RM_QUOTES_BUILD_EPITTCP
+		def_bool y
+endif
+config BRCMSDK416L05_ENABLE_PRINTK_AND_BUG
+	bool "Enable Kernel CONFIG_PRINTK and CONFIG_BUG"
+config BRCMSDK416L05_BCM_DEFAULT_CONSOLE_LOGLEVEL
+	int "Default console printk level"
+	depends on BRCMSDK416L05_ENABLE_PRINTK_AND_BUG
+config BRCMSDK416L05_BCM_PRINTK_TIME
+	bool "Include timestamp in printk"
+	depends on BRCMSDK416L05_ENABLE_PRINTK_AND_BUG
+config BRCMSDK416L05_BCM_COLORIZE_PRINTS
+	bool "Enable Colorized Prints"
+config BRCMSDK416L05_BCM_ASSERTS
+	bool "Enable Asserts"
+config BRCMSDK416L05_BCM_FATAL_ASSERTS
+	bool "Enable Fatal Asserts"
+	depends on BRCMSDK416L05_BCM_ASSERTS
+config BRCMSDK416L05_BCM_KERNEL_HACKING
+	bool "Enable Linux Kernel Hacking/Debug Features"
+config BRCMSDK416L05_BCM_DEBUG_SPINLOCK
+	bool "Enable Spinlock Debug"
+	depends on BRCMSDK416L05_BCM_KERNEL_HACKING
+config BRCMSDK416L05_BCM_DEBUG_MUTEXES
+	bool "Enable Mutex Debug"
+	depends on BRCMSDK416L05_BCM_KERNEL_HACKING
+config BRCMSDK416L05_BCM_RCU_CPU_STALL_DETECTOR
+	bool "Enable RCU Stall Detector"
+	depends on BRCMSDK416L05_BCM_KERNEL_HACKING
+config BRCMSDK416L05_BCM_DEBUG_PREEMPT
+	bool "Enable Preemption Debugging"
+	depends on BRCMSDK416L05_BCM_KERNEL_HACKING
+config BRCMSDK416L05_BCM_SCHEDSTATS
+	bool "Enable Scheduler Stats"
+	depends on BRCMSDK416L05_BCM_KERNEL_HACKING
+config BRCMSDK416L05_BCM_SCHED_DEBUG
+	bool "Enable Scheduler DebugEnable Scheduler Debug"
+	depends on BRCMSDK416L05_BCM_KERNEL_HACKING
+config BRCMSDK416L05_BCM_BCM_SCHEDAUDIT
+	bool "Enable BCM Scheduler Audit"
+config BRCMSDK416L05_BCM_MAGIC_SYSRQ
+	bool "Enable Magic SysRq"
+config BRCMSDK416L05_BRCM_KERNEL_VMTOOLS
+	bool "Enable Memory Diagnostic Tools in Kernel"
+config BRCMSDK416L05_BRCM_KERNEL_CSTAT
+	bool "Enable Cache Stats Tool in Kernel"
+config BRCMSDK416L05_BRCM_IKOS
+	bool "Build for IKOS simulation (experimental)"
+config BRCMSDK416L05_BRCM_DRIVER_BCMPROF
+	tristate "Broadcom PROF Driver"
+config BRCMSDK416L05_BUILD_DEBUG_TOOLS
+	bool "Enable Debug Tools"
+config BRCMSDK416L05_BUILD_GDBSERVER
+	bool "Build GDBserver for application debugging"
+config BRCMSDK416L05_ENABLE_APP_COREDUMPS
+	bool "Enable application core dumps"
+config BRCMSDK416L05_CMS_SECURITY_LOG
+	bool "Enable CMS Security Logging"
+config BRCMSDK416L05_CMS_LOG_DEBUG
+	bool "Enable CMS Debug Logging"
+choice
+	prompt "Debug Log level"
+	default BRCMSDK416L05_CMS_LOG_LEVEL_2
+	depends on BRCMSDK416L05_CMS_LOG_DEBUG
+	config BRCMSDK416L05_CMS_LOG_LEVEL_1
+		bool "1"
+	config BRCMSDK416L05_CMS_LOG_LEVEL_2
+		bool "2"
+endchoice
+config BRCMSDK416L05_CMS_STARTUP_DEBUG
+	bool "Enable CMS Startup Debug"
+	depends on BRCMSDK416L05_CMS_LOG_DEBUG
+config BRCMSDK416L05_CMS_ACTION_LOG
+	bool "Enable CMS Action Logging"
+config BRCMSDK416L05_CMS_MEM_BOUNDARY_CHECK
+	bool "Enable CMS Memory Boundary Checking"
+config BRCMSDK416L05_CMS_MEM_POISON_ALLOC_FREE
+	bool "Enable CMS Memory Poison Allocs and Frees"
+config BRCMSDK416L05_CMS_MEM_LEAK_TRACING
+	bool "Enable CMS Memory Leak Tracing"
+config BRCMSDK416L05_CMS_FATAL_ASSERT
+	bool "Enable CMS Asserts"
+config BRCMSDK416L05_CMS_BYPASS_LOGIN
+	bool "Bypass CMS Login"
+
+# it should be tristate in the future
+config BRCMSDK416L05_BUILD_SOAP
+	bool "Soap server"
+if BRCMSDK416L05_BUILD_SOAP
+   choice
+	prompt "Soap server version"
+	default BRCMSDK416L05_BRCM_APP_SOAP_V3
+	depends on BRCMSDK416L05_BUILD_SOAP
+	config BRCMSDK416L05_BRCM_APP_SOAP_V3
+		bool "3.0"
+	config BRCMSDK416L05_BRCM_APP_SOAP_V2
+		bool "2.0"
+	config BRCMSDK416L05_BRCM_APP_SOAP_V1
+		bool "1.5"
+   endchoice
+   config BRCMSDK416L05_BUILD_SOAP_VER
+	int
+	default 1  if BRCMSDK416L05_BRCM_APP_SOAP_V1
+	default 2  if BRCMSDK416L05_BRCM_APP_SOAP_V2
+	default 3  if BRCMSDK416L05_BRCM_APP_SOAP_V3
+endif
+
+choice
+	prompt "Chip Diagnostic Utility"
+	default BRCM416L05_DIAGAPP_DONT_BUILD
+config BRCM416L05_DIAGAPP_DONT_BUILD
+	bool "don't build"
+config BRCM416L05_DIAGAPP_DYNAMIC_BUILD
+	bool "dynamic"
+config BRCM416L05_DIAGAPP_STATIC_BUILD
+	bool "static"
+endchoice
+if BRCM416L05_DIAGAPP_DYNAMIC_BUILD || BRCM416L05_DIAGAPP_STATIC_BUILD
+	config BRCMSDK416L05_BUILD_DIAGAPP
+		string
+		default "dynamic" if BRCM416L05_DIAGAPP_DYNAMIC_BUILD
+		default "static"  if BRCM416L05_DIAGAPP_STATIC_BUILD
+	config BRCM416L05_RM_QUOTES_BUILD_DIAGAPP
+		def_bool y
+endif
+
+config BRCMSDK416L05_BENCHMARKS_SMP
+	bool "Enable OpenSSL speed and multi-process Dhrystone (for SMP profiling)"
+config BRCMSDK416L05_BUILD_SYSSTAT
+	bool "Build SYSSTAT family of utilities (mpstat, iostat, pidstat, sar, etc)"
+config BRCMSDK416L05_BUILD_STRESS
+	bool "Build Stress app and scripts"
+config BRCMSDK416L05_BUILD_LMBENCH
+	bool "Build lmbench suite (note publication restrictions)"
+config BRCMSDK416L05_BUILD_TCPDUMP
+	bool "Build tcpdump (implies libpcap)"
+config BRCMSDK416L05_BUILD_SENDPACKETS
+	bool "Build sendpackets raw packet generator (implies libpcap)"
+config BRCMSDK416L05_BUILD_IPERF
+	bool "Build Iperf traffic generator"
+config BRCMSDK416L05_BUILD_STRACE
+	bool "Build system call tracer (strace)"
+config BRCMSDK416L05_BUILD_DISABLE_EXEC_STACK
+	bool "Build with executable stack disabled"
+choice
+	prompt "Restrict memory available for use"
+	config BRCMSDK416L05_BRCM_MEMORY_RESTRICTION_OFF
+		bool "AUTO"
+	config BRCMSDK416L05_BRCM_MEMORY_RESTRICTION_16M
+		bool "16M"
+	config BRCMSDK416L05_BRCM_MEMORY_RESTRICTION_32M
+		bool "32M"
+	config BRCMSDK416L05_BRCM_MEMORY_RESTRICTION_64M
+		bool "64M"
+endchoice
+config BRCMSDK416L05_BUILD_SPICTL
+	bool "Enable spictl SPI SLAVE DEVICE TEST"
+
+config BRCMSDK416L05_BUILD_WEB_SOCKETS_TEST
+	bool "Enable websocket tests (wstest.html)"
+
+config BRCMSDK416L05_BUILD_HOMEPLUG_DEBUG
+	bool "Enable HomePlug extended debug"
+
+config BRCMSDK416L05_BRCM_HOMEPLUG_NO_SNR_ASCII
+	bool "Disable TR-181 HomePlug SNR per tones"
+
+config BRCMSDK416L05_BUILD_SPICTL
+	bool "Enable spictl SPI SLAVE DEVICE TEST"
+
+if BRCMSDK416L05_BRCM_63138 || BRCMSDK416L05_BRCM_63148
+config BRCMSDK416L05_BRCM_DRIVER_SYSPERF
+	tristate "Build sysperf tool"
+config BRCMSDK416L05_BUILD_SYSPERFCTL
+	depends on BRCMSDK416L05_BRCM_DRIVER_SYSPERF
+	int
+	default 1
+endif
+
+endmenu
+
+endmenu

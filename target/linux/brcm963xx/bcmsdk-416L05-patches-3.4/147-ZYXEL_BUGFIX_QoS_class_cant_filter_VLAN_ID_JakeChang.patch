@@ -1,0 +1,13 @@
+Index: linux-3.4.11/net/bridge/netfilter/ebt_vlan.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/ebt_vlan.c	2016-10-04 19:29:26.983368165 +0800
++++ linux-3.4.11/net/bridge/netfilter/ebt_vlan.c	2016-10-04 19:30:04.564715935 +0800
+@@ -67,7 +67,7 @@
+ 	encap = fp->h_vlan_encapsulated_proto;
+     }else{
+         // for new broadcom vlan device
+-        TCI = ntohs(((struct vlan_hdr *)(skb->vlan_header))->h_vlan_TCI);
++        TCI = ((struct vlan_hdr *)(skb->vlan_header))->h_vlan_TCI;
+ 	    id = TCI & VLAN_VID_MASK;
+ 	    prio = (TCI >> 13) & 0x7;
+     }

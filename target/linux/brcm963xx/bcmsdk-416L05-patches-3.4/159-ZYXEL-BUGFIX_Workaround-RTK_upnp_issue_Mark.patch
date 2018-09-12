@@ -1,0 +1,19 @@
+Index: linux-3.4.11/net/bridge/br_forward.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_forward.c	2017-01-16 14:34:22.167773841 +0800
++++ linux-3.4.11/net/bridge/br_forward.c	2017-01-16 14:35:19.419773841 +0800
+@@ -119,6 +119,14 @@
+ 			}
+ #endif /* CONFIG_BCM_KF_ENET_SWITCH */
+ 		}
++#ifdef CONFIG_SUPPORT_RTK_SWITCH// ZYXEL, Mark, workaround for upnp issue
++		else if(skb->pkt_type == PACKET_MULTICAST){
++			if ((sdev->priv_flags & IFF_EXT_SWITCH) && (ddev->priv_flags & IFF_EXT_SWITCH))
++			{
++				return 0;
++			}
++		}
++#endif
+ 	}
+ #endif /* CONFIG_BCM_KF_WANDEV */
+ 

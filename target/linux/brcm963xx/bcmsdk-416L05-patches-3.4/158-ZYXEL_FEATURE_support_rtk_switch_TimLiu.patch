@@ -1,0 +1,512 @@
+Index: linux-3.4.11/Kconfig.zyxel
+===================================================================
+--- linux-3.4.11.orig/Kconfig.zyxel	2017-01-16 13:46:44.697583381 +0800
++++ linux-3.4.11/Kconfig.zyxel	2017-01-16 13:47:01.928095583 +0800
+@@ -8,4 +8,10 @@
+ config I2C_SX9310
+ 	tristate "Support for I2C SEMTECH SX9310"
+ 	depends on I2C
+-	default n
+\ No newline at end of file
++	default n
++
++config SUPPORT_RTK_SWITCH
++	bool "Support Realtek switch"
++	default n
++	help
++	  Use Realtek Switch.
+Index: linux-3.4.11/net/bridge/br_igmp.h
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_igmp.h	2017-01-16 01:04:08.811222736 +0800
++++ linux-3.4.11/net/bridge/br_igmp.h	2017-01-16 13:49:52.525153924 +0800
+@@ -83,6 +83,9 @@
+    int                             excludePort;
+    char                            enRtpSeqCheck;  
+    struct net_device              *from_dev;
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++	int leave_flag;
++#endif
+ };
+ 
+ enum mcpd_packet_admitted
+@@ -135,6 +138,24 @@
+                        uint32_t info);
+ 
+ void br_igmp_mc_fdb_cleanup(struct net_bridge *br);
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++int br_igmp_mc_fdb_counter(struct net_device *from_dev,
++                          struct net_bridge *br,
++                          struct net_bridge_port *prt,
++                          struct in_addr *rxGrp,
++                          struct in_addr *txGrp,
++                          struct in_addr *rep,
++                          int mode,
++                          struct in_addr *src);
++int br_igmp_mc_fdb_set_leaveflag(struct net_device *from_dev,
++                          struct net_bridge *br,
++                          struct net_bridge_port *prt,
++                          struct in_addr *rxGrp,
++                          struct in_addr *txGrp,
++                          struct in_addr *rep,
++                          int mode,
++                          struct in_addr *src);
++#endif
+ int br_igmp_mc_fdb_remove(struct net_device *from_dev,
+                           struct net_bridge *br, 
+                           struct net_bridge_port *prt, 
+Index: linux-3.4.11/net/bridge/br_igmp.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_igmp.c	2017-01-16 01:04:08.811222736 +0800
++++ linux-3.4.11/net/bridge/br_igmp.c	2017-01-16 14:09:00.434231747 +0800
+@@ -236,6 +236,9 @@
+ 	struct net_bridge_mc_rep_entry *rep_entry = NULL;
+ 	struct net_bridge_mc_rep_entry *rep_entry_n = NULL;
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++if(!list_empty(&igmp_fdb->rep_list)){
++#endif
+ 	list_for_each_entry_safe(rep_entry, 
+ 	                         rep_entry_n, &igmp_fdb->rep_list, list) 
+ 	{
+@@ -255,6 +258,9 @@
+ 			}
+ 		}
+ 	}
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++}
++#endif
+ 	if(list_empty(&igmp_fdb->rep_list)) 
+ 	{
+ 		hlist_del(&igmp_fdb->hlist);
+@@ -262,7 +268,7 @@
+ 		br_mcast_blog_release(BR_MCAST_PROTO_IGMP, (void *)igmp_fdb);
+ #endif
+ 		kmem_cache_free(br_igmp_mc_fdb_cache, igmp_fdb);
+-}
++	}
+ 
+ 	return;
+ }
+@@ -503,6 +509,9 @@
+ 			{
+ 				/* found entry - update TS */
+ 				struct net_bridge_mc_rep_entry *reporter = br_igmp_rep_find(dst, rep, NULL);
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++				dst->leave_flag = 0;
++#endif
+ 				if(reporter == NULL)
+ 				{
+ 					rep_entry = kmem_cache_alloc(br_igmp_mc_rep_cache, GFP_ATOMIC);
+@@ -614,6 +623,9 @@
+ 		return 0;
+ 	}
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++	mc_fdb->leave_flag = 0;
++#endif
+ 	mc_fdb->txGrp.s_addr = txGrp->s_addr;
+ 	mc_fdb->rxGrp.s_addr = rxGrp->s_addr;
+ 	memcpy(&mc_fdb->src_entry, src, sizeof(struct in_addr));
+@@ -678,6 +690,127 @@
+ 	spin_unlock_bh(&br->mcl_lock);
+ }
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++int br_igmp_mc_fdb_counter(struct net_device *from_dev,
++                          struct net_bridge *br,
++                          struct net_bridge_port *prt,
++                          struct in_addr *rxGrp,
++                          struct in_addr *txGrp,
++                          struct in_addr *rep,
++                          int mode,
++                          struct in_addr *src){
++	struct net_bridge_mc_fdb_entry *mc_fdb;
++	int filt_mode;
++	struct hlist_head *head = NULL;
++	struct hlist_node *h=NULL, *n;
++	int counter = 0;
++
++	//printk("--- remove mc entry ---\n");
++
++	if(!br || !prt || !txGrp || !rxGrp || !rep || !from_dev)
++		return 0;
++
++	if(!br_igmp_control_filter(NULL, txGrp->s_addr))
++		return 0;
++
++	if(!netdev_path_is_leaf(from_dev))
++		return 0;
++
++	if((SNOOP_IN_CLEAR != mode) && (SNOOP_EX_CLEAR != mode))
++	   return 0;
++
++	if(mode == SNOOP_IN_CLEAR)
++		filt_mode = MCAST_INCLUDE;
++	else
++		filt_mode = MCAST_EXCLUDE;
++
++	spin_lock_bh(&br->mcl_lock);
++	head = &br->mc_hash[br_igmp_mc_fdb_hash(txGrp->s_addr)];
++	if(head){
++		 hlist_for_each_entry_safe(mc_fdb, h, n, head, hlist)
++		{
++			if ((mc_fdb->rxGrp.s_addr == rxGrp->s_addr) &&
++		    (mc_fdb->txGrp.s_addr == txGrp->s_addr) &&
++				(filt_mode == mc_fdb->src_entry.filt_mode) &&
++				(mc_fdb->src_entry.src.s_addr == src->s_addr) &&
++				(mc_fdb->from_dev == from_dev) )
++		   {
++				if((mc_fdb->dst != prt) && (mc_fdb->leave_flag == 0))
++				counter++;
++			}
++		}
++	}
++	spin_unlock_bh(&br->mcl_lock);
++
++	return counter;
++}
++
++int br_igmp_mc_fdb_set_leaveflag(struct net_device *from_dev,
++                          struct net_bridge *br,
++                          struct net_bridge_port *prt,
++                          struct in_addr *rxGrp,
++                          struct in_addr *txGrp,
++                          struct in_addr *rep,
++                          int mode,
++                          struct in_addr *src){
++	struct net_bridge_mc_fdb_entry *mc_fdb;
++	struct net_bridge_mc_rep_entry *rep_entry, *rep_entry_n;
++	int filt_mode;
++	struct hlist_head *head = NULL;
++	struct hlist_node *h=NULL, *n;
++
++	if(!br || !prt || !txGrp || !rxGrp || !rep || !from_dev)
++		return 0;
++
++	if(!br_igmp_control_filter(NULL, rxGrp->s_addr))
++		return 0;
++
++	if(!netdev_path_is_leaf(from_dev))
++		return 0;
++
++	if((SNOOP_IN_CLEAR != mode) && (SNOOP_EX_CLEAR != mode))
++	   return 0;
++
++	if(mode == SNOOP_IN_CLEAR)
++		filt_mode = MCAST_INCLUDE;
++	else
++		filt_mode = MCAST_EXCLUDE;
++
++	spin_lock_bh(&br->mcl_lock);
++	head = &br->mc_hash[br_igmp_mc_fdb_hash(txGrp->s_addr)];
++	if(head){
++		 hlist_for_each_entry_safe(mc_fdb, h, n, head, hlist)
++		{
++
++		if ((mc_fdb->rxGrp.s_addr == rxGrp->s_addr) &&
++		    (mc_fdb->txGrp.s_addr == txGrp->s_addr) &&
++		    (filt_mode == mc_fdb->src_entry.filt_mode) &&
++		    (mc_fdb->src_entry.src.s_addr == src->s_addr) &&
++		    (mc_fdb->from_dev == from_dev) &&
++		    (mc_fdb->dst == prt))
++		   {
++				list_for_each_entry_safe(rep_entry,
++		                                  rep_entry_n, &mc_fdb->rep_list, list)
++	            {
++			          if(rep_entry->rep.s_addr == rep->s_addr)
++	                {
++	                    list_del(&rep_entry->list);
++	                    kmem_cache_free(br_igmp_mc_rep_cache, rep_entry);
++	                }
++		        }
++		        if(list_empty(&mc_fdb->rep_list))
++		        {
++	           		mc_fdb->leave_flag = 1;
++		        }
++			}
++		}
++	}
++	spin_unlock_bh(&br->mcl_lock);
++
++	return 0;
++}
++#endif
++
+ int br_igmp_mc_fdb_remove(struct net_device *from_dev,
+                           struct net_bridge *br, 
+                           struct net_bridge_port *prt, 
+@@ -692,6 +825,9 @@
+ 	int filt_mode;
+ 	struct hlist_head *head = NULL;
+ 	struct hlist_node *h, *n;
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++	int counter = 0;
++#endif
+ 
+ 	//printk("--- remove mc entry ---\n");
+ 	
+@@ -709,6 +845,12 @@
+ 	else
+ 		filt_mode = MCAST_EXCLUDE;
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++counter = br_igmp_mc_fdb_counter(from_dev,br,prt,rxGrp,txGrp,rep,mode,src);
++if(counter != 0){
++	br_igmp_mc_fdb_set_leaveflag(from_dev,br,prt,rxGrp,txGrp,rep,mode,src);
++}else{
++#endif
+ 	spin_lock_bh(&br->mcl_lock);
+ 	head = &br->mc_hash[br_igmp_mc_fdb_hash(txGrp->s_addr)];
+ 	hlist_for_each_entry_safe(mc_fdb, h, n, head, hlist)
+@@ -726,7 +868,10 @@
+ 	}
+ 	br_igmp_set_timer(br);
+ 	spin_unlock_bh(&br->mcl_lock);
+-	
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++}
++#endif
++
+ 	return 0;
+ }
+ EXPORT_SYMBOL(br_igmp_mc_fdb_remove);
+Index: linux-3.4.11/net/bridge/br_mld.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mld.c	2017-01-16 01:04:08.815222736 +0800
++++ linux-3.4.11/net/bridge/br_mld.c	2017-01-16 14:16:20.623117419 +0800
+@@ -274,6 +274,9 @@
+ 	struct net_br_mld_mc_rep_entry *rep_entry = NULL;
+ 	struct net_br_mld_mc_rep_entry *rep_entry_n = NULL;
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++if(!list_empty(&mld_fdb->rep_list)){
++#endif
+ 	list_for_each_entry_safe(rep_entry, 
+ 	                         rep_entry_n, &mld_fdb->rep_list, list) 
+ 	{
+@@ -289,6 +292,9 @@
+ 			}
+ 		}
+ 	}
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++}
++#endif
+ 	if(list_empty(&mld_fdb->rep_list)) 
+ 	{
+ 		hlist_del(&mld_fdb->hlist);
+@@ -488,6 +494,9 @@
+ 			{
+ 				/* found entry - update TS */
+ 				struct net_br_mld_mc_rep_entry *reporter = br_mld_rep_find(dst, rep, NULL);
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++				dst->leave_flag = 0;
++#endif
+ 				if(reporter == NULL)
+ 				{
+ 					rep_entry = kmem_cache_alloc(br_mld_mc_rep_cache, GFP_ATOMIC);
+@@ -608,6 +617,9 @@
+ #endif
+ 	mc_fdb->info = info;
+ 	mc_fdb->lanppp = lanppp;
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++	mc_fdb->leave_flag = 0;
++#endif
+ 	INIT_LIST_HEAD(&mc_fdb->rep_list);
+ 	BCM_IN6_ASSIGN_ADDR(&rep_entry->rep, rep);
+ 	rep_entry->tstamp = jiffies + (BR_MLD_MEMBERSHIP_TIMEOUT*HZ);
+@@ -654,6 +666,124 @@
+ 	spin_unlock_bh(&br->mld_mcl_lock);
+ }
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++int br_mld_mc_fdb_counter(struct net_device *from_dev,
++                          struct net_bridge *br,
++                          struct net_bridge_port *prt,
++                          struct in6_addr *grp,
++                          struct in6_addr *rep,
++                          int mode,
++                          struct in6_addr *src){
++	struct net_br_mld_mc_fdb_entry *mc_fdb;
++	int filt_mode;
++	struct hlist_head *head = NULL;
++	struct hlist_node *h=NULL, *n;
++	int counter = 0;
++
++	//printk("--- remove mc entry ---\n");
++
++	if(!br || !prt || !grp|| !rep || !from_dev)
++		return 0;
++
++	if(!(br_mld_control_filter(NULL, grp) ||
++		BCM_IN6_IS_ADDR_L2_MCAST(grp)))
++		return 0;
++
++	if(!netdev_path_is_leaf(from_dev))
++		return 0;
++
++	if((SNOOP_IN_CLEAR != mode) && (SNOOP_EX_CLEAR != mode))
++	   return 0;
++
++	if(mode == SNOOP_IN_CLEAR)
++		filt_mode = MCAST_INCLUDE;
++	else
++		filt_mode = MCAST_EXCLUDE;
++
++	spin_lock_bh(&br->mld_mcl_lock);
++	head = &br->mld_mc_hash[br_mld_mc_fdb_hash(grp)];
++	if(head){
++		 hlist_for_each_entry_safe(mc_fdb, h, n, head, hlist)
++		{
++			if ((BCM_IN6_ARE_ADDR_EQUAL(&mc_fdb->grp, grp)) &&
++				(filt_mode == mc_fdb->src_entry.filt_mode) &&
++				(BCM_IN6_ARE_ADDR_EQUAL(&mc_fdb->src_entry.src, src)) &&
++				(mc_fdb->from_dev == from_dev) &&
++				(mc_fdb->dst != prt) && mc_fdb->leave_flag == 0)
++			{
++				counter++;
++			}
++		}
++	}
++	spin_unlock_bh(&br->mld_mcl_lock);
++
++	return counter;
++}
++
++int br_mld_mc_fdb_set_leaveflag(struct net_device *from_dev,
++                          struct net_bridge *br,
++                          struct net_bridge_port *prt,
++                          struct in6_addr *grp,
++                          struct in6_addr *rep,
++                          int mode,
++                          struct in6_addr *src){
++	struct net_br_mld_mc_fdb_entry *mc_fdb;
++	struct net_br_mld_mc_rep_entry *rep_entry = NULL, *rep_entry_n = NULL;
++	int filt_mode;
++	struct hlist_head *head = NULL;
++	struct hlist_node *h=NULL, *n;
++
++	if(!br || !prt || !grp|| !rep || !from_dev)
++		return 0;
++
++	if(!(br_mld_control_filter(NULL, grp) ||
++		BCM_IN6_IS_ADDR_L2_MCAST(grp)))
++		return 0;
++
++	if(!netdev_path_is_leaf(from_dev))
++		return 0;
++
++	if((SNOOP_IN_CLEAR != mode) && (SNOOP_EX_CLEAR != mode))
++	   return 0;
++
++	if(mode == SNOOP_IN_CLEAR)
++		filt_mode = MCAST_INCLUDE;
++	else
++		filt_mode = MCAST_EXCLUDE;
++
++	spin_lock_bh(&br->mld_mcl_lock);
++	head = &br->mld_mc_hash[br_mld_mc_fdb_hash(grp)];
++	if(head){
++		 hlist_for_each_entry_safe(mc_fdb, h, n, head, hlist)
++		{
++			if ((BCM_IN6_ARE_ADDR_EQUAL(&mc_fdb->grp, grp)) &&
++				(filt_mode == mc_fdb->src_entry.filt_mode) &&
++				(BCM_IN6_ARE_ADDR_EQUAL(&mc_fdb->src_entry.src, src)) &&
++				(mc_fdb->from_dev == from_dev) &&
++				(mc_fdb->dst == prt))
++			{
++				list_for_each_entry_safe(rep_entry,
++		                                  rep_entry_n, &mc_fdb->rep_list, list)
++	            {
++			        if((BCM_IN6_ARE_ADDR_EQUAL(&rep_entry->rep, rep)))
++					{
++	                    list_del(&rep_entry->list);
++	                    kmem_cache_free(br_mld_mc_rep_cache, rep_entry);
++	                }
++		        }
++		        if(list_empty(&mc_fdb->rep_list))
++	            {
++	           		mc_fdb->leave_flag = 1;
++		        }
++			}
++		}
++	}
++	spin_unlock_bh(&br->mld_mcl_lock);
++
++	return 0;
++}
++#endif
++
+ int br_mld_mc_fdb_remove(struct net_device *from_dev,
+                          struct net_bridge *br, 
+                          struct net_bridge_port *prt, 
+@@ -667,6 +797,9 @@
+ 	int filt_mode;
+ 	struct hlist_head *head = NULL;
+ 	struct hlist_node *h, *n;
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++	int counter = 0;
++#endif
+     
+ 	if(!br || !prt || !grp|| !rep || !from_dev)
+ 		return 0;
+@@ -686,6 +819,12 @@
+ 	else
+ 		filt_mode = MCAST_EXCLUDE;
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++counter = br_mld_mc_fdb_counter(from_dev,br,prt,grp,rep,mode,src);
++if(counter != 0){
++	br_mld_mc_fdb_set_leaveflag(from_dev,br,prt,grp,rep,mode,src);
++}else{
++#endif
+ 	spin_lock_bh(&br->mld_mcl_lock);
+ 	head = &br->mld_mc_hash[br_mld_mc_fdb_hash(grp)];
+ 	hlist_for_each_entry_safe(mc_fdb, h, n, head, hlist) 
+@@ -702,6 +841,9 @@
+ 	}
+ 	br_mld_set_timer(br);
+ 	spin_unlock_bh(&br->mld_mcl_lock);
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++}
++#endif
+ 
+ 	return 0;
+ }
+Index: linux-3.4.11/net/bridge/br_mld.h
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mld.h	2017-01-16 01:04:08.815222736 +0800
++++ linux-3.4.11/net/bridge/br_mld.h	2017-01-16 14:34:31.756519832 +0800
+@@ -129,6 +129,9 @@
+ 	uint32_t                       info; 
+ 	int                            lanppp;
+ 	struct net_device             *from_dev;
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++	int leave_flag;
++#endif
+ };
+ 
+ int br_mld_process_ignore_group_list (int count, t_MCPD_IGNORE_GROUP_ENTRY* ignoreMsgPtr);
+@@ -156,6 +159,23 @@
+ 
+ void br_mld_mc_fdb_cleanup(struct net_bridge *br);
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++int br_mld_mc_fdb_counter(struct net_device *from_dev,
++                          struct net_bridge *br,
++                          struct net_bridge_port *prt,
++                          struct in6_addr *grp,
++                          struct in6_addr *rep,
++                          int mode,
++                          struct in6_addr *src);
++int br_mld_mc_fdb_set_leaveflag(struct net_device *from_dev,
++                          struct net_bridge *br,
++                          struct net_bridge_port *prt,
++                          struct in6_addr *grp,
++                          struct in6_addr *rep,
++                          int mode,
++                          struct in6_addr *src);
++#endif
++
+ int br_mld_mc_fdb_remove(struct net_device *from_dev,
+                          struct net_bridge *br, 
+                          struct net_bridge_port *prt, 

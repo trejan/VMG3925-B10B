@@ -1,0 +1,25 @@
+Index: linux-3.4.11/net/netfilter/xt_AUTOMAP.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/xt_AUTOMAP.c	2016-03-28 18:51:11.167038400 +0800
++++ linux-3.4.11/net/netfilter/xt_AUTOMAP.c	2016-03-28 18:51:43.547038400 +0800
+@@ -97,6 +97,7 @@
+ 		unsigned char prio = 0;
+ 		unsigned char dscp = 0;
+ 		unsigned char dscpPrecedence = 0;
++		unsigned short len = 0;
+ 
+ 		if(aminfo->flags & XT_AUTO_TYPE){
+ 			getVlanPrioAndIpHeader(skb, &prio, &iph);
+@@ -128,9 +129,10 @@
+ 					break;
+ 				case AUTOMAP_TYPE_PKTLEN:
+ 
+-					if(iph->tot_len > 1100){
++					len = ntohs(iph->tot_len);
++					if(len > 1100){
+ 						skb->mark|=vlan8021pToPriorityQueue[0]; /* queue priority 2 */
+-                    }else if(iph->tot_len < 250){
++                    }else if(len < 250){
+ 						skb->mark|=vlan8021pToPriorityQueue[5]; /* queue priority 5 */
+                     }else{  /*250~1100*/
+ 						skb->mark|=vlan8021pToPriorityQueue[3]; /* queue priority 3 */

@@ -1,0 +1,97 @@
+Index: linux-3.4.11/net/bridge/br_if.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_if.c	2017-01-16 14:46:43.202387658 +0800
++++ linux-3.4.11/net/bridge/br_if.c	2017-01-16 14:47:12.916693427 +0800
+@@ -40,6 +40,13 @@
+ #include "br_fp.h"
+ #include "br_fp_hooks.h"
+ #endif
++
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++/*+++ Kide@zyxel: rtk switch port grouping */
++int (*rtk_switch_ports_grouping_conf_hook)(unsigned int grp_svid, struct net_device *prt, bool add) = NULL;
++EXPORT_SYMBOL(rtk_switch_ports_grouping_conf_hook);
++#endif
++
+ /*
+  * Determine initial path cost based on speed.
+  * using recommendations from 802.1d standard
+@@ -444,6 +451,16 @@
+ 
+ 	kobject_uevent(&p->kobj, KOBJ_ADD);
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++    /*+++ Kide@zyxel:
++     * add port grouping with this bridge device.
++     */
++    if (rtk_switch_ports_grouping_conf_hook)
++        rtk_switch_ports_grouping_conf_hook(br->dev->ifindex+200, dev, 1);
++
++	printk("[%s](%d)\n", __FUNCTION__,__LINE__);
++#endif
++
+ 	return 0;
+ 
+ err4:
+@@ -504,6 +521,17 @@
+ 		call_netdevice_notifiers(NETDEV_CHANGEADDR, br->dev);
+ 
+ 	netdev_update_features(br->dev);
++
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++    /*+++ Kide@zyxel:
++     * delete port grouping with this bridge device.
++     */
++    if (rtk_switch_ports_grouping_conf_hook)
++        rtk_switch_ports_grouping_conf_hook(br->dev->ifindex+200, dev, 0);
++
++	printk("[%s](%d)\n", __FUNCTION__,__LINE__);
++#endif
++
+ 	return 0;
+ }
+ 
+Index: linux-3.4.11/net/bridge/br_mcast.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mcast.c	2017-01-16 14:43:38.603773841 +0800
++++ linux-3.4.11/net/bridge/br_mcast.c	2017-01-16 14:47:16.580481234 +0800
+@@ -1078,6 +1078,39 @@
+ 		return -1;
+ 	}
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++    /*+++ Kide@zyxel:
++     * push stag for each specific bridge device to fix switch port grouping.
++     */
++    if (lan_dev_p && !strncmp(lan_dev_p->name, "eth", 3)) {
++        blogRuleAction_t ruleAction;
++
++        rule_p = blog_p->blogRule_p;
++        memset(&ruleAction, 0, sizeof(blogRuleAction_t));
++        ruleAction.cmd = BLOG_RULE_CMD_PUSH_VLAN_HDR;
++        blog_rule_add_action(rule_p, &ruleAction);
++
++        memset(&ruleAction, 0, sizeof(blogRuleAction_t));
++        ruleAction.cmd = BLOG_RULE_CMD_SET_VID;
++        ruleAction.toTag = 0;
++        ruleAction.vid = br->dev->ifindex + 200;
++        blog_rule_add_action(rule_p, &ruleAction);
++
++        memset(&ruleAction, 0, sizeof(blogRuleAction_t));
++        ruleAction.cmd = BLOG_RULE_CMD_SET_ETHERTYPE;
++        ruleAction.etherType = 0x8100;
++        blog_rule_add_action(rule_p, &ruleAction);
++
++#if 0
++        blog_dump(blog_p);
++        for (rule_p=blog_p->blogRule_p; rule_p != NULL; rule_p=rule_p->next_p) {
++            blog_rule_dump(rule_p);
++        }
++#endif
++    }
++    /*---*/
++#endif
++
+ 	numActivates = br_mcast_vlan_process(br, mc_fdb, proto, blog_p);
+ 	if ( 0 == numActivates )
+ 	{

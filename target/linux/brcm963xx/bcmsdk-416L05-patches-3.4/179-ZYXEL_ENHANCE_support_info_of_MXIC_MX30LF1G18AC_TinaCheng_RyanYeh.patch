@@ -1,0 +1,38 @@
+Index: linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/brcmnand_base.c	2017-11-20 11:18:09.750701316 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c	2017-11-20 11:42:12.598755458 +0800
+@@ -879,6 +879,18 @@
+ 		.ctrlVersion = CONFIG_MTD_BRCMNAND_VERS_4_0,  /* ONFI capable NAND controllers */		
+ 	},
+ #endif
++	{	/* 43 */ //2017, 2nd source for VMG8924-B10D,VMG3925-B10C,XMG3512-B10A
++		.chipId = MXIC_MX30LF1G18AC,
++		.mafId = FLASHTYPE_MXIC,
++		.chipIdStr = "MXIC MX30LF1G18AC",
++		.options = NAND_BBT_USE_FLASH,
++		.timing1 = 0,
++		.timing2 = 0,
++		.nop=4,
++		.eccLevel=4,
++		.nbrBlocks = 1024,
++		.ctrlVersion = CONFIG_MTD_BRCMNAND_VERS_3_0,
++	},
+ 
+ 	{	/* LAST DUMMY ENTRY */
+ 		.chipId = 0,
+Index: linux-3.4.11/include/linux/mtd/brcmnand.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/mtd/brcmnand.h	2017-11-20 11:18:09.254701298 +0800
++++ linux-3.4.11/include/linux/mtd/brcmnand.h	2017-11-20 11:38:13.238746476 +0800
+@@ -485,6 +485,10 @@
+ #define FLASHTYPE_ZENTEL        0x92
+ #define ZENTEL_A5U1GA31ATS      0xF1
+ 
++/* -------- MXIC NAND flash -----------------*/
++#define FLASHTYPE_MXIC          0xC2
++#define MXIC_MX30LF1G18AC       0xF1    //2017, 2nd source for VMG8924-B10D,VMG3925-B10C,XMG3512-B10A
++
+ /*---------------------------------------------------------------------------------------*/
+ 
+ // Low level MLC test as compared to the high level test in mtd-abi.h

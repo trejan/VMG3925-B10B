@@ -1,0 +1,23 @@
+Index: linux-3.4.11/arch/mips/bcm963xx/setup.c
+===================================================================
+--- linux-3.4.11.orig/arch/mips/bcm963xx/setup.c	2016-09-21 16:57:58.066423883 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/setup.c	2016-09-22 09:39:30.254720447 +0800
+@@ -1246,6 +1246,18 @@
+ 	}
+ #endif
+ 
++#if defined(ZYPRJ_VMG8924_B10A)
++    {
++        unsigned short bpGpio;
++        if(BpGetInternetLedEnableGpio(&bpGpio) == BP_SUCCESS)
++        {
++            printk("Internet LED Enable gpio(%d) need to config to output.\n",bpGpio);
++            printk("Default set to Inactive\n");
++            kerSysSetGpioState(bpGpio, kGpioInactive);
++        }
++    }
++#endif
++
+     return 0;
+ }
+ 

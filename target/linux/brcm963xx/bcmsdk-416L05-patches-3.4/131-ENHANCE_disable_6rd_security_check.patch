@@ -1,0 +1,13 @@
+Index: linux-3.4.11/Kconfig.bcm_kf
+===================================================================
+--- linux-3.4.11.orig/Kconfig.bcm_kf	2016-04-22 15:21:43.398503122 +0800
++++ linux-3.4.11/Kconfig.bcm_kf	2016-04-22 15:32:29.848122052 +0800
+@@ -401,7 +401,7 @@
+ 
+ config BCM_KF_IPV6RD_SECURITY:
+ 	bool
+-	default y
++	default n
+ 
+ config BCM_KF_DPI:
+ 	bool

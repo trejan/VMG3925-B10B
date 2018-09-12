@@ -1,0 +1,940 @@
+Index: linux-3.4.11/Kconfig.bcm
+===================================================================
+--- linux-3.4.11.orig/Kconfig.bcm	2016-09-08 12:36:50.792873714 +0800
++++ linux-3.4.11/Kconfig.bcm	2016-09-08 12:36:50.920873714 +0800
+@@ -983,6 +983,11 @@
+ 	depends on BCM_JUMBO_FRAME
+ 	default n
+ 
++config BCM_IGNORE_BRIDGE_MTU
++	bool "Ignore Bridge MTU while forwarding in accelerated path"
++	depends on BCM_JUMBO_FRAME
++	default n
++
+ config BCM_USER_DEFINED_DEFAULT_MTU_SIZE
+ 	int "User Defined Default Linux Device Interface MTU size"
+ 	depends on BCM_USER_DEFINED_DEFAULT_MTU
+Index: linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/brcmnand_base.c	2016-09-08 12:36:50.448873709 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c	2016-09-08 15:33:57.464370376 +0800
+@@ -929,6 +929,7 @@
+ };
+ 
+ static int brcmnand_wait(struct mtd_info *mtd, int state, uint32_t* pStatus);
++static int brcmnand_read_page(struct mtd_info *mtd, uint8_t *outp_buf, uint8_t* outp_oob, uint64_t page);
+ 
+ 
+ // Is there a register at the location
+@@ -1545,7 +1546,7 @@
+ /* The BCHP_HIF_INTR2_xxx registers don't exist on DSL chips so the old way of
+  * verifying ECC is used.
+  */
+-#if !defined(CONFIG_BCM_KF_NAND)
++#if defined(CONFIG_BCM_KF_NAND) && CONFIG_MTD_BRCMNAND_VERSION >= CONFIG_MTD_BRCMNAND_VERS_7_0
+ /* 
+  * SWLINUX-1584: Use HIF status register to check for errors.
+  * In the past we rely on the fact that the registers 
+@@ -1576,9 +1577,12 @@
+ 		return BRCMNAND_SUCCESS;
+ 
+ 	if (intr_status & BCHP_HIF_INTR2_CPU_STATUS_NAND_UNC_INTR_MASK) {
++#if !defined(CONFIG_BCM_KF_NAND)
+ 		// Clear Status Mask for sector 0 workaround
+ 		BDEV_WR(BCHP_HIF_INTR2_CPU_CLEAR, 
+ 			HIF_INTR2_ERR_MASK|BCHP_HIF_INTR2_CPU_STATUS_NAND_CTLRDY_INTR_MASK);
++#endif
++
+ #if 0 /* Already cleared with cpu-clear */
+ 		intr_status &= ~HIF_INTR2_ERR_MASK;
+ 		BDEV_WR(BCHP_HIF_INTR2_CPU_STATUS, intr_status);    
+@@ -1587,8 +1591,10 @@
+ 	}
+ 
+ 	else  if (intr_status & BCHP_HIF_INTR2_CPU_STATUS_NAND_CORR_INTR_MASK) {
++#if !defined(CONFIG_BCM_KF_NAND)
+ 		BDEV_WR(BCHP_HIF_INTR2_CPU_CLEAR, 
+ 			HIF_INTR2_ERR_MASK|BCHP_HIF_INTR2_CPU_STATUS_NAND_CTLRDY_INTR_MASK);
++#endif
+ #if 0 /* Already cleared with cpu-clear */
+ 		intr_status &= ~HIF_INTR2_ERR_MASK;
+ 		BDEV_WR(BCHP_HIF_INTR2_CPU_STATUS, intr_status);    
+@@ -2395,7 +2401,169 @@
+ #endif
+ 
+ 
++#if defined(CONFIG_BCM_KF_NAND)
++static int brcmnand_get_ecc_strength(struct brcmnand_chip *chip)
++{
++	uint32_t acc;
++	int ecclevel, eccstrength;
++
++	acc = chip->ctrl_read(bchp_nand_acc_control(chip->ctrl->CS[chip->csi]));
++	ecclevel = (acc & BCHP_NAND_ACC_CONTROL_ECC_LEVEL_MASK)
++		>> BCHP_NAND_ACC_CONTROL_ECC_LEVEL_SHIFT;
++
++	if (ecclevel == BRCMNAND_ECC_HAMMING)
++		eccstrength = 1;
++	else if (ecclevel == BRCMNAND_ECC_DISABLE)
++		eccstrength = 0;
++	else
++		eccstrength = ecclevel;
++
++	return eccstrength;
++}
++
++
++/*
++ * Check a page to see if it is erased (w/ bitflips) after an uncorrectable ECC
++ * error
++ *
++ * Because the HW ECC signals an ECC error if an erase paged has even a single
++ * bitflip, we must check each ECC error to see if it is actually an erased
++ * page with bitflips, not a truly corrupted page.
++ *
++ * On a real error, return a negative error code (-EBADMSG for ECC error), and
++ * buf will contain raw data.
++ * Otherwise, fill buf with 0xff and return the maximum number of
++ * bitflips-per-ECC-sector to the caller.
++ *
++ */
++
++static int brcmnand_handle_false_read_ecc_unc_errors(struct mtd_info* mtd,
++		void* buffer, u_char* oobarea, loff_t offset)
++{
++	struct brcmnand_chip *chip = (struct brcmnand_chip*) mtd->priv;
++	uint32_t acc0;
++	int i, sas, oob_nbits, data_nbits;
++	unsigned int max_bitflips = 0;
++	int ret;
++	struct nand_ecclayout *ecclayout = chip->ecclayout;
++	int oobofs_limit = 0, eccpos_idx = 0, check_ecc = 1, ecc_pos;
++	unsigned long ecc;
++	u_char* oobs;
++
++	acc0 = brcmnand_disable_read_ecc(chip->ctrl->CS[chip->csi]);
++	if (buffer == NULL) {
++		buffer = chip->ctrl->buffers->databuf;
++		/* Invalidate page cache */
++		chip->pagebuf = -1;
++	}
++	if (oobarea == NULL)
++		oobarea = chip->oob_poi;
++
++	ret = brcmnand_read_page(mtd, buffer, oobarea, offset>>chip->page_shift);
++	brcmnand_restore_ecc(chip->ctrl->CS[chip->csi], acc0);
++	if (ret)
++		return ret;
++
++	oobs = oobarea;
++	sas = mtd->oobsize / chip->eccsteps;
++	oob_nbits = sizeof(ecc)<<3;
++	data_nbits = chip->eccsize << 3;
++
++	for (i = 0; i < chip->eccsteps; i++, oobarea += sas) {
++		unsigned int bitflips = 0;
++
++		oobofs_limit = (i + 1)*sas;
++
++		/* only check for ECC bytes because JFFS2 may already write OOB */
++		/* check number ecc bit flip within each ecc step size */
++		while ( eccpos_idx < MTD_MAX_ECCPOS_ENTRIES_LARGE && check_ecc ) {
++			ecc_pos = ecclayout->eccpos[eccpos_idx];
++			if (ecc_pos == 0) {
++				/* no more ecc bytes all done */
++				check_ecc = 0;
++				break;
++			} else if (ecc_pos < oobofs_limit) {
++				/* this ecc bytes belong to this subpage, count any bit flip */
++				ecc = (unsigned long)oobs[ecc_pos];
++			bitflips += 8 - bitmap_weight(&ecc, oob_nbits); /* only lowest 8 bit matters */
++				eccpos_idx++;
++		} else {
++				/* done with this subpage */
++				break;
++			}
++		}
++
++		bitflips += data_nbits - bitmap_weight(buffer, data_nbits);
++
++		buffer += chip->eccsize;
++		offset += chip->eccsize;
++
++		/* Too many bitflips */
++		if (bitflips > brcmnand_get_ecc_strength(chip))
++			return -EBADMSG;
++
++		max_bitflips = max(max_bitflips, bitflips);
++	}
++
++	return max_bitflips;
++
++}
++
++
++/* This function handle the correctable and uncorrect ecc error for page read
++ *  and return the approriate buffer and return code to upper layer
++ */
++static int
++brcmnand_handle_ecc_errors(struct mtd_info *mtd, uint8_t *buf,
++				uint8_t* oob, loff_t offset, int error)
++{
++	struct brcmnand_chip *chip = (struct brcmnand_chip*) mtd->priv;
++	struct nand_ecclayout *ecclayout = chip->ecclayout;
++	int eccpos, eccpos_idx = 0;
++	int ret = 0;
++
++	/* verify ECC error in whole page base */
++	if (error == BRCMNAND_UNCORRECTABLE_ECC_ERROR) {
++		ret = brcmnand_handle_false_read_ecc_unc_errors(mtd, buf, oob, offset);
++		if (ret < 0) {
++			printk("uncorrectable error at 0x%llx\n", (unsigned long long)offset);
++			mtd->ecc_stats.failed++;
++			/* NAND layer expects zero on ECC errors */
++			ret = 0;
++		} else {
++			/* uncorrectable ecc error caused by erase page and number of bit flip within ecc
++			 * strength. Fill buffer and oob with 0xff
++			 */
++			if (buf)
++				memset(buf, 0xff, chip->eccsize*chip->eccsteps);
++			if (oob) {
++				/* only restore 0xff on the ecc bytes only because JFFS2 may already
++				 * write cleanmarker in oob
++				 */
++				while ((eccpos = ecclayout->eccpos[eccpos_idx])) {
++			 		oob[eccpos] = 0xff;
++					eccpos_idx++;
++				}
++			}
++
++			if (ret)
++				printk("corrected %d bitflips in blank page at 0x%llx\n",
++					ret, (unsigned long long)offset);
++			mtd->ecc_stats.corrected += ret;
++			ret = 0;
++		}
++	}
++
++	if (error == BRCMNAND_CORRECTABLE_ECC_ERROR) {
++		printk("corrected error at 0x%llx\n", (unsigned long long)offset);
++		mtd->ecc_stats.corrected++;
++		ret = 0;
++	}
++
++	return ret;
++}
+ 
++#else
+ /*
+  * Returns 0 on success
+  * Expect a controller read was done before hand, and that the OOB data are read into NAND registers.
+@@ -2539,6 +2707,7 @@
+ 
+ 	return ret;
+ }
++#endif
+ 
+ // THT PR50928: if wr_preempt is disabled, enable it to clear error
+ int brcmnand_handle_ctrl_timeout(struct mtd_info* mtd, int retry)
+@@ -2844,6 +3013,9 @@
+ 	int retries = 5, done=0;
+ 	int valid = 0;
+ 
++#if CONFIG_MTD_BRCMNAND_VERSION >= CONFIG_MTD_BRCMNAND_VERS_7_0
++	uint32_t intr_status;
++#endif
+ 
+ if (gdebug > 3 ) 
+ {printk("%s: offset=%0llx, oobarea=%p\n", __FUNCTION__, offset, oobarea);}
+@@ -2875,7 +3047,7 @@
+ }
+ #endif
+ 
+-#if 0 /* Already done by cpu-clear */
++#if defined(CONFIG_BCM_KF_NAND) && CONFIG_MTD_BRCMNAND_VERSION >= CONFIG_MTD_BRCMNAND_VERS_7_0
+ 		intr_status = BDEV_RD(BCHP_HIF_INTR2_CPU_STATUS);
+ 		intr_status &= ~(HIF_INTR2_ERR_MASK);
+ 		BDEV_WR(BCHP_HIF_INTR2_CPU_STATUS, intr_status);
+@@ -2954,7 +3126,11 @@
+ 			break;
+ 			
+ 		case BRCMNAND_UNCORRECTABLE_ECC_ERROR:
++#if !defined(CONFIG_BCM_KF_NAND)
+ 			ret = brcmnand_handle_false_read_ecc_unc_errors(mtd, buffer, oobarea, offset);
++#else
++			ret = BRCMNAND_UNCORRECTABLE_ECC_ERROR;
++#endif
+ 			done = 1;
+ 			break;
+ 			
+@@ -4685,7 +4861,7 @@
+ 	int eccstep;
+ 	int dataRead = 0;
+ 	int oobRead = 0;
+-	int ret = 0;
++	int ret = 0, error = 0;
+ 	uint64_t offset = ((uint64_t) page) << chip->page_shift;
+ 	int corrected = 0; // Only update stats once per page
+ 	int uncorrected = 0; // Only update stats once per page
+@@ -4703,14 +4879,23 @@
+ __FUNCTION__, ret);
+ 		if (ret == BRCMNAND_CORRECTABLE_ECC_ERROR) {
+ 			if ( !corrected) {
++#if !defined(CONFIG_BCM_KF_NAND)
+ 				(mtd->ecc_stats.corrected)++;
++#else
++				if (error != BRCMNAND_UNCORRECTABLE_ECC_ERROR)
++					error = ret;
++#endif
+ 				corrected = 1;
+ 			}
+ 			ret = 0;
+ 		} 
+ 		else if (ret == BRCMNAND_UNCORRECTABLE_ECC_ERROR) {
+ 			if ( !uncorrected) {
++#if !defined(CONFIG_BCM_KF_NAND)
+ 				(mtd->ecc_stats.failed)++;
++#else
++				error = ret;
++#endif
+ 				uncorrected = 1;
+ 			}
+ 			ret = 0;
+@@ -4724,6 +4909,11 @@
+ 		oobRead += chip->eccOobSize;
+ 	}
+ 
++#if defined(CONFIG_BCM_KF_NAND)
++	if (error)
++		ret = brcmnand_handle_ecc_errors(mtd, outp_buf, outp_oob, offset, error);
++#endif
++
+ 	return ret;
+ }
+ 
+@@ -4749,7 +4939,7 @@
+ 	int oobRead = 0;
+ 	int corrected = 0; // Only update stats once per page
+ 	int uncorrected = 0; // Only update stats once per page
+-	int ret = 0;
++	int ret = 0, error = 0;
+ 	uint64_t offset = page << chip->page_shift;
+ 
+ 
+@@ -4767,14 +4957,23 @@
+ __FUNCTION__, ret);
+ 		if (ret == BRCMNAND_CORRECTABLE_ECC_ERROR) {
+ 			if ( !corrected) {
++#if !defined(CONFIG_BCM_KF_NAND)
+ 				(mtd->ecc_stats.corrected)++;
++#else
++				if (error != BRCMNAND_UNCORRECTABLE_ECC_ERROR)
++					error = ret;
++#endif
+ 				corrected = 1;
+ 			}
+ 			ret = 0;
+ 		}
+ 		else if (ret == BRCMNAND_UNCORRECTABLE_ECC_ERROR) {
+ 			if ( !uncorrected) {
++#if !defined(CONFIG_BCM_KF_NAND)
+ 				(mtd->ecc_stats.failed)++;
++#else
++				error = ret;
++#endif
+ 				uncorrected = 1;
+ 			}
+ 			ret = 0;
+@@ -4794,6 +4993,12 @@
+ if (gdebug > 3 ) {
+ printk("<--%s offset=%0llx, ret=%d\n", __FUNCTION__, offset, ret);
+ print_oobbuf(outp_oob, mtd->oobsize); }
++
++#if defined(CONFIG_BCM_KF_NAND)
++	if (error)
++		ret = brcmnand_handle_ecc_errors(mtd, NULL, outp_oob, offset, error);
++#endif
++
+ 	return ret;
+ }
+ 
+Index: linux-3.4.11/include/linux/blog.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/blog.h	2016-09-08 12:36:49.348873703 +0800
++++ linux-3.4.11/include/linux/blog.h	2016-09-08 12:36:50.944873699 +0800
+@@ -300,6 +300,8 @@
+ typedef struct blog_t Blog_t;
+ #define BLOG_NULL                   ((Blog_t*)NULL)
+ #define BLOG_KEY_NONE               0
++#define BLOG_KEY_TUNNEL_IPV4        0xFFFFFFFE
++#define BLOG_KEY_TUNNEL_IPV6        0xFFFFFFFF
+ 
+ /* __bgn_include_if_linux__ */
+ 
+@@ -1638,23 +1640,24 @@
+     uint8_t             vtag_num;
+     uint16_t            eth_type;
+ 
+-    uint16_t            minMtu;
+     union {
+-        uint16_t        flags;
++        uint32_t        flags;
+         struct {
+-            uint16_t    ptm_us_bond: 1; /* PTM US Bonding Mode */
+-            uint16_t    tos_mode_us: 1; /* ToS mode for US: fixed, inherit */
+-            uint16_t    tos_mode_ds: 1; /* ToS mode for DS: fixed, inherit */
+-            uint16_t    has_pppoe:   1;
+-            uint16_t    ack_cnt:     4; /* back to back TCP ACKs for prio */
+-            uint16_t    ack_done:    1; /* TCP ACK prio decision made */
+-            uint16_t    nf_dir:      1;
+-            uint16_t    pop_pppoa:   1;
+-            uint16_t    insert_eth:  1;
+-            uint16_t    iq_prio:     1;
+-            uint16_t    mc_sync:     1;
+-            uint16_t    rtp_seq_chk: 1; /* RTP sequence check enable       */
+-            uint16_t    incomplete:  1;
++            uint32_t    rsvd:        15;
++            uint32_t    ptm_us_bond: 1; /* PTM US Bonding Mode */
++            uint32_t    tos_mode_us: 1; /* ToS mode for US: fixed, inherit */
++            uint32_t    tos_mode_ds: 1; /* ToS mode for DS: fixed, inherit */
++            uint32_t    has_pppoe:   1;
++            uint32_t    ack_cnt:     4; /* back to back TCP ACKs for prio */
++            uint32_t    ack_done:    1; /* TCP ACK prio decision made */
++            uint32_t    nf_dir_pld:  1;
++            uint32_t    nf_dir_del:  1;
++            uint32_t    pop_pppoa:   1;
++            uint32_t    insert_eth:  1;
++            uint32_t    iq_prio:     1;
++            uint32_t    mc_sync:     1;
++            uint32_t    rtp_seq_chk: 1; /* RTP sequence check enable       */
++            uint32_t    incomplete:  1;
+         };
+     };
+     union {
+@@ -1723,7 +1726,7 @@
+     };
+     uint16_t            mcast_port_map;
+ 
+-    uint16_t            unused2;
++    uint16_t            minMtu;
+     uint8_t             unused1;
+     uint8_t             tuple_offset; /* offset of flow tuple header */
+ 
+@@ -1843,6 +1846,8 @@
+ typedef int (*blog_dpi_ctk_update_t)(uint32_t appid);
+ extern blog_dpi_ctk_update_t blog_dpi_ctk_update_fn;
+ 
++extern int blog_is_config_netdev_mac(void *dev_p);
++
+ /*
+  *------------------------------------------------------------------------------
+  *  Section 2. Associating native OS or 3rd-party network constructs
+Index: linux-3.4.11/include/linux/crypto.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/crypto.h	2016-09-08 12:36:49.356873704 +0800
++++ linux-3.4.11/include/linux/crypto.h	2016-09-08 12:36:50.944873699 +0800
+@@ -81,6 +81,10 @@
+  */
+ #define CRYPTO_ALG_KERN_DRIVER_ONLY	0x00001000
+ 
++#if defined(CONFIG_BLOG) && defined(CONFIG_BCM_KF_BLOG)
++#define CRYPTO_ALG_BLOG			0x80000000
++#endif
++
+ /*
+  * Transform masks and values (for crt_flags).
+  */
+Index: linux-3.4.11/include/linux/flwstif.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/flwstif.h	2016-09-08 12:36:49.360873703 +0800
++++ linux-3.4.11/include/linux/flwstif.h	2016-09-08 12:36:50.944873699 +0800
+@@ -53,12 +53,12 @@
+ }FlwStIfReq_t;
+ 
+ extern uint32_t flwStIf_request( FlwStIfReq_t req, void *ptr, uint32_t param1,
+-                                 uint32_t param2, uint32_t param3 );
++                                 uint32_t param2, uint32_t param3, uint32_t param4 );
+ 
+ typedef int (* flwStIfGetHook_t)( uint32_t flwIdx, FlwStIf_t *flwSt_p );
+ 
+-typedef int (* flwStIfPushHook_t)( void *ctk1, void *ctk2, uint32_t direction,
+-                                   FlwStIf_t *flwSt_p );
++typedef int (* flwStIfPushHook_t)( void *ctk1, void *ctk2, uint32_t dir1,
++                                uint32_t dir2, FlwStIf_t *flwSt_p );
+ 
+ extern void flwStIf_bind(flwStIfGetHook_t flwStIfGetHook, flwStIfPushHook_t flwStIfPushHook);
+ 
+Index: linux-3.4.11/include/linux/mtd/bchp_nand_7x.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/mtd/bchp_nand_7x.h	2016-09-08 12:36:49.388873702 +0800
++++ linux-3.4.11/include/linux/mtd/bchp_nand_7x.h	2016-09-08 12:36:50.948873702 +0800
+@@ -33,9 +33,11 @@
+ #include <bcm_map_part.h>
+ #ifdef CONFIG_ARM
+ #define BRCMNAND_CTL_BASE                       (NAND_REG_BASE)
++#define BRCMNAND_INTR_BASE                      (NAND_INTR_BASE)
+ #define BRCMNAND_CACHE_BASE                     (NAND_CACHE_BASE)
+ #else
+ #define BRCMNAND_CTL_BASE                       (NAND_REG_BASE & 0x0fffffff)
++#define BRCMNAND_INTR_BASE                      (NAND_INTR_BASE & 0x0fffffff)
+ #define BRCMNAND_CACHE_BASE                     (NAND_CACHE_BASE & 0x0fffffff)
+ #endif
+ #define BRCMNAND_FLD_ADDR(FLD)                  \
+@@ -1427,6 +1429,14 @@
+ #define BCHP_NAND_FLASH_CACHEi_WORD_SHIFT                          0
+ 
+ 
++/***************************************************************************
++ *NAND FLASH INTR STATUS register
++ ***************************************************************************/
++
++#define BCHP_HIF_INTR2_CPU_STATUS                                  (BRCMNAND_INTR_BASE)
++#define BCHP_HIF_INTR2_CPU_STATUS_NAND_UNC_INTR_MASK               (0x1<<6)
++#define BCHP_HIF_INTR2_CPU_STATUS_NAND_CORR_INTR_MASK              (0x1<<7)
++
+ #endif /* #ifndef BCHP_NAND_7x_H__ */
+ 
+ /* End of File */
+Index: linux-3.4.11/net/bridge/br_input.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_input.c	2016-09-08 12:36:49.672873703 +0800
++++ linux-3.4.11/net/bridge/br_input.c	2016-09-08 12:36:50.948873702 +0800
+@@ -452,6 +452,13 @@
+ 
+ 	p = br_port_get_rcu(skb->dev);
+ 
++#if defined(CONFIG_BCM_KF_WANDEV)
++   if (!p)
++   {
++      kfree_skb(skb);
++      return RX_HANDLER_CONSUMED;
++   }
++#endif
+ 	if (unlikely(is_link_local(dest))) {
+ 		/*
+ 		 * See IEEE 802.1D Table 7-10 Reserved addresses
+Index: linux-3.4.11/net/bridge/br_mcast.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mcast.c	2016-09-08 12:36:49.732873704 +0800
++++ linux-3.4.11/net/bridge/br_mcast.c	2016-09-08 12:36:50.948873702 +0800
+@@ -353,6 +353,7 @@
+ 	uint32_t phyType;
+ 	char wan_ops;
+ 	uint32_t index = 0;
++	char pppNeedsAction = 0;
+ 
+ 	if(!mc_fdb)
+ 		return;
+@@ -389,18 +390,7 @@
+ 			ruleAction.cmd = BLOG_RULE_CMD_POP_PPPOE_HDR;
+ 			blog_rule_add_action(rule_p, &ruleAction);
+ 
+-			if ( NULL == br_mcast_blog_find_command(rule_p, BLOG_RULE_CMD_SET_MAC_DA, &index) )
+-			{
+-				memset(&ruleAction, 0, sizeof(blogRuleAction_t));
+-				ruleAction.cmd = BLOG_RULE_CMD_SET_MAC_DA;
+-				if(igmp_fdb)
+-					br_mcast_ipv4_to_eth(igmp_fdb->txGrp.s_addr, ruleAction.macAddr);
+-#if defined(CONFIG_BCM_KF_MLD) && defined(CONFIG_BR_MLD_SNOOP)
+-				else
+-					br_mcast_ipv6_to_eth(mld_fdb->grp.s6_addr, ruleAction.macAddr);
+-#endif
+-				blog_rule_add_action(rule_p, &ruleAction);
+-			}
++			pppNeedsAction = 1;
+ 		}
+ 		else if(*wan_vlan_dev_pp == NULL &&
+ 		        dev_p->priv_flags & IFF_BCM_VLAN)
+@@ -413,7 +403,10 @@
+ 	/* For IPoA */
+ 	phyType = netdev_path_get_hw_port_type(*wan_dev_pp);
+ 	phyType = BLOG_GET_HW_ACT(phyType);
+-	if((phyType == VC_MUX_IPOA) || (phyType == LLC_SNAP_ROUTE_IP))
++	if( ((phyType == VC_MUX_IPOA) || (phyType == LLC_SNAP_ROUTE_IP)) ||
++	    pppNeedsAction ||
++	    ((igmp_fdb) && (igmp_fdb->txGrp.s_addr != igmp_fdb->rxGrp.s_addr))
++	  )
+ 	{
+ 		if ( NULL == br_mcast_blog_find_command(rule_p, BLOG_RULE_CMD_SET_MAC_DA, &index) )
+ 		{
+Index: linux-3.4.11/net/core/blog.c
+===================================================================
+--- linux-3.4.11.orig/net/core/blog.c	2016-09-08 12:36:50.888873714 +0800
++++ linux-3.4.11/net/core/blog.c	2016-09-08 12:36:50.948873702 +0800
+@@ -1142,12 +1142,12 @@
+             blog_p->ct_ver[idx] = (param2 == BLOG_PARAM2_GRE_IPV4) ?
+                                                 BLOG_PARAM2_IPV4 : param2;
+             /* 
+-             * Save flow direction. Here we make one assumption:
+-             * If a packet traverses both IPv4 and IPv6 conntracks,
+-             * for example, 6in4 or 4in6 tunnel, the nf_dir must be the same
+-             * for both conntracks.
++             * Save flow direction
+              */
+-            blog_p->nf_dir = param1;
++            if(idx == BLOG_CT_PLD)
++                blog_p->nf_dir_pld = param1;
++            else
++                blog_p->nf_dir_del = param1;
+ 
+             blog_print( "idx<%d> ct_p<%p> ct_ver<%d>\n",
+                     idx, blog_p->ct_p[idx], blog_p->ct_ver[idx] );
+@@ -1352,6 +1352,30 @@
+         case FLOWTRACK_KEY_SET:
+             blog_assertr( ((param1 == BLOG_PARAM1_DIR_ORIG) ||
+                            (param1 == BLOG_PARAM1_DIR_REPLY)), 0 );
++
++            /* check pld connections for any corruptions*/
++            if((param2 != BLOG_KEY_TUNNEL_IPV6) && (param2 != BLOG_KEY_TUNNEL_IPV4))
++            {
++                if(param2 != BLOG_KEY_NONE)
++                {
++                    /*check blog_key[param1] should be BLOG_KEY_NONE */
++                    if(((struct nf_conn *)net_p)->blog_key[param1] != BLOG_KEY_NONE )
++                    {
++                        blog_error("blog_key corruption when adding flow net_p=%p"
++                            "dir=%d old_key=0x%08x new_key=0x%08x\n", net_p, param1,
++                             ((struct nf_conn *)net_p)->blog_key[param1], param2);
++                    }
++                }
++                else
++                {
++                    if(((struct nf_conn *)net_p)->blog_key[param1] == BLOG_KEY_NONE )
++                    {
++                        blog_error("blog_key corruption when deleting flow"
++                                    "for net_p=%p \n", net_p);
++                    }
++                }
++            }
++
+             ((struct nf_conn *)net_p)->blog_key[param1] = param2;
+             return 0;
+ 
+@@ -1950,9 +1974,6 @@
+ 
+         blog_p->tx.dev_p = (void *)dev_p;           /* Log device info */
+ 
+-        if (blog_p->minMtu > ((struct net_device *)dev_p)->mtu)
+-            blog_p->minMtu = ((struct net_device *)dev_p)->mtu;
+-
+         blogHash.l1_tuple.channel = (uint8_t)channel;
+         blogHash.l1_tuple.phyType = BLOG_GET_PHYTYPE(phyHdr);
+         blogHash.l1_tuple.phyLen  = BLOG_GET_PHYLEN(phyHdr);
+@@ -1960,6 +1981,7 @@
+         blog_p->priority = skb_p->priority;         /* Log skb info */
+         blog_p->mark     = skb_p->mark;
+ 
++		blog_p->minMtu   = blog_getTxMtu(blog_p);
+         blog_assertr( (BLOG_GET_PHYTYPE(phyHdr) < BLOG_MAXPHY), PKT_NORM);
+         blog_print( "skb<0x%08x> blog<0x%08x> pData<0x%08x> length<%d>"
+                     " dev<0x%08x> chnl<%u> %s PhyHdrLen<%u> key<0x%08x>",
+@@ -2618,13 +2640,13 @@
+             blog_p->priority, blog_p->mark, blog_p->minMtu);
+ 
+ #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
+-    if ( blog_p->ct_p[BLOG_PARAM2_IPV4] )
+-        blog_nfct_dump( blog_p->skb_p, blog_p->ct_p[BLOG_PARAM2_IPV4], 
+-                        blog_p->nf_dir );
+-
+-    if ( blog_p->ct_p[BLOG_PARAM2_IPV6] )
+-        blog_nfct_dump( blog_p->skb_p, blog_p->ct_p[BLOG_PARAM2_IPV6], 
+-                        blog_p->nf_dir );
++    if ( blog_p->ct_p[BLOG_CT_PLD] )
++        blog_nfct_dump( blog_p->skb_p, blog_p->ct_p[BLOG_CT_PLD],
++                        blog_p->nf_dir_pld );
++
++    if ( blog_p->ct_p[BLOG_CT_DEL] )
++        blog_nfct_dump( blog_p->skb_p, blog_p->ct_p[BLOG_CT_DEL],
++                        blog_p->nf_dir_del );
+ #endif
+ 
+     printk( "  RX count<%u> channel<%02u> bmap<0x%04x> phyLen<%u> "
+@@ -2699,9 +2721,13 @@
+         if ( IS_RX_DIR(dir_dev_p) )
+             continue;
+         dev_p = (struct net_device *)DEVP_DETACH_DIR(dir_dev_p);
++#ifdef CONFIG_BCM_IGNORE_BRIDGE_MTU
+         /* Exclude Bridge device - bridge always has the least MTU of all attached interfaces -
+          * irrespective of this specific flow path */
+         if (dev_p && !(dev_p->priv_flags&IFF_EBRIDGE) && dev_p->mtu < minMtu)
++#else
++        if (dev_p && dev_p->mtu < minMtu)
++#endif
+         {
+             minMtu = dev_p->mtu;
+         }
+@@ -3433,6 +3459,32 @@
+     return ret;
+ }
+ 
++int blog_is_config_netdev_mac(void *ptr)
++{
++   struct net_device *dev_p = (struct net_device *) ptr;
++#if defined(CONFIG_BCM_KF_WANDEV)
++   struct net_device *root_dev_p = netdev_path_get_root(dev_p);
++#endif
++
++  if ( (dev_p->priv_flags & IFF_POINTOPOINT) || (dev_p->priv_flags & IFF_ISATAP) )
++      return 0;
++
++#if defined(CONFIG_BCM_KF_PPP)
++  if (dev_p->priv_flags & IFF_PPP)
++      return 0;
++#endif
++
++  if ( (dev_p->priv_flags & IFF_EBRIDGE)
++#if defined(CONFIG_BCM_KF_WANDEV)
++                                || (root_dev_p->priv_flags & IFF_WANDEV)
++#endif
++     )
++      return 1;
++  else
++      return 0;
++}
++
++
+ /*
+  *------------------------------------------------------------------------------
+  * Function     : __init_blog
+@@ -3633,6 +3685,7 @@
+ void blog_ptm_us_bonding( struct sk_buff *skb_p, int mode ) { return; }
+ 
+ int blog_dm(BlogDpiType_t type, uint32_t param1, uint32_t param2) { return 0; }
++int blog_is_config_netdev_mac(void *ptr) { return 0; }
+ 
+ EXPORT_SYMBOL(blog_emit);
+ 
+@@ -3712,6 +3765,7 @@
+ EXPORT_SYMBOL(blog_ptm_us_bonding);
+ EXPORT_SYMBOL(blog_dm);
+ EXPORT_SYMBOL(blog_dpi_ctk_update_fn);
++EXPORT_SYMBOL(blog_is_config_netdev_mac);
+ 
+ EXPORT_SYMBOL(blog);
+ 
+Index: linux-3.4.11/net/core/flwstif.c
+===================================================================
+--- linux-3.4.11.orig/net/core/flwstif.c	2016-09-08 12:36:49.752873706 +0800
++++ linux-3.4.11/net/core/flwstif.c	2016-09-08 12:36:50.952873715 +0800
+@@ -38,7 +38,7 @@
+ static flwStIfPushHook_t flwStIfPush_hook_g = NULL; 
+ 
+ uint32_t flwStIf_request( FlwStIfReq_t req, void *ptr, uint32_t param1,
+-                          uint32_t param2, uint32_t param3 )
++                          uint32_t param2, uint32_t param3, uint32_t param4 )
+ {
+     int ret=0;
+     switch (req)
+@@ -57,7 +57,7 @@
+             if (flwStIfPush_hook_g)
+             {
+                 ret = flwStIfPush_hook_g(ptr, (void *)param1, param2, 
+-                                         (FlwStIf_t *)param3);
++                                         param3, (FlwStIf_t *)param4);
+             }
+             else
+             {
+Index: linux-3.4.11/net/core/iqos.c
+===================================================================
+--- linux-3.4.11.orig/net/core/iqos.c	2016-09-08 12:36:49.752873706 +0800
++++ linux-3.4.11/net/core/iqos.c	2016-09-08 12:36:50.952873715 +0800
+@@ -113,18 +113,22 @@
+ int iqos_prio_L4port( iqos_ipproto_t ipProto, uint16_t destPort )
+ {
+     unsigned long flags;
+-    uint8_t prio = IQOS_PRIO_HIGH;
++    uint8_t prio = IQOS_PRIO_LOW;
+ 
+     if ( unlikely(iqos_prio_L4port_hook_g == (iqos_prio_L4port_hook_t)NULL) )
++    {
++        if ((ipProto != IQOS_IPPROTO_UDP) && (ipProto != IQOS_IPPROTO_TCP))
++            prio = IQOS_PRIO_HIGH;
+         goto iqos_prio_L4port_exit;
++    }
+ 
+     IQOS_LOCK_IRQSAVE();
+     prio = iqos_prio_L4port_hook_g( ipProto, destPort ); 
+     IQOS_UNLOCK_IRQRESTORE();
+ 
+-iqos_prio_L4port_exit:
++    iqos_prio_L4port_exit:
+     return prio;
+-}
++ }
+ 
+ 
+ /*
+Index: linux-3.4.11/net/ipv4/esp4.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv4/esp4.c	2016-09-08 12:36:49.768873706 +0800
++++ linux-3.4.11/net/ipv4/esp4.c	2016-09-08 12:36:50.952873715 +0800
+@@ -145,8 +145,9 @@
+ #endif
+ 
+ #if defined(CONFIG_BCM_KF_BLOG) && defined(CONFIG_BLOG)
+-#if !defined(CONFIG_BCM_KF_SPU) || !(defined(CONFIG_BCM_SPU) || defined(CONFIG_BCM_SPU_MODULE)) || ((defined(CONFIG_BCM_SPU) || defined(CONFIG_BCM_SPU_MODULE)) && !(defined(CONFIG_BCM_RDPA) || defined(CONFIG_BCM_RDPA_MODULE)))
+-	blog_skip(skb);
++#if defined(CONFIG_BCM_KF_SPU) && (defined(CONFIG_BCM_SPU) || defined(CONFIG_BCM_SPU_MODULE))
++	struct crypto_tfm *ctfm;
++	struct crypto_alg *calg;
+ #endif
+ #endif
+ 	/* skb is pure payload to encrypt */
+@@ -157,6 +158,18 @@
+ 	aead = esp->aead;
+ 	alen = crypto_aead_authsize(aead);
+ 
++#if defined(CONFIG_BCM_KF_BLOG) && defined(CONFIG_BLOG)
++#if defined(CONFIG_BCM_KF_SPU) && (defined(CONFIG_BCM_SPU) || defined(CONFIG_BCM_SPU_MODULE))
++	ctfm = crypto_aead_tfm(aead);
++	calg = ctfm->__crt_alg;
++	if ( !(calg->cra_flags & CRYPTO_ALG_BLOG) )
++	{
++		blog_skip(skb);
++	}
++#else
++	blog_skip(skb);
++#endif
++#endif
+ 	tfclen = 0;
+ 	if (x->tfcpad) {
+ 		struct xfrm_dst *dst = (struct xfrm_dst *)skb_dst(skb);
+@@ -427,7 +440,18 @@
+ #endif
+ 
+ #if defined(CONFIG_BCM_KF_BLOG) && defined(CONFIG_BLOG)
+-#if !defined(CONFIG_BCM_KF_SPU) || !(defined(CONFIG_BCM_SPU) || defined(CONFIG_BCM_SPU_MODULE)) || ((defined(CONFIG_BCM_SPU) || defined(CONFIG_BCM_SPU_MODULE)) && !(defined(CONFIG_BCM_RDPA) || defined(CONFIG_BCM_RDPA_MODULE)))
++#if defined(CONFIG_BCM_KF_SPU) && (defined(CONFIG_BCM_SPU) || defined(CONFIG_BCM_SPU_MODULE))
++	struct crypto_tfm *ctfm;
++	struct crypto_alg *calg;
++
++	ctfm = crypto_aead_tfm(aead);
++	calg = ctfm->__crt_alg;
++
++	if ( !(calg->cra_flags & CRYPTO_ALG_BLOG) )
++	{
++		blog_skip(skb);
++	}
++#else
+ 	blog_skip(skb);
+ #endif
+ #endif
+Index: linux-3.4.11/net/ipv6/ip6_tunnel.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/ip6_tunnel.c	2016-09-08 12:36:50.040873706 +0800
++++ linux-3.4.11/net/ipv6/ip6_tunnel.c	2016-09-08 12:36:50.952873715 +0800
+@@ -1070,6 +1070,7 @@
+ 	blog_link(TOS_MODE, blog_ptr(skb), NULL, DIR_TX,
+ 		(t->parms.flags & IP6_TNL_F_USE_ORIG_TCLASS) ?
+ 			BLOG_TOS_INHERIT : BLOG_TOS_FIXED);
++	blog_link(IF_DEVICE, blog_ptr(skb), (void*)dev, DIR_TX, skb->len);
+ 	blog_unlock();
+ #endif
+ 
+Index: linux-3.4.11/net/ipv6/sit.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/sit.c	2016-09-08 12:36:50.052873708 +0800
++++ linux-3.4.11/net/ipv6/sit.c	2016-09-08 12:36:50.952873715 +0800
+@@ -939,6 +939,7 @@
+ #if defined(CONFIG_BCM_KF_BLOG) && defined(CONFIG_BLOG)
+ 	blog_lock();
+ 	blog_link(TOS_MODE, blog_ptr(skb), tunnel, DIR_TX, tunnel->parms.iph.tos);
++	blog_link(IF_DEVICE, blog_ptr(skb), (void*)dev, DIR_TX, skb->len);
+ 	blog_unlock();
+ #endif
+ 
+Index: linux-3.4.11/net/netfilter/nf_conntrack_acct.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_acct.c	2016-09-08 12:36:50.080873708 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_acct.c	2016-09-08 12:36:50.952873715 +0800
+@@ -67,7 +67,7 @@
+ 		if (ct->blog_key[dir] != BLOG_KEY_NONE)
+ 		{
+ 			flwStIf_request(FLWSTIF_REQ_GET, &fast_stats,
+-							ct->blog_key[dir], 0, 0);
++							ct->blog_key[dir], 0, 0, 0);
+ 			acct[dir].ts = fast_stats.pollTS_ms;
+ 		}
+ 
+@@ -108,7 +108,7 @@
+ 		if (ct->blog_key[dir] != BLOG_KEY_NONE)
+ 		{
+ 			flwStIf_request(FLWSTIF_REQ_GET, &fast_stats,
+-							ct->blog_key[dir], 0, 0);
++							ct->blog_key[dir], 0, 0, 0);
+ 			acct[dir].ts = fast_stats.pollTS_ms;
+ 		}
+ 
+@@ -157,7 +157,7 @@
+ 		if (ct->blog_key[dir] != BLOG_KEY_NONE)
+ 		{
+ 			flwStIf_request(FLWSTIF_REQ_GET, &fast_stats,
+-							ct->blog_key[dir], 0, 0);
++							ct->blog_key[dir], 0, 0, 0);
+ 
+ 			acct[dir].ts = fast_stats.pollTS_ms;
+ 		}
+@@ -292,7 +292,7 @@
+  * Function Name: flwStPushFunc
+  *---------------------------------------------------------------------------
+  */
+-int flwStPushFunc( void *ctk1, void *ctk2, uint32_t dir,
++int flwStPushFunc( void *ctk1, void *ctk2, uint32_t dir1, uint32_t dir2,
+                    FlwStIf_t *flwSt_p )
+ {
+ 	struct nf_conn_counter *acct;
+@@ -305,9 +305,9 @@
+ 		acct = nf_conn_acct_find((struct nf_conn *)ctk1);
+ 		if (acct)
+ 		{
+-			acct[dir].cum_fast_pkts += flwSt_p->rx_packets;
+-			acct[dir].cum_fast_bytes += flwSt_p->rx_bytes;
+-			acct[dir].ts = flwSt_p->pollTS_ms;
++			acct[dir1].cum_fast_pkts += flwSt_p->rx_packets;
++			acct[dir1].cum_fast_bytes += flwSt_p->rx_bytes;
++			acct[dir1].ts = flwSt_p->pollTS_ms;
+ 		}
+ 	}
+ 
+@@ -316,9 +316,9 @@
+ 		acct = nf_conn_acct_find((struct nf_conn *)ctk2);
+ 		if (acct)
+ 		{
+-			acct[dir].cum_fast_pkts += flwSt_p->rx_packets;
+-			acct[dir].cum_fast_bytes += flwSt_p->rx_bytes;
+-			acct[dir].ts = flwSt_p->pollTS_ms;
++			acct[dir2].cum_fast_pkts += flwSt_p->rx_packets;
++			acct[dir2].cum_fast_bytes += flwSt_p->rx_bytes;
++			acct[dir2].ts = flwSt_p->pollTS_ms;
+ 		}
+ 	}
+ 
+Index: linux-3.4.11/net/netfilter/nf_conntrack_core.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_core.c	2016-09-08 12:36:50.900873710 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_core.c	2016-09-08 12:36:50.964873718 +0800
+@@ -1303,7 +1303,7 @@
+ 	if (skb == NULL || skb->blog_p == NULL ) {
+ 		switch (nf_ct_l3num(ct)) {
+ 			case AF_INET:
+-				ct->iq_prio = IN_MULTICAST(orig->dst.u3.ip) ? IQOS_PRIO_HIGH : IQOS_PRIO_LOW;
++				ct->iq_prio = ipv4_is_multicast(orig->dst.u3.ip) ? IQOS_PRIO_HIGH : IQOS_PRIO_LOW;
+ 				break;
+ 			case AF_INET6:
+ 				ct->iq_prio = nf_conntrack_ipv6_is_multicast(orig->dst.u3.ip6) ? IQOS_PRIO_HIGH : IQOS_PRIO_LOW;
+Index: linux-3.4.11/net/netfilter/nf_conntrack_proto_tcp.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_proto_tcp.c	2016-09-08 12:36:50.088873708 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_proto_tcp.c	2016-09-08 12:36:50.964873718 +0800
+@@ -1057,7 +1057,9 @@
+ 			ct->blog_key[IP_CT_DIR_REPLY] = BLOG_KEY_NONE;
+ 		}
+ 
+-		clear_bit(IPS_BLOG_BIT, &ct->status);
++		if (th->fin) {
++			clear_bit(IPS_BLOG_BIT, &ct->status);
++		}
+ 	}
+ 	if (ct->proto.tcp.state !=  TCP_CONNTRACK_ESTABLISHED)
+ 		blog_skip((struct sk_buff *)skb); /* abort blogging this packet */

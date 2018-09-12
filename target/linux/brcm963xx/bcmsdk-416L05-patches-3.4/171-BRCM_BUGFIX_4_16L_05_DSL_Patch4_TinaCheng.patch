@@ -1,0 +1,605 @@
+Index: linux-3.4.11/drivers/tty/tty_ldisc.c
+===================================================================
+--- linux-3.4.11.orig/drivers/tty/tty_ldisc.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/drivers/tty/tty_ldisc.c	2017-04-12 13:26:40.687813624 +0800
+@@ -406,6 +406,12 @@
+  *	they are not on hot paths so a little discipline won't do
+  *	any harm.
+  *
++#if defined(CONFIG_BCM_KF_MISC_3_4_CVE_PORTS)
++ *	The line discipline-related tty_struct fields are reset to
++ *	prevent the ldisc driver from re-using stale information for
++ *	the new ldisc instance.
++ *
++#endif
+  *	Locking: takes termios_mutex
+  */
+ 
+@@ -414,6 +420,11 @@
+ 	mutex_lock(&tty->termios_mutex);
+ 	tty->termios->c_line = num;
+ 	mutex_unlock(&tty->termios_mutex);
++#if defined(CONFIG_BCM_KF_MISC_3_4_CVE_PORTS)
++/*CVE-2015-8964*/
++	tty->disc_data = NULL;
++	tty->receive_room = 0;
++#endif
+ }
+ 
+ /**
+Index: linux-3.4.11/drivers/net/ppp/ppp_generic.c
+===================================================================
+--- linux-3.4.11.orig/drivers/net/ppp/ppp_generic.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/drivers/net/ppp/ppp_generic.c	2017-04-12 14:26:01.041985937 +0800
+@@ -688,13 +688,13 @@
+                 {
+                     printk(KERN_ERR "PPP: Failed to add %s to Interface path (%d)",
+                            ppp->dev->name, err);
++                    dev_put(real_dev);
+                 }
+                 else
+                 {
+                     netdev_path_dump(ppp->dev);
+                 }
+ 
+-                dev_put(real_dev);
+ 		break;
+ #endif
+ 
+@@ -3187,12 +3187,16 @@
+ 		if(!strstr(ppp->dev->name,"pppowwan")){
+ #endif
+ 			int err;
++			struct net_device *next_dev;
++			next_dev = netdev_path_next_dev(ppp->dev);
+ 			err = netdev_path_remove(ppp->dev);
+ 			if(err)
+ 			{
+ 				printk(KERN_ERR "PPP: Failed to remove %s from Interface path (%d)", ppp->dev->name, err);
+ 				netdev_path_dump(ppp->dev);
+ 			}
++			if(next_dev != NULL)
++				dev_put(next_dev);
+ #if 1 /* support pppowwan */
+ 		}
+ #endif
+Index: linux-3.4.11/fs/ioprio.c
+===================================================================
+--- linux-3.4.11.orig/fs/ioprio.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/fs/ioprio.c	2017-04-12 13:26:40.835813674 +0800
+@@ -145,8 +145,16 @@
+ 	if (ret)
+ 		goto out;
+ 	ret = IOPRIO_PRIO_VALUE(IOPRIO_CLASS_NONE, IOPRIO_NORM);
++#if defined(CONFIG_BCM_KF_MISC_3_4_CVE_PORTS)
++/*CVE-2016-7911*/
++	task_lock(p);
++#endif
+ 	if (p->io_context)
+ 		ret = p->io_context->ioprio;
++#if defined(CONFIG_BCM_KF_MISC_3_4_CVE_PORTS)
++/*CVE-2016-7911*/
++	task_unlock(p);
++#endif
+ out:
+ 	return ret;
+ }
+Index: linux-3.4.11/fs/proc/base.c
+===================================================================
+--- linux-3.4.11.orig/fs/proc/base.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/fs/proc/base.c	2017-04-12 13:26:41.111813628 +0800
+@@ -829,7 +829,13 @@
+ 
+ 	mm = mm_for_maps(task);
+ 	ret = PTR_ERR(mm);
++#if defined(CONFIG_BCM_KF_MISC_3_4_CVE_PORTS)
++/*CVE-2016-7916*/
++	/* Ensure the process spawned far enough to have an environment. */
++	if (!mm || IS_ERR(mm) || !mm->env_end)
++#else
+ 	if (!mm || IS_ERR(mm))
++#endif
+ 		goto out_free;
+ 
+ 	ret = 0;
+Index: linux-3.4.11/arch/arm/mach-bcm963xx/Makefile
+===================================================================
+--- linux-3.4.11.orig/arch/arm/mach-bcm963xx/Makefile	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/Makefile	2017-04-12 13:26:41.347813646 +0800
+@@ -14,6 +14,10 @@
+ EXTRA_CFLAGS += -g
+ EXTRA_CFLAGS += $(BRCM_WERROR_CFLAGS)
+ 
++ifeq "$(ADSL)" "ANNEX_B"
++EXTRA_CFLAGS += -DADSL_ANNEXB
++endif
++
+ ifneq ($(strip $(BUILD_SWMDK)),)
+ EXTRA_CFLAGS += -DSUPPORT_SWMDK
+ endif
+Index: linux-3.4.11/block/genhd.c
+===================================================================
+--- linux-3.4.11.orig/block/genhd.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/block/genhd.c	2017-04-12 13:26:41.563813744 +0800
+@@ -851,6 +851,10 @@
+ 	if (iter) {
+ 		class_dev_iter_exit(iter);
+ 		kfree(iter);
++#if defined(CONFIG_BCM_KF_MISC_3_4_CVE_PORTS)
++/* CVE-2016-7910 */
++		seqf->private = NULL;
++#endif
+ 	}
+ }
+ 
+Index: linux-3.4.11/crypto/algif_hash.c
+===================================================================
+--- linux-3.4.11.orig/crypto/algif_hash.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/crypto/algif_hash.c	2017-04-12 13:26:41.799813494 +0800
+@@ -189,9 +189,20 @@
+ 	struct sock *sk2;
+ 	struct alg_sock *ask2;
+ 	struct hash_ctx *ctx2;
++#if defined(CONFIG_BCM_KF_MISC_3_4_CVE_PORTS)
++	int more;
++#endif
+ 	int err;
+ 
++#if defined(CONFIG_BCM_KF_MISC_3_4_CVE_PORTS)
++/*CVE-2016-8646*/
++	lock_sock(sk);
++	more = ctx->more;
++	err = more ? crypto_ahash_export(req, state) : 0;
++	release_sock(sk);
++#else
+ 	err = crypto_ahash_export(req, state);
++#endif
+ 	if (err)
+ 		return err;
+ 
+@@ -202,7 +213,15 @@
+ 	sk2 = newsock->sk;
+ 	ask2 = alg_sk(sk2);
+ 	ctx2 = ask2->private;
++#if defined(CONFIG_BCM_KF_MISC_3_4_CVE_PORTS)
++/*CVE-2016-8646*/
++	ctx2->more = more;
++
++	if (!more)
++		return err;
++#else
+ 	ctx2->more = 1;
++#endif
+ 
+ 	err = crypto_ahash_import(&ctx2->req, state);
+ 	if (err) {
+Index: linux-3.4.11/include/linux/blog.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/blog.h	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/include/linux/blog.h	2017-04-12 13:26:41.999813667 +0800
+@@ -1641,6 +1641,10 @@
+     struct blog_t       * vblog_p;      /* vertical list of Blog_t */
+     void                * mc_fdb;       /* physical rx network device */
+ 
++    uint32_t            reserved9;
++    BlogEthAddr_t       src_mac;        /* Flow src MAC */
++    BlogEthAddr_t       dst_mac;        /* Flow dst MAC */
++
+     void                * fdb[2];       /* fdb_src and fdb_dst */
+     int8_t              delta[MAX_VIRT_DEV];  /* octet delta info */
+     uint8_t             vtag_num;
+Index: linux-3.4.11/include/linux/iqos.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/iqos.h	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/include/linux/iqos.h	2017-04-12 13:26:42.267813623 +0800
+@@ -154,6 +154,14 @@
+ typedef void (* iqos_fap_dump_porttbl_hook_t)( uint8_t ipProto );
+ #endif
+ 
++typedef int (* iqos_runner_get_hook_t)( void *bdmf_obj, long bdmf_index, 
++            void *iq_param ); 
++
++typedef int (* iqos_runner_L4port_hook_t)( void *bdmf_obj, void *bdmf_index, 
++            void *iq_param );
++
++typedef int (* iqos_runner_rem_L4port_hook_t)( void *bdmf_obj, long bdmf_index);
++
+ iqos_cong_status_t iqos_get_sys_cong_status( void );
+ iqos_cong_status_t iqos_get_cong_status( iqos_if_t iface, uint32_t chnl );
+ uint32_t iqos_set_cong_status( iqos_if_t iface, uint32_t chnl, 
+Index: linux-3.4.11/net/core/dev.c
+===================================================================
+--- linux-3.4.11.orig/net/core/dev.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/net/core/dev.c	2017-04-12 13:26:42.555813602 +0800
+@@ -3644,7 +3644,7 @@
+ #endif
+ #if defined(CONFIG_BCM_KF_TMS) && defined(CONFIG_BCM_TMS_MODULE)
+ int (*bcm_1ag_handle_frame_check_hook)(struct sk_buff *) = NULL;
+-int (*bcm_3ah_loopback_mode_check_hook)(struct sk_buff *, struct net_device *) = NULL;
++int (*bcm_3ah_handle_frame_check_hook)(struct sk_buff *, struct net_device *) = NULL;
+ #endif
+ 
+ /**
+@@ -3733,15 +3733,15 @@
+       }
+    }
+    /* Check if 802.3ah service is started. */
+-   if (bcm_3ah_loopback_mode_check_hook)
++   if (bcm_3ah_handle_frame_check_hook)
+    {
+       /* We want to skip vlanctl for 3ah packet, or for any packet when 3ah loopback was enabled. */
+-      if ((skb->protocol == htons(ETH_P_8023AH)) || (bcm_3ah_loopback_mode_check_hook(skb, skb->dev)))
++      if ((bcm_3ah_handle_frame_check_hook(skb, skb->dev)))
+       {
+          goto skip_vlanctl;
+       }
+    }
+-#endif   /* #if defined(CONFIG_BCM_TMS_MODULE) */
++#endif /* #if defined(CONFIG_BCM_TMS_MODULE) */
+ 
+    if (bcm_vlan_handle_frame_hook && (ret = bcm_vlan_handle_frame_hook(&skb)) != 0)
+    {
+@@ -5609,21 +5609,14 @@
+ 
+ #if defined(CONFIG_BCM_KF_IGMP) || defined(CONFIG_BCM_KF_MLD)
+ 		case SIOCDEVISWANDEV:
+-			if(netdev_path_is_leaf(dev))
+-			{
+ #if defined(CONFIG_BCM_KF_WANDEV)
+-				if ((dev->priv_flags & IFF_WANDEV) || 
+-				    (dev->priv_flags & IFF_EPON_IF))
+-				{
+-					ifr->ifr_flags = 1;
+-				}
+-#endif
+-				else
+-				{
+-					ifr->ifr_flags = 0;
+-				}
++			if ((dev->priv_flags & IFF_WANDEV) ||
++				(dev->priv_flags & IFF_EPON_IF))
++			{
++				ifr->ifr_flags = 1;
+ 			}
+ 			else
++#endif
+ 			{
+ 				ifr->ifr_flags = 0;
+ 			}
+@@ -7742,5 +7735,5 @@
+ 
+ #if defined(CONFIG_BCM_KF_TMS) && defined(CONFIG_BCM_TMS_MODULE)
+ EXPORT_SYMBOL(bcm_1ag_handle_frame_check_hook);
+-EXPORT_SYMBOL(bcm_3ah_loopback_mode_check_hook);
++EXPORT_SYMBOL(bcm_3ah_handle_frame_check_hook);
+ #endif
+Index: linux-3.4.11/net/core/blog.c
+===================================================================
+--- linux-3.4.11.orig/net/core/blog.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/net/core/blog.c	2017-04-12 13:26:42.787813870 +0800
+@@ -892,6 +892,7 @@
+             CPY(vtag[1]);
+             CPY(vtag_num);
+             CPY(tupleV6);
++            CPY(tuple_offset);
+             for(i=0; i<MAX_VIRT_DEV; i++)
+             {
+                if( prev_p->virt_dev_p[i] )
+@@ -1181,11 +1182,27 @@
+ 
+         case BRIDGEFDB:
+         {
+-            blog_assertv( ((param1 == BLOG_PARAM1_SRCFDB) ||
++           blog_assertv( ((param1 == BLOG_PARAM1_SRCFDB) ||
+                            (param1 == BLOG_PARAM1_DSTFDB)) );
+ 
+-            blog_p->fdb[param1] = net_p;
++           /* Note:- In bridging mode, dest bridge FDB pointer could be NULL if
++            * the dest MAC has not been learned yet */  
++           if ( unlikely(net_p != (void *) NULL) )
++           {
++                uint8_t *mac_p;
++                struct net_bridge_fdb_entry * fdb_p 
++                        = (struct net_bridge_fdb_entry *)net_p;
++ 
++                if ( param1 == BLOG_PARAM1_SRCFDB)
++                    mac_p = (uint8_t *) &blog_p->src_mac;
++                else
++                    mac_p = (uint8_t *) &blog_p->dst_mac;
++
++                /* copy the MAC from Bridge FDB to blog */
++                memcpy(mac_p, fdb_p->addr.addr, BLOG_ETH_ADDR_LEN);
++            }
+ 
++            blog_p->fdb[param1] = net_p;
+             break;
+         }
+ 
+@@ -2669,6 +2686,12 @@
+             (int)blog_p->tos_mode_us, (int)blog_p->tos_mode_ds, 
+             blog_p->hash, blog_p->key.protocol,
+             blog_p->priority, blog_p->mark, blog_p->minMtu);
++    
++    printk( "\tMAC src<%02x:%02x:%02x:%02x:%02x:%02x> dst<%02x:%02x:%02x:%02x:%02x:%02x>\n", 
++            blog_p->src_mac.u8[0], blog_p->src_mac.u8[1], blog_p->src_mac.u8[2], 
++            blog_p->src_mac.u8[3], blog_p->src_mac.u8[4], blog_p->src_mac.u8[5], 
++            blog_p->dst_mac.u8[0], blog_p->dst_mac.u8[1], blog_p->dst_mac.u8[2],
++            blog_p->dst_mac.u8[3], blog_p->dst_mac.u8[4], blog_p->dst_mac.u8[5] ); 
+ 
+ #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
+     if ( blog_p->ct_p[BLOG_CT_PLD] )
+@@ -3394,7 +3417,7 @@
+         /* non-accelerated PPTP tunnel US case we need to sync seqno */
+         blog_print( "non-XL PPTP Tunnel" );
+ 
+-        fkb_p = (struct fkbuff*) ((uint32_t)skb_p + BLOG_OFFSETOF(sk_buff,fkbInSkb));
++        fkb_p = (struct fkbuff*) ((uintptr_t)skb_p + BLOG_OFFSETOF(sk_buff,fkbInSkb));
+         ip_p = _blog_parse_l2hdr( fkb_p, h_proto );
+         
+         if (ip_p != NULL && ip_p->proto == BLOG_IPPROTO_GRE )
+Index: linux-3.4.11/net/core/iqos.c
+===================================================================
+--- linux-3.4.11.orig/net/core/iqos.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/net/core/iqos.c	2017-04-12 14:31:39.931618168 +0800
+@@ -112,7 +112,6 @@
+  */
+ int iqos_prio_L4port( iqos_ipproto_t ipProto, uint16_t destPort )
+ {
+-    unsigned long flags;
+     uint8_t prio = IQOS_PRIO_LOW;
+ 
+     if ( unlikely(iqos_prio_L4port_hook_g == (iqos_prio_L4port_hook_t)NULL) )
+@@ -122,11 +121,11 @@
+         goto iqos_prio_L4port_exit;
+     }
+ 
+-    IQOS_LOCK_IRQSAVE();
++    IQOS_LOCK_BH();
+     prio = iqos_prio_L4port_hook_g( ipProto, destPort ); 
+-    IQOS_UNLOCK_IRQRESTORE();
++    IQOS_UNLOCK_BH();
+ 
+-    iqos_prio_L4port_exit:
++ iqos_prio_L4port_exit:
+     return prio;
+  }
+ 
+@@ -139,7 +138,6 @@
+ uint8_t iqos_add_L4port( iqos_ipproto_t ipProto, uint16_t destPort, 
+         iqos_ent_t ent, iqos_prio_t prio )
+ {
+-    unsigned long flags;
+     uint8_t addIx = IQOS_INVALID_NEXT_IX;
+ 
+ #if defined(CONFIG_BCM_KF_LOG)
+@@ -151,9 +149,9 @@
+     if ( unlikely(iqos_add_L4port_hook_g == (iqos_add_L4port_hook_t)NULL) )
+         goto iqos_add_L4port_exit;
+ 
+-    IQOS_LOCK_IRQSAVE();
++    IQOS_LOCK_BH();
+     addIx = iqos_add_L4port_hook_g( ipProto, destPort, ent, prio ); 
+-    IQOS_UNLOCK_IRQRESTORE();
++    IQOS_UNLOCK_BH();
+ 
+ iqos_add_L4port_exit:
+ #if defined(CONFIG_BCM_KF_LOG)
+@@ -171,7 +169,6 @@
+ uint8_t iqos_rem_L4port( iqos_ipproto_t ipProto, uint16_t destPort, 
+         iqos_ent_t ent )
+ {
+-    unsigned long flags;
+     uint8_t remIx = IQOS_INVALID_NEXT_IX;
+ 
+ #if defined(CONFIG_BCM_KF_LOG)
+@@ -182,9 +179,9 @@
+     if ( unlikely(iqos_rem_L4port_hook_g == (iqos_rem_L4port_hook_t)NULL) )
+         goto iqos_rem_L4port_exit;
+ 
+-    IQOS_LOCK_IRQSAVE();
++    IQOS_LOCK_BH();
+     remIx = iqos_rem_L4port_hook_g( ipProto, destPort, ent ); 
+-    IQOS_UNLOCK_IRQRESTORE();
++    IQOS_UNLOCK_BH();
+ 
+ iqos_rem_L4port_exit:
+ #if defined(CONFIG_BCM_KF_LOG)
+@@ -265,6 +262,11 @@
+ iqos_fap_dump_porttbl_hook_t  iqos_fap_dump_porttbl_hook_g = NULL;
+ #endif
+ 
++iqos_runner_get_hook_t iqos_runner_stat_hook_g = NULL;
++iqos_runner_get_hook_t iqos_runner_get_L4port_hook_g = NULL;
++iqos_runner_L4port_hook_t iqos_runner_add_L4port_hook_g  = NULL;
++iqos_runner_rem_L4port_hook_t iqos_runner_rem_L4port_hook_g  = NULL; 
++iqos_runner_L4port_hook_t iqos_runner_find_L4port_hook_g = NULL;
+ 
+ /* get the congestion status for system */ 
+ iqos_cong_status_t iqos_get_sys_cong_status( void )
+@@ -314,6 +316,11 @@
+ EXPORT_SYMBOL(iqos_fap_rem_L4port_hook_g);
+ EXPORT_SYMBOL(iqos_fap_dump_porttbl_hook_g);
+ #endif
++EXPORT_SYMBOL(iqos_runner_stat_hook_g);
++EXPORT_SYMBOL(iqos_runner_get_L4port_hook_g);
++EXPORT_SYMBOL(iqos_runner_add_L4port_hook_g);
++EXPORT_SYMBOL(iqos_runner_rem_L4port_hook_g); 
++EXPORT_SYMBOL(iqos_runner_find_L4port_hook_g); 
+ 
+ #if defined(CONFIG_BCM_XTMCFG) || defined(CONFIG_BCM_XTMCFG_MODULE)
+ EXPORT_SYMBOL(iqos_xtm_status_hook_g);
+Index: linux-3.4.11/net/netfilter/nf_conntrack_core.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_core.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_core.c	2017-04-12 13:26:43.235813597 +0800
+@@ -614,8 +614,30 @@
+ 	*    after adjustment for idle_jiffies.
+ 	*
+ 	*    In the last case (d), on expiry it is time to destroy the conn.
++	*
++	* e) the udp conntrack timeout is set to less than flow cache interval(120 sec)
+ 	*/
+-	if ((!ct->prev_idle) || (!ct_time_p->idle_jiffies)) {
++  
++	if ( nf_ct_protonum(ct) == IPPROTO_UDP && ct->prev_idle)   /* handle case (e) */
++	{
++		if( ct_time_p->idle_jiffies < ct_time_p->extra_jiffies) 
++		{
++			unsigned long newtime_1;
++			if (timer_pending(&ct->timeout))
++				del_timer(&ct->timeout);
++
++			ct->prev_timeout.expires = ct->timeout.expires;
++			newtime_1= ct->timeout.expires + (ct_time_p->extra_jiffies - ct_time_p->idle_jiffies);
++			ct->timeout.expires = newtime_1;
++			add_timer(&ct->timeout);
++			ct->prev_idle = ct_time_p->idle_jiffies;
++		}else {
++			if (timer_pending(&ct->timeout))
++				del_timer(&ct->timeout);
++
++			death_by_timeout((unsigned long) ct);
++		}
++	} else if ((!ct->prev_idle) || (!ct_time_p->idle_jiffies)) {
+ 		unsigned long newtime;
+ 
+ 		ct->prev_timeout.expires = ct->timeout.expires;
+Index: linux-3.4.11/net/netfilter/nf_conntrack_standalone.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_standalone.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_standalone.c	2017-04-12 13:26:44.003813771 +0800
+@@ -220,6 +220,12 @@
+ 			ct_time = (long)((ULONG_MAX - ct->prev_timeout.expires) + ct->timeout.expires);
+ 
+ 		ct_time = ct_time - ct_time_p->idle_jiffies;
++		
++		if( (ct_time_p->proto == IPPROTO_UDP && test_bit(IPS_SEEN_REPLY_BIT, &ct->status))
++			 || ct_time < 0)
++		{	 
++			 ct_time = (long)(ct_time_p->extra_jiffies- ct_time_p->idle_jiffies);
++		}
+ 	}
+ 	else
+ 		ct_time = (long)(ct->timeout.expires - jiffies);
+Index: linux-3.4.11/net/bridge/br_input.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_input.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/net/bridge/br_input.c	2017-04-12 13:26:44.027813459 +0800
+@@ -295,7 +295,7 @@
+ 						wl_pktc_req_hook(GET_PKTC_TX_MODE, 0, 0, 0) : 0;
+ 
+ 			src = __br_fdb_get(br, eth_hdr(skb)->h_source);
+-			if (unlikely(src == NULL))
++			if (unlikely(src == NULL) || unlikely(src->dst == NULL))
+ 				goto next;
+ 
+ 			srcPhyType = BLOG_GET_PHYTYPE(src->dst->dev->path.hw_port_type);
+@@ -336,7 +336,7 @@
+ 			 *
+ 			 * The netdev_path_is_root() check makes sure that we 
+ 			 * are always transmitting to a root device */
+-			 
++ 
+ 			    /* Update chaining table for DHD on the wl to switch direction only */
+ 				if (from_wl_to_switch && (dhd_pktc_req_hook != NULL)) {
+ 					dhd_pktc_req_hook(UPDATE_BRC_HOT,
+Index: linux-3.4.11/net/bridge/br_igmp.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_igmp.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/net/bridge/br_igmp.c	2017-04-12 13:26:44.595813164 +0800
+@@ -754,8 +754,6 @@
+ 	if(!SNOOP_IN_IS_ADDR_L2_MCAST(txGrp) && !br_igmp_control_filter(NULL, txGrp->s_addr) )
+ 		return 0;
+ 
+-	if(!netdev_path_is_leaf(from_dev))
+-		return 0;
+ 
+ 	if((SNOOP_IN_ADD != mode) && (SNOOP_EX_ADD != mode))
+ 		return 0;
+@@ -992,8 +990,6 @@
+ 	if(!br || !prt || !txGrp || !rxGrp || !rep || !from_dev)
+ 		return 0;
+ 
+-	if(!netdev_path_is_leaf(from_dev))
+-		return 0;
+ 
+ 	if((SNOOP_IN_CLEAR != mode) && (SNOOP_EX_CLEAR != mode))
+ 		return 0;
+@@ -1381,9 +1377,6 @@
+ 	if(!br || !dev)
+ 		return 0;
+ 
+-	if(!netdev_path_is_leaf(dev))
+-		return 0;
+-
+ 	spin_lock_bh(&br->mcl_lock);
+ 	for (i = 0; i < BR_IGMP_HASH_SIZE; i++) 
+ 	{
+Index: linux-3.4.11/net/bridge/br_mcast.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mcast.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/net/bridge/br_mcast.c	2017-04-12 13:26:44.611813541 +0800
+@@ -801,12 +801,26 @@
+ 
+         rule_filter = &(((blogRule_t *)new_blog_p->blogRule_p)->filter);
+         new_blog_p->vtag_num = rule_filter->nbrOfVlanTags;
+-        vid = ((rule_filter->vlan[0].value.h_vlan_TCI &
++        if (rule_filter->vlan[0].mask.h_vlan_TCI)
++        {
++            vid = ((rule_filter->vlan[0].value.h_vlan_TCI &
+                 rule_filter->vlan[0].mask.h_vlan_TCI) & 0xFFF);
+-        new_blog_p->vtag[0] = vid ? vid : 0xFFFF; 
+-        vid = ((rule_filter->vlan[1].value.h_vlan_TCI &
++        }
++        else
++        {
++            vid = 0xFFF;
++        }
++        new_blog_p->vtag[0] = vid; 
++        if (rule_filter->vlan[1].mask.h_vlan_TCI)
++        {
++            vid = ((rule_filter->vlan[1].value.h_vlan_TCI &
+                 rule_filter->vlan[1].mask.h_vlan_TCI) & 0xFFF);
+-        new_blog_p->vtag[1] = vid ? vid : 0xFFFF;
++        }
++        else
++        {
++            vid = 0xFFF;
++        }
++        new_blog_p->vtag[1] = vid;
+ 
+         blog_lock();
+         blog_link(MCAST_FDB, new_blog_p, (void *)new_mc_fdb, 0, 0);
+Index: linux-3.4.11/net/bridge/br_mld.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mld.c	2017-04-12 13:26:04.587814322 +0800
++++ linux-3.4.11/net/bridge/br_mld.c	2017-04-12 13:26:44.743813488 +0800
+@@ -575,9 +575,6 @@
+ 	   BCM_IN6_IS_ADDR_L2_MCAST(grp)))
+ 		return 0;
+ 
+-	if(!netdev_path_is_leaf(from_dev))
+-		return 0;
+-
+ 	if((SNOOP_IN_ADD != mode) && (SNOOP_EX_ADD != mode))
+ 		return 0;
+ 
+@@ -808,8 +805,6 @@
+ 	   BCM_IN6_IS_ADDR_L2_MCAST(grp)))
+ 		return 0;
+ 
+-	if(!netdev_path_is_leaf(from_dev))
+-		return 0;
+ 
+ 	if((SNOOP_IN_CLEAR != mode) && (SNOOP_EX_CLEAR != mode))
+ 		return 0;
+@@ -1027,9 +1022,6 @@
+ 	if(!br || !dev)
+ 		return 0;
+ 
+-	if(!netdev_path_is_leaf(dev))
+-		return 0;
+-
+ 	spin_lock_bh(&br->mld_mcl_lock);
+ 	for (i = 0; i < BR_MLD_HASH_SIZE; i++) 
+ 	{

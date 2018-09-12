@@ -1,0 +1,70 @@
+Index: linux-3.4.11/net/ipv4/udp.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv4/udp.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/net/ipv4/udp.c	2017-04-25 21:43:52.961079703 +0800
+@@ -1171,6 +1171,9 @@
+ 	int peeked, off = 0;
+ 	int err;
+ 	int is_udplite = IS_UDPLITE(sk);
++#if 1 //Zyxel CVE-2016-10229
++	bool checksum_valid = false;
++#endif
+ 	bool slow;
+ 
+ 	/*
+@@ -1202,11 +1205,20 @@
+ 	 */
+ 
+ 	if (copied < ulen || UDP_SKB_CB(skb)->partial_cov) {
++#if 1 //Zyxel CVE-2016-10229
++		checksum_valid = !udp_lib_checksum_complete(skb);
++		if (!checksum_valid)
++#else
+ 		if (udp_lib_checksum_complete(skb))
++#endif
+ 			goto csum_copy_err;
+ 	}
+ 
++#if 1 //Zyxel CVE-2016-10229
++	if (checksum_valid || skb_csum_unnecessary(skb))
++#else
+ 	if (skb_csum_unnecessary(skb))
++#endif
+ 		err = skb_copy_datagram_iovec(skb, sizeof(struct udphdr),
+ 					      msg->msg_iov, copied);
+ 	else {
+Index: linux-3.4.11/net/ipv6/udp.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/udp.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/net/ipv6/udp.c	2017-04-25 21:47:00.371908602 +0800
+@@ -345,6 +345,9 @@
+ 	int peeked, off = 0;
+ 	int err;
+ 	int is_udplite = IS_UDPLITE(sk);
++#if 1 //Zyxel CVE-2016-10229
++	bool checksum_valid = false;
++#endif
+ 	int is_udp4;
+ 	bool slow;
+ 
+@@ -379,11 +382,20 @@
+ 	 */
+ 
+ 	if (copied < ulen || UDP_SKB_CB(skb)->partial_cov) {
++#if 1 //Zyxel CVE-2016-10229
++		checksum_valid = !udp_lib_checksum_complete(skb);
++		if (!checksum_valid)
++#else
+ 		if (udp_lib_checksum_complete(skb))
++#endif
+ 			goto csum_copy_err;
+ 	}
+ 
++#if 1 //Zyxel CVE-2016-10229
++	if (checksum_valid || skb_csum_unnecessary(skb))
++#else
+ 	if (skb_csum_unnecessary(skb))
++#endif
+ 		err = skb_copy_datagram_iovec(skb, sizeof(struct udphdr),
+ 					      msg->msg_iov, copied       );
+ 	else {

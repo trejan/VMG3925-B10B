@@ -1,0 +1,105 @@
+Index: linux-3.4.11/include/net/pkt_sched.h
+===================================================================
+--- linux-3.4.11.orig/include/net/pkt_sched.h	2015-08-19 18:07:28.859760230 +0800
++++ linux-3.4.11/include/net/pkt_sched.h	2015-08-19 18:13:37.247779459 +0800
+@@ -103,8 +103,10 @@
+ 			      struct tcf_result *res);
+ extern int tc_classify(struct sk_buff *skb, const struct tcf_proto *tp,
+ 		       struct tcf_result *res);
++#ifdef CONFIG_RMNET_DATA_FC
+ extern int tc_qdisc_flow_control(struct net_device *dev, u32 tcm_handle,
+ 				  int flow_enable);
++#endif
+ /* Calculate maximal size of packet seen by hard_start_xmit
+    routine of this device.
+  */
+Index: linux-3.4.11/net/sched/sch_api.c
+===================================================================
+--- linux-3.4.11.orig/net/sched/sch_api.c	2015-08-19 18:07:28.867760230 +0800
++++ linux-3.4.11/net/sched/sch_api.c	2015-08-19 18:11:37.202786550 +0800
+@@ -1029,6 +1029,7 @@
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_RMNET_DATA_FC
+ /*
+  * enable/disable flow on qdisc.
+  */
+@@ -1060,6 +1061,7 @@
+ 	return qdisc_len;
+ }
+ EXPORT_SYMBOL(tc_qdisc_flow_control);
++#endif
+ 
+ /*
+  * Create/change qdisc.
+Index: linux-3.4.11/net/sched/sch_prio.c
+===================================================================
+--- linux-3.4.11.orig/net/sched/sch_prio.c	2015-08-19 18:07:28.867760230 +0800
++++ linux-3.4.11/net/sched/sch_prio.c	2015-08-19 18:12:25.698917899 +0800
+@@ -27,7 +27,9 @@
+ 	struct tcf_proto *filter_list;
+ 	u8  prio2band[TC_PRIO_MAX+1];
+ 	struct Qdisc *queues[TCQ_PRIO_BANDS];
++#ifdef CONFIG_RMNET_DATA_FC
+ 	u8 enable_flow;
++#endif
+ };
+ 
+ 
+@@ -96,10 +98,10 @@
+ {
+ 	struct prio_sched_data *q = qdisc_priv(sch);
+ 	int prio;
+-
++#ifdef CONFIG_RMNET_DATA_FC
+ 	if (!q->enable_flow)
+ 		return NULL;
+-
++#endif
+ 	for (prio = 0; prio < q->bands; prio++) {
+ 		struct Qdisc *qdisc = q->queues[prio];
+ 		struct sk_buff *skb = qdisc->ops->peek(qdisc);
+@@ -113,10 +115,10 @@
+ {
+ 	struct prio_sched_data *q = qdisc_priv(sch);
+ 	int prio;
+-
++#ifdef CONFIG_RMNET_DATA_FC
+ 	if (!q->enable_flow)
+ 		return NULL;
+-
++#endif
+ 	for (prio = 0; prio < q->bands; prio++) {
+ 		struct Qdisc *qdisc = q->queues[prio];
+ 		struct sk_buff *skb = qdisc_dequeue_peeked(qdisc);
+@@ -157,7 +159,9 @@
+ 	for (prio = 0; prio < q->bands; prio++)
+ 		qdisc_reset(q->queues[prio]);
+ 	sch->q.qlen = 0;
++#ifdef CONFIG_RMNET_DATA_FC
+ 	q->enable_flow = 1;
++#endif
+ }
+ 
+ static void
+@@ -190,7 +194,9 @@
+ 	}
+ 
+ 	sch_tree_lock(sch);
++#ifdef CONFIG_RMNET_DATA_FC
+ 	q->enable_flow = qopt->enable_flow;
++#endif
+ 	q->bands = qopt->bands;
+ 	memcpy(q->prio2band, qopt->priomap, TC_PRIO_MAX+1);
+ 
+@@ -254,7 +260,9 @@
+ 	struct tc_prio_qopt opt;
+ 
+ 	opt.bands = q->bands;
++#ifdef CONFIG_RMNET_DATA_FC
+ 	opt.enable_flow = q->enable_flow;
++#endif
+ 	memcpy(&opt.priomap, q->prio2band, TC_PRIO_MAX + 1);
+ 
+ 	NLA_PUT(skb, TCA_OPTIONS, sizeof(opt), &opt);

@@ -1,0 +1,15 @@
+Index: linux-3.4.11/Makefile
+===================================================================
+--- linux-3.4.11.orig/Makefile	2015-12-29 22:21:11.400116160 +0800
++++ linux-3.4.11/Makefile	2015-12-30 02:17:17.567397865 +0800
+@@ -395,6 +395,10 @@
+ KBUILD_CFLAGS_MODULE  := -DMODULE
+ KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
+ 
++ifeq ($(ZCFG_USED),y)
++KBUILD_CFLAGS += -DZCFG_USED
++endif
++
+ # Read KERNELRELEASE from include/config/kernel.release (if it exists)
+ KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
+ KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)

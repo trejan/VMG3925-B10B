@@ -1,0 +1,152 @@
+diff -Naur linux-3.4.11.orig/net/bridge/br_igmp.c linux-3.4.11/net/bridge/br_igmp.c
+--- linux-3.4.11.orig/net/bridge/br_igmp.c	2017-03-10 14:40:23.581119909 +0800
++++ linux-3.4.11/net/bridge/br_igmp.c	2017-03-10 14:44:20.569113170 +0800
+@@ -57,6 +57,91 @@
+ 
+ #define MCPD_NETLINK_SKB_TIMEOUT_MS 2000
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++/*+++ Kide@zyxel.com */
++#include <linux/netfilter_bridge.h>
++#include <net/ip.h>
++
++static void br_igmp_port_querier(unsigned long data)
++{
++    struct net_bridge_port *port = (void *)data;
++    struct net_bridge *br = port->br;
++    struct sk_buff *skb;
++    struct igmphdr *ih;
++    struct ethhdr *eth;
++    struct iphdr *iph;
++ 
++    spin_lock_bh(&br->mcl_lock);
++   
++    if (br->igmp_snooping == 0)
++        goto out;
++
++    if (port->state == BR_STATE_DISABLED ||
++        port->state == BR_STATE_BLOCKING)
++        goto out;
++    
++    skb = netdev_alloc_skb_ip_align(br->dev, sizeof(*eth) + sizeof(*iph) + sizeof(*ih) + 4);
++    if (!skb)
++        goto out;
++
++    skb->protocol = htons(ETH_P_IP);
++    skb_reset_mac_header(skb);
++    
++    eth = eth_hdr(skb);
++    memcpy(eth->h_source, br->dev->dev_addr, 6);
++    eth->h_dest[0] = 1;
++    eth->h_dest[1] = 0;
++    eth->h_dest[2] = 0x5e;
++    eth->h_dest[3] = 0;
++    eth->h_dest[4] = 0;
++    eth->h_dest[5] = 1;
++    eth->h_proto = htons(ETH_P_IP);
++    skb_put(skb, sizeof(*eth));
++
++    skb_set_network_header(skb, skb->len);
++    iph = ip_hdr(skb);
++    iph->version = 4;
++    iph->ihl = 6;
++    iph->tos = 0xc0;
++    iph->tot_len = htons(sizeof(*iph) + sizeof(*ih) + 4);
++    iph->id = 0;
++    iph->frag_off = htons(IP_DF);
++    iph->ttl = 1;
++    iph->protocol = IPPROTO_IGMP;
++    iph->saddr = 0;
++    iph->daddr = htonl(INADDR_ALLHOSTS_GROUP);
++    ((u8 *)&iph[1])[0] = IPOPT_RA;
++    ((u8 *)&iph[1])[1] = 4;
++    ((u8 *)&iph[1])[2] = 0;
++    ((u8 *)&iph[1])[3] = 0;
++    ip_send_check(iph);
++    skb_put(skb, 24);
++
++    skb_set_transport_header(skb, skb->len);
++    ih = igmp_hdr(skb);
++    ih->type = IGMP_HOST_MEMBERSHIP_QUERY;
++    ih->code = HZ / (HZ / IGMP_TIMER_SCALE);
++    ih->group = 0;
++    ih->csum = 0;
++    ih->csum = ip_compute_csum((void *)ih, sizeof(struct igmphdr));
++    skb_put(skb, sizeof(*ih));
++
++    __skb_pull(skb, sizeof(*eth));
++
++    __skb_push(skb, sizeof(struct ethhdr));
++    skb->dev = port->dev;
++    NF_HOOK(NFPROTO_BRIDGE, NF_BR_LOCAL_OUT, skb, NULL, skb->dev, dev_queue_xmit);
++
++    if (--port->mcast_startup_queries_sent > 0)
++        mod_timer(&port->mcast_query_timer, jiffies+10*HZ);
++
++    pr_err("%s: send igmp-query[%d] on port=%s\n", __func__, port->mcast_startup_queries_sent, port->dev->name);
++out:
++    spin_unlock_bh(&br->mcl_lock);
++    return;
++}
++#endif
++
+ void br_igmp_get_ip_igmp_hdrs( const struct sk_buff *pskb, struct iphdr **ppipmcast, struct igmphdr **ppigmp, int *lanppp)
+ {
+ 	struct iphdr *pip = NULL;
+@@ -375,6 +460,16 @@
+ #endif
+ 				list_for_each_entry(reporter_group, &mcast_group->rep_list, list)
+ 				{
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++                    /*+++ Kide@zyxel.com: last member in the group. */
++                    if (list_is_singular(&mcast_group->rep_list)) {
++                        found = 1;
++                        if ((int)(reporter_group->tstamp - jiffies) <= 30*HZ)
++                            mcast_group->dst->querier = 1;
++                        else if (time_after(tstamp, reporter_group->tstamp - 30*HZ))
++                            tstamp = reporter_group->tstamp - 30*HZ;
++                    }
++#endif
+ 					if ( time_after(tstamp, reporter_group->tstamp) )
+ 					{
+ 						tstamp = reporter_group->tstamp;
+@@ -391,6 +486,23 @@
+ 	}
+ 	else
+ 	{
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++        /*+++ Kide@zyxel.com: */
++        struct net_bridge_port *p;
++        list_for_each_entry_rcu(p, &br->port_list, list) {
++            if (p->querier && !timer_pending(&p->mcast_query_timer)) {
++                pr_err("%s: start mcast_query_timer on port=%s\n", __func__, p->dev->name);
++                p->mcast_startup_queries_sent = 3;
++                setup_timer(&p->mcast_query_timer, br_igmp_port_querier, (unsigned long)p);
++                mod_timer(&p->mcast_query_timer, jiffies);
++            }
++            else if (p->querier == 0 && timer_pending(&p->mcast_query_timer)) {
++                pr_err("%s: stop and delete mcast_query_timer on port=%s\n", __func__, p->dev->name);
++                del_timer(&p->mcast_query_timer);
++            }
++            p->querier = 0;
++        }
++#endif
+ 		mod_timer(&br->igmp_timer, (tstamp + TIMER_CHECK_TIMEOUT));
+ 	}
+ 
+diff -Naur linux-3.4.11.orig/net/bridge/br_private.h linux-3.4.11/net/bridge/br_private.h
+--- linux-3.4.11.orig/net/bridge/br_private.h	2017-03-10 14:40:23.581119909 +0800
++++ linux-3.4.11/net/bridge/br_private.h	2017-03-10 14:41:37.117117818 +0800
+@@ -180,6 +180,12 @@
+ #if defined(CONFIG_BCM_KF_IP)
+ #if defined(CONFIG_BCM_KF_IGMP) && defined(CONFIG_BR_IGMP_SNOOP) || (defined(CONFIG_BCM_KF_MLD) && defined(CONFIG_BR_MLD_SNOOP))
+ 	int                  dirty;
++#ifdef CONFIG_SUPPORT_RTK_SWITCH 
++    /*+++ Kide@zyxel.com: */
++    int                     querier;
++    u32                     mcast_startup_queries_sent;
++    struct timer_list       mcast_query_timer;
++#endif
+ #endif
+ 	struct br_flow_path  *flowPath_p;
+ #endif

@@ -1,0 +1,56 @@
+Index: linux-3.4.11/arch/arm/mach-bcm963xx/Makefile
+===================================================================
+--- linux-3.4.11.orig/arch/arm/mach-bcm963xx/Makefile	2016-04-22 19:33:37.919509812 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/Makefile	2016-04-22 19:35:35.109701187 +0800
+@@ -27,6 +27,9 @@
+ ifeq ($(strip ${ZYXEL_PARTITION}),y)
+ EXTRA_CFLAGS += -DZYXEL_PARTITION=1
+ endif
++ifneq ($(strip ${ZYXEL_SUPPORT_ETHWAN_AS_LAN}),)
++EXTRA_CFLAGS += -DZYXEL_SUPPORT_ETHWAN_AS_LAN=$(ZYXEL_SUPPORT_ETHWAN_AS_LAN)
++endif
+ else
+ EXTRA_CFLAGS += -DZYXEL=0
+ endif
+Index: linux-3.4.11/arch/arm/mach-bcm963xx/board_963xx.c
+===================================================================
+--- linux-3.4.11.orig/arch/arm/mach-bcm963xx/board_963xx.c	2016-04-22 19:33:34.443509756 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/board_963xx.c	2016-04-22 19:35:19.516346275 +0800
+@@ -388,6 +388,27 @@
+ 	return;
+ }
+ 
++#if (defined(CONFIG_BCM963138) || defined (CONFIG_BCM963148)) && defined(ZYXEL_SUPPORT_ETHWAN_AS_LAN)
++int isEthwanAsWan=0;
++static void __init set_ETHWAN_config(char *cmdline)
++{
++	char *cmd_ptr;
++
++	cmd_ptr = strstr(cmdline, "ETHWAN=");
++	if (cmd_ptr != NULL) {
++		cmd_ptr += 7;
++		if (strcmp(cmd_ptr, ETHWAN_CONFIG_LAN) == 0)
++			isEthwanAsWan=0;
++		else if (strcmp(cmd_ptr, ETHWAN_CONFIG_WAN) == 0)
++			isEthwanAsWan=1;
++		else
++			isEthwanAsWan=1;
++	}else
++		isEthwanAsWan=1;
++	printk("ETHWAN set to %d.\n", isEthwanAsWan);
++}
++#endif
++
+ static void __init set_memsize_from_cmdline(char *cmdline)
+ {
+ 	char *cmd_ptr, *end_ptr;
+@@ -458,6 +479,9 @@
+ 		if (t->hdr.tag == ATAG_CMDLINE) {
+ 			set_memsize_from_cmdline(t->u.cmdline.cmdline);
+ 			check_if_rootfs_is_set(t->u.cmdline.cmdline);
++#if (defined(CONFIG_BCM963138) || defined (CONFIG_BCM963148)) && defined(ZYXEL_SUPPORT_ETHWAN_AS_LAN)
++			set_ETHWAN_config(t->u.cmdline.cmdline);
++#endif
+ 		}
+ 		if ((t->hdr.tag == ATAG_INITRD2) || (t->hdr.tag == ATAG_INITRD))
+ 			is_rootfs_set = true;

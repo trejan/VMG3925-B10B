@@ -1,0 +1,72 @@
+# NVRAM board text file template for the 43602mch2 rev P101 board.
+#
+# Copyright 2014, Broadcom Corporation
+# All Rights Reserved.
+#
+# THIS SOFTWARE IS OFFERED "AS IS", AND BROADCOM GRANTS NO WARRANTIES OF ANY
+# KIND, EXPRESS OR IMPLIED, BY STATUTE, COMMUNICATION OR OTHERWISE. BROADCOM
+# SPECIFICALLY DISCLAIMS ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A SPECIFIC PURPOSE OR NON-INFRINGEMENT CONCERNING THIS SOFTWARE.
+boardnum=62526
+boardtype=0x06F7
+boardrev=0x1101
+venid=0x14E4
+sromrev=11
+devid=0x43BB
+xtalfreq=40000
+boardflags=0x00001000
+boardflags2=0x00100002
+boardflags3=0x04000005
+macaddr=00:90:4C:17:30:00
+aa2g=7
+txchain=7
+rxchain=7
+antswitch=0
+parefldovoltage=35
+ledbh0=0xFF
+ledbh1=0xFF
+ledbh2=0xFF
+ledbh3=0xFF
+ledbh10=2
+leddc=0xFFFF
+temps_period=5
+tempthresh=120
+temps_hysteresis=5
+phycal_tempdelta=0
+tempoffset=0
+tssiposslope2g=1
+femctrl=3
+papdcap2g=0
+tworangetssi2g=0
+pdgain2g=21
+epagain2g=0
+gainctrlsph=0
+rxgains2gelnagaina0=4
+rxgains2gtrelnabypa0=1
+rxgains2gtrisoa0=7
+rxgains2gelnagaina1=4
+rxgains2gtrelnabypa1=1
+rxgains2gtrisoa1=7
+rxgains2gelnagaina2=4
+rxgains2gtrelnabypa2=1
+rxgains2gtrisoa2=7
+maxp2ga0=0x66
+maxp2ga1=0x66
+maxp2ga2=0x66
+pa2ga0=0xFF3A,0x1CB5,0xFCA0
+pa2ga1=0xFF3E,0x1D11,0xFC9D
+pa2ga2=0xFF3C,0x1CA4,0xFCA8
+pdoffset2g40ma0=0
+pdoffset2g40ma1=0
+pdoffset2g40ma2=0
+cckbw202gpo=0x0000
+cckbw20ul2gpo=0x0000
+mcsbw202gpo=0xCC653320
+mcsbw402gpo=0xCC653320
+ofdmlrbw202gpo=0x0000
+dot11agofdmhrbw202gpo=0x6533
+ccode=0x0000
+regrev=0x0000
+agbg0=0x00
+agbg1=0x00
+agbg2=0x00

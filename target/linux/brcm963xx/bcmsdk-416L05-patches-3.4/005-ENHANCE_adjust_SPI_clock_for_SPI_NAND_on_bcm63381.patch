@@ -1,0 +1,124 @@
+Index: linux-3.4.11/drivers/mtd/nand/bcm63xx_spinand.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/nand/bcm63xx_spinand.c	2016-04-14 18:30:43.963781018 +0800
++++ linux-3.4.11/drivers/mtd/nand/bcm63xx_spinand.c	2016-04-14 18:54:08.587732024 +0800
+@@ -1452,7 +1452,13 @@
+ 
+     /* micron MT29F1G01 only support up to 50MHz, update to 50Mhz if it is more than that */
+     spi_flash_busnum = HS_SPI_BUS_NUM;
++    //20150520, TimLiu, Adjust the clock, reference T&W
++    #if defined(ZYXEL)
++    //according to data sheet, operating up to 66.67 MHz
++    spi_flash_clock = 66000000;
++    #else
+     spi_flash_clock = 50000000;
++    #endif
+ 
+     /* retrieve the maximum read/write transaction length from the SPI controller */
+     spi_max_op_len = SPI_BUF_LEN;
+Index: linux-3.4.11/drivers/mtd/nand/Makefile
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/nand/Makefile	2016-04-14 18:30:43.963781018 +0800
++++ linux-3.4.11/drivers/mtd/nand/Makefile	2016-04-14 18:54:08.587732024 +0800
+@@ -58,3 +58,17 @@
+ endif # BCM_KF # defined(CONFIG_BCM_KF_MTD_BCM963XX)
+ 
+ nand-objs := nand_base.o nand_bbt.o
++
++EXTRA_CFLAGS    += -I $(TOPDIR)/include/asm-generic -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD) -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD)
++
++## 20130822, TimLiu add ZyXEL compile flags
++#ifdef VENDOR_ZYXEL
++ifeq ($(strip ${ZYXEL}),y)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++ifeq ($(strip ${ZYXEL_PARTITION}),y)
++EXTRA_CFLAGS += -DZYXEL_PARTITION=1
++endif
++endif
+Index: linux-3.4.11/drivers/mtd/maps/Makefile
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/maps/Makefile	2016-04-14 18:30:43.963781018 +0800
++++ linux-3.4.11/drivers/mtd/maps/Makefile	2016-04-14 18:54:08.587732024 +0800
+@@ -63,3 +63,17 @@
+ obj-$(CONFIG_MTD_BCM_SPI_NAND)	+= bcm963xx_mtd.o
+ EXTRA_CFLAGS	+= -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD) -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD)
+ endif # BCM_KF
++
++EXTRA_CFLAGS    += -I $(TOPDIR)/include/asm-generic
++
++## 20130822, TimLiu add ZyXEL compile flags
++#ifdef VENDOR_ZYXEL
++ifeq ($(strip ${ZYXEL}),y)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++ifeq ($(strip ${ZYXEL_PARTITION}),y)
++EXTRA_CFLAGS += -DZYXEL_PARTITION=1
++endif
++endif
+Index: linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/bcm63xx-nand.c	2016-04-14 18:51:55.805036607 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c	2016-04-14 18:54:08.591732022 +0800
+@@ -67,6 +67,48 @@
+ static int __devinit brcmnanddrv_probe(struct platform_device *pdev);
+ static int __devexit brcmnanddrv_remove(struct platform_device *pdev);
+ 
++
++
++#if 1 //20160407,Tina.C modified it from patch.
++///20130822, Timliu, add new partition, rom-d, for Linux by MTD.
++#if defined(ZYXEL) && defined(ZYXEL_PARTITION)
++static struct mtd_partition bcm63XX_nand_parts[] =
++{
++    {name: "rootfs",        offset: 0, size: 0},
++    {name: "rootfs_update", offset: 0, size: 0},
++    {name: "data",          offset: 0, size: 0},
++    {name: "rom-d",         offset: 0, size: 0},
++    {name: "wwan",          offset: 0, size: 0},
++    {name: "nvram",         offset: 0, size: 0},
++    {name: "image",         offset: 0, size: 0},
++    {name: "image_update",  offset: 0, size: 0},
++    {name: "dummy1",        offset: 0, size: 0},
++    {name: "dummy2",        offset: 0, size: 0},
++    {name: "dummy3",        offset: 0, size: 0},
++    {name: "dummy4",        offset: 0, size: 0},
++    {name: NULL,            offset: 0, size: 0}
++};
++#else
++static struct mtd_partition bcm63XX_nand_parts[] =
++{
++    {name: "rootfs",        offset: 0, size: 0},
++    {name: "rootfs_update", offset: 0, size: 0},
++    {name: "data",          offset: 0, size: 0},
++    {name: "nvram",         offset: 0, size: 0},
++    {name: "image",         offset: 0, size: 0},
++    {name: "image_update",  offset: 0, size: 0},
++    {name: "dummy1",        offset: 0, size: 0},
++    {name: "dummy2",        offset: 0, size: 0},
++    {name: "dummy3",        offset: 0, size: 0},
++    {name: "dummy4",        offset: 0, size: 0},
++    {name: "dummy5",        offset: 0, size: 0},
++    {name: "dummy6",        offset: 0, size: 0},
++    {name: NULL,            offset: 0, size: 0}
++};
++#endif
++
++#else
++
+ ///20130822, Timliu, add new partition, rom-d, for Linux by MTD.
+ #if defined(ZYXEL) && defined(ZYXEL_PARTITION)
+ static struct mtd_partition bcm63XX_nand_parts[] = 
+@@ -98,6 +140,8 @@
+ };
+ #endif
+ 
++#endif //end of #if 1
++
+ static char* misc_mtd_partition_names[BCM_MAX_EXTRA_PARTITIONS] =
+ {
+ 	"misc1",

@@ -1,0 +1,25 @@
+Index: radvd-1.8/send.c
+===================================================================
+--- radvd-1.8.orig/send.c	2017-09-27 17:17:56.296661867 +0800
++++ radvd-1.8/send.c	2017-09-27 17:17:56.000000000 +0800
+@@ -160,15 +160,14 @@
+     }
+     if(ret == 0)
+         return ret;
+-    
+-	sprintf(sysCmd, "ifconfig | grep -A2 \"nas\\|ppp\" | grep \"inet6 addr\" | grep \"Scope:Global\" > /var/wan6ipcheck");
+-	system(sysCmd);
+-	fp = fopen("/var/wan6ipcheck", "r");
++
++	/* # 42154: LAN PC can not get IPv6 address. The WAN ipv6 connection is ready/lost is updated by bev6addr module.*/
++	fp = fopen("/var/wan6ipReady", "r");
+ 	if(fp)
+ 	{
+-		char wan6ip[512] = {0};
++		char wan6ip[16] = {0};
+ 		fread(wan6ip, 1, sizeof(wan6ip) - 1, fp);
+-		if(strchr(wan6ip, ':'))
++		if(strcmp(wan6ip, "1") == 0)
+ 			ret = 0;
+ 		fclose(fp);
+     }

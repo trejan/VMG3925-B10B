@@ -1,0 +1,24 @@
+Index: linux-3.4.11/net/core/dev.c
+===================================================================
+--- linux-3.4.11.orig/net/core/dev.c	2016-04-22 15:21:43.510503118 +0800
++++ linux-3.4.11/net/core/dev.c	2016-04-22 15:29:55.172127228 +0800
+@@ -4810,11 +4810,18 @@
+                rx_unicast_packets, tx_unicast_packets, stats->rx_broadcast_packets, stats->tx_broadcast_packets, 
+                stats->rx_unknown_packets);
+     else
++#if 1 //__ZYXEL__, Chi-Hsiang
++        /* Print placeholder with dashes */
++        seq_printf(seq, "     0      0      0 "  /* Multicast */
++                        "    0     0     0     0 "  /* Unicast and broadcast*/
++                        "    0\n");  /* Unknown RX errors */
++
++#else
+         /* Print placeholder with dashes */
+         seq_printf(seq, "     -      -      - "  /* Multicast */
+                         "    -     -     -     - "  /* Unicast and broadcast*/
+                         "    -\n");  /* Unknown RX errors */     
+-        
++#endif
+ }
+ #endif
+ 

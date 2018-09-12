@@ -1,0 +1,37 @@
+Index: linux-3.4.11/net/ipv6/Makefile
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/Makefile	2017-01-11 17:35:11.369179052 +0800
++++ linux-3.4.11/net/ipv6/Makefile	2017-01-11 17:37:41.734246848 +0800
+@@ -2,6 +2,9 @@
+ # Makefile for the Linux TCP/IP (INET6) layer.
+ #
+ 
++#/* __ZyXEL__, GraceXiao, 20170109, #32394 The IPv6 Link Local Address can?™t display in Status webpage. */
++EXTRA_CFLAGS += -I$(SHARED_DIR)/opensource/include/$(BRCM_BOARD)
++
+ obj-$(CONFIG_IPV6) += ipv6.o
+ 
+ ipv6-objs :=	af_inet6.o anycast.o ip6_output.o ip6_input.o addrconf.o \
+Index: linux-3.4.11/net/ipv6/addrconf.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/addrconf.c	2017-01-11 17:35:11.553179964 +0800
++++ linux-3.4.11/net/ipv6/addrconf.c	2017-01-11 17:37:01.251980143 +0800
+@@ -89,6 +89,8 @@
+ #include <linux/seq_file.h>
+ #include <linux/export.h>
+ 
++#include <bcmnetlink.h>
++
+ /* Set to 3 to get tracing... */
+ #define ACONF_DEBUG 2
+ 
+@@ -2495,6 +2497,9 @@
+ 		addrconf_prefix_route(&ifp->addr, ifp->prefix_len, idev->dev, 0, 0);
+ 		addrconf_dad_start(ifp, 0);
+ 		in6_ifa_put(ifp);
++		
++		/* __ZyXEL__, GraceXiao, 20170109, #32394 The IPv6 Link Local Address can?™t display in Status webpage. */
++		kerSysSendtoMonitorTask(MSG_NETLINK_IPV6_LINK_LOCAL_GET, NULL, 0); 
+ 	}
+ }
+ 

@@ -1,0 +1,43 @@
+Index: linux-3.4.11/arch/arm/plat-bcm63xx/pcie-bcm63xx.c
+===================================================================
+--- linux-3.4.11.orig/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2016-05-20 11:31:32.224107018 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2016-05-20 11:31:32.672107001 +0800
+@@ -887,7 +887,7 @@
+ 	bool shutdown;
+ 	TRACE();
+ 
+-#if defined(ZYPRJ_XMG3512)
++#if defined(ZYXEL_QTN_SW_RESET)
+ 	{
+ 		unsigned short gpio;
+ 		if ( BpGetWlanDisableGpio(&gpio) == BP_SUCCESS ) {
+Index: linux-3.4.11/arch/arm/plat-bcm63xx/Makefile
+===================================================================
+--- linux-3.4.11.orig/arch/arm/plat-bcm63xx/Makefile	2016-05-20 11:31:32.220107016 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/Makefile	2016-05-20 16:01:38.724116642 +0800
+@@ -34,6 +34,25 @@
+ ifneq ("$(strip ${ZYXEL_PRODUCT})","")
+ EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
+ endif
++#__ZyXEL__, for ZyXEL hardware depend misc.
++ifeq ($(strip ${ZYXEL_QTN_WIFI_5G_SUPPORT}),y)
++EXTRA_CFLAGS += -DZYXEL_QTN_WIFI_5G_SUPPORT
++endif
++ifeq ($(strip ${ZYXEL_QTN_SW_RESET}),y)
++EXTRA_CFLAGS += -DZYXEL_QTN_SW_RESET
++endif
++ifeq ($(strip ${ZYXEL_WPS_SPOTLIGHT}),y)
++EXTRA_CFLAGS += -DZYXEL_WPS_SPOTLIGHT
++endif
++ifeq ($(strip ${ZYXEL_SFP_MODULE_SUPPORT}),y)
++EXTRA_CFLAGS += -DZYXEL_SFP_MODULE_SUPPORT
++endif
++ifeq ($(strip ${ZYXEL_SFP_DETECT_PIN}),y)
++EXTRA_CFLAGS += -DZYXEL_SFP_DETECT_PIN
++endif
++ifeq ($(strip ${ZYXEL_SFP_TX_FAULT_PIN}),y)
++EXTRA_CFLAGS += -DZYXEL_SFP_TX_FAULT_PIN
++endif
+ else
+ EXTRA_CFLAGS += -DZYXEL=0
+ endif

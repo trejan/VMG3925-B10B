@@ -1,0 +1,35 @@
+Index: linux-3.4.11/net/ipv4/netfilter/ip_tables.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv4/netfilter/ip_tables.c	2014-10-01 17:40:33.554517470 +0800
++++ linux-3.4.11/net/ipv4/netfilter/ip_tables.c	2014-10-01 17:52:46.712032048 +0800
+@@ -322,6 +322,7 @@
+ 	const struct xt_table_info *private;
+ 	struct xt_action_param acpar;
+ 	unsigned int addend;
++	int isRateLimit = 0;
+ 
+ 	/* Initialization */
+ 	ip = ip_hdr(skb);
+@@ -389,6 +390,8 @@
+ #else
+ 				goto no_match;
+ #endif
++			if(strstr(acpar.match->name, "limit") != NULL)
++				isRateLimit = 1;
+ 		}
+ 
+ 		ADD_COUNTER(e->counters, skb->len, 1);
+@@ -513,7 +516,12 @@
+ #else
+ 	if (acpar.hotdrop)
+ 		return NF_DROP;
+-	else return verdict;
++	else{
++		if(isRateLimit == 1 && verdict == NF_ACCEPT){
++			blog_skip(skb);
++		}
++		return verdict;
++	}
+ #endif
+ }
+ 

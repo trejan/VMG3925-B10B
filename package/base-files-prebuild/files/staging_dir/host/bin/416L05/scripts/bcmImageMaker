@@ -1,0 +1,250 @@
+#!/usr/bin/env perl
+
+#20131101m TimLiu Modify for create ZyXEL image header and MRD info.
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+
+my $cferom;
+my $pmcrom;
+my $pmcflag;
+my $blocksize;
+my $rootfs;
+my $fake_rootfs;
+my $bootfs;
+my $image;
+my $verbose;
+my $flashtype;
+my $fsonly;
+my $ubifs;
+my $bootofs;
+my $bootsize;
+my $bootofsinkb;
+my $bootsizeinkb;
+my $blocksizeinkb;
+my $mirroredcfe;
+my $secbtdatadir;
+my $secbtldr;
+my $btrmflag;
+my $kernelimg;
+my $flashtotalsize;
+my $flashtotalsizeinkb;
+
+GetOptions(
+    "cferom=s", \$cferom, "pmcrom=s", \$pmcrom, "blocksize=i", \$blocksize, "rootfs=s", \$rootfs,  "bootfs=s", \$bootfs,
+    "fsonly=s", \$fsonly, "image=s",     \$image,     "verbose",  \$verbose, "ubifs",    \$ubifs,
+    "bootofs=i", \$bootofs, "bootsize=i", \$bootsize, "mirroredcfe", \$mirroredcfe, "kernelimg=s", \$kernelimg,
+    "flashtotalsize=i", \$flashtotalsize, "fake_rootfs=s", \$fake_rootfs
+) or die("bad option");
+
+my @required_env = (
+    qw[
+      PROFILE_DIR HOSTTOOLS_DIR BRCM_VOICE_BOARD_ID BRCM_NUM_MAC_ADDRESSES BRCM_BOARD_ID
+      ]
+);
+
+foreach (@required_env) {
+    $ENV{$_}
+      or die("$_ not defined in environment");
+}
+
+my @required_zyenv = (
+    qw [
+       VENDORNAME PRODUCTNAME SERIALNUMBER FIRMWARE_VERSION ZYXEL_MODEL_ID BRCM_CHIP
+       MAINFEATUREBIT DEBUGBIT COUNTRYCODE
+       BRCM_BASE_MAC_ADDRESS BRCM_MAIN_TP_NUM BRCM_PSI_SIZE BRCM_AUXFS_PERCENT ARCH_ENDIAN
+       NVRAM_MEMORY_CONFIG NVRAM_MC_MEMORY_ALLOCATION NVRAM_TM_MEMORY_ALLOCATION
+       NVRAM_DHD0_MEMORY_ALLOCATION NVRAM_DHD1_MEMORY_ALLOCATION NVRAM_DHD2_MEMORY_ALLOCATION
+       ZYXEL_FEATURE_BITS
+       MRD_FEATURE_BITS_VOICE MRD_FEATURE_BITS_WIFI MRD_FEATURE_BITS_VDSL_PROFILE MRD_FEATURE_BITS_ADSL_TYPE
+       ]
+);
+if($kernelimg) { 
+    foreach (@required_zyenv) {
+        if ( $ENV{$_} eq '') {
+          die("$_ not defined in environment");
+	}
+    }
+}
+
+if ( $blocksize == 16 * 1024 ) {
+    $flashtype = "NAND16";
+}
+elsif ( $blocksize == 128 * 1024 ) {
+    $flashtype = "NAND128";
+}
+elsif ( $blocksize == 256 * 1024 ) {
+    $flashtype = "NAND256";
+}
+elsif ( $blocksize == 512 * 1024 ) {
+    $flashtype = "NAND512";
+}
+elsif ( $blocksize == 1024 * 1024 ) {
+    $flashtype = "NAND1024";
+}
+elsif ( $blocksize == 2048 * 1024 ) {
+    $flashtype = "NAND2048";
+}
+else {
+    die("blocksize not supported");
+}
+
+unless( $bootofs < $bootsize )
+{
+    die ("invalid boot offset");
+}
+
+unless ( ( $bootsize % $blocksize ) == 0 )
+{
+    die ("invalid boot size, must be multiple of block size.");
+}
+
+
+chdir $ENV{PROFILE_DIR};
+
+$bootsizeinkb = $bootsize/1024;
+$bootofsinkb = $bootofs/1024;
+$blocksizeinkb = $blocksize/1024;
+$flashtotalsizeinkb = $flashtotalsize*1024;
+
+e("dd if=/dev/zero of=fileboot.tmp bs=1024 count=$bootsizeinkb > fileboot.tmp");
+if ( ($pmcrom) && (-e $pmcrom) ) {
+    e("dd if=/dev/zero of=bootofs.tmp bs=1024 count=$bootofsinkb > bootofs.tmp");
+    e("cat $pmcrom bootofs.tmp | head --bytes=$bootofs > bootofs.tmp");
+    $pmcflag = 1;
+}
+else {
+    e("dd if=/dev/zero of=bootofs.tmp bs=1024 count=$bootofsinkb > bootofs.tmp");
+    $pmcflag = 0;
+}
+
+
+if ($mirroredcfe) {
+    $btrmflag = 1;
+    $secbtdatadir = "$ENV{PROFILE_DIR}/../../cfe/cfe/board/bcm63xx_btrm/data/$ENV{BRCM_CHIP}";
+    if (-d $secbtdatadir) {
+        print "Packaging with secure boot support ...\n";
+        $secbtldr = "$ENV{PROFILE_DIR}/../cfe/cfe$ENV{BRCM_CHIP}bi_nand.bin";
+        e("rm -f $secbtldr");
+        e("$ENV{HOSTTOOLS_DIR}/SecureBootUtils/makeSecureBootCfe nand $ENV{BRCM_CHIP} $ENV{PROFILE_DIR} $bootsize");
+        if ( ($secbtldr) && (-e $secbtldr) ) {
+           if ($ENV{BRCM_CHIP} == "63268") {
+              e("cat bootofs.tmp $secbtldr fileboot.tmp | head --bytes=$bootsize > image.tmp");
+           } else {
+              e("cat bootofs.tmp $cferom fileboot.tmp | head --bytes=$bootsize > image.tmp");
+	      my $i;
+	      my $j;
+              for ($i = 1; $i < $ENV{SECURE_BOOT_NUM_BOOT_BLKS}; $i++) {
+                 $j=($i + 1)*$bootsize;
+                 if ($i <= $ENV{SECURE_BOOT_NUM_BTLDR_IMAGES}) {
+                    e("cat image.tmp $secbtldr fileboot.tmp | head --bytes=$j > image2.tmp");
+                 } else {
+                    e("cat image.tmp fileboot.tmp | head --bytes=$j > image2.tmp");
+                 }
+		 e("mv image2.tmp image.tmp");
+              }
+           }
+           if ($ubifs) {
+              e("$ENV{HOSTTOOLS_DIR}/BcmFsTag -s 2 -u $blocksize > marker.tmp");
+	      e("cat image.tmp $bootfs marker.tmp $rootfs > $image");
+              if ($fsonly) {
+                 e("cat $bootfs marker.tmp $rootfs > merged.tmp");
+              }
+              e("rm marker.tmp");
+           } else {
+	      e("cat image.tmp $rootfs > $image");
+           }
+           e("rm $secbtldr image.tmp");
+        } else {
+           die("The file $secbtldr was not successfully created. Exiting.");
+        }
+    } else {
+        die("The directory $secbtdatadir and it's required contents do not exist. Exiting");
+    }
+}
+else {
+    $btrmflag = 0;
+    if ($ubifs) {
+        e("$ENV{HOSTTOOLS_DIR}/BcmFsTag -s 2 -u $blocksize > marker.tmp");
+        e("cat bootofs.tmp $cferom fileboot.tmp | head --bytes=$bootsize | cat - $bootfs marker.tmp $rootfs > $image");
+        if ($fsonly) {
+            e("cat $bootfs marker.tmp $rootfs > merged.tmp");
+        }
+        e("rm marker.tmp");
+    }
+    else {
+        e("cat bootofs.tmp $cferom fileboot.tmp | head --bytes=$bootsize | cat - $rootfs > $image");
+    }
+}
+
+
+if ($fsonly) {
+    if ($ubifs) {
+        e("$ENV{HOSTTOOLS_DIR}/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype --btrm $btrmflag merged.tmp $fsonly.w");
+        e("rm -f merged.tmp");
+    }
+    else {
+		if($kernelimg) {
+			#doing ZyXEL image formate
+			e("$ENV{HOSTTOOLS_DIR}/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype --btrm $btrmflag --kernelfile $kernelimg --rootfsfile $fake_rootfs $rootfs $fsonly.w");
+		}
+		else {
+			e("$ENV{HOSTTOOLS_DIR}/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype --btrm $btrmflag $rootfs $fsonly.w");
+		}
+    }
+}
+if($kernelimg) {
+	#doing ZyXEL image formate
+	e("$ENV{HOSTTOOLS_DIR}/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype --pmc $pmcflag --btrm $btrmflag --kernelfile $kernelimg --rootfsfile $fake_rootfs $image $image.w");
+	e(      "$ENV{HOSTTOOLS_DIR}/createimg --boardid=$ENV{BRCM_BOARD_ID} "
+	      . " --endian $ENV{ARCH_ENDIAN}"
+	      . " --voiceboardid $ENV{BRCM_VOICE_BOARD_ID}"
+	      . " --numbermac=$ENV{BRCM_NUM_MAC_ADDRESSES}"
+	      . " --macaddr=$ENV{BRCM_BASE_MAC_ADDRESS}"
+	      . " --tp=$ENV{BRCM_MAIN_TP_NUM}"
+	      . " --psisize=$ENV{BRCM_PSI_SIZE}"
+	      . " --flblksz=$blocksizeinkb"
+	      . " --flashTotalSize=$flashtotalsizeinkb"
+	      . " --auxfsprcnt=$ENV{BRCM_AUXFS_PERCENT}"
+	      . " --gponsn=$ENV{BRCM_GPON_SERIAL_NUMBER}"
+	      . " --gponpw=$ENV{BRCM_GPON_PASSWORD}"
+	      . " --kernelfile $kernelimg"
+	      . " --rootfsfile $fake_rootfs"
+	      . " --memconfig=$ENV{NVRAM_MEMORY_CONFIG}"
+	      . " --misc1=$ENV{BRCM_MISC1_PARTITION_SIZE}"
+	      . " --misc2=$ENV{BRCM_MISC2_PARTITION_SIZE}"
+	      . " --misc3=$ENV{BRCM_MISC3_PARTITION_SIZE}"
+	      . " --misc4=$ENV{BRCM_MISC4_PARTITION_SIZE}"
+	      . " --wholeflashfile=$image.w");
+	e("rm $image fileboot.tmp bootofs.tmp");
+}
+else {
+e("$ENV{HOSTTOOLS_DIR}/addvtoken --endian $ENV{ARCH_ENDIAN} --chip $ENV{BRCM_CHIP} --flashtype $flashtype --pmc $pmcflag --btrm $btrmflag $image $image.w");
+e(      "$ENV{HOSTTOOLS_DIR}/createimg --boardid=$ENV{BRCM_BOARD_ID} "
+      . " --endian $ENV{ARCH_ENDIAN}"
+      . " --voiceboardid $ENV{BRCM_VOICE_BOARD_ID}"
+      . " --numbermac=$ENV{BRCM_NUM_MAC_ADDRESSES}"
+      . " --macaddr=$ENV{BRCM_BASE_MAC_ADDRESS}"
+      . " --tp=$ENV{BRCM_MAIN_TP_NUM}"
+      . " --psisize=$ENV{BRCM_PSI_SIZE}"
+      . " --flblksz=$blocksizeinkb"
+      . " --auxfsprcnt=$ENV{BRCM_AUXFS_PERCENT}"
+      . " --gponsn=$ENV{BRCM_GPON_SERIAL_NUMBER}"
+      . " --gponpw=$ENV{BRCM_GPON_PASSWORD}"
+      . " --misc1=$ENV{BRCM_MISC1_PARTITION_SIZE}"
+      . " --misc2=$ENV{BRCM_MISC2_PARTITION_SIZE}"
+      . " --misc3=$ENV{BRCM_MISC3_PARTITION_SIZE}"
+      . " --misc4=$ENV{BRCM_MISC4_PARTITION_SIZE}"
+      . " --wholeflashfile=$image.w");
+e("rm $image fileboot.tmp bootofs.tmp");
+}
+sub e {
+    my $cmnd = shift;
+    if ($verbose) {
+        print "bcmImageMaker: $cmnd\n";
+    }
+    system($cmnd);
+}
+

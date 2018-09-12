@@ -1,0 +1,105 @@
+Index: linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/bcm63xx-nand.c	2016-04-22 21:14:49.251607776 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c	2016-04-22 23:26:43.046383455 +0800
+@@ -77,6 +77,7 @@
+     {name: "rootfs",        offset: 0, size: 0},
+     {name: "rootfs_update", offset: 0, size: 0},
+     {name: "data",          offset: 0, size: 0},
++	{name: "romfile",       offset: 0, size: 0},
+     {name: "rom-d",         offset: 0, size: 0},
+     {name: "wwan",          offset: 0, size: 0},
+     {name: "nvram",         offset: 0, size: 0},
+@@ -85,7 +86,6 @@
+     {name: "dummy1",        offset: 0, size: 0},
+     {name: "dummy2",        offset: 0, size: 0},
+     {name: "dummy3",        offset: 0, size: 0},
+-    {name: "dummy4",        offset: 0, size: 0},
+     {name: NULL,            offset: 0, size: 0}
+ };
+ #else
+@@ -236,7 +236,7 @@
+     unsigned long rootfs_ofs;
+ //20130822, TimLiu ZyXEL customize the MTD partition. 20160407,Tina.C.
+ #if defined(ZYXEL) && defined(ZYXEL_PARTITION)
+-    int nr_parts = 8;
++    int nr_parts = 9;
+ #else
+     int nr_parts = 6;
+ #endif
+@@ -291,9 +291,9 @@
+         bcm63XX_nand_parts[0].ecclayout = mtd->ecclayout;
+ 
+         /* This partition is used for flashing images */
+-        bcm63XX_nand_parts[6].offset = bcm63XX_nand_parts[0].offset;
+-        bcm63XX_nand_parts[6].size = bcm63XX_nand_parts[0].size;
+-        bcm63XX_nand_parts[6].ecclayout = mtd->ecclayout;
++        bcm63XX_nand_parts[7].offset = bcm63XX_nand_parts[0].offset;
++        bcm63XX_nand_parts[7].size = bcm63XX_nand_parts[0].size;
++        bcm63XX_nand_parts[7].ecclayout = mtd->ecclayout;
+ 
+         if (is_split_partition (mtd, bcm63XX_nand_parts[0].offset, bcm63XX_nand_parts[0].size, &split_offset))
+         {
+@@ -327,9 +327,9 @@
+         bcm63XX_nand_parts[1].ecclayout = mtd->ecclayout;
+ 
+         /* This partition is used for flashing images */
+-        bcm63XX_nand_parts[7].offset = bcm63XX_nand_parts[1].offset;
+-        bcm63XX_nand_parts[7].size = bcm63XX_nand_parts[1].size;
+-        bcm63XX_nand_parts[7].ecclayout = mtd->ecclayout;
++        bcm63XX_nand_parts[8].offset = bcm63XX_nand_parts[1].offset;
++        bcm63XX_nand_parts[8].size = bcm63XX_nand_parts[1].size;
++        bcm63XX_nand_parts[8].ecclayout = mtd->ecclayout;
+ 
+         if (is_split_partition (mtd, bcm63XX_nand_parts[1].offset, bcm63XX_nand_parts[1].size, &split_offset))
+         {
+@@ -350,16 +350,21 @@
+         bcm63XX_nand_parts[2].size = nvram.ulNandPartSizeKb[NP_DATA] * 1024;
+         bcm63XX_nand_parts[2].ecclayout = mtd->ecclayout;
+ 
+-        /* ROM-D */
+-        bcm63XX_nand_parts[3].offset = nvram.ulNandRomdPartOfsKb * 1024;
+-        bcm63XX_nand_parts[3].size = nvram.ulNandRomdPartSizeKb * 1024;
++        /* ROMFILE */
++        bcm63XX_nand_parts[3].offset = nvram.ulNandRomfilePartOfsKb * 1024;
++        bcm63XX_nand_parts[3].size = nvram.ulNandRomfilePartSizeKb * 1024;
+         bcm63XX_nand_parts[3].ecclayout = mtd->ecclayout;
+ 
+-		/* WWAN */
+-        bcm63XX_nand_parts[4].offset = nvram.ulNandWwanPartOfsKb * 1024;
+-        bcm63XX_nand_parts[4].size = nvram.ulNandWwanPartSizeKb * 1024;
++        /* ROM-D */
++        bcm63XX_nand_parts[4].offset = nvram.ulNandRomdPartOfsKb * 1024;
++        bcm63XX_nand_parts[4].size = nvram.ulNandRomdPartSizeKb * 1024;
+         bcm63XX_nand_parts[4].ecclayout = mtd->ecclayout;
+ 
++		/* WWAN */
++        bcm63XX_nand_parts[5].offset = nvram.ulNandWwanPartOfsKb * 1024;
++        bcm63XX_nand_parts[5].size = nvram.ulNandWwanPartSizeKb * 1024;
++        bcm63XX_nand_parts[5].ecclayout = mtd->ecclayout;
++
+         //part_num=nandinfo->nr_parts;
+         i=BCM_MAX_EXTRA_PARTITIONS-2; // skip DATA partition
+         while(i >= 0) {
+@@ -394,9 +399,9 @@
+         }
+ 
+         /* Boot and NVRAM data */
+-        bcm63XX_nand_parts[5].offset = nvram.ulNandPartOfsKb[NP_BOOT] * 1024;
+-        bcm63XX_nand_parts[5].size = nvram.ulNandPartSizeKb[NP_BOOT] * 1024;
+-        bcm63XX_nand_parts[5].ecclayout = mtd->ecclayout;
++        bcm63XX_nand_parts[6].offset = nvram.ulNandPartOfsKb[NP_BOOT] * 1024;
++        bcm63XX_nand_parts[6].size = nvram.ulNandPartSizeKb[NP_BOOT] * 1024;
++        bcm63XX_nand_parts[6].ecclayout = mtd->ecclayout;
+ 
+         PRINTK("Part[0] name=%s, size=%llx, ofs=%llx\n", bcm63XX_nand_parts[0].name,
+             bcm63XX_nand_parts[0].size, bcm63XX_nand_parts[0].offset);
+@@ -410,6 +415,8 @@
+             bcm63XX_nand_parts[4].size, bcm63XX_nand_parts[4].offset);
+         PRINTK("Part[5] name=%s, size=%llx, ofs=%llx\n", bcm63XX_nand_parts[5].name,
+             bcm63XX_nand_parts[5].size, bcm63XX_nand_parts[5].offset);
++        PRINTK("Part[6] name=%s, size=%llx, ofs=%llx\n", bcm63XX_nand_parts[6].name,
++            bcm63XX_nand_parts[6].size, bcm63XX_nand_parts[6].offset);
+ #else
+     /* RootFS partition */
+     bcm63XX_nand_parts[0].offset = nvram.ulNandPartOfsKb[rootfs]*1024;

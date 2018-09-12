@@ -1,0 +1,150 @@
+Index: linux-3.4.11/net/ipv4/netfilter/nf_nat_sip.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv4/netfilter/nf_nat_sip.c	2016-04-22 15:21:43.526503118 +0800
++++ linux-3.4.11/net/ipv4/netfilter/nf_nat_sip.c	2016-04-22 15:29:12.232128665 +0800
+@@ -50,7 +50,7 @@
+ 
+ 	pr_debug("nf_nat_redirect: new ct ");
+ 	nf_ct_dump_tuple(&new->tuplehash[IP_CT_DIR_ORIGINAL].tuple);
+-
++#if 0  //pochao: merge from P2812 fxs to ip phone can't work
+ 	/* Change src to where new ct comes from */
+ 	range.flags = NF_NAT_RANGE_MAP_IPS;
+ 	range.min_ip = range.max_ip =
+@@ -66,6 +66,19 @@
+ 	pr_debug("nf_nat_redirect: setup PREROUTING map %pI4:%hu\n",
+ 	       	 &range.min_ip, ntohs(range.min.udp.port));
+ 	nf_nat_setup_info(new, &range, NF_NAT_MANIP_DST);
++#else
++
++	/* For DST manip, map ip:port here to where it's expected. */
++	range.flags = (NF_NAT_RANGE_MAP_IPS | NF_NAT_RANGE_PROTO_SPECIFIED);
++	range.min = range.max = exp->saved_proto;
++	range.min_ip = range.max_ip = exp->saved_ip;
++
++	pr_debug("nf_nat_redirect: setup PREROUTING map %pI4:%hu\n",
++	       	 &range.min_ip, ntohs(range.min.udp.port));
++	nf_nat_setup_info(new, &range, NF_NAT_MANIP_DST);
++
++#endif
++
+ 
+ 	/* register the SIP Data RTP/RTCP ports with ingress QoS classifier */
+ 	pr_debug("adding iqos from %pI4:%hu->%pI4:%hu\n",
+Index: linux-3.4.11/net/netfilter/nf_conntrack_expect.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_expect.c	2016-04-22 15:21:43.554503117 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_expect.c	2016-04-22 15:29:12.232128665 +0800
+@@ -270,7 +270,7 @@
+ 			/* address needs to be cleared for nf_ct_tuple_equal */
+ 			memset((void *)&exp->tuple.src.u3 + len, 0x00,
+ 			       sizeof(exp->tuple.src.u3) - len);
+-		memset(&exp->mask.src.u3, 0xFF, len);
++		memset(&exp->mask.src.u3, 0x00, len);
+ 		if (sizeof(exp->mask.src.u3) > len)
+ 			memset((void *)&exp->mask.src.u3 + len, 0x00,
+ 			       sizeof(exp->mask.src.u3) - len);
+Index: linux-3.4.11/net/netfilter/nf_conntrack_sip.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_sip.c	2016-04-22 15:21:43.558503117 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_sip.c	2016-04-22 15:29:12.232128665 +0800
+@@ -505,6 +505,9 @@
+ 	char *p = *dptr;
+ 	int port;
+ 	int len;
++#if 1 //pochao: merge from P2812 fxs to ip phone can't work
++	enum ip_conntrack_dir dir = CTINFO2DIR(ctinfo);
++#endif
+ 
+ 	if (!find_field(&p, *dptr+*dlen, POS_MEDIA_AUDIO))
+ 		return NF_ACCEPT;
+@@ -512,6 +515,12 @@
+ 		return NF_DROP;
+ 	pr_debug("nf_conntrack_sip: audio=%d\n", port);
+ 	addr->u.all = htons((u_int16_t)port);
++#if 1 //pochao: merge from P2812 fxs to ip phone can't work
++	if (!memcmp(&ct->tuplehash[dir].tuple.src.u3,
++		    &ct->tuplehash[!dir].tuple.dst.u3,
++		    sizeof(ct->tuplehash[dir].tuple.src.u3)))
++		return NF_ACCEPT;
++#endif
+ 	len = expect_rtp(skb, protoff, ct, ctinfo, dptr, dlen, &p, &len,
+ 			 addr, SIP_EXPECT_CLASS_AUDIO);
+ 	return len;
+@@ -749,6 +758,21 @@
+ 	struct nf_conntrack_man addr;
+ 	int len;
+ 	typeof(nf_nat_addr_hook) nf_nat_addr;
++#if 1 //pochao: merge from P2812 fxs to ip phone can't work
++	bool isReq = false, isRes = false;
++
++	if(memcmp(*dptr, "INVITE", sizeof("INVITE") - 1) == 0 ||
++		memcmp(*dptr, "UPDATE", sizeof("UPDATE") - 1) == 0 ||
++		memcmp(*dptr, "BYE", sizeof("BYE") - 1) == 0){
++		isReq = true;
++	}
++	else if(memcmp(*dptr, "SIP/2.0 200", sizeof("SIP/2.0 200") - 1) == 0 ||
++		memcmp(*dptr, "SIP/2.0 100", sizeof("SIP/2.0 100") - 1) == 0 ||
++		memcmp(*dptr, "SIP/2.0 180", sizeof("SIP/2.0 180") - 1) == 0 ||
++		memcmp(*dptr, "SIP/2.0 183", sizeof("SIP/2.0 183") - 1) == 0 ){
++		isRes = true;
++	}
++#endif
+ 
+ 	while (find_field(&p, *dptr + *dlen, POS_VIA)) {
+ 
+@@ -761,6 +785,9 @@
+ 			    sizeof(addr.u3)) && addr.u.udp.port != htons(0) &&
+ 		    addr.u.udp.port != ct->tuplehash[dir].tuple.src.u.udp.port){
+ 		    	pr_debug("nf_conntrack_sip: different message port\n");
++#if 1 //Autumn
++			addr.u.udp.port = ct->tuplehash[!dir].tuple.dst.u.udp.port;
++#endif
+ 		    	ret = expect_sip(skb, protoff, ct, ctinfo, dptr, dlen,
+ 					 &p, &len, &addr);
+ 			break;
+@@ -768,11 +795,20 @@
+ 		/* LAN->WAN. Change the LAN address to WAN address */ 
+ 		else if (!memcmp(&addr.u3, &ct->tuplehash[dir].tuple.src.u3,
+ 				 sizeof(addr.u3)) &&
++#if 1 //Autumn
++				(addr.u.all == htons(0) || addr.u.all == ct->tuplehash[dir].tuple.src.u.all )&&
++#else
+ 			 addr.u.all == ct->tuplehash[dir].tuple.src.u.all &&
++#endif
+ 			 memcmp(&ct->tuplehash[dir].tuple.src.u3,
+ 			 	&ct->tuplehash[!dir].tuple.dst.u3,
+ 				sizeof(ct->tuplehash[dir].tuple.dst.u3)) &&
+ 			 (nf_nat_addr = rcu_dereference(nf_nat_addr_hook))) {
++#if 1 //pochao: merge from P2812 fxs to ip phone can't work
++				if(isRes){
++					return NF_ACCEPT;
++				}
++#endif
+ 			addr.u3 = ct->tuplehash[!dir].tuple.dst.u3;
+ 			addr.u.all = ct->tuplehash[!dir].tuple.dst.u.all;
+ 			ret = nf_nat_addr(skb, protoff, ct, ctinfo, dptr,
+@@ -789,6 +825,11 @@
+ 			 	&ct->tuplehash[!dir].tuple.dst.u3,
+ 				sizeof(ct->tuplehash[dir].tuple.dst.u3)) &&
+ 			 (nf_nat_addr = rcu_dereference(nf_nat_addr_hook))) {
++#if 1 //pochao: merge from P2812 fxs to ip phone can't work
++				if(isRes){
++					return NF_ACCEPT;
++				}
++#endif
+ 			addr.u3 = ct->tuplehash[!dir].tuple.dst.u3;
+ 			addr.u.all = ct->tuplehash[!dir].tuple.dst.u.all;
+ 			ret = nf_nat_addr(skb, protoff, ct, ctinfo, dptr,
+@@ -806,6 +847,11 @@
+ 			 	&ct->tuplehash[!dir].tuple.src.u3,
+ 				sizeof(ct->tuplehash[dir].tuple.dst.u3)) &&
+ 			 (nf_nat_addr = rcu_dereference(nf_nat_addr_hook))) {
++#if 1 //pochao: merge from P2812 fxs to ip phone can't work
++				if(isRes){
++					return NF_ACCEPT;
++				}
++#endif
+ 			addr = ct->tuplehash[!dir].tuple.src;
+ 			ret = nf_nat_addr(skb, protoff, ct, ctinfo, dptr,
+ 					  dlen, &p, &len, &addr);

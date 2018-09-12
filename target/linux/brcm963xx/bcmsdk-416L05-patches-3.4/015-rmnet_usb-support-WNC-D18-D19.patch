@@ -1,0 +1,135 @@
+From b6acf35f1bafd4e8bfc4dd21a0a531b296ece949 Mon Sep 17 00:00:00 2001
+From: Steven Yu-Yu Hung <steven.hung@wnc.com.tw>
+Date: Wed, 26 Nov 2014 19:10:55 +0800
+Subject: [PATCH 5/5] rmnet_usb: support WNC D18/D19
+
+---
+ drivers/net/usb/rmnet_usb_ctrl.c   | 13 ++++++++-----
+ drivers/net/usb/rmnet_usb_data.c   | 19 +++++++++++++++++++
+ net/rmnet_data/rmnet_data_config.c |  7 +++++++
+ 3 files changed, 34 insertions(+), 5 deletions(-)
+
+Index: linux-3.4.11/drivers/net/usb/rmnet_usb_ctrl.c
+===================================================================
+--- linux-3.4.11.orig/drivers/net/usb/rmnet_usb_ctrl.c	2016-04-14 18:54:46.003730713 +0800
++++ linux-3.4.11/drivers/net/usb/rmnet_usb_ctrl.c	2016-04-14 18:55:08.039729947 +0800
+@@ -21,7 +21,7 @@
+ #include <linux/debugfs.h>
+ #include "rmnet_usb.h"
+ 
+-static char *rmnet_dev_names[MAX_RMNET_DEVS] = {"hsicctl"};
++static char *rmnet_dev_names[MAX_RMNET_DEVS] = {"qcqmi"};
+ module_param_array(rmnet_dev_names, charp, NULL, S_IRUGO | S_IWUSR);
+ 
+ #define DEFAULT_READ_URB_LENGTH		0x1000
+@@ -470,7 +470,7 @@
+ 	}
+ 
+ 	udev = interface_to_usbdev(dev->intf);
+-	ret = usb_control_msg(udev, usb_rcvctrlpipe(udev, 0),
++	ret = usb_control_msg(udev, usb_sndctrlpipe(udev, 0),
+ 		req,
+ 		(USB_DIR_OUT | USB_TYPE_CLASS | USB_RECIP_INTERFACE),
+ 		val,
+@@ -626,6 +626,9 @@
+ 	if (list_empty(&dev->rx_list)) {
+ 		spin_unlock_irqrestore(&dev->rx_lock, flags);
+ 
++		if (file->f_flags & O_NONBLOCK)
++			return -EAGAIN;
++
+ 		retval = wait_event_interruptible(dev->read_wait_queue,
+ 				!list_empty(&dev->rx_list) ||
+ 				!test_bit(RMNET_CTRL_DEV_READY,
+@@ -764,7 +767,7 @@
+ 	mutex_unlock(&dev->dev_lock);
+ 
+ 	retval = rmnet_usb_ctrl_write_cmd(dev->cudev,
+-			USB_CDC_REQ_SET_CONTROL_LINE_STATE, 0, NULL, 0);
++			USB_CDC_REQ_SET_CONTROL_LINE_STATE, 1, NULL, 0);
+ 	if (!retval)
+ 		dev->cudev->set_ctrl_line_state_cnt++;
+ 
+@@ -884,7 +887,7 @@
+ 	cudev->in_ctlreq->bRequest  = USB_CDC_GET_ENCAPSULATED_RESPONSE;
+ 	cudev->in_ctlreq->wValue = 0;
+ 	cudev->in_ctlreq->wIndex =
+-		cudev->intf->cur_altsetting->desc.bInterfaceNumber;
++		cpu_to_le16(cudev->intf->cur_altsetting->desc.bInterfaceNumber);
+ 	cudev->in_ctlreq->wLength = cpu_to_le16(DEFAULT_READ_URB_LENGTH);
+ 
+ 	interval = int_in->desc.bInterval;
+@@ -906,9 +909,9 @@
+ 	*data = (unsigned long)cudev;
+ 
+ 
++	set_bit(RMNET_CTRL_DEV_READY, &cudev->status);
+ 	/* If MUX is enabled, wakeup the open process here */
+ 	if (test_bit(RMNET_CTRL_DEV_MUX_EN, &cudev->status)) {
+-		set_bit(RMNET_CTRL_DEV_READY, &cudev->status);
+ 		for (n = 0; n < insts_per_dev; n++) {
+ 			dev = &ctrl_devs[rmnet_devnum][n];
+ 			wake_up(&dev->open_wait_queue);
+Index: linux-3.4.11/drivers/net/usb/rmnet_usb_data.c
+===================================================================
+--- linux-3.4.11.orig/drivers/net/usb/rmnet_usb_data.c	2016-04-14 18:54:46.003730713 +0800
++++ linux-3.4.11/drivers/net/usb/rmnet_usb_data.c	2016-04-14 18:55:08.047729948 +0800
+@@ -711,6 +711,24 @@
+ };
+ 
+ static const struct usb_device_id vidpids[] = {
++	/* QTI EVB */
++	{ USB_DEVICE_INTERFACE_NUMBER(0x05c6, 0x9025, 4),
++	.driver_info = (unsigned long)&rmnet_info,
++	},
++	/* WNC D18 */
++	{ USB_DEVICE_INTERFACE_NUMBER(0x1435, 0xd181, 3),
++	.driver_info = (unsigned long)&rmnet_info,
++	},
++	{ USB_DEVICE_INTERFACE_NUMBER(0x1435, 0xd181, 4),
++	.driver_info = (unsigned long)&rmnet_info,
++	},
++	{ USB_DEVICE_INTERFACE_NUMBER(0x1435, 0xd181, 5),
++	.driver_info = (unsigned long)&rmnet_info,
++	},
++	/* WNC D19 */
++	{ USB_DEVICE_INTERFACE_NUMBER(0x1435, 0xd191, 4),
++	.driver_info = (unsigned long)&rmnet_info,
++	},
+ 	{ USB_DEVICE_INTERFACE_NUMBER(0x05c6, 0x9034, 4),
+ 	.driver_info = (unsigned long)&rmnet_info,
+ 	},
+@@ -822,6 +840,7 @@
+ 
+ 	return retval;
+ }
++module_init(rmnet_data_start);
+ 
+ static void __exit rmnet_usb_exit(void)
+ {
+Index: linux-3.4.11/net/rmnet_data/rmnet_data_config.c
+===================================================================
+--- linux-3.4.11.orig/net/rmnet_data/rmnet_data_config.c	2016-04-14 18:54:58.451730287 +0800
++++ linux-3.4.11/net/rmnet_data/rmnet_data_config.c	2016-04-14 18:55:08.047729948 +0800
+@@ -26,6 +26,11 @@
+ #include "rmnet_data_vnd.h"
+ #include "rmnet_data_private.h"
+ 
++#include <linux/version.h>
++#if LINUX_VERSION_CODE < KERNEL_VERSION(3,8,0)
++#define RMNET_KERNEL_PRE_3_8
++#endif
++
+ RMNET_LOG_MODULE(RMNET_DATA_LOGMASK_CONFIG);
+ 
+ /* ***************** Local Definitions and Declarations ********************* */
+@@ -1193,7 +1198,9 @@
+ 	LOGL("(..., %lu, %s)", event, dev->name);
+ 
+ 	switch (event) {
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0)
+ 	case NETDEV_UNREGISTER_FINAL:
++#endif
+ 	case NETDEV_UNREGISTER:
+ 		if (_rmnet_is_physical_endpoint_associated(dev)) {
+ 			LOGH("Kernel is trying to unregister %s", dev->name);

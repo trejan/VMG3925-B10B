@@ -1,0 +1,148 @@
+Index: linux-3.4.11/drivers/net/usb/qmi_wwan.c
+===================================================================
+--- linux-3.4.11.orig/drivers/net/usb/qmi_wwan.c	2016-05-12 11:21:54.811492999 +0800
++++ linux-3.4.11/drivers/net/usb/qmi_wwan.c	2016-05-12 13:19:43.211738808 +0800
+@@ -395,6 +395,28 @@
+ 	.data		= BIT(8) | BIT(19), /* interface whitelist bitmap */
+ };
+ 
++unsigned long qmi_get_driver_info(char *driver_info)
++{
++	if (strstr(driver_info, "info"))
++		return (unsigned long)&qmi_wwan_info;
++	if (strstr(driver_info, "shared"))
++		return (unsigned long)&qmi_wwan_shared;
++	if (strstr(driver_info, "int0"))
++		return (unsigned long)&qmi_wwan_force_int0;
++	if (strstr(driver_info, "int1"))
++		return (unsigned long)&qmi_wwan_force_int1;
++	if (strstr(driver_info, "int2"))
++		return (unsigned long)&qmi_wwan_force_int2;
++	if (strstr(driver_info, "int3"))
++		return (unsigned long)&qmi_wwan_force_int3;
++	if (strstr(driver_info, "int4"))
++		return (unsigned long)&qmi_wwan_force_int4;
++	if (strstr(driver_info, "sierra"))
++		return (unsigned long)&qmi_wwan_sierra;
++
++	return 0;
++}
++
+ #define HUAWEI_VENDOR_ID	0x12D1
+ 
+ /* Gobi 1000 QMI/wwan interface number is 3 according to qcserial */
+@@ -630,6 +652,10 @@
+ };
+ MODULE_DEVICE_TABLE(usb, products);
+ 
++static struct qmi_driver_info_s qmi_driver_info = {
++	.get_driver_info      = qmi_get_driver_info,
++};
++
+ static struct usb_driver qmi_wwan_driver = {
+ 	.name		      = "qmi_wwan",
+ 	.id_table	      = products,
+@@ -643,12 +669,16 @@
+ 
+ static int __init qmi_wwan_init(void)
+ {
++	register_qmi_get_driver_info(&qmi_driver_info);
++
+ 	return usb_register(&qmi_wwan_driver);
+ }
+ module_init(qmi_wwan_init);
+ 
+ static void __exit qmi_wwan_exit(void)
+ {
++	unregister_qmi_get_driver_info();
++
+ 	usb_deregister(&qmi_wwan_driver);
+ }
+ module_exit(qmi_wwan_exit);
+Index: linux-3.4.11/drivers/usb/core/driver.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/driver.c	2016-05-12 11:21:54.539492999 +0800
++++ linux-3.4.11/drivers/usb/core/driver.c	2016-05-12 12:00:14.571492999 +0800
+@@ -34,6 +34,20 @@
+ 
+ #ifdef CONFIG_HOTPLUG
+ 
++static unsigned long (*qmi_get_driver_info)(char *);
++
++void register_qmi_get_driver_info(struct qmi_driver_info_s *driver_info)
++{
++	qmi_get_driver_info = driver_info->get_driver_info;
++}
++EXPORT_SYMBOL_GPL(register_qmi_get_driver_info);
++
++void unregister_qmi_get_driver_info(void)
++{
++	qmi_get_driver_info = NULL;
++}
++EXPORT_SYMBOL_GPL(unregister_qmi_get_driver_info);
++
+ /*
+  * Adds a new dynamic USBdevice ID to this driver,
+  * and cause the driver to probe for all devices again.
+@@ -46,11 +60,16 @@
+ 	u32 idVendor = 0;
+ 	u32 idProduct = 0;
+ 	unsigned int bInterfaceClass = 0;
++	unsigned int bInterfaceSubClass = 0;
++	unsigned int bInterfaceProtocol = 0;
++	char driver_info[128];
+ 	int fields = 0;
+ 	int retval = 0;
+ 
+-	fields = sscanf(buf, "%x %x %x", &idVendor, &idProduct,
+-					&bInterfaceClass);
++	fields = sscanf(buf, "%x %x %x %x %x %s", &idVendor, &idProduct,
++			&bInterfaceClass, &bInterfaceSubClass,
++			&bInterfaceProtocol, driver_info);
++
+ 	if (fields < 2)
+ 		return -EINVAL;
+ 
+@@ -62,9 +81,22 @@
+ 	dynid->id.idVendor = idVendor;
+ 	dynid->id.idProduct = idProduct;
+ 	dynid->id.match_flags = USB_DEVICE_ID_MATCH_DEVICE;
+-	if (fields == 3) {
+-		dynid->id.bInterfaceClass = (u8)bInterfaceClass;
++
++	if (bInterfaceClass == USB_CLASS_VENDOR_SPEC) {
+ 		dynid->id.match_flags |= USB_DEVICE_ID_MATCH_INT_CLASS;
++		dynid->id.match_flags |= USB_DEVICE_ID_MATCH_INT_SUBCLASS;
++		dynid->id.match_flags |= USB_DEVICE_ID_MATCH_INT_PROTOCOL;
++		dynid->id.match_flags |= USB_DEVICE_ID_MATCH_INT_INFO;
++		dynid->id.bInterfaceClass = (u8)bInterfaceClass;
++		dynid->id.bInterfaceSubClass = (u8)bInterfaceSubClass;
++		dynid->id.bInterfaceProtocol = (u8)bInterfaceProtocol;
++		if (qmi_get_driver_info)
++			dynid->id.driver_info = qmi_get_driver_info(driver_info);
++	} else {
++		if (fields == 3) {
++			dynid->id.bInterfaceClass = (u8)bInterfaceClass;
++			dynid->id.match_flags |= USB_DEVICE_ID_MATCH_INT_CLASS;
++		}
+ 	}
+ 
+ 	spin_lock(&dynids->lock);
+Index: linux-3.4.11/include/linux/usb.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/usb.h	2016-05-12 11:21:54.543492999 +0800
++++ linux-3.4.11/include/linux/usb.h	2016-05-12 13:09:20.791738808 +0800
+@@ -1698,6 +1698,13 @@
+ /* debugfs stuff */
+ extern struct dentry *usb_debug_root;
+ 
++struct qmi_driver_info_s {
++	unsigned long (*get_driver_info)(char *);
++};
++
++extern void register_qmi_get_driver_info(struct qmi_driver_info_s *driver_info);
++extern void unregister_qmi_get_driver_info(void);
++
+ #endif  /* __KERNEL__ */
+ 
+ #endif

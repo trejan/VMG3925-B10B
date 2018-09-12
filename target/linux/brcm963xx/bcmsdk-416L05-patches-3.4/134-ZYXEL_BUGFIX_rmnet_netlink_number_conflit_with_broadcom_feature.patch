@@ -1,0 +1,33 @@
+Index: linux-3.4.11/include/linux/netlink.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/netlink.h
++++ linux-3.4.11/include/linux/netlink.h
+@@ -45,6 +45,10 @@
+ #define NETLINK_DPI            27       /* for dpictl */
+ #endif
+ 
++#if defined(CONFIG_RMNET_DATA)
++#define RMNET_NETLINK_PROTO 24
++#endif
++
+ #define MAX_LINKS 32		
+ 
+ struct sockaddr_nl {
+Index: linux-3.4.11/include/linux/rmnet_data.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/rmnet_data.h
++++ linux-3.4.11/include/linux/rmnet_data.h
+@@ -32,7 +32,13 @@
+ #define RMNET_INGRESS_FORMAT_MAP_CKSUMV3        (1<<5)
+ 
+ /* ***************** Netlink API ******************************************** */
++#if 1 
++// ZyXEL, Mark, move RMNET_NETLINK_PROTO to netlink.h and re-assign value.
++// Because, the value is conflict with BRCM wirless feature (nvram/wlcsm)
++#include <linux/netlink.h>
++#else
+ #define RMNET_NETLINK_PROTO 31
++#endif
+ #define RMNET_MAX_STR_LEN  16
+ #define RMNET_NL_DATA_MAX_LEN 64
+ 

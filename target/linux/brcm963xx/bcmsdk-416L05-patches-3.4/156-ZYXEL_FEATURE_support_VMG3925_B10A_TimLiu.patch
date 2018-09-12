@@ -1,0 +1,90 @@
+Index: linux-3.4.11/arch/mips/bcm963xx/setup.c
+===================================================================
+--- linux-3.4.11.orig/arch/mips/bcm963xx/setup.c	2017-01-04 11:09:18.673808309 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/setup.c	2017-01-04 11:11:12.868188973 +0800
+@@ -380,7 +380,7 @@
+ }
+ 
+ //<<20140212, TimLiu add for refine the GPIO configuration.
+-#if defined(ZYXEL) && (defined(ZYPRJ_VMG5948) || defined(ZYPRJ_VMG8948) || defined(ZYPRJ_VMG9823))
++#if defined(ZYXEL) && (defined(ZYPRJ_VMG5948) || defined(ZYPRJ_VMG8948) || defined(ZYPRJ_VMG9823) || defined(ZYPRJ_VMG3925) )
+ typedef enum
+ {
+     kGpioInput,
+@@ -393,7 +393,7 @@
+ *   0 for succeed.
+ *   others for fail.
+ **/
+-static int setGpioDir(unsigned short bpGpio, GPIO_DIRECTION_t direction)
++int setGpioDir(unsigned short bpGpio, GPIO_DIRECTION_t direction)
+ {
+     if(direction == kGpioInput) {
+         kerSysSetGpioDirInput(bpGpio);
+@@ -402,6 +402,7 @@
+     }
+     return 0;
+ }
++EXPORT_SYMBOL(setGpioDir);
+ 
+ /**
+ * Set gpio value to active/inactive.
+@@ -409,11 +410,18 @@
+ *   0 for succeed.
+ *   others for fail.
+ **/
+-static int setGpioState(unsigned short bpGpio, GPIO_STATE_t state)
++int setGpioState(unsigned short bpGpio, GPIO_STATE_t state)
+ {
+     kerSysSetGpioState(bpGpio, state);
+     return 0;
+ }
++EXPORT_SYMBOL(setGpioState);
++
++int getGpioState(unsigned short bpGpio)
++{
++    return kerSysGetGpioValue(bpGpio);
++}
++EXPORT_SYMBOL(getGpioState);
+ #endif //(ZYXEL)
+ //>>20140212, TimLiu
+ 
+@@ -1245,7 +1253,38 @@
+     	}
+ 	}
+ #endif
+-
++//20150213, TimLiu, Need to config GPIO for VMG3925, from MSTC.
++#if defined(ZYPRJ_VMG3925)
++    {
++    	unsigned short bpGpio;
++    	if(BpGetInternetLedEnableGpio(&bpGpio) == BP_SUCCESS)
++    	{
++    		printk("Internet LED Enable gpio(%d) need to config to output.\n",bpGpio);
++			printk("Default set to Active\n");
++            if(setGpioState(bpGpio, kGpioActive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    	if(BpGetInternetCtrlSignalGpio(&bpGpio) == BP_SUCCESS)
++    	{
++    		printk("Internal control signal gpio(%d) need to config to output.\n",bpGpio);
++			printk("Default set to Active\n");
++            if(setGpioState(bpGpio, kGpioActive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    	if(BpGetMDIO_SDAGpio(&bpGpio) == BP_SUCCESS)
++    	{
++    		printk("Using GPIO(%d) simulate MDIO signal need to config to output.\n",bpGpio);
++            if(setGpioDir(bpGpio, kGpioOutput) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    	if(BpGetMDC_SCKGpio(&bpGpio) == BP_SUCCESS)
++    	{
++    		printk("Using GPIO(%d) simulate MDC signal need to config to output.\n",bpGpio);
++            if(setGpioState(bpGpio, kGpioInactive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    }
++#endif
+ #if defined(ZYPRJ_VMG8924_B10A)
+     {
+         unsigned short bpGpio;

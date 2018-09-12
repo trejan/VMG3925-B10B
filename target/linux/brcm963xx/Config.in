@@ -1,0 +1,16 @@
+menu "brcm963xx configuration"
+	depends on TARGET_brcm963xx
+
+config BRCM963xx_SDK_VER_416L05
+	def_bool y
+
+config BRCM_SDK_VERSION
+	string
+	default "416L05"
+
+comment "!!! CAUTION !!!"
+comment "Broadcom SDK are prebuild files(binary/object)"
+comment "These files built by default configuration!"
+comment "You should not change any options!!"
+source "target/linux/brcm963xx/kconfigs/Config-416L05.in"
+endmenu

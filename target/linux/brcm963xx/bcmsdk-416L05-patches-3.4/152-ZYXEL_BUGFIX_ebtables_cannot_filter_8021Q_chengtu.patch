@@ -1,0 +1,13 @@
+Index: linux-3.4.11/net/bridge/netfilter/ebtables.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/ebtables.c	2016-09-08 15:50:52.742814120 +0800
++++ linux-3.4.11/net/bridge/netfilter/ebtables.c	2016-09-08 16:06:20.640831900 +0800
+@@ -160,7 +160,7 @@
+ 		if (FWINV2(ntohs(h->h_proto) >= 1536, EBT_IPROTO))
+ 			return 1;
+ 	} else if (!(e->bitmask & EBT_NOPROTO) ){
+-		if(e->ethproto == ETH_P_8021Q && ethproto!=ETH_P_8021Q) {/*If protocol type of rule is 802.1q and packet header is not 802.1q*/
++		if(ntohs(e->ethproto) == ETH_P_8021Q && ntohs(ethproto)!=ETH_P_8021Q) {/*If protocol type of rule is 802.1q and packet header is not 802.1q*/
+                      /* for new broadcom vlan device */
+                      if(FWINV2(!(ntohs(((struct vlan_hdr *)(skb->vlan_header))->h_vlan_encapsulated_proto)), EBT_IPROTO))
+ 		        return 1;

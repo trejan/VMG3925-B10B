@@ -1,0 +1,12 @@
+Index: linux-3.4.11/net/bridge/Makefile
+===================================================================
+--- linux-3.4.11.orig/net/bridge/Makefile
++++ linux-3.4.11/net/bridge/Makefile
+@@ -7,6 +7,7 @@ ifneq ($(strip $(CONFIG_BCM_WLAN)),)
+ EXTRA_CFLAGS    += -DDSLCPE -DBCMDRIVER -DPKTC
+ EXTRA_CFLAGS    += -I$(BRCMDRIVERS_DIR)/broadcom/net/wl/bcm9$(BRCM_CHIP)/include
+ EXTRA_CFLAGS    += -I$(BRCMDRIVERS_DIR)/broadcom/net/wl/bcm9$(BRCM_CHIP)/main/src/include
++EXTRA_CFLAGS    += -I$(BRCMDRIVERS_DIR)/broadcom/net/wl/shared/impl1
+ endif
+ endif #BCM_KF #defined(CONFIG_BCM_KF_WLAN)
+ 

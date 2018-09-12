@@ -1,0 +1,13 @@
+Index: linux-3.4.11/net/bridge/netfilter/ebt_ip.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/ebt_ip.c	2016-10-19 14:20:38.229024389 +0800
++++ linux-3.4.11/net/bridge/netfilter/ebt_ip.c	2016-10-19 14:29:06.998382860 +0800
+@@ -252,7 +252,7 @@
+         pptr = skb_header_pointer(skb, ih->ihl*4,  sizeof(_ports), &_ports);
+ 
+         /* not DHCP packet, then try to compared with recoded mac */
+-        if(pptr->src!=67 && pptr->src!=68 && pptr->dst!=67 && pptr->dst!=68){
++        if(ntohs(pptr->src)!=67 && ntohs(pptr->src)!=68 && ntohs(pptr->dst)!=67 && ntohs(pptr->dst)!=68){
+ 			for(i=0;i<OPTION_MAC_ENTRY;i++){
+ 		        if(!compare_ether_addr(eth_hdr(skb)->h_source, info->SrcMacArray[i])){
+ 					/* if match, continue to check other conditions */

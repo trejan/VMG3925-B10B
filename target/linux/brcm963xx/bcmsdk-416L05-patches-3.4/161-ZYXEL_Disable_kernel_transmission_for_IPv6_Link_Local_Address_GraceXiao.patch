@@ -1,0 +1,15 @@
+Index: linux-3.4.11/net/ipv6/addrconf.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/addrconf.c	2017-01-19 17:22:07.462097246 +0800
++++ linux-3.4.11/net/ipv6/addrconf.c	2017-01-19 17:24:35.976380666 +0800
+@@ -2498,8 +2498,10 @@
+ 		addrconf_dad_start(ifp, 0);
+ 		in6_ifa_put(ifp);
+ 		
++#if 0
+ 		/* __ZyXEL__, GraceXiao, 20170109, #32394 The IPv6 Link Local Address can?™t display in Status webpage. */
+ 		kerSysSendtoMonitorTask(MSG_NETLINK_IPV6_LINK_LOCAL_GET, NULL, 0); 
++#endif
+ 	}
+ }
+ 

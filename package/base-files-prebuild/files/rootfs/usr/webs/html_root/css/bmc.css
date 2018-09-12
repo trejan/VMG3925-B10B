@@ -1,0 +1,108 @@
+body
+{
+	background:black;
+	margin: 0px;
+	font-family: arial;
+	font-size: 100%;
+}
+.vmenu
+{
+	position: absolute;
+	top:10%;
+	width: 30%;
+}
+
+a
+{
+    color: inherit;
+    text-decoration: none;
+    display: block;
+       
+}
+.vmenu.hidden
+{
+	left: -12em;
+}
+.vmenu .item
+{
+	margin-left:0.5em;
+	margin-bottom: 0.5em;
+	font-size: 1.0em;
+	color: #808080;
+}
+.vmenu .item.focused
+{
+	color: #ffffff;
+}
+.vmenu .highlight
+{
+	position: absolute;
+	width: 100%;
+	z-index: -1;
+	/*background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ff3019), color-stop(100%,#6D0000));*/
+	background: -webkit-gradient(linear, left top, left bottom, from(#800000), to(#800000), color-stop(0.5, #200000));
+	-webkit-transition:all 0.20s ease-in-out;
+}
+.chip
+{
+	position: absolute;
+	top: 10%;
+	left: 75%;
+}
+.chip .image
+{
+	float: left;
+}
+.chip .image .name
+{
+	position: absolute;
+	top: 48%;
+	left: 19%;
+	color: #ffffff;
+	font-size: 1em;
+	font-weight: 500;
+	text-align: center;
+}
+.chip .info
+{
+	float: right;
+	color: #808080;
+	font-size: 0.75em;
+}
+.hmenu
+ {
+	position: absolute;
+	top: 8%;
+	left: 5%;
+	width: 90%;
+	z-index: -2;
+	-webkit-transition:all 0.30s ease-in-out;      
+}  
+.hmenu.hidden
+{  
+	top:50%;
+	opacity: 0;
+}
+
+#panel-center
+{
+    position: absolute;
+    left: 30%;
+    top: 20%;
+    width: 40%;
+    height: 40%;
+     border-style:solid;
+	border-color:#787878;
+    background:rgba(42, 42, 42, 0.8);
+       
+}
+
+#videoPlayer
+{
+	position: absolute;
+	top:10%;
+	left: 30%;
+	width: 70%;
+	height: auto;
+	z-index: 5;
+}

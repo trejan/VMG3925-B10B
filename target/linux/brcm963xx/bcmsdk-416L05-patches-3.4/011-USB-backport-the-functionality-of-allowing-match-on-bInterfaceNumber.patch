@@ -1,0 +1,183 @@
+From eb25c9d803489e84cf59cbaad5dcdeb92819633a Mon Sep 17 00:00:00 2001
+From: Steven Yu-Yu Hung <steven.hung@wnc.com.tw>
+Date: Fri, 5 Dec 2014 12:28:25 +0800
+Subject: [PATCH 1/5] USB: backport the functionality of allowing match on
+ bInterfaceNumber
+
+cherry-pick from git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+commit 81df2d594340dcb6d1a02191976be88a1ca8120c USB: allow match on bInterfaceNumber
+commit e9e82dbb03486d18dcf6783c54841412dce1abdb USB: properly pad out usb_device_id.driver_info
+---
+ drivers/usb/core/driver.c       |  9 +++++++--
+ drivers/usb/core/message.c      |  5 +++--
+ drivers/usb/core/sysfs.c        |  5 +++--
+ include/linux/mod_devicetable.h | 10 +++++++++-
+ include/linux/usb.h             | 16 ++++++++++++++++
+ scripts/mod/file2alias.c        |  5 ++++-
+ 6 files changed, 42 insertions(+), 8 deletions(-)
+
+Index: linux-3.4.11/drivers/usb/core/driver.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/driver.c	2016-04-14 18:30:43.927781020 +0800
++++ linux-3.4.11/drivers/usb/core/driver.c	2016-04-14 18:54:16.791731737 +0800
+@@ -546,14 +546,15 @@
+ 	if (!usb_match_device(dev, id))
+ 		return 0;
+ 
+-	/* The interface class, subclass, and protocol should never be
++	/* The interface class, subclass, protocol and number should never be
+ 	 * checked for a match if the device class is Vendor Specific,
+ 	 * unless the match record specifies the Vendor ID. */
+ 	if (dev->descriptor.bDeviceClass == USB_CLASS_VENDOR_SPEC &&
+ 			!(id->match_flags & USB_DEVICE_ID_MATCH_VENDOR) &&
+ 			(id->match_flags & (USB_DEVICE_ID_MATCH_INT_CLASS |
+ 				USB_DEVICE_ID_MATCH_INT_SUBCLASS |
+-				USB_DEVICE_ID_MATCH_INT_PROTOCOL)))
++				USB_DEVICE_ID_MATCH_INT_PROTOCOL |
++				USB_DEVICE_ID_MATCH_INT_NUMBER)))
+ 		return 0;
+ 
+ 	if ((id->match_flags & USB_DEVICE_ID_MATCH_INT_CLASS) &&
+@@ -568,6 +569,10 @@
+ 	    (id->bInterfaceProtocol != intf->desc.bInterfaceProtocol))
+ 		return 0;
+ 
++	if ((id->match_flags & USB_DEVICE_ID_MATCH_INT_NUMBER) &&
++	    (id->bInterfaceNumber != intf->desc.bInterfaceNumber))
++		return 0;
++
+ 	return 1;
+ }
+ EXPORT_SYMBOL_GPL(usb_match_one_id);
+Index: linux-3.4.11/drivers/usb/core/message.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/message.c	2016-04-14 18:30:43.927781020 +0800
++++ linux-3.4.11/drivers/usb/core/message.c	2016-04-14 18:54:16.791731737 +0800
+@@ -1535,7 +1535,7 @@
+ 
+ 	if (add_uevent_var(env,
+ 		   "MODALIAS=usb:"
+-		   "v%04Xp%04Xd%04Xdc%02Xdsc%02Xdp%02Xic%02Xisc%02Xip%02X",
++		   "v%04Xp%04Xd%04Xdc%02Xdsc%02Xdp%02Xic%02Xisc%02Xip%02Xin%02X",
+ 		   le16_to_cpu(usb_dev->descriptor.idVendor),
+ 		   le16_to_cpu(usb_dev->descriptor.idProduct),
+ 		   le16_to_cpu(usb_dev->descriptor.bcdDevice),
+@@ -1544,7 +1544,8 @@
+ 		   usb_dev->descriptor.bDeviceProtocol,
+ 		   alt->desc.bInterfaceClass,
+ 		   alt->desc.bInterfaceSubClass,
+-		   alt->desc.bInterfaceProtocol))
++		   alt->desc.bInterfaceProtocol,
++		   alt->desc.bInterfaceNumber))
+ 		return -ENOMEM;
+ 
+ #if defined(CONFIG_BCM_KF_USB_HOSTS)
+Index: linux-3.4.11/drivers/usb/core/sysfs.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/sysfs.c	2016-04-14 18:30:43.927781020 +0800
++++ linux-3.4.11/drivers/usb/core/sysfs.c	2016-04-14 18:54:16.803731724 +0800
+@@ -840,7 +840,7 @@
+ 	alt = intf->cur_altsetting;
+ 
+ 	return sprintf(buf, "usb:v%04Xp%04Xd%04Xdc%02Xdsc%02Xdp%02X"
+-			"ic%02Xisc%02Xip%02X\n",
++			"ic%02Xisc%02Xip%02Xin%02X\n",
+ 			le16_to_cpu(udev->descriptor.idVendor),
+ 			le16_to_cpu(udev->descriptor.idProduct),
+ 			le16_to_cpu(udev->descriptor.bcdDevice),
+@@ -849,7 +849,8 @@
+ 			udev->descriptor.bDeviceProtocol,
+ 			alt->desc.bInterfaceClass,
+ 			alt->desc.bInterfaceSubClass,
+-			alt->desc.bInterfaceProtocol);
++			alt->desc.bInterfaceProtocol,
++			alt->desc.bInterfaceNumber);
+ }
+ static DEVICE_ATTR(modalias, S_IRUGO, show_modalias, NULL);
+ 
+Index: linux-3.4.11/include/linux/mod_devicetable.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/mod_devicetable.h	2016-04-14 18:30:43.927781020 +0800
++++ linux-3.4.11/include/linux/mod_devicetable.h	2016-04-14 18:54:16.803731724 +0800
+@@ -78,6 +78,9 @@
+  *	of a given interface; other interfaces may support other classes.
+  * @bInterfaceSubClass: Subclass of interface; associated with bInterfaceClass.
+  * @bInterfaceProtocol: Protocol of interface; associated with bInterfaceClass.
++ * @bInterfaceNumber: Number of interface; composite devices may use
++ *	fixed interface numbers to differentiate between vendor-specific
++ *	interfaces.
+  * @driver_info: Holds information used by the driver.  Usually it holds
+  *	a pointer to a descriptor understood by the driver, or perhaps
+  *	device flags.
+@@ -115,8 +118,12 @@
+ 	__u8		bInterfaceSubClass;
+ 	__u8		bInterfaceProtocol;
+ 
++	/* Used for vendor-specific interface matches */
++	__u8		bInterfaceNumber;
++
+ 	/* not matched against */
+-	kernel_ulong_t	driver_info;
++	kernel_ulong_t	driver_info
++		__attribute__((aligned(sizeof(kernel_ulong_t))));
+ };
+ 
+ /* Some useful macros to use to create struct usb_device_id */
+@@ -130,6 +137,7 @@
+ #define USB_DEVICE_ID_MATCH_INT_CLASS		0x0080
+ #define USB_DEVICE_ID_MATCH_INT_SUBCLASS	0x0100
+ #define USB_DEVICE_ID_MATCH_INT_PROTOCOL	0x0200
++#define USB_DEVICE_ID_MATCH_INT_NUMBER		0x0400
+ 
+ #define HID_ANY_ID				(~0)
+ 
+Index: linux-3.4.11/include/linux/usb.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/usb.h	2016-04-14 18:30:43.927781020 +0800
++++ linux-3.4.11/include/linux/usb.h	2016-04-14 18:54:16.803731724 +0800
+@@ -731,6 +731,22 @@
+ 	.bInterfaceProtocol = (pr)
+ 
+ /**
++ * USB_DEVICE_INTERFACE_NUMBER - describe a usb device with a specific interface number
++ * @vend: the 16 bit USB Vendor ID
++ * @prod: the 16 bit USB Product ID
++ * @num: bInterfaceNumber value
++ *
++ * This macro is used to create a struct usb_device_id that matches a
++ * specific interface number of devices.
++ */
++#define USB_DEVICE_INTERFACE_NUMBER(vend, prod, num) \
++	.match_flags = USB_DEVICE_ID_MATCH_DEVICE | \
++		       USB_DEVICE_ID_MATCH_INT_NUMBER, \
++	.idVendor = (vend), \
++	.idProduct = (prod), \
++	.bInterfaceNumber = (num)
++
++/**
+  * USB_DEVICE_INFO - macro used to describe a class of usb devices
+  * @cl: bDeviceClass value
+  * @sc: bDeviceSubClass value
+Index: linux-3.4.11/scripts/mod/file2alias.c
+===================================================================
+--- linux-3.4.11.orig/scripts/mod/file2alias.c	2016-04-14 18:30:43.927781020 +0800
++++ linux-3.4.11/scripts/mod/file2alias.c	2016-04-14 18:54:16.803731724 +0800
+@@ -156,7 +156,7 @@
+ }
+ 
+ /* USB is special because the bcdDevice can be matched against a numeric range */
+-/* Looks like "usb:vNpNdNdcNdscNdpNicNiscNipN" */
++/* Looks like "usb:vNpNdNdcNdscNdpNicNiscNipNinN" */
+ static void do_usb_entry(struct usb_device_id *id,
+ 			 unsigned int bcdDevice_initial, int bcdDevice_initial_digits,
+ 			 unsigned char range_lo, unsigned char range_hi,
+@@ -210,6 +210,9 @@
+ 	ADD(alias, "ip",
+ 	    id->match_flags&USB_DEVICE_ID_MATCH_INT_PROTOCOL,
+ 	    id->bInterfaceProtocol);
++	ADD(alias, "in",
++	    id->match_flags&USB_DEVICE_ID_MATCH_INT_NUMBER,
++	    id->bInterfaceNumber);
+ 
+ 	add_wildcard(alias);
+ 	buf_printf(&mod->dev_table_buf,

@@ -1,0 +1,84 @@
+Index: linux-3.4.11/include/linux/icmpv6.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/icmpv6.h	2010-10-21 04:30:22.000000000 +0800
++++ linux-3.4.11/include/linux/icmpv6.h	2017-03-10 13:24:11.496233271 +0800
+@@ -123,7 +123,9 @@
+ #define ICMPV6_NOT_NEIGHBOUR		2
+ #define ICMPV6_ADDR_UNREACH		3
+ #define ICMPV6_PORT_UNREACH		4
+-
++/* __ZyXEL__, Albert, 20170213, for ANATEL Conformance IPv6 Test  */
++#define ICMPV6_POLICY_FAIL		5
++#define ICMPV6_REJECT_ROUTE		6
+ /*
+  *	Codes for Time Exceeded
+  */
+Index: linux-3.4.11/include/linux/netfilter_ipv6/ip6t_REJECT.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/netfilter_ipv6/ip6t_REJECT.h	2010-10-21 04:30:22.000000000 +0800
++++ linux-3.4.11/include/linux/netfilter_ipv6/ip6t_REJECT.h	2017-03-10 13:24:01.327188101 +0800
+@@ -7,6 +7,9 @@
+ 	IP6T_ICMP6_NOT_NEIGHBOUR,
+ 	IP6T_ICMP6_ADDR_UNREACH,
+ 	IP6T_ICMP6_PORT_UNREACH,
++/* __ZyXEL__, Albert, 20170213, for ANATEL Conformance IPv6 Test  */
++	IP6T_ICMP6_POLICY_FAIL,
++	IP6T_ICMP6_REJECT_ROUTE,
+ 	IP6T_ICMP6_ECHOREPLY,
+ 	IP6T_TCP_RESET
+ };
+Index: linux-3.4.11/net/ipv6/addrconf.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/addrconf.c	2017-03-10 13:22:43.662934914 +0800
++++ linux-3.4.11/net/ipv6/addrconf.c	2017-03-10 13:24:21.837481903 +0800
+@@ -2953,7 +2953,9 @@
+ 	 * Optimistic nodes can start receiving
+ 	 * Frames right away
+ 	 */
+-	if (ifp->flags & IFA_F_OPTIMISTIC)
++
++// WenHsien.20160907: Force speed up DAD: insert global IP into routing table while starting DAD.
++//	if (ifp->flags & IFA_F_OPTIMISTIC)
+ 		ip6_ins_rt(ifp->rt);
+ 
+ 	addrconf_dad_kick(ifp);
+Index: linux-3.4.11/net/ipv6/icmp.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/icmp.c	2010-10-21 04:30:22.000000000 +0800
++++ linux-3.4.11/net/ipv6/icmp.c	2017-03-10 13:24:09.251101680 +0800
+@@ -393,6 +393,17 @@
+ 	sk = icmpv6_xmit_lock(net);
+ 	if (sk == NULL)
+ 		return;
++
++/* __ZyXEL__, Albert, 20170213, for ANATEL Conformance IPv6 Test  */
++#if 1 //Keep the original MARK when this packet is the case of reject-with. 
++    if((type == ICMPV6_DEST_UNREACH && code == ICMPV6_POLICY_FAIL)){
++            if(skb->mark > 0){
++                sk->sk_mark = skb->mark;
++                fl6.flowi6_mark = skb->mark;
++            }
++    }
++#endif
++
+ 	np = inet6_sk(sk);
+ 
+ 	if (!icmpv6_xrlim_allow(sk, type, &fl))
+Index: linux-3.4.11/net/ipv6/netfilter/ip6t_REJECT.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/netfilter/ip6t_REJECT.c	2010-10-21 04:30:22.000000000 +0800
++++ linux-3.4.11/net/ipv6/netfilter/ip6t_REJECT.c	2017-03-10 13:24:07.102227301 +0800
+@@ -205,6 +205,13 @@
+ 	case IP6T_TCP_RESET:
+ 		send_reset(net, skb);
+ 		break;
++/* __ZyXEL__, Albert, 20170213, for ANATEL Conformance IPv6 Test  */
++	case IP6T_ICMP6_POLICY_FAIL:
++		send_unreach(net, skb, ICMPV6_POLICY_FAIL, par->hooknum);
++		break;
++	case IP6T_ICMP6_REJECT_ROUTE:
++		send_unreach(net, skb, ICMPV6_REJECT_ROUTE, par->hooknum);
++		break;
+ 	default:
+ 		if (net_ratelimit())
+ 			pr_info("case %u not handled yet\n", reject->with);

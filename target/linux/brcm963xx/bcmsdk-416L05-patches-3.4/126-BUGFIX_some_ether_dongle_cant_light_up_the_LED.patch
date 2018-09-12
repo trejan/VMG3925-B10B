@@ -1,0 +1,45 @@
+Index: linux-3.4.11/drivers/net/usb/Makefile
+===================================================================
+--- linux-3.4.11.orig/drivers/net/usb/Makefile	2015-11-17 11:09:53.000000000 +0800
++++ linux-3.4.11/drivers/net/usb/Makefile	2015-11-17 11:16:17.160708649 +0800
+@@ -3,7 +3,13 @@
+ #
+ 
+ ifdef BCM_KF # defined(CONFIG_BCM_KF_USBNET)
+-EXTRA_CFLAGS	+= -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD)
++ifeq ($(strip $(ZYXEL)),y)
++EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD) -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++endif
+ endif #BCM_KF # defined(CONFIG_BCM_KF_USBNET)
+ 
+ obj-$(CONFIG_USB_CATC)		+= catc.o
+Index: linux-3.4.11/drivers/net/usb/cdc_ether.c
+===================================================================
+--- linux-3.4.11.orig/drivers/net/usb/cdc_ether.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/net/usb/cdc_ether.c	2015-11-17 11:14:47.904468883 +0800
+@@ -32,6 +32,10 @@
+ #include <linux/usb/cdc.h>
+ #include <linux/usb/usbnet.h>
+ 
++#if defined(ZYXEL) && (ZYXEL==1)
++#include "board.h"
++extern void USB_LED_Control( int USBId, int status );
++#endif
+ 
+ #if defined(CONFIG_USB_NET_RNDIS_HOST) || defined(CONFIG_USB_NET_RNDIS_HOST_MODULE)
+ 
+@@ -449,6 +453,10 @@
+ 		return status;
+ 	}
+ 
++#if defined(ZYXEL) && (ZYXEL==1)
++	USB_LED_Control(dev->udev->portnum, 0x01);
++#endif
++
+ 	/* FIXME cdc-ether has some multicast code too, though it complains
+ 	 * in routine cases.  info->ether describes the multicast support.
+ 	 * Implement that here, manipulating the cdc filter as needed.

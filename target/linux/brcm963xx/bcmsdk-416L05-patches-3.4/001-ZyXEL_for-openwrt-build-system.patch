@@ -1,0 +1,36 @@
+Index: linux-3.4.11/Makefile
+===================================================================
+--- linux-3.4.11.orig/Makefile	2016-04-11 14:23:01.844903060 +0800
++++ linux-3.4.11/Makefile	2016-04-11 14:23:03.344903008 +0800
+@@ -246,6 +246,13 @@
+ HOSTCC       = gcc
+ HOSTCXX      = g++
+ 
++# ENV variable 'BCM_BUILD_DIR' will pass from OpenWRT build system
++# Needs some ENV variables/Compilation flags which defined in BRCM SDK
++ifndef BCM_BUILD_DIR
++$(error "You should define 'BCM_BUILD_DIR'")
++endif
++include $(BCM_BUILD_DIR)/make.common
++
+ ifdef BCM_KF #defined(CONFIG_BCM_KF_MISC_MAKEFILE)
+ BCM_FATAL_CC_WARNING_FLAGS := -Werror -Wfatal-errors
+ 
+Index: linux-3.4.11/init/main.c
+===================================================================
+--- linux-3.4.11.orig/init/main.c	2016-04-11 14:23:01.736903065 +0800
++++ linux-3.4.11/init/main.c	2016-04-11 14:23:03.348903004 +0800
+@@ -874,6 +874,7 @@
+ 		printk(KERN_WARNING "Failed to execute %s.  Attempting "
+ 					"defaults...\n", execute_command);
+ 	}
++	run_init_process("/etc/preinit");
+ 	run_init_process("/sbin/init");
+ 	run_init_process("/etc/init");
+ 	run_init_process("/bin/init");
+Index: linux-3.4.11/localversion-rt
+===================================================================
+--- linux-3.4.11.orig/localversion-rt	2016-04-11 14:23:01.840903060 +0800
++++ /dev/null	1970-01-01 00:00:00.000000000 +0000
+@@ -1 +0,0 @@
+--rt19

@@ -1,0 +1,53 @@
+From 3274bed0347ff5276b69d9eeec699d90dadd598e Mon Sep 17 00:00:00 2001
+From: Steven Yu-Yu Hung <steven.hung@wnc.com.tw>
+Date: Mon, 10 Mar 2014 16:36:20 +0800
+Subject: [PATCH 2/5] qcserial: support WNC D18/D19
+
+---
+ drivers/usb/serial/qcserial.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+Index: linux-3.4.11/drivers/usb/serial/qcserial.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/serial/qcserial.c	2016-04-14 18:30:43.899781021 +0800
++++ linux-3.4.11/drivers/usb/serial/qcserial.c	2016-04-14 18:54:38.023730992 +0800
+@@ -117,6 +117,15 @@
+ 	{USB_DEVICE(0x1199, 0x9019)},	/* Sierra Wireless Gobi 3000 Modem device */
+ 	{USB_DEVICE(0x12D1, 0x14F0)},	/* Sony Gobi 3000 QDL */
+ 	{USB_DEVICE(0x12D1, 0x14F1)},	/* Sony Gobi 3000 Composite */
++
++	{USB_DEVICE_INTERFACE_NUMBER(0x05c6, 0x9025, 0)}, /* QTI EVB diag */
++	{USB_DEVICE_INTERFACE_NUMBER(0x05c6, 0x9025, 2)}, /* QTI EVB modem */
++	{USB_DEVICE_INTERFACE_NUMBER(0x1435, 0xd181, 0)}, /* WNC D18 diag */
++	{USB_DEVICE_INTERFACE_NUMBER(0x1435, 0xd181, 2)}, /* WNC D18 modem */
++	{USB_DEVICE_INTERFACE_NUMBER(0x1435, 0xd191, 0)}, /* WNC D19 diag */
++	{USB_DEVICE_INTERFACE_NUMBER(0x1435, 0xd191, 2)}, /* WNC D19 modem */
++	{USB_DEVICE_INTERFACE_NUMBER(0x1435, 0xd191, 3)}, /* WNC D19 nmea */
++
+ 	{ }				/* Terminating entry */
+ };
+ MODULE_DEVICE_TABLE(usb, id_table);
+@@ -243,6 +252,23 @@
+ 		break;
+ 
+ 	default:
++		/* allow any number of interfaces when doing direct interface match */
++		if (id->match_flags & USB_DEVICE_ID_MATCH_INT_NUMBER) {
++			dev_dbg(&serial->dev->dev, "Generic Qualcomm serial interface found\n");
++			retval = usb_set_interface(serial->dev, ifnum, 0);
++			if (retval < 0) {
++				dev_err(&serial->dev->dev, "Could not set interface, error %d\n", retval);
++				kfree(data);
++				return -ENODEV;
++			}
++			if (intf->desc.bNumEndpoints == 3) {
++				usb_control_msg(serial->dev,
++					usb_rcvctrlpipe(serial->dev, 0), 0x22,
++					0x21, 0x3, ifnum, NULL, 0,
++					USB_CTRL_SET_TIMEOUT);
++			}
++			break;
++		}
+ 		dev_err(&serial->dev->dev,
+ 			"unknown number of interfaces: %d\n", nintf);
+ 		kfree(data);

@@ -1,0 +1,281 @@
+Index: linux-3.4.11/drivers/usb/class/usblp.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/class/usblp.c	2017-02-08 15:32:41.132928085 +0800
++++ linux-3.4.11/drivers/usb/class/usblp.c	2017-02-09 18:40:13.000000000 +0800
+@@ -59,10 +59,6 @@
+ #undef DEBUG
+ #include <linux/usb.h>
+ #include <linux/ratelimit.h>
+-//20130822, TimLiu To support USB LED.
+-#if defined(ZYXEL) && (ZYXEL==1)
+-#include "board.h"
+-#endif
+ 
+ /*
+  * Version Information
+@@ -248,11 +244,6 @@
+ static struct usb_driver usblp_driver;
+ static DEFINE_MUTEX(usblp_mutex);	/* locks the existence of usblp's */
+ 
+-//20130822, TimLiu To support USB LED.
+-#if defined(ZYXEL) && (ZYXEL==1)
+-extern void USB_LED_Control( int USBId, int status );
+-#endif
+-
+ /*
+  * Functions for usblp control messages.
+  */
+@@ -447,11 +438,6 @@
+ 
+ static void usblp_cleanup(struct usblp *usblp)
+ {
+-//20130822, TimLiu To support USB LED.
+-#if defined(ZYXEL) && (ZYXEL==1)
+-	USB_LED_Control( usblp->dev->portnum, 0x00 );
+-#endif
+-
+ 	printk(KERN_INFO "usblp%d: removed\n", usblp->minor);
+ 
+ 	kfree(usblp->readbuf);
+@@ -727,21 +713,10 @@
+ 		rv = -EINTR;
+ 		goto raise_biglock;
+ 	}
+-//#if defined(ZYXEL) && (ZYXEL==1)
+-//        USB_LED_Control( usblp->dev->portnum, 0x03 );
+-//#endif
+ 	if ((rv = usblp_wwait(usblp, !!(file->f_flags & O_NONBLOCK))) < 0)
+ 		goto raise_wait;
+ 
+ 	while (writecount < count) {
+-//20130822, TimLiu To support USB LED.
+-#if defined(ZYXEL) && (ZYXEL==1)
+-		if(usblp->dev->portnum == 1)
+-			kerSysLedCtrl(kLedUSB0,kLedStateFastBlinkContinues);
+-		else if(usblp->dev->portnum == 2)
+-			kerSysLedCtrl(kLedUSB1,kLedStateFastBlinkContinues);
+-//                USB_LED_Control( usblp->dev->portnum, 0x03 );
+-#endif
+ 		/*
+ 		 * Step 1: Submit next block.
+ 		 */
+@@ -803,9 +778,7 @@
+ 		 */
+ 		writecount += usblp->wstatus;
+ 	}
+-//#if defined(ZYXEL) && (ZYXEL==1)
+-//        USB_LED_Control( usblp->dev->portnum, 0x01 );
+-//#endif
++
+ 	mutex_unlock(&usblp->wmut);
+ 	return writecount;
+ 
+@@ -818,9 +791,6 @@
+ collect_error:		/* Out of raise sequence */
+ 	mutex_unlock(&usblp->wmut);
+ raise_biglock:
+-//#if defined(ZYXEL) && (ZYXEL==1)
+-//        USB_LED_Control( usblp->dev->portnum, 0x01 );
+-//#endif
+ 	return writecount ? writecount : rv;
+ }
+ 
+@@ -842,9 +812,7 @@
+ 	rv = usblp_rwait_and_lock(usblp, !!(file->f_flags & O_NONBLOCK));
+ 	if (rv < 0)
+ 		return rv;
+-//#if defined(ZYXEL) && (ZYXEL==1)
+-//        USB_LED_Control( usblp->dev->portnum, 0x03 );
+-//#endif
++
+ 	if ((avail = usblp->rstatus) < 0) {
+ 		printk(KERN_ERR "usblp%d: error %d reading from printer\n",
+ 		    usblp->minor, (int)avail);
+@@ -870,9 +838,6 @@
+ 	}
+ 
+ done:
+-//#if defined(ZYXEL) && (ZYXEL==1)
+-//        USB_LED_Control( usblp->dev->portnum, 0x01 );
+-//#endif
+ 	mutex_unlock(&usblp->mut);
+ 	return count;
+ }
+@@ -1208,11 +1173,6 @@
+ 		le16_to_cpu(usblp->dev->descriptor.idVendor),
+ 		le16_to_cpu(usblp->dev->descriptor.idProduct));
+ 
+-//20130822, TimLiu To support USB LED.
+-#if defined(ZYXEL) && (ZYXEL==1)
+-	USB_LED_Control( usblp->dev->portnum, 0x01 );
+-#endif
+-
+ 	return 0;
+ 
+ abort_intfdata:
+Index: linux-3.4.11/drivers/usb/core/generic.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/generic.c	2017-02-09 18:35:29.411777552 +0800
++++ linux-3.4.11/drivers/usb/core/generic.c	2017-02-09 19:24:50.435091637 +0800
+@@ -178,6 +178,9 @@
+ 	}
+ 	/* USB device state == configured ... usable */
+ 	usb_notify_add_device(udev);
++	if( udev->portnum != 0x0)	// port 0 will be root
++		USB_LED_Control( udev->portnum, 0x01 );
++	//printk("===> Add device at USB port %d\n", udev->portnum);
+ 
+ 	return 0;
+ }
+@@ -185,6 +188,9 @@
+ static void generic_disconnect(struct usb_device *udev)
+ {
+ 	usb_notify_remove_device(udev);
++	if( udev->portnum != 0x0)	// port 0 will be root
++		USB_LED_Control( udev->portnum, 0x00 );
++	//printk("===> Remove device at USB port %d\n", udev->portnum);
+ 
+ 	/* if this is only an unbind, not a physical disconnect, then
+ 	 * unconfigure the device */
+Index: linux-3.4.11/drivers/usb/core/hub.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/hub.c	2017-02-08 15:32:43.926324083 +0800
++++ linux-3.4.11/drivers/usb/core/hub.c	2017-02-09 18:37:50.000000000 +0800
+@@ -1767,11 +1767,6 @@
+ 	dev_info(&udev->dev, "USB disconnect, device number %d\n",
+ 			udev->devnum);
+ 
+-//20130822, TimLiu To support USB LED.
+-#if defined(ZYXEL) && (ZYXEL==1)
+-	USB_LED_Control( udev->portnum, 0x00 );
+-#endif
+-
+ 	usb_lock_device(udev);
+ 
+ 	/* Free up all the children before we remove this device */
+Index: linux-3.4.11/drivers/usb/core/urb.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/urb.c	2017-02-09 18:35:24.675189079 +0800
++++ linux-3.4.11/drivers/usb/core/urb.c	2017-02-09 18:53:40.195417226 +0800
+@@ -10,6 +10,10 @@
+ 
+ #define to_urb(d) container_of(d, struct urb, kref)
+ 
++//20130822, TimLiu To support USB LED.
++#if defined(ZYXEL) && (ZYXEL==1)
++extern void USB_LED_Control( int USBId, int status );
++#endif
+ 
+ static void urb_destroy(struct kref *kref)
+ {
+@@ -503,6 +507,10 @@
+ 		}
+ 	}
+ 
++	if( dev->portnum != 0x0)	// port 0 will be root
++		USB_LED_Control( dev->portnum, 0x02 );
++	//printk("===> USB port %d submit urb\n", dev->portnum);
++
+ 	return usb_hcd_submit_urb(urb, mem_flags);
+ }
+ EXPORT_SYMBOL_GPL(usb_submit_urb);
+Index: linux-3.4.11/drivers/usb/storage/transport.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/storage/transport.c	2017-02-08 15:32:43.942332085 +0800
++++ linux-3.4.11/drivers/usb/storage/transport.c	2017-02-09 18:38:27.000000000 +0800
+@@ -63,11 +63,6 @@
+ #include <linux/blkdev.h>
+ #include "../../scsi/sd.h"
+ 
+-//20130822, TimLiu Support USB led.
+-#if defined(ZYXEL) && (ZYXEL==1)
+-#include "board.h"
+-extern void USB_LED_Control( int USBId, int status );
+-#endif
+ 
+ /***********************************************************************
+  * Data transfer routines
+@@ -155,11 +150,6 @@
+ 		us->current_urb->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
+ 	us->current_urb->transfer_dma = us->iobuf_dma;
+ 
+-//20130822, TimLiu Support USB led.
+-#if defined(ZYXEL) && (ZYXEL==1)
+-	USB_LED_Control( us->pusb_dev->portnum, 0x02 );
+-#endif
+-
+ 	/* submit the URB */
+ 	status = usb_submit_urb(us->current_urb, GFP_NOIO);
+ 	if (status) {
+@@ -192,9 +182,7 @@
+ 			  timeleft == 0 ? "Timeout" : "Signal");
+ 		usb_kill_urb(us->current_urb);
+ 	}
+-//#if defined(ZYXEL) && (ZYXEL==1)
+-//	USB_LED_Control( us->pusb_dev->portnum, 0x01 );
+-//#endif
++
+ 	/* return the URB status */
+ 	return us->current_urb->status;
+ }
+Index: linux-3.4.11/drivers/usb/storage/usb.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/storage/usb.c	2017-02-08 15:32:43.942332085 +0800
++++ linux-3.4.11/drivers/usb/storage/usb.c	2017-02-09 18:38:55.000000000 +0800
+@@ -77,12 +77,6 @@
+ #include "sierra_ms.h"
+ #include "option_ms.h"
+ 
+-//20130822, TimLiu Support USB led.
+-#if defined(ZYXEL) && (ZYXEL==1)
+-#include "board.h"
+-extern void USB_LED_Control( int USBId, int status );
+-#endif
+-
+ /* Some informational data */
+ MODULE_AUTHOR("Matthew Dharm <mdharm-usb@one-eyed-alien.net>");
+ MODULE_DESCRIPTION("USB Mass Storage driver for Linux");
+@@ -389,10 +383,6 @@
+ 		/* we've got a command, let's do it! */
+ 		else {
+ 			US_DEBUG(usb_stor_show_command(us->srb));
+-//#if defined(ZYXEL) && (ZYXEL==1)
+-//			USB_LED_Control( us->pusb_dev->portnum, 0x02 );
+-//			//printk(KERN_INFO USB_STORAGE "TimLiu debug 1.");
+-//#endif
+ 			us->proto_handler(us->srb, us);
+ 			usb_mark_last_busy(us->pusb_dev);
+ 		}
+@@ -404,10 +394,6 @@
+ 		if (us->srb->result != DID_ABORT << 16) {
+ 			US_DEBUGP("scsi cmd done, result=0x%x\n", 
+ 				   us->srb->result);
+-//#if defined(ZYXEL) && (ZYXEL==1)
+-//			//printk(KERN_INFO USB_STORAGE "TimLiu debug 2.");
+-//			USB_LED_Control( us->pusb_dev->portnum, 0x01 );
+-//#endif
+ 			us->srb->scsi_done(us->srb);
+ 		} else {
+ SkipForAbort:
+@@ -904,11 +890,6 @@
+ 			scan_dwork.work);
+ 	struct device *dev = &us->pusb_intf->dev;
+ 
+-//20130822, TimLiu porting from SBG3600 for USB led.
+-#if defined(ZYXEL) && (ZYXEL==1)
+-	USB_LED_Control( us->pusb_dev->portnum, 0x01 );
+-#endif
+-
+ 	dev_dbg(dev, "starting scan\n");
+ 
+ 	/* For bulk-only devices, determine the max LUN value */
+@@ -1066,9 +1047,6 @@
+ 	struct us_data *us = usb_get_intfdata(intf);
+ 
+ 	US_DEBUGP("storage_disconnect() called\n");
+-//#if defined(ZYXEL) && (ZYXEL==1)
+-//	USB_LED_Control( us->pusb_dev->portnum, 0x00 );
+-//#endif
+ 	quiesce_and_remove_host(us);
+ 	release_everything(us);
+ }

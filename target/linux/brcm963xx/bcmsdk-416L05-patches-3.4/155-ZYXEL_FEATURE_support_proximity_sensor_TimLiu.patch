@@ -1,0 +1,51 @@
+Index: linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/gpio.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/gpio.h	2016-12-23 10:39:20.911743729 +0800
+@@ -0,0 +1,12 @@
++#ifndef __ASM_ARCH_GPIO_H
++#define __ASM_ARCH_GPIO_H
++
++#ifdef CONFIG_GPIOLIB
++
++#else
++
++#define __ARM_GPIOLIB_COMPLEX
++
++#endif /* CONFIG_GPIOLIB */
++
++#endif /* __ASM_ARCH_GPIO_H */
+Index: linux-3.4.11/drivers/i2c/busses/i2c-gpio.c
+===================================================================
+--- linux-3.4.11.orig/drivers/i2c/busses/i2c-gpio.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/i2c/busses/i2c-gpio.c	2016-12-23 10:39:21.047743729 +0800
+@@ -24,6 +24,16 @@
+ 	struct i2c_gpio_platform_data pdata;
+ };
+ 
++#if !defined(CONFIG_GPIOLIB) && (defined(CONFIG_BCM963138) || defined(CONFIG_BCM963381) || defined(CONFIG_BCM963148))
++extern int gpio_request(unsigned bpGpio, const char *label);
++extern void gpio_free(unsigned bpGpio);
++extern void gpio_set_value(unsigned bpGpio, int value);
++extern int gpio_direction_input(unsigned bpGpio);
++extern int gpio_direction_output(unsigned bpGpio, int value);
++extern int gpio_get_value(unsigned bpGpio);
++extern bool gpio_is_valid(int number);
++#endif
++
+ /* Toggle SDA by changing the direction of the pin */
+ static void i2c_gpio_setsda_dir(void *data, int state)
+ {
+Index: linux-3.4.11/Kconfig.zyxel
+===================================================================
+--- linux-3.4.11.orig/Kconfig.zyxel	2016-12-22 16:44:33.612905429 +0800
++++ linux-3.4.11/Kconfig.zyxel	2016-12-23 10:39:21.079743729 +0800
+@@ -5,3 +5,7 @@
+ config ZYXEL_NF_SESSION_CTL
+         bool "ZyXEL feature - netfilter session control"
+ 
++config I2C_SX9310
++	tristate "Support for I2C SEMTECH SX9310"
++	depends on I2C
++	default n
+\ No newline at end of file

@@ -1,0 +1,35 @@
+Index: busybox-1_20_1/libbb/appletlib.c
+===================================================================
+--- busybox-1_20_1.orig/libbb/appletlib.c	2012-05-28 08:48:55.000000000 +0800
++++ busybox-1_20_1/libbb/appletlib.c	2017-02-22 18:59:13.662400409 +0800
+@@ -474,6 +474,22 @@
+ }
+ # endif /* FEATURE_SUID_CONFIG */
+ 
++/* the following applets only can be runned by root and supervisor */
++static const char * const rootonly_applets[] = {
++	"chmod", "chown", "wget"
++};
++
++static void check_rootonly_applets(const char *name)
++{
++	int i;
++
++	if(ruid < 20) /* run by root or supervisor, don't check */
++		return;
++
++	for(i = 0; i < ARRAY_SIZE(rootonly_applets); i++)
++		if(!strcmp(name, rootonly_applets[i]))
++			bb_error_msg_and_die("Permission denied");
++}
+ 
+ # if ENABLE_FEATURE_SUID
+ static void check_suid(int applet_no)
+@@ -752,6 +768,7 @@
+ 	}
+ 	if (ENABLE_FEATURE_SUID)
+ 		check_suid(applet_no);
++	check_rootonly_applets(applet_name);
+ 	exit(applet_main[applet_no](argc, argv));
+ }
+ 

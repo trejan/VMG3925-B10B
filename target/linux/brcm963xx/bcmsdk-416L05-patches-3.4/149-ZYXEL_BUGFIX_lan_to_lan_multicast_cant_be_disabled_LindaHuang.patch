@@ -1,0 +1,17 @@
+Index: linux-3.4.11/net/bridge/br_mcast.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mcast.c	2016-10-19 09:18:53.602566011 +0800
++++ linux-3.4.11/net/bridge/br_mcast.c	2016-10-19 10:52:49.148176239 +0800
+@@ -146,10 +146,12 @@
+ 
+ int br_mcast_get_lan2lan_snooping(t_BR_MCAST_PROTO_TYPE proto, struct net_bridge *br)
+ {
++#if 0 //ZYXEL
+    if (!multiConfig.thereIsAnUplink)
+       {
+       return BR_MC_LAN2LAN_STATUS_ENABLE;
+       }
++#endif
+ #if defined(CONFIG_BR_MLD_SNOOP)
+    if ( BR_MCAST_PROTO_MLD == proto )
+       {

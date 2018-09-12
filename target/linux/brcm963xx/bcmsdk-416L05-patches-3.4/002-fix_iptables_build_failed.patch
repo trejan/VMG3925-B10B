@@ -1,0 +1,12 @@
+Index: linux-3.4.11/include/linux/netfilter/Kbuild
+===================================================================
+--- linux-3.4.11.orig/include/linux/netfilter/Kbuild	2016-04-11 14:43:15.668860711 +0800
++++ linux-3.4.11/include/linux/netfilter/Kbuild	2016-04-11 14:43:45.700859651 +0800
+@@ -51,6 +51,7 @@
+ header-y += xt_helper.h
+ header-y += xt_iprange.h
+ header-y += xt_ipvs.h
++header-y += xt_layer7.h
+ header-y += xt_length.h
+ header-y += xt_limit.h
+ header-y += xt_mac.h

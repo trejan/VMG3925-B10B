@@ -1,0 +1,1026 @@
+Index: linux-3.4.11/arch/mips/bcm963xx/Makefile
+===================================================================
+--- linux-3.4.11.orig/arch/mips/bcm963xx/Makefile	2016-04-14 17:40:45.115885635 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/Makefile	2016-04-14 17:40:47.543885547 +0800
+@@ -27,6 +27,28 @@
+ EXTRA_CFLAGS += -g
+ EXTRA_CFLAGS += $(BRCM_WERROR_CFLAGS)
+ 
++## 20130822, TimLiu Add ZyXEL compile flags.
++ifeq ($(strip ${ZYXEL}),y)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++ifeq ($(strip ${ZYXEL_PARTITION}),y)
++EXTRA_CFLAGS += -DZYXEL_PARTITION=1
++endif
++ifneq ($(strip ${ZYPRJ_HARDWARE_VERSION}),)
++EXTRA_CFLAGS += -DZYPRJ_HARDWARE_VERSION=$(ZYPRJ_HARDWARE_VERSION)
++endif
++ifeq ($(strip ${ZYXEL_EXTERNAL_DECT}),y)
++EXTRA_CFLAGS += -DZYXEL_EXTERNAL_DECT=1
++endif
++ifneq ($(strip ${ZYXEL_WIFI_LED_PATTERN}),)
++EXTRA_CFLAGS += -DZYXEL_WIFI_LED_PATTERN=$(ZYXEL_WIFI_LED_PATTERN)
++endif
++else
++EXTRA_CFLAGS += -DZYXEL=0
++endif
++
+ ifneq ($(strip $(BUILD_SWMDK)),)
+ EXTRA_CFLAGS += -DSUPPORT_SWMDK
+ endif
+Index: linux-3.4.11/arch/mips/bcm963xx/setup.c
+===================================================================
+--- linux-3.4.11.orig/arch/mips/bcm963xx/setup.c	2016-04-14 17:40:45.119885634 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/setup.c	2016-04-14 17:40:47.543885547 +0800
+@@ -379,6 +379,44 @@
+     while (1);
+ }
+ 
++//<<20140212, TimLiu add for refine the GPIO configuration.
++#if defined(ZYXEL) && (defined(ZYPRJ_VMG5948) || defined(ZYPRJ_VMG8948) || defined(ZYPRJ_VMG9823))
++typedef enum
++{
++    kGpioInput,
++    kGpioOutput
++} GPIO_DIRECTION_t;
++
++/**
++* Set gpio direction to input/output.
++* return value:
++*   0 for succeed.
++*   others for fail.
++**/
++static int setGpioDir(unsigned short bpGpio, GPIO_DIRECTION_t direction)
++{
++    if(direction == kGpioInput) {
++        kerSysSetGpioDirInput(bpGpio);
++    }else if(direction == kGpioOutput) {
++        kerSysSetGpioDir(bpGpio);
++    }
++    return 0;
++}
++
++/**
++* Set gpio value to active/inactive.
++* return value:
++*   0 for succeed.
++*   others for fail.
++**/
++static int setGpioState(unsigned short bpGpio, GPIO_STATE_t state)
++{
++    kerSysSetGpioState(bpGpio, state);
++    return 0;
++}
++#endif //(ZYXEL)
++//>>20140212, TimLiu
++
+ #if defined(CONFIG_BCM96318) /* For 6318 for now but can be used for other chip if need */
+ /*  *********************************************************************
+     *  setPinMuxGpio()
+@@ -789,9 +827,16 @@
+             MISC->miscLed_inv = 0;
+     }
+ 
++#if defined(ZYXEL) && (ZYXEL == 1)
++    LED->ledInit &= ~LED_FAST_INTV_MASK;
++    LED->ledInit |= (LED_INTERVAL_20MS * 6) << LED_FAST_INTV_SHIFT;		//120ms, approach software control 125ms
++    LED->ledInit &= ~LED_SLOW_INTV_MASK;
++    LED->ledInit |= (LED_INTERVAL_20MS * 12) << LED_SLOW_INTV_SHIFT;	//240ms, approach software control 250ms
++#else
+     /* Set LED blink rate for activity LEDs to 80mS */
+     LED->ledInit &= ~LED_FAST_INTV_MASK;
+     LED->ledInit |= (LED_INTERVAL_20MS * 4) << LED_FAST_INTV_SHIFT;
++#endif
+ 
+     /* Start with all HW LEDs disabled */
+     LED->ledHWDis |= 0xFFFFFF;
+@@ -802,23 +847,39 @@
+     /* Enable HW to drive LEDs for Ethernet ports in use */
+     if (EnetInfo[0].sw.port_map & (1 << 0)) {
+         LED->ledHWDis &= ~(1 << LED_EPHY0_ACT);
+-        LED->ledHWDis &= ~(1 << LED_EPHY0_SPD);
++//<<20140210, TimLiu add for refine configurations for different boards.
++        if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_EPHY0_SPD_LED) )
++            LED->ledHWDis &= ~(1 << LED_EPHY0_SPD);
++//>>20140210, Timliu
+     }
+     if (EnetInfo[0].sw.port_map & (1 << 1)) {
+         LED->ledHWDis &= ~(1 << LED_EPHY1_ACT);
+-        LED->ledHWDis &= ~(1 << LED_EPHY1_SPD);
++//<<20140210, TimLiu add for refine configurations for different boards.
++        if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_EPHY1_SPD_LED) )
++            LED->ledHWDis &= ~(1 << LED_EPHY1_SPD);
++//>>20140210, Timliu
+     }
+     if (EnetInfo[0].sw.port_map & (1 << 2)) {
+         LED->ledHWDis &= ~(1 << LED_EPHY2_ACT);
+-        LED->ledHWDis &= ~(1 << LED_EPHY2_SPD);
++//<<20140210, TimLiu add for refine configurations for different boards.
++        if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_EPHY2_SPD_LED) )
++            LED->ledHWDis &= ~(1 << LED_EPHY2_SPD);
++//>>20140210, Timliu
+     }
+     if (EnetInfo[0].sw.port_map & (1 << 3)) {
+         LED->ledHWDis &= ~(1 << LED_GPHY0_ACT);
+-        LED->ledHWDis &= ~(1 << LED_GPHY0_SPD0);
+-        LED->ledHWDis &= ~(1 << LED_GPHY0_SPD1);
+-        LED->ledLinkActSelLow |= ((1 << LED_GPHY0_SPD0) << LED_0_LINK_SHIFT);
+-        LED->ledLinkActSelLow |= ((1 << LED_GPHY0_SPD1) << LED_1_LINK_SHIFT);
+-        GPIO->RoboSWLEDControl |= LED_BICOLOR_SPD;
++//<<20140210, TimLiu add for refine configurations for different boards.
++        if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_GPHY0_SPD0_LED) ) {
++            LED->ledHWDis &= ~(1 << LED_GPHY0_SPD0);
++            LED->ledLinkActSelLow |= ((1 << LED_GPHY0_SPD0) << LED_0_LINK_SHIFT);
++        }
++        if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_GPHY0_SPD1_LED) ) {
++            LED->ledHWDis &= ~(1 << LED_GPHY0_SPD1);
++            LED->ledLinkActSelLow |= ((1 << LED_GPHY0_SPD1) << LED_1_LINK_SHIFT);
++        }
++        if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_GPHY0_ALL_SPD_LED) )
++            GPIO->RoboSWLEDControl |= LED_BICOLOR_SPD;
++//>>20140210, Timliu
+     }
+ 
+     /* UART2 - SDIN and SDOUT are separate for flexibility */
+@@ -865,20 +926,33 @@
+         /* Enable LED controller to drive GPIO when LEDs are connected to GPIO pins */
+         if (GPIOOverlays & BP_OVERLAY_EPHY_LED_0) {
+             GPIO->LEDCtrl |= (1 << LED_EPHY0_ACT);
+-            GPIO->LEDCtrl |= (1 << LED_EPHY0_SPD);
++//<<20140210, TimLiu add for refine configurations for different boards.
++            if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_EPHY0_SPD_LED) )
++                GPIO->LEDCtrl |= (1 << LED_EPHY0_SPD);
++//>>20140210, Timliu
+         }
+         if (GPIOOverlays & BP_OVERLAY_EPHY_LED_1) {
+             GPIO->LEDCtrl |= (1 << LED_EPHY1_ACT);
+-            GPIO->LEDCtrl |= (1 << LED_EPHY1_SPD);
++//<<20140210, TimLiu add for refine configurations for different boards.
++            if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_EPHY1_SPD_LED) )
++                GPIO->LEDCtrl |= (1 << LED_EPHY1_SPD);
++//>>20140210, Timliu
+         }
+         if (GPIOOverlays & BP_OVERLAY_EPHY_LED_2) {
+             GPIO->LEDCtrl |= (1 << LED_EPHY2_ACT);
+-            GPIO->LEDCtrl |= (1 << LED_EPHY2_SPD);
++//<<20140210, TimLiu add for refine configurations for different boards.
++            if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_EPHY2_SPD_LED) )
++                GPIO->LEDCtrl |= (1 << LED_EPHY2_SPD);
++//>>20140210, Timliu
+         }
+         if (GPIOOverlays & BP_OVERLAY_GPHY_LED_0) {
+             GPIO->LEDCtrl |= (1 << LED_GPHY0_ACT);
+-            GPIO->LEDCtrl |= (1 << LED_GPHY0_SPD0);
+-            GPIO->LEDCtrl |= (1 << LED_GPHY0_SPD1);
++//<<20140210, TimLiu add for refine configurations for different boards.
++            if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_GPHY0_SPD0_LED) )
++                GPIO->LEDCtrl |= (1 << LED_GPHY0_SPD0);
++            if( !(DeviceOptions&BP_DEVICE_OPTION_DISABLE_GPHY0_SPD1_LED) )
++                GPIO->LEDCtrl |= (1 << LED_GPHY0_SPD1);
++//>>20140210, Timliu
+         }
+         if (GPIOOverlays & BP_OVERLAY_PHY) {
+             unsigned short IntLdMode = 0xffff;
+@@ -1068,6 +1142,110 @@
+     if ( BpGetFemtoResetGpio(&gpio) == BP_SUCCESS ) {
+         kerSysSetGpioState(gpio, kGpioActive);
+     }
++
++#if defined(ZYPRJ_VMG5948)
++    //Hardware version : SR1
++    {
++    	unsigned short bpGpio;
++
++    	if(BpGetDECTExtIntrGpio(&bpGpio) == BP_SUCCESS)
++    	{
++            printk("DECT button gpio(%d) need to switch to input.\n",bpGpio);
++            if(setGpioDir(bpGpio, kGpioInput) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    	if(BpGetDectLedGpio(&bpGpio) == BP_SUCCESS)
++    	{
++            printk("DECT LED gpio(%d) need to config to output.\n",bpGpio);
++            if(setGpioState(bpGpio, kGpioInactive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    	if(BpGetDECTResetGpio(&bpGpio) == BP_SUCCESS)
++    	{
++            printk("DECT Reset gpio(%d) need to config to output.\n",bpGpio);
++            if(setGpioState(bpGpio, kGpioInactive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    	if(BpGetWirelessSesLedGpio(&bpGpio) == BP_SUCCESS)
++    	{
++            printk("DECT WPS gpio(%d) need to config to output.\n",bpGpio);
++            if(setGpioState(bpGpio, kGpioInactive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    	if(BpGetWirelessSesLed2Gpio(&bpGpio) == BP_SUCCESS)
++    	{
++            printk("DECT WPS 5G gpio(%d) need to config to output.\n",bpGpio);
++            if(setGpioState(bpGpio, kGpioInactive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    	//if(BpGetWirelessBtnGpio(&bpGpio) == BP_SUCCESS)
++    	(bpGpio = (unsigned short)BP_GPIO_45_AH);
++    	{
++            printk("wireless button gpio(%d) need to switch to input.\n",bpGpio);
++            if(setGpioDir(bpGpio, kGpioInput) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    }
++#endif
++
++#if defined(ZYPRJ_VMG8948)
++    //Hardware version : SR1
++    {
++    	unsigned short bpGpio;
++
++#if defined(ZYXEL_EXTERNAL_DECT) && (ZYXEL_EXTERNAL_DECT == 1)
++    	if(BpGetDECTResetGpio(&bpGpio) == BP_SUCCESS)
++    	{
++    		printk("DECT Reset gpio(%d) need to config to output.\n",bpGpio);
++            if(setGpioState(bpGpio, kGpioInactive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++#endif
++#if defined(ZYXEL_WIFI_LED_PATTERN) && (ZYXEL_WIFI_LED_PATTERN ==1)
++    	if(BpGetWirelessSelectGpio(&bpGpio) == BP_SUCCESS)
++    	{
++    		printk("Wireless select gpio(%d) need to config to output.\n",bpGpio);
++            if(setGpioState(bpGpio, kGpioInactive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++#endif
++    	//if(BpGetGuestWirelessExtIntrGpio(&bpGpio) == BP_SUCCESS)
++		if(BpGetWirelessBtnExtIntrGpio(&bpGpio) == BP_SUCCESS)
++    	{
++    		printk("wireless button gpio(%d) need to switch to input.\n",bpGpio);
++            if(setGpioDir(bpGpio, kGpioInput) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++		//using for guest WiFi indicate
++		(bpGpio = (unsigned short)BP_GPIO_22_AH);
++    	{
++    		printk("Guest WiFi button gpio(%d) need to switch to input.\n",bpGpio);
++            if(setGpioDir(bpGpio, kGpioInput) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    }
++#endif
++
++#if defined(ZYPRJ_VMG9823)
++    {
++    	unsigned short bpGpio;
++    	if(BpGetInternetLedEnableGpio(&bpGpio) == BP_SUCCESS)
++    	{
++    		printk("Internet LED Enable gpio(%d) need to config to output.\n",bpGpio);
++			printk("Default set to Active\n");
++            if(setGpioState(bpGpio, kGpioActive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++    	if(BpGetInternetCtrlSignalGpio(&bpGpio) == BP_SUCCESS)
++    	{
++    		printk("Internal control signal gpio(%d) need to config to output.\n",bpGpio);
++			printk("Default set to Active\n");
++            if(setGpioState(bpGpio, kGpioActive) != 0)
++                printk("Fail to init GPIO_%d\n", bpGpio);
++    	}
++	}
++#endif
++
+     return 0;
+ }
+ 
+@@ -1382,6 +1560,23 @@
+         }
+     }
+ 
++#if defined(ZYXEL) && (ZYXEL==1)
++    if( BpGetWirelessBtnExtIntr(&irq) == BP_SUCCESS )
++    {
++        if(BpGetWirelessBtnExtIntrGpio(&gpio) == BP_SUCCESS)
++        {
++            int gpio_polarity = gpio & BP_ACTIVE_MASK;
++            gpio &= BP_GPIO_NUM_MASK;
++            PERF->ext_irq_muxsel0 |= ( (gpio&EXT_IRQ_MASK_LOW) << (irq*EXT_IRQ_OFF_LOW) );
++            DBGPERF->Dbg_extirqmuxsel0_1 |= ( ((gpio&EXT_IRQ_MASK_HIGH)>>EXT_IRQ_OFF_LOW) << (irq*EXT_IRQ_OFF_HIGH) );
++            if (gpio_polarity == BP_ACTIVE_HIGH)
++			{
++                PERF->ExtIrqCfg |= (1<<irq);
++            }
++        }
++    }
++#endif
++
+     if( BpGetLteExtIntr(&irq) == BP_SUCCESS )
+     {
+         if(BpGetLteExtIntrGpio(&gpio) == BP_SUCCESS)
+Index: linux-3.4.11/drivers/mtd/brcmnand/Makefile
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/Makefile	2016-04-14 17:40:45.767885611 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/Makefile	2016-04-14 17:40:47.543885547 +0800
+@@ -7,3 +7,14 @@
+ obj-$(CONFIG_MTD_BRCMNAND_CORRECTABLE_ERR_HANDLING)	+= brcmnand_cet.o
+ EXTRA_CFLAGS	+= -I $(TOPDIR)/include/asm-generic -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD) -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD)
+ 
++## 20130822, TimLiu add ZyXEL compile flags
++#ifdef VENDOR_ZYXEL
++ifeq ($(strip ${ZYXEL}),y)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++ifeq ($(strip ${ZYXEL_PARTITION}),y)
++EXTRA_CFLAGS += -DZYXEL_PARTITION=1
++endif
++endif
+Index: linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/bcm63xx-nand.c	2016-04-14 17:40:45.755885611 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c	2016-04-14 18:51:55.805036607 +0800
+@@ -67,22 +67,36 @@
+ static int __devinit brcmnanddrv_probe(struct platform_device *pdev);
+ static int __devexit brcmnanddrv_remove(struct platform_device *pdev);
+ 
++///20130822, Timliu, add new partition, rom-d, for Linux by MTD.
++#if defined(ZYXEL) && defined(ZYXEL_PARTITION)
+ static struct mtd_partition bcm63XX_nand_parts[] = 
+ {
+     {name: "rootfs",        offset: 0, size: 0},
+     {name: "rootfs_update", offset: 0, size: 0},
+     {name: "data",          offset: 0, size: 0},
++    {name: "rom-d",         offset: 0, size: 0},
++    {name: "wwan",          offset: 0, size: 0},
+     {name: "nvram",         offset: 0, size: 0},
+     {name: "image",         offset: 0, size: 0},
+     {name: "image_update",  offset: 0, size: 0},
+-    {name: "dummy1",        offset: 0, size: 0},
+-    {name: "dummy2",        offset: 0, size: 0},
+-    {name: "dummy3",        offset: 0, size: 0},
+-    {name: "dummy4",        offset: 0, size: 0},
+-    {name: "dummy5",        offset: 0, size: 0},
+-    {name: "dummy6",        offset: 0, size: 0},
++    {name: NULL,            offset: 0, size: 0},
++    {name: NULL,            offset: 0, size: 0},
+     {name: NULL,            offset: 0, size: 0}
+ };
++#else
++static struct mtd_partition bcm63XX_nand_parts[] =
++{
++    {name: "rootfs",        offset: 0, size: 0},
++    {name: "rootfs_update", offset: 0, size: 0},
++    {name: "data",          offset: 0, size: 0},
++    {name: "nvram",         offset: 0, size: 0},
++    {name: "image",         offset: 0, size: 0},
++    {name: "image_update",  offset: 0, size: 0},
++    {name: NULL,            offset: 0, size: 0},
++    {name: NULL,            offset: 0, size: 0},
++    {name: NULL,            offset: 0, size: 0}
++};
++#endif
+ 
+ static char* misc_mtd_partition_names[BCM_MAX_EXTRA_PARTITIONS] =
+ {
+@@ -176,7 +190,12 @@
+     uint64_t extra=0, extra_single_part_size=0;
+     static NVRAM_DATA nvram;
+     unsigned long rootfs_ofs;
++//20130822, TimLiu ZyXEL customize the MTD partition. 20160407,Tina.C.
++#if defined(ZYXEL) && defined(ZYXEL_PARTITION)
++    int nr_parts = 8;
++#else
+     int nr_parts = 6;
++#endif
+     int rootfs, rootfs_update;
+     unsigned long  split_offset;
+ 
+@@ -220,7 +239,134 @@
+             }
+         }
+     }
++//20130822, TimLiu register the MTD partition. 20160407,Tina.C.
++#if defined(ZYXEL) && defined(ZYXEL_PARTITION)
++        /* RootFS partition */
++        bcm63XX_nand_parts[0].offset = nvram.ulNandPartOfsKb[rootfs]*1024;
++        bcm63XX_nand_parts[0].size = nvram.ulNandPartSizeKb[rootfs]*1024;
++        bcm63XX_nand_parts[0].ecclayout = mtd->ecclayout;
++
++        /* This partition is used for flashing images */
++        bcm63XX_nand_parts[6].offset = bcm63XX_nand_parts[0].offset;
++        bcm63XX_nand_parts[6].size = bcm63XX_nand_parts[0].size;
++        bcm63XX_nand_parts[6].ecclayout = mtd->ecclayout;
++
++        if (is_split_partition (mtd, bcm63XX_nand_parts[0].offset, bcm63XX_nand_parts[0].size, &split_offset))
++        {
++            /* RootFS partition */
++            bcm63XX_nand_parts[0].offset = split_offset;
++            bcm63XX_nand_parts[0].size -= (split_offset - nvram.ulNandPartOfsKb[rootfs]*1024);
++
++            /* BootFS partition */
++            bcm63XX_nand_parts[nr_parts].name = "bootfs";
++            bcm63XX_nand_parts[nr_parts].offset = nvram.ulNandPartOfsKb[rootfs]*1024;
++            bcm63XX_nand_parts[nr_parts].size = split_offset - nvram.ulNandPartOfsKb[rootfs]*1024;
++            bcm63XX_nand_parts[nr_parts].ecclayout = mtd->ecclayout;
++            nr_parts++;
++
++            if (kerSysIsRootfsSet() == false) {
++                kerSysSetBootParm("ubi.mtd", "0");
++                kerSysSetBootParm("root=", "ubi:rootfs_ubifs");
++                kerSysSetBootParm("rootfstype=", "ubifs");
++            }
++        }
++        else {
++            if (kerSysIsRootfsSet() == false) {
++                kerSysSetBootParm("root=", "mtd:rootfs");
++                kerSysSetBootParm("rootfstype=", "jffs2");
++            }
++        }
++
++        /* RootFS_update partition */
++        bcm63XX_nand_parts[1].offset = nvram.ulNandPartOfsKb[rootfs_update]*1024;
++        bcm63XX_nand_parts[1].size = nvram.ulNandPartSizeKb[rootfs_update]*1024;
++        bcm63XX_nand_parts[1].ecclayout = mtd->ecclayout;
++
++        /* This partition is used for flashing images */
++        bcm63XX_nand_parts[7].offset = bcm63XX_nand_parts[1].offset;
++        bcm63XX_nand_parts[7].size = bcm63XX_nand_parts[1].size;
++        bcm63XX_nand_parts[7].ecclayout = mtd->ecclayout;
+ 
++        if (is_split_partition (mtd, bcm63XX_nand_parts[1].offset, bcm63XX_nand_parts[1].size, &split_offset))
++        {
++            /* rootfs_update partition */
++            bcm63XX_nand_parts[1].offset = split_offset;
++            bcm63XX_nand_parts[1].size -= (split_offset - nvram.ulNandPartOfsKb[rootfs_update]*1024);
++
++            /* bootfs_update partition */
++            bcm63XX_nand_parts[nr_parts].name = "bootfs_update";
++            bcm63XX_nand_parts[nr_parts].offset = nvram.ulNandPartOfsKb[rootfs_update]*1024;
++            bcm63XX_nand_parts[nr_parts].size = split_offset - nvram.ulNandPartOfsKb[rootfs_update]*1024;
++            bcm63XX_nand_parts[nr_parts].ecclayout = mtd->ecclayout;
++            nr_parts++;
++        }
++
++        /* Data (psi, scratch pad) */
++        bcm63XX_nand_parts[2].offset = nvram.ulNandPartOfsKb[NP_DATA] * 1024;
++        bcm63XX_nand_parts[2].size = nvram.ulNandPartSizeKb[NP_DATA] * 1024;
++        bcm63XX_nand_parts[2].ecclayout = mtd->ecclayout;
++
++        /* ROM-D */
++        bcm63XX_nand_parts[3].offset = nvram.ulNandRomdPartOfsKb * 1024;
++        bcm63XX_nand_parts[3].size = nvram.ulNandRomdPartSizeKb * 1024;
++        bcm63XX_nand_parts[3].ecclayout = mtd->ecclayout;
++
++		/* WWAN */
++        bcm63XX_nand_parts[4].offset = nvram.ulNandWwanPartOfsKb * 1024;
++        bcm63XX_nand_parts[4].size = nvram.ulNandWwanPartSizeKb * 1024;
++        bcm63XX_nand_parts[4].ecclayout = mtd->ecclayout;
++
++        //part_num=nandinfo->nr_parts;
++        i=BCM_MAX_EXTRA_PARTITIONS-2; // skip DATA partition
++        while(i >= 0) {
++            if(nvram.part_info[i].size != 0xffff) {
++                //sz_bits -- 0b01 -- MB, 0b10 - GB , 0b10, 0b11 - reserved
++                switch((nvram.part_info[i].size & 0xc000)>>14) {
++                    case 0:
++                        extra_single_part_size=1<<20;//1024*1024;
++                        break;
++                    case 1:
++                        extra_single_part_size=1<<30;//1024*1024*1024;
++                        break;
++                    default:
++                        extra_single_part_size=0;
++                        break;
++                }
++                extra_single_part_size=(nvram.part_info[i].size&0x3fff)*extra_single_part_size;
++            if((extra_single_part_size&(~((uint64_t)mtd->erasesize-1))) != extra_single_part_size)
++                extra_single_part_size=(extra_single_part_size+mtd->erasesize);
++            extra_single_part_size =  (extra_single_part_size) & (~((uint64_t)mtd->erasesize-1));
++            if(extra_single_part_size >  mtd->erasesize) {
++                extra+=extra_single_part_size;
++                bcm63XX_nand_parts[nr_parts].name = misc_mtd_partition_names[i];
++                bcm63XX_nand_parts[nr_parts].offset = (nvram.ulNandPartOfsKb[NP_DATA] * 1024) - extra;
++                bcm63XX_nand_parts[nr_parts].size = extra_single_part_size;
++                bcm63XX_nand_parts[nr_parts].ecclayout = mtd->ecclayout;
++                nr_parts++;
++                //part_num++;
++                }
++            }
++            i--;
++        }
++
++        /* Boot and NVRAM data */
++        bcm63XX_nand_parts[5].offset = nvram.ulNandPartOfsKb[NP_BOOT] * 1024;
++        bcm63XX_nand_parts[5].size = nvram.ulNandPartSizeKb[NP_BOOT] * 1024;
++        bcm63XX_nand_parts[5].ecclayout = mtd->ecclayout;
++
++        PRINTK("Part[0] name=%s, size=%llx, ofs=%llx\n", bcm63XX_nand_parts[0].name,
++            bcm63XX_nand_parts[0].size, bcm63XX_nand_parts[0].offset);
++        PRINTK("Part[1] name=%s, size=%llx, ofs=%llx\n", bcm63XX_nand_parts[1].name,
++            bcm63XX_nand_parts[1].size, bcm63XX_nand_parts[1].offset);
++        PRINTK("Part[2] name=%s, size=%llx, ofs=%llx\n", bcm63XX_nand_parts[2].name,
++            bcm63XX_nand_parts[2].size, bcm63XX_nand_parts[2].offset);
++        PRINTK("Part[3] name=%s, size=%llx, ofs=%llx\n", bcm63XX_nand_parts[3].name,
++            bcm63XX_nand_parts[3].size, bcm63XX_nand_parts[3].offset);
++        PRINTK("Part[4] name=%s, size=%llx, ofs=%llx\n", bcm63XX_nand_parts[4].name,
++            bcm63XX_nand_parts[4].size, bcm63XX_nand_parts[4].offset);
++        PRINTK("Part[5] name=%s, size=%llx, ofs=%llx\n", bcm63XX_nand_parts[5].name,
++            bcm63XX_nand_parts[5].size, bcm63XX_nand_parts[5].offset);
++#else
+     /* RootFS partition */
+     bcm63XX_nand_parts[0].offset = nvram.ulNandPartOfsKb[rootfs]*1024;
+     bcm63XX_nand_parts[0].size = nvram.ulNandPartSizeKb[rootfs]*1024;
+@@ -340,7 +486,7 @@
+         bcm63XX_nand_parts[2].size, bcm63XX_nand_parts[2].offset);
+     PRINTK("Part[3] name=%s, size=%llx, ofs=%llx\n", bcm63XX_nand_parts[3].name,
+         bcm63XX_nand_parts[3].size, bcm63XX_nand_parts[3].offset);
+-
++#endif  //defined(ZYXEL) && defined(ZYXEL_PARTITION)
+     mtd_device_register(mtd, bcm63XX_nand_parts, nr_parts);
+ 
+     return(nr_parts);
+Index: linux-3.4.11/drivers/usb/class/Makefile
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/class/Makefile	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/usb/class/Makefile	2016-04-14 17:40:47.547885549 +0800
+@@ -3,6 +3,16 @@
+ # (one step up from the misc category)
+ #
+ 
++##20130822,TimLiu support USB LED
++ifeq ($(strip $(ZYXEL)),y)
++EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD) -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++
++endif
++
+ obj-$(CONFIG_USB_ACM)		+= cdc-acm.o
+ obj-$(CONFIG_USB_PRINTER)	+= usblp.o
+ obj-$(CONFIG_USB_WDM)		+= cdc-wdm.o
+Index: linux-3.4.11/drivers/usb/class/usblp.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/class/usblp.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/usb/class/usblp.c	2016-04-14 17:40:47.547885549 +0800
+@@ -59,6 +59,10 @@
+ #undef DEBUG
+ #include <linux/usb.h>
+ #include <linux/ratelimit.h>
++//20130822, TimLiu To support USB LED.
++#if defined(ZYXEL) && (ZYXEL==1)
++#include "board.h"
++#endif
+ 
+ /*
+  * Version Information
+@@ -244,6 +248,11 @@
+ static struct usb_driver usblp_driver;
+ static DEFINE_MUTEX(usblp_mutex);	/* locks the existence of usblp's */
+ 
++//20130822, TimLiu To support USB LED.
++#if defined(ZYXEL) && (ZYXEL==1)
++extern void USB_LED_Control( int USBId, int status );
++#endif
++
+ /*
+  * Functions for usblp control messages.
+  */
+@@ -438,6 +447,11 @@
+ 
+ static void usblp_cleanup(struct usblp *usblp)
+ {
++//20130822, TimLiu To support USB LED.
++#if defined(ZYXEL) && (ZYXEL==1)
++	USB_LED_Control( usblp->dev->portnum, 0x00 );
++#endif
++
+ 	printk(KERN_INFO "usblp%d: removed\n", usblp->minor);
+ 
+ 	kfree(usblp->readbuf);
+@@ -713,10 +727,21 @@
+ 		rv = -EINTR;
+ 		goto raise_biglock;
+ 	}
++//#if defined(ZYXEL) && (ZYXEL==1)
++//        USB_LED_Control( usblp->dev->portnum, 0x03 );
++//#endif
+ 	if ((rv = usblp_wwait(usblp, !!(file->f_flags & O_NONBLOCK))) < 0)
+ 		goto raise_wait;
+ 
+ 	while (writecount < count) {
++//20130822, TimLiu To support USB LED.
++#if defined(ZYXEL) && (ZYXEL==1)
++		if(usblp->dev->portnum == 1)
++			kerSysLedCtrl(kLedUSB0,kLedStateFastBlinkContinues);
++		else if(usblp->dev->portnum == 2)
++			kerSysLedCtrl(kLedUSB1,kLedStateFastBlinkContinues);
++//                USB_LED_Control( usblp->dev->portnum, 0x03 );
++#endif
+ 		/*
+ 		 * Step 1: Submit next block.
+ 		 */
+@@ -778,7 +803,9 @@
+ 		 */
+ 		writecount += usblp->wstatus;
+ 	}
+-
++//#if defined(ZYXEL) && (ZYXEL==1)
++//        USB_LED_Control( usblp->dev->portnum, 0x01 );
++//#endif
+ 	mutex_unlock(&usblp->wmut);
+ 	return writecount;
+ 
+@@ -791,6 +818,9 @@
+ collect_error:		/* Out of raise sequence */
+ 	mutex_unlock(&usblp->wmut);
+ raise_biglock:
++//#if defined(ZYXEL) && (ZYXEL==1)
++//        USB_LED_Control( usblp->dev->portnum, 0x01 );
++//#endif
+ 	return writecount ? writecount : rv;
+ }
+ 
+@@ -812,7 +842,9 @@
+ 	rv = usblp_rwait_and_lock(usblp, !!(file->f_flags & O_NONBLOCK));
+ 	if (rv < 0)
+ 		return rv;
+-
++//#if defined(ZYXEL) && (ZYXEL==1)
++//        USB_LED_Control( usblp->dev->portnum, 0x03 );
++//#endif
+ 	if ((avail = usblp->rstatus) < 0) {
+ 		printk(KERN_ERR "usblp%d: error %d reading from printer\n",
+ 		    usblp->minor, (int)avail);
+@@ -838,6 +870,9 @@
+ 	}
+ 
+ done:
++//#if defined(ZYXEL) && (ZYXEL==1)
++//        USB_LED_Control( usblp->dev->portnum, 0x01 );
++//#endif
+ 	mutex_unlock(&usblp->mut);
+ 	return count;
+ }
+@@ -1173,6 +1208,11 @@
+ 		le16_to_cpu(usblp->dev->descriptor.idVendor),
+ 		le16_to_cpu(usblp->dev->descriptor.idProduct));
+ 
++//20130822, TimLiu To support USB LED.
++#if defined(ZYXEL) && (ZYXEL==1)
++	USB_LED_Control( usblp->dev->portnum, 0x01 );
++#endif
++
+ 	return 0;
+ 
+ abort_intfdata:
+Index: linux-3.4.11/drivers/usb/core/Makefile
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/Makefile	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/usb/core/Makefile	2016-04-14 17:40:47.547885549 +0800
+@@ -12,3 +12,13 @@
+ usbcore-$(CONFIG_USB_DEVICEFS)	+= inode.o
+ 
+ obj-$(CONFIG_USB)		+= usbcore.o
++
++##20130822,TimLiu support USB LED
++ifeq ($(strip $(ZYXEL)),y)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++
++endif
++
+Index: linux-3.4.11/drivers/usb/core/hub.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/hub.c	2016-04-14 17:40:45.867885606 +0800
++++ linux-3.4.11/drivers/usb/core/hub.c	2016-04-14 17:40:47.547885549 +0800
+@@ -1763,6 +1763,11 @@
+ 	dev_info(&udev->dev, "USB disconnect, device number %d\n",
+ 			udev->devnum);
+ 
++//20130822, TimLiu To support USB LED.
++#if defined(ZYXEL) && (ZYXEL==1)
++	USB_LED_Control( udev->portnum, 0x00 );
++#endif
++
+ 	usb_lock_device(udev);
+ 
+ 	/* Free up all the children before we remove this device */
+Index: linux-3.4.11/drivers/usb/core/urb.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/urb.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/usb/core/urb.c	2016-04-14 17:40:47.547885549 +0800
+@@ -623,6 +623,7 @@
+ 	might_sleep();
+ 	if (!(urb && urb->dev && urb->ep))
+ 		return;
++
+ 	atomic_inc(&urb->reject);
+ 
+ 	usb_hcd_unlink_urb(urb, -ENOENT);
+Index: linux-3.4.11/drivers/usb/core/usb.h
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/core/usb.h	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/usb/core/usb.h	2016-04-14 17:40:47.551885550 +0800
+@@ -156,3 +156,7 @@
+ extern void usb_notify_add_bus(struct usb_bus *ubus);
+ extern void usb_notify_remove_bus(struct usb_bus *ubus);
+ 
++//20130822,TimLiu support USB LED
++#if defined(ZYXEL) && (ZYXEL==1)
++extern void USB_LED_Control( int USBId, int status );
++#endif
+Index: linux-3.4.11/drivers/usb/serial/Makefile
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/serial/Makefile	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/usb/serial/Makefile	2016-04-14 17:40:47.551885550 +0800
+@@ -4,6 +4,16 @@
+ 
+ # Object file lists.
+ 
++##20130822,TimLiu support USB LED
++ifeq ($(strip $(ZYXEL)),y)
++EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD) -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++
++endif
++
+ obj-$(CONFIG_USB_SERIAL)			+= usbserial.o
+ 
+ usbserial-y := usb-serial.o generic.o bus.o
+Index: linux-3.4.11/drivers/usb/storage/Makefile
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/storage/Makefile	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/usb/storage/Makefile	2016-04-14 17:40:47.551885550 +0800
+@@ -7,6 +7,15 @@
+ 
+ ccflags-y := -Idrivers/scsi
+ 
++##20130822,TimLiu support USB LED
++ifeq ($(strip $(ZYXEL)),y)
++EXTRA_CFLAGS += -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD) -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++endif
++
+ obj-$(CONFIG_USB_UAS)		+= uas.o
+ obj-$(CONFIG_USB_STORAGE)	+= usb-storage.o
+ 
+Index: linux-3.4.11/drivers/usb/storage/initializers.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/storage/initializers.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/usb/storage/initializers.c	2016-04-14 17:40:47.551885550 +0800
+@@ -104,3 +104,4 @@
+ 	US_DEBUGP("Huawei mode set result is %d\n", result);
+ 	return 0;
+ }
++
+Index: linux-3.4.11/drivers/usb/storage/transport.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/storage/transport.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/usb/storage/transport.c	2016-04-14 17:40:47.551885550 +0800
+@@ -63,6 +63,11 @@
+ #include <linux/blkdev.h>
+ #include "../../scsi/sd.h"
+ 
++//20130822, TimLiu Support USB led.
++#if defined(ZYXEL) && (ZYXEL==1)
++#include "board.h"
++extern void USB_LED_Control( int USBId, int status );
++#endif
+ 
+ /***********************************************************************
+  * Data transfer routines
+@@ -150,6 +155,11 @@
+ 		us->current_urb->transfer_flags |= URB_NO_TRANSFER_DMA_MAP;
+ 	us->current_urb->transfer_dma = us->iobuf_dma;
+ 
++//20130822, TimLiu Support USB led.
++#if defined(ZYXEL) && (ZYXEL==1)
++	USB_LED_Control( us->pusb_dev->portnum, 0x02 );
++#endif
++
+ 	/* submit the URB */
+ 	status = usb_submit_urb(us->current_urb, GFP_NOIO);
+ 	if (status) {
+@@ -182,7 +192,9 @@
+ 			  timeleft == 0 ? "Timeout" : "Signal");
+ 		usb_kill_urb(us->current_urb);
+ 	}
+-
++//#if defined(ZYXEL) && (ZYXEL==1)
++//	USB_LED_Control( us->pusb_dev->portnum, 0x01 );
++//#endif
+ 	/* return the URB status */
+ 	return us->current_urb->status;
+ }
+Index: linux-3.4.11/drivers/usb/storage/usb.c
+===================================================================
+--- linux-3.4.11.orig/drivers/usb/storage/usb.c	2016-04-14 17:40:45.935885603 +0800
++++ linux-3.4.11/drivers/usb/storage/usb.c	2016-04-14 17:40:47.555885550 +0800
+@@ -77,6 +77,12 @@
+ #include "sierra_ms.h"
+ #include "option_ms.h"
+ 
++//20130822, TimLiu Support USB led.
++#if defined(ZYXEL) && (ZYXEL==1)
++#include "board.h"
++extern void USB_LED_Control( int USBId, int status );
++#endif
++
+ /* Some informational data */
+ MODULE_AUTHOR("Matthew Dharm <mdharm-usb@one-eyed-alien.net>");
+ MODULE_DESCRIPTION("USB Mass Storage driver for Linux");
+@@ -387,6 +393,10 @@
+ 		/* we've got a command, let's do it! */
+ 		else {
+ 			US_DEBUG(usb_stor_show_command(us->srb));
++//#if defined(ZYXEL) && (ZYXEL==1)
++//			USB_LED_Control( us->pusb_dev->portnum, 0x02 );
++//			//printk(KERN_INFO USB_STORAGE "TimLiu debug 1.");
++//#endif
+ 			us->proto_handler(us->srb, us);
+ 			usb_mark_last_busy(us->pusb_dev);
+ 		}
+@@ -398,6 +408,10 @@
+ 		if (us->srb->result != DID_ABORT << 16) {
+ 			US_DEBUGP("scsi cmd done, result=0x%x\n", 
+ 				   us->srb->result);
++//#if defined(ZYXEL) && (ZYXEL==1)
++//			//printk(KERN_INFO USB_STORAGE "TimLiu debug 2.");
++//			USB_LED_Control( us->pusb_dev->portnum, 0x01 );
++//#endif
+ 			us->srb->scsi_done(us->srb);
+ 		} else {
+ SkipForAbort:
+@@ -894,6 +908,11 @@
+ 			scan_dwork.work);
+ 	struct device *dev = &us->pusb_intf->dev;
+ 
++//20130822, TimLiu porting from SBG3600 for USB led.
++#if defined(ZYXEL) && (ZYXEL==1)
++	USB_LED_Control( us->pusb_dev->portnum, 0x01 );
++#endif
++
+ 	dev_dbg(dev, "starting scan\n");
+ 
+ 	/* For bulk-only devices, determine the max LUN value */
+@@ -1051,6 +1070,9 @@
+ 	struct us_data *us = usb_get_intfdata(intf);
+ 
+ 	US_DEBUGP("storage_disconnect() called\n");
++//#if defined(ZYXEL) && (ZYXEL==1)
++//	USB_LED_Control( us->pusb_dev->portnum, 0x00 );
++//#endif
+ 	quiesce_and_remove_host(us);
+ 	release_everything(us);
+ }
+Index: linux-3.4.11/include/linux/usb/serial.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/usb/serial.h	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/include/linux/usb/serial.h	2016-04-14 17:40:47.555885550 +0800
+@@ -117,6 +117,9 @@
+ 	char			throttle_req;
+ 	unsigned long		sysrq; /* sysrq timeout */
+ 	struct device		dev;
++#if defined(ZYXEL) && (ZYXEL == 1) // __MSTC__, Richard Huang, For Telefonica 3G WAN backup, __TELEFONICA__, MitraStar Chehuai, 20110627
++	int	shutdown_flag;	/*Jennifer, add, to avoid kernel crash*/
++#endif
+ };
+ #define to_usb_serial_port(d) container_of(d, struct usb_serial_port, dev)
+ 
+Index: linux-3.4.11/arch/arm/mach-bcm963xx/Makefile
+===================================================================
+--- linux-3.4.11.orig/arch/arm/mach-bcm963xx/Makefile	2016-04-14 17:40:45.083885635 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/Makefile	2016-04-14 17:40:47.555885550 +0800
+@@ -18,3 +18,15 @@
+ EXTRA_CFLAGS += -DSUPPORT_SWMDK
+ endif
+ 
++## 20140828, TimLiu Add ZyXEL compile flags.
++ifeq ($(strip ${ZYXEL}),y)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++ifeq ($(strip ${ZYXEL_PARTITION}),y)
++EXTRA_CFLAGS += -DZYXEL_PARTITION=1
++endif
++else
++EXTRA_CFLAGS += -DZYXEL=0
++endif
+Index: linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/brcmnand_base.c	2016-04-14 17:40:45.759885611 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c	2016-04-14 18:30:43.999781019 +0800
+@@ -5852,7 +5852,7 @@
+ 
+ 
+ 
+-#ifdef CONFIG_MTD_BRCMNAND_VERIFY_WRITE
++#ifdef BRCMNAND_WRITE_VERIFY
+ 
+ #if 0
+ /*
+@@ -6140,6 +6140,9 @@
+ 	int oobWritten = 0;
+ 	int ret = 0;
+ 	uint64_t offset = page << chip->page_shift;
++#ifdef CONFIG_MTD_BRCMNAND_VERIFY_WRITE
++	char * tmp_page_buf = NULL;
++#endif
+ 
+ 
+ if (gdebug > 3 ) {
+@@ -6163,6 +6166,21 @@
+ 		oobWritten += chip->eccOobSize;
+ 	}
+ 
++#ifdef CONFIG_MTD_BRCMNAND_VERIFY_WRITE
++	tmp_page_buf = kmalloc(mtd->writesize, GFP_KERNEL);
++	if(tmp_page_buf) {
++		memset(tmp_page_buf, 0, mtd->writesize);
++		brcmnand_read_page(mtd, tmp_page_buf, NULL, page);
++		if (memcmp(inp_buf, tmp_page_buf, mtd->writesize))
++		{
++			printk(KERN_ERR "%s: NAND Verify Write fail at offset=%0llx\n", __FUNCTION__, offset);
++			kfree(tmp_page_buf);
++			return -EIO;
++		}
++		kfree(tmp_page_buf);
++	}
++#endif
++
+ 	// TBD
+ #ifdef BRCMNAND_WRITE_VERIFY
+ if (0 == ret) {
+Index: linux-3.4.11/arch/arm/plat-bcm63xx/Makefile
+===================================================================
+--- linux-3.4.11.orig/arch/arm/plat-bcm63xx/Makefile	2016-04-14 17:40:45.099885632 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/Makefile	2016-04-14 17:40:47.559885549 +0800
+@@ -27,3 +27,13 @@
+ obj-$(CONFIG_BCM_M2M_DMA) += bcm63xx_m2mdma.o
+ 
+ EXTRA_CFLAGS    += -I$(INC_BRCMBOARDPARMS_PATH)/$(BRCM_BOARD) -I$(SRCBASE)/include -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD) -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD) -I$(INC_BRCMSHARED_PUB_PATH)/pmc
++
++## 20151208, TimLiu Add ZyXEL compile flags.
++ifeq ($(strip ${ZYXEL}),y)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++else
++EXTRA_CFLAGS += -DZYXEL=0
++endif
+Index: linux-3.4.11/arch/arm/plat-bcm63xx/pcie-bcm63xx.c
+===================================================================
+--- linux-3.4.11.orig/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2016-04-14 17:40:45.099885632 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2016-04-14 17:40:47.559885549 +0800
+@@ -886,7 +886,24 @@
+ 	int i;
+ 	bool shutdown;
+ 	TRACE();
+-  
++
++#if defined(ZYPRJ_XMG3512)
++	{
++		unsigned short gpio;
++		if ( BpGetWlanDisableGpio(&gpio) == BP_SUCCESS ) {
++			//printk("bcm63xx_pcie_init(before): GPIO_%x is %d\n", gpio, kerSysGetGpioValue(gpio));
++			kerSysSetGpioState(gpio, kGpioInactive);
++			//printk("bcm63xx_pcie_init(after): GPIO_%x is %d\n", gpio, kerSysGetGpioValue(gpio));
++		}
++		//(gpio = (unsigned short)BP_GPIO_34_AL);	//RESET#
++		if ( BpGet5GResetGpio(&gpio) == BP_SUCCESS ) {
++			//printk("bcm63xx_pcie_init(before): GPIO_%x is %d\n", gpio, kerSysGetGpioValue(gpio));
++			kerSysSetGpioState(gpio, kGpioInactive);
++			//printk("bcm63xx_pcie_init(after): GPIO_%x is %d\n", gpio, kerSysGetGpioValue(gpio));
++		}
++	}
++#endif
++
+ 	/* pcie ports, domain 1/2 */
+ 	for (i = 0; i < NUM_CORE; i++) {
+ 		shutdown = TRUE;
+@@ -897,8 +914,8 @@
+ 			if(bcm63xx_pcie_link_up(i)) {
+ 				pci_common_init(&(bcm63xx_pcie_ports[i].hw_pci));
+ 				shutdown = FALSE;
+-	  	}
+-	  }
++			}
++		}
+ 		if(shutdown) {
+ 			/* power off ports without link */
+ 			printk("PCIE port %d power-down\n", i);

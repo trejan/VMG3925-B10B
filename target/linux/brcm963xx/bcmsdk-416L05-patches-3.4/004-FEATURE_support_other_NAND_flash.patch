@@ -1,0 +1,99 @@
+Index: linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/brcmnand_base.c	2016-04-14 18:30:43.999781019 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c	2016-04-14 18:53:44.583732854 +0800
+@@ -814,6 +814,30 @@
+ 		.ctrlVersion = CONFIG_MTD_BRCMNAND_VERS_3_0, 
+ 	},
+ 
++	{	/* 39 */
++		.mafId = FLASHTYPE_ESMT,
++		.chipId = ESMT_F59L1G81MA,
++		.chipIdStr = "ESMT F59L1G81MA",
++		.options = NAND_BBT_USE_FLASH,
++		.idOptions = BRCMNAND_ID_EXT_BYTES,
++		.timing1 = 0,
++		.timing2 = 0,
++		.nop=4,
++		.ctrlVersion = 0,
++	},
++
++	{	/* 40 */
++		.mafId = FLASHTYPE_ZENTEL,
++		.chipId = ZENTEL_A5U1GA31ATS,
++		.chipIdStr = "Zentel A5U1GA31ATS",
++		.options = NAND_BBT_USE_FLASH,
++		.idOptions = BRCMNAND_ID_EXT_BYTES,
++		.timing1 = 0,
++		.timing2 = 0,
++		.nop=4,
++		.ctrlVersion = 0,
++	},
++
+ #if 0
+ /* New Chip ID scheme in place and working, but as of 2631-2.5 these do not work yet, for some unknown reason */
+ 
+@@ -945,7 +969,7 @@
+ 
+ 	if (nandCtrlReg < BCHP_NAND_REVISION || nandCtrlReg > BCHP_NAND_LAST_REG ||
+ 		(nandCtrlReg & 0x3) != 0) {
+-		printk( "brcmnand_ctrl_read: Invalid register value %08x\n", nandCtrlReg);
++		printk( "brcmnand_ctrl_write: Invalid register value %08x\n", nandCtrlReg);
+ 	}
+ 	
+ 	BDEV_WR(pReg, val);
+@@ -8339,6 +8363,8 @@
+ 	case FLASHTYPE_HYNIX:	
+ 	case FLASHTYPE_TOSHIBA:
+ 	case FLASHTYPE_MICRON:
++	case FLASHTYPE_ESMT:
++	case FLASHTYPE_ZENTEL:
+ 		pageSize = 1024 << (devId4thdByte & SAMSUNG_4THID_PAGESIZE_MASK);
+ 		blockSize = (64*1024) << ((devId4thdByte & SAMSUNG_4THID_BLKSIZE_MASK) >> 4);
+ 		//oobSize = devId4thdByte & SAMSUNG_4THID_OOBSIZE_MASK ? 16 : 8;
+@@ -8402,6 +8428,8 @@
+ 		case FLASHTYPE_HYNIX:		
+ 		case FLASHTYPE_TOSHIBA:
+ 		case FLASHTYPE_MICRON:
++		case FLASHTYPE_ESMT:
++		case FLASHTYPE_ZENTEL:
+ 	PRINTK("5th ID byte = %02x, extID = %08lx\n", devId5thByte, devIdExt);
+ 
+ 			switch(devId5thByte & SAMSUNG_5THID_NRPLANE_MASK) {
+@@ -8424,6 +8452,8 @@
+ 		switch(brcmnand_maf_id) {
+ 		case FLASHTYPE_SAMSUNG:
+ 		case FLASHTYPE_MICRON:
++		case FLASHTYPE_ESMT:
++		case FLASHTYPE_ZENTEL:
+ 			if (idOptions & BRCMNAND_ID_HAS_MICRON_M68A) {
+ 				planeSizeMB=128;
+ 			}
+@@ -10937,7 +10967,7 @@
+ 				chip->ecclayout = &brcmnand_oob_bch12_27_2k;
+ 			}
+ 			else if (chip->ecclevel == BRCMNAND_ECC_HAMMING) {
+-printk("ECC layout=brcmnand_oob_bch4_4k\n");
++printk("ECC layout=brcmnand_oob_64\n");
+ 				chip->ecclayout = &brcmnand_oob_64;
+ 			}
+ 			else {
+Index: linux-3.4.11/include/linux/mtd/brcmnand.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/mtd/brcmnand.h	2016-04-14 18:30:43.999781019 +0800
++++ linux-3.4.11/include/linux/mtd/brcmnand.h	2016-04-14 18:53:44.583732854 +0800
+@@ -477,6 +477,14 @@
+ #define TOSHIBA_TC58NVG1S3ETAI5	0xDA
+ #define TOSHIBA_TC58NVG3S0ETA00	0xD3
+ 
++/* -------- ESMT NAND flash -----------------*/
++#define FLASHTYPE_ESMT          0xC8
++#define ESMT_F59L1G81MA         0xD1
++
++/* -------- Zentel NAND flash -----------------*/
++#define FLASHTYPE_ZENTEL        0x92
++#define ZENTEL_A5U1GA31ATS      0xF1
++
+ /*---------------------------------------------------------------------------------------*/
+ 
+ // Low level MLC test as compared to the high level test in mtd-abi.h

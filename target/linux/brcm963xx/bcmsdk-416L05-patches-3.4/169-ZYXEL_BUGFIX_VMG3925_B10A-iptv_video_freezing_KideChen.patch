@@ -1,0 +1,80 @@
+--- linux-3.4.11.orig/net/bridge/br_igmp.c	2017-03-08 12:25:50.892166168 +0800
++++ linux-3.4.11/net/bridge/br_igmp.c	2017-03-08 12:54:12.271510314 +0800
+@@ -263,12 +263,42 @@
+ #endif
+ 	if(list_empty(&igmp_fdb->rep_list)) 
+ 	{
+-		hlist_del(&igmp_fdb->hlist);
+-#if defined(CONFIG_BLOG) 
+-		br_mcast_blog_release(BR_MCAST_PROTO_IGMP, (void *)igmp_fdb);
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++        /*+++ Kide@zyxel.com: */
++        struct net_bridge_mc_fdb_entry *mc_fdb;
++        struct hlist_head *head = NULL;
++        struct hlist_node *h=NULL, *n;
++
++        head = &br->mc_hash[br_igmp_mc_fdb_hash(igmp_fdb->txGrp.s_addr)];
++        if (head) {
++            hlist_for_each_entry_safe(mc_fdb, h, n, head, hlist) {
++                if (mc_fdb == igmp_fdb)
++                    continue;
++                else if (mc_fdb->txGrp.s_addr > igmp_fdb->txGrp.s_addr)
++                    break;
++                else if ((mc_fdb->rxGrp.s_addr == igmp_fdb->rxGrp.s_addr) &&
++                         (mc_fdb->txGrp.s_addr == igmp_fdb->txGrp.s_addr) &&
++                         (mc_fdb->src_entry.filt_mode == igmp_fdb->src_entry.filt_mode) &&
++                         (mc_fdb->src_entry.src.s_addr == igmp_fdb->src_entry.src.s_addr) &&
++                         (mc_fdb->from_dev == igmp_fdb->from_dev) &&
++                         (mc_fdb->dst != igmp_fdb->dst) &&
++                         (mc_fdb->leave_flag == 0)) {
++                    pr_err("%s: Someone is still watching the grp[0x%x] on port=%s\n", __func__,
++                            mc_fdb->txGrp.s_addr, mc_fdb->dst->dev->name);
++                    igmp_fdb->leave_flag = 1;
++                    return;
++                }
++            }
++        }
++        pr_err("%s: Deleted the mc_fdb entry for the grp[0x%x] on port=%s\n", __func__,
++                igmp_fdb->txGrp.s_addr, igmp_fdb->dst->dev->name);
+ #endif
+-		kmem_cache_free(br_igmp_mc_fdb_cache, igmp_fdb);
+-	}
++        hlist_del(&igmp_fdb->hlist);
++#if defined(CONFIG_BLOG)
++        br_mcast_blog_release(BR_MCAST_PROTO_IGMP, (void *)igmp_fdb);
++#endif
++        kmem_cache_free(br_igmp_mc_fdb_cache, igmp_fdb);
++    }
+ 
+ 	return;
+ }
+@@ -335,6 +365,14 @@
+ 			hlist_for_each_entry(mcast_group, h_group, &br->mc_hash[i], hlist) 
+ 			{
+ 				struct net_bridge_mc_rep_entry *reporter_group;
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++                /*+++ Kide@zyxel.com: */
++                if (mcast_group->leave_flag) {
++                    if (time_after(tstamp, jiffies + 30*HZ))
++                        tstamp = jiffies + 30*HZ;
++                    found = 1;
++                }
++#endif
+ 				list_for_each_entry(reporter_group, &mcast_group->rep_list, list)
+ 				{
+ 					if ( time_after(tstamp, reporter_group->tstamp) )
+@@ -370,6 +408,14 @@
+ 		hlist_for_each_entry_safe(mcast_group, h_group, n_group, &br->mc_hash[i], hlist) 
+ 		{
+ 			struct net_bridge_mc_rep_entry *reporter_group, *n_reporter;
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++            /*+++ Kide@zyxel.com: */
++            if (mcast_group->leave_flag) {
++                pr_err("%s: Timeout check for the grp[0x%x] along with leave_flag=1\n", __func__, mcast_group->txGrp.s_addr); 
++                br_igmp_mc_fdb_del_entry(br, mcast_group, NULL, NULL);
++                continue;
++            }
++#endif
+ 			list_for_each_entry_safe(reporter_group, n_reporter, &mcast_group->rep_list, list)
+ 			{
+ 				if (time_after_eq(jiffies, reporter_group->tstamp)) 

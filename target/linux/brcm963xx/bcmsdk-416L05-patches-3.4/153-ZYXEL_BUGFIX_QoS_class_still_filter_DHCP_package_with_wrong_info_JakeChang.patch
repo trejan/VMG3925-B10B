@@ -1,0 +1,48 @@
+Index: linux-3.4.11/net/bridge/netfilter/ebt_ip.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/netfilter/ebt_ip.c	2016-11-15 15:49:07.676238648 +0800
++++ linux-3.4.11/net/bridge/netfilter/ebt_ip.c	2016-11-15 17:38:08.830421644 +0800
+@@ -80,7 +80,7 @@
+ 	return NULL;
+ }
+ 
+-/* If match, return value is 0 */
++/* If match, return value is 1 */
+ static int cmp_option60(char *optval60, const struct ebt_ip_info *info)
+ {
+ 	int len;
+@@ -105,10 +105,10 @@
+ 	if(strcmp(cfgptr->cfgdata, optionData) == 0)
+ 		return true;
+ 
+-	return 1;
++	return false;
+ }
+ 
+-/* If match, return value is 0 */
++/* If match, return value is 1 */
+ static int cmp_option61(char *optval61, const struct ebt_ip_info *info)
+ {
+         int len;
+@@ -135,10 +135,10 @@
+         if(!memcmp(cfgptr->cfgdata, optionData, len))
+                 return true;
+ 
+-        return 1;
++        return false;
+ }
+ 
+-/* If match, return value is 0 */
++/* If match, return value is 1 */
+ static int cmp_option77(char *optval77, const struct ebt_ip_info *info)
+ {
+         uint8_t len = 0, total_len = 0, current_len = 0;
+@@ -174,7 +174,7 @@
+ }
+ 
+ 
+-/* If match, return value is 0 */
++/* If match, return value is 1 */
+ static int cmp_option125(char *optval125, const struct ebt_ip_info *info)
+ {
+         int len = 0,  total_len = 0, current_len = 0;

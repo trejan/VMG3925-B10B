@@ -1,0 +1,33 @@
+diff -Naur linux-3.4.11.orig/drivers/scsi/scsi_lib.c linux-3.4.11/drivers/scsi/scsi_lib.c
+--- linux-3.4.11.orig/drivers/scsi/scsi_lib.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/drivers/scsi/scsi_lib.c	2016-12-30 09:33:38.817342500 +0800
+@@ -406,6 +405,11 @@
+ 	LIST_HEAD(starved_list);
+ 	unsigned long flags;
+
++#if 1 // ZYXEL
++	/* if the device is dead, sdev will be NULL, so no queue to run */
++	if (!sdev)
++		return;
++#endif
+ 	shost = sdev->host;
+ 	if (scsi_target(sdev)->single_lun)
+ 		scsi_single_lun_run(sdev);
+@@ -437,9 +441,17 @@
+ 		}
+ 
+ 		spin_unlock(shost->host_lock);
++#if 1 // ZYXEL
++		/* hold a reference on the device so it doesn't release device */
++		get_device(&sdev->sdev_gendev);
++#endif
+ 		spin_lock(sdev->request_queue->queue_lock);
+ 		__blk_run_queue(sdev->request_queue);
+ 		spin_unlock(sdev->request_queue->queue_lock);
++#if 1 // ZYXEL
++		/* ok to remove device now */
++		put_device(&sdev->sdev_gendev);
++#endif
+ 		spin_lock(shost->host_lock);
+ 	}
+ 	/* put any unprocessed entries back */

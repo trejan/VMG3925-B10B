@@ -1,0 +1,35 @@
+Index: linux-3.4.11/arch/mips/bcm963xx/setup.c
+===================================================================
+--- linux-3.4.11.orig/arch/mips/bcm963xx/setup.c	2017-03-28 14:53:49.490947010 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/setup.c	2017-03-28 14:54:38.978433342 +0800
+@@ -1241,8 +1241,28 @@
+     	{
+     		printk("Internet LED Enable gpio(%d) need to config to output.\n",bpGpio);
+ 			printk("Default set to Active\n");
+-            if(setGpioState(bpGpio, kGpioActive) != 0)
+-                printk("Fail to init GPIO_%d\n", bpGpio);
++            //if(setGpioState(bpGpio, kGpioActive) != 0)
++            //    printk("Fail to init GPIO_%d\n", bpGpio);
++            if (!(bpGpio & BP_GPIO_SERIAL))
++            {
++                if(setGpioState(bpGpio, kGpioActive) != 0)
++                    printk("Fail to init GPIO_%d\n", bpGpio);
++            }else
++            {
++                unsigned short gpio_state;
++				unsigned short led_state=1;
++                if (((bpGpio & BP_ACTIVE_LOW) && (led_state == 1)) ||
++                    (!(bpGpio & BP_ACTIVE_LOW) && (led_state == 0)))
++                    gpio_state = 0;
++                else
++                    gpio_state = 1;
++                LED->ledMode &= ~(LED_MODE_MASK << GPIO_NUM_TO_LED_MODE_SHIFT(bpGpio));
++                if( gpio_state )
++                    LED->ledMode |= (LED_MODE_OFF << GPIO_NUM_TO_LED_MODE_SHIFT(bpGpio));
++                else
++                    LED->ledMode |= (LED_MODE_ON << GPIO_NUM_TO_LED_MODE_SHIFT(bpGpio));
++                printk("setLed( %x, LED_ON )\n", bpGpio);
++            }
+     	}
+     	if(BpGetInternetCtrlSignalGpio(&bpGpio) == BP_SUCCESS)
+     	{
