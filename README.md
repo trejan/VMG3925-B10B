@@ -22,6 +22,12 @@ V5.13(AAVF.11)C0 for a Zyxel VMG3925-B10B with baby jumbo frames (1508) enabled.
 
 9. The complete firmware image is bin/brcm963xx/zyxel/ras.bin and should be roughly 28MB. Flash it using the web interface of your VMG3925-B10B.
 
+## Binaries
+
+Precompiled firmware is on the releases page.
+
+If you wish to revert to the stock firmware then download it from Zyxel and reflash it using the web interface.
+
 ## Notes
 
 The Broadcom SDK configuration menu is a trap. The Zyxel firmware doesn't use the SDK configuration in the menu and specifically looks at target/linux/brcm963xx/bcmsdk-416L05-AAVF-config-3.4 instead. Any changes made in the menu for the Broadcom SDK will be ignored.
