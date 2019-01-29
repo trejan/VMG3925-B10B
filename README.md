@@ -14,6 +14,8 @@ The baby jumbo frame change and the firmware binary have been tested on several 
 * DSL driver version: d26s
 * 3G dongle WWAN package version: 1.18
 
+See ftp://ftp.zyxel.com/VMG3925-B10B/firmware for release notes.
+
 ## Instructions
 
 1. You must use the 32-bit version of [Ubuntu 12.04.5 LTS Desktop](http://releases.ubuntu.com/12.04/) to build this firmware. Using anything else is likely to cause buildroot to fail and generate nothing or a broken firmware image.
