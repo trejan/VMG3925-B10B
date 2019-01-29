@@ -230,6 +230,7 @@ zcfgRet_t zcfgFe98To181ObjMappingNameGet(const char *tr98PathName, char *tr181Pa
 zcfgRet_t zcfgFe181To98ObjMappingNameGet(const char *tr181PathName, char *tr98PathName);
 zcfgRet_t zcfgFe98NameToSeqnum(const char *tr98PathName, zcfg_name_t *seqnum, objIndex_t *tr98ObjIid);
 zcfgRet_t zcfgFe98SeqnumToName(zcfg_name_t seqnum, objIndex_t *objIid, char *tr98PathName);
+char *zcfgFeTr98ObjQueryInstanceArray(const char *tr98PathName);
 zcfgRet_t zcfgFe98ParmMappingToName(const char *notifyName, char *tr98NotifyName);
 zcfgRet_t zcfgTr98MapAddObjName();
 zcfgRet_t zcfgTr181MapAddObjName();
@@ -299,6 +300,8 @@ void zcfgFeSessionTr98SpvObjSet(struct json_object *);
 zcfgRet_t zcfgFeSessionTr98SpvObjectClear();
 
 struct json_object *zcfgFeNewTr98SpvObject();
+bool zcfgTr98StatusRunSpvValid(struct json_object *);
+bool zcfgFeTr98SpvAndApplyOnSessionComplete(struct json_object *multiobj);
 zcfgRet_t zcfgFeAddTr98SpvObject(struct json_object *, const char *, struct json_object *, struct json_object *);
 zcfgRet_t zcfgFeDeleteTr98SpvObject(struct json_object *, const char *);
 struct json_object *zcfgFeRetrieveTr98SpvObject(struct json_object *tr98SpvObj, const char *objpath, struct json_object **);
@@ -310,6 +313,7 @@ void zcfgFe98ParamGuardRelease(struct json_object *);
 
 char *translateWanIpIface(int dataTransType, const char *wanIpIfaces);
 zcfgRet_t zcfgFe98To181IpIface(const char *tr98IfaceName, char *ipIface);
+zcfgRet_t zcfgFeTr181IpIfaceRunning(const char *iface, char *paramfault);
 zcfg_offset_t zcfgFeTr181WanSetLink(char *wanLinkName, bool set, void **retObj, objIndex_t *retObjIndex, int *applied);
 
 zcfgRet_t zcfgFeTr181IfaceStackLowerLayerGet(char *higherLayer, char *result);
@@ -329,15 +333,39 @@ zcfgRet_t feObjJsonSubNext(zcfg_offset_t ,objIndex_t * ,objIndex_t * , struct js
 #define zcfgFeRetrieveSpv(objpath) zcfgFeHandRoutRetrieveTr98Spv(objpath, tr98Jobj, multiJobj)
 
 #ifdef ZCFG_APPLY_MULTIOBJSET_ON_SESSIONCOMPLETE
+void zcfgFeSessMultiObjSet();
 void zcfgFeSessMultiObjSetClear();
 struct json_object *zcfgFeSessMultiObjSetRetrieve();
 void zcfgFeSessMultiObjSetSave(struct json_object *multiobj);
 struct json_object *zcfgFeSessMultiObjSetUtilize(struct json_object *multiobj);
+void zcfgFeJsonMultiObjSetParamk(const char *);
+struct json_object *zcfgFeJsonMultiObjParamkRetrieve();
 #else
+#define zcfgFeSessMultiObjSet() { }
 #define zcfgFeSessMultiObjSetClear() { }
 #define zcfgFeSessMultiObjSetRetrieve() NULL
 #define zcfgFeSessMultiObjSetSave(obj) { }
 #define zcfgFeSessMultiObjSetUtilize(obj) obj
+#define zcfgFeJsonMultiObjSetParamk(paramk) { }
+#define zcfgFeJsonMultiObjParamkRetrieve() NULL
 #endif
+
+#ifdef ZCFG_RPC_REQUEST_ADDITIONS
+struct json_object *zcfgFeRpcRequestAdditionNew();
+#else
+#define zcfgFeRpcRequestAdditionNew() NULL
+#endif
+
+#define zcfgFeRpcRequestAddRpcDelayApply(_rpcObjAddition, _value) zcfgFeRpcRequestAddRpcApplyAttr(_rpcObjAddition, "delayapply", json_object_new_boolean(_value))
+#define zcfgFeRpcRequestAdditionRelease json_object_put
+
+zcfgRet_t zcfgFeRpcRequestAddAttr(struct json_object *, const char *, struct json_object *, bool );
+zcfgRet_t zcfgFeRpcRequestAddReplyAttr(struct json_object *, const char *, struct json_object *);
+zcfgRet_t zcfgFeRpcRequestAddRpcApplyAttr(struct json_object *, const char *, struct json_object *);
+zcfgRet_t zcfgFeRpcRequestAddMethod(struct json_object *, const char *, bool);
+zcfgRet_t zcfgFeRpcRequestSpecifyMethodParam(struct json_object *, const char *, const char *, struct json_object *);
+
+zcfgRet_t zcfgFeRpcObjectRetrieveMethodReply(struct json_object *, const char *, struct json_object **);
+struct json_object *zcfgFeRpcRequestRetrieveMethodReplyParam(struct json_object *, const char *);
 
 #endif

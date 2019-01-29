@@ -462,7 +462,7 @@ tr98Parameter_t para_VoiceLineProcessing[] = {
 	{ "TransmitGain", PARAMETER_ATTR_WRITE, 0, json_type_int},
 	{ "ReceiveGain", PARAMETER_ATTR_WRITE, 0, json_type_int},
 	{ "EchoCancellationEnable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
-	//{ "EchoCancellationInUse", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	//{ "EchoCancellationInUse", PARAMETER_ATTR_READONLY, 0, json_type_boolean},
 	//{ "EchoCancellationTail", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
 	{ NULL, 0, 0, 0}
 };
@@ -539,10 +539,9 @@ tr98Parameter_t para_VoiceLineStats[] = {
 	{ NULL, 0, 0, 0}
 };
 tr98Parameter_t para_VoicePhyIntf[] = {
-	//{ "PhyPort", PARAMETER_ATTR_READONLY, 3, json_type_string},
-	//{ "InterfaceID", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
-	//{ "Description", PARAMETER_ATTR_WRITE, 33, json_type_string},
-	//{ "NumberOfLines", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
+	{ "PhyPort", PARAMETER_ATTR_READONLY, 3, json_type_string},
+	{ "InterfaceID", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
+	{ "Description", PARAMETER_ATTR_READONLY, 33, json_type_string},
 	//{ "X_ZYXEL_PotsType", PARAMETER_ATTR_WRITE, 33, json_type_string},
 	//{ "X_ZYXEL_DialingType", PARAMETER_ATTR_WRITE, 33, json_type_string},
 	//{ "X_ZYXEL_DialToneType", PARAMETER_ATTR_WRITE, 33, json_type_string},

@@ -1,0 +1,37 @@
+Index: linux-3.4.11/include/linux/mtd/brcmnand.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/mtd/brcmnand.h	2017-09-28 19:45:10.698539454 +0800
++++ linux-3.4.11/include/linux/mtd/brcmnand.h	2017-09-29 16:50:24.969851678 +0800
+@@ -476,6 +476,7 @@
+ #define TOSHIBA_TC58NVG0S3ETA00	0xD1
+ #define TOSHIBA_TC58NVG1S3ETAI5	0xDA
+ #define TOSHIBA_TC58NVG3S0ETA00	0xD3
++#define TOSHIBA_TH58NVG2S3HTAI0	0xDC
+ 
+ /* -------- ESMT NAND flash -----------------*/
+ #define FLASHTYPE_ESMT          0xC8
+Index: linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/brcmnand_base.c	2017-09-29 16:49:10.853521877 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c	2017-09-29 16:50:11.253531793 +0800
+@@ -880,6 +880,20 @@
+ 	},
+ #endif
+ 
++	{	/* 41 */
++		.chipId = TOSHIBA_TH58NVG2S3HTAI0,
++		.mafId = FLASHTYPE_TOSHIBA,
++		.chipIdStr = "TOSHIBA TH58NVG2S3HTAI0",
++		.options = NAND_BBT_USE_FLASH,
++		.idOptions = BRCMNAND_ID_EXT_BYTES,
++		.timing1 = 0,
++		.timing2 = 0,
++		.nop=4,
++		.eccLevel=8,
++		.nbrBlocks = 4096,
++		.ctrlVersion = CONFIG_MTD_BRCMNAND_VERS_3_0,
++	},
++
+ 	{	/* LAST DUMMY ENTRY */
+ 		.chipId = 0,
+ 		.mafId = 0,

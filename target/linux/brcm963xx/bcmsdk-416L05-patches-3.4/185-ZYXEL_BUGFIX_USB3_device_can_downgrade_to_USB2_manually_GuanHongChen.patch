@@ -1,0 +1,168 @@
+Index: linux-3.4.11/arch/arm/plat-bcm63xx/Makefile
+===================================================================
+--- linux-3.4.11.orig/arch/arm/plat-bcm63xx/Makefile	2018-01-09 18:30:11.970659771 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/Makefile	2018-01-09 11:16:38.256529500 +0800
+@@ -53,6 +53,10 @@
+ ifeq ($(strip ${ZYXEL_SFP_TX_FAULT_PIN}),y)
+ EXTRA_CFLAGS += -DZYXEL_SFP_TX_FAULT_PIN
+ endif
++#ZYXEL USB3.0 or USB2.0 can be set by user manually
++ifeq ($(strip ${ZYXEL_USB_SET_MANUALLY}),y)
++EXTRA_CFLAGS += -DZYXEL_USB_SET_MANUALLY
++endif
+ else
+ EXTRA_CFLAGS += -DZYXEL=0
+ endif
+Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
+===================================================================
+--- linux-3.4.11.orig/arch/arm/plat-bcm63xx/bcm63xx_usb.c	2018-01-09 18:30:11.970659771 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c	2018-01-09 18:42:19.874871274 +0800
+@@ -65,6 +65,10 @@
+ #define CAP_TYPE_OHCI       0x01
+ #define CAP_TYPE_XHCI       0x02
+ 
++#if defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++int USB3_ENABLE;
++#endif
++
+ /*TODO double check the values for these 2 structures */
+ static struct usb_ehci_pdata bcm_ehci_pdata = {
+     .caps_offset         = 0,
+@@ -255,6 +259,9 @@
+ {
+    
+      short usb_gpio;
++#if defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++	 const char *name = "xhci_hcd";
++#endif
+ 
+      printk("++++ Powering up USB blocks\n");
+    
+@@ -284,7 +291,51 @@
+        }
+     }
+ 
++#if defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++	mutex_lock(&module_mutex);
++	if (find_module(name) != NULL)
++	{
++		USB3_ENABLE = 1;
++	}
++	else
++	{
++		USB3_ENABLE = 0;
++	}
++	mutex_unlock(&module_mutex);
++
++	if (USB3_ENABLE)
++	{
++		/*enable SSC for usb3.0 */
++		usb3_ssc_enable();
++
++		mdelay(300);
++
++		/*initialize XHCI settings*/
++#if defined(CONFIG_BCM963138)
++		bcm63138B0_manual_usb_ldo_start();
++		USBH_CTRL->usb_pm |= XHC_SOFT_RESETB;
++		USBH_CTRL->usb30_ctl1 &= ~PHY3_PLL_SEQ_START;
++#else
++		USBH_CTRL->usb30_ctl1 |= USB3_IOC;
++		USBH_CTRL->usb30_ctl1 |= XHC_SOFT_RESETB;
++#endif
++
++		USBH_CTRL->usb30_ctl1 |= PHY3_PLL_SEQ_START;
++	}
++	else
++	{
++		mdelay(300);
+ 
++#if defined(CONFIG_BCM963148)
++		USBH_CTRL->usb30_ctl1 |= USB3_IOC;
++		USBH_CTRL->usb30_ctl1 &= ~XHC_SOFT_RESETB;
++#endif
++
++#if defined(CONFIG_BCM963138)
++		bcm63138B0_manual_usb_ldo_start();
++#endif
++	}
++#else  //defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
+ #if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
+     /*enable SSC for usb3.0 */
+      usb3_ssc_enable();
+@@ -317,6 +368,7 @@
+ #endif
+ 
+ #endif/* defined(CONFIG_USB_XHCI_PLATFORM) */
++#endif //defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
+ 
+ 
+     /*adjust the default AFE settings for better eye diagrams */
+@@ -337,20 +389,38 @@
+     }
+ #endif
+ 
+-
+-#if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
+-
++#if defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++	if (USB3_ENABLE)
++	{
+ #if defined(CONFIG_BCM963138)
+-     bcm63138B0_usb3_erdy_nump_bypass();
++		bcm63138B0_usb3_erdy_nump_bypass();
+ #endif
+ 
+ #if defined(CONFIG_BCM963148)
+-	usb3_pll_fix();
++		usb3_pll_fix();
+ #endif
+ 
+-    xhci_dev = bcm_add_usb_host(CAP_TYPE_XHCI, 0, USB_XHCI_PHYS_BASE,
+-        0x1000, INTERRUPT_ID_USB_XHCI, "xhci-hcd", NULL);
++		xhci_dev = bcm_add_usb_host(CAP_TYPE_XHCI, 0, USB_XHCI_PHYS_BASE,
++			0x1000, INTERRUPT_ID_USB_XHCI, "xhci-hcd", NULL);
++	}
++#else //defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++
++#if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
++	
++#if defined(CONFIG_BCM963138)
++    bcm63138B0_usb3_erdy_nump_bypass();
+ #endif
++	
++#if defined(CONFIG_BCM963148)
++    usb3_pll_fix();
++#endif
++	
++    xhci_dev = bcm_add_usb_host(CAP_TYPE_XHCI, 0, USB_XHCI_PHYS_BASE,
++			0x1000, INTERRUPT_ID_USB_XHCI, "xhci-hcd", NULL);
++#endif/*defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)*/
++#endif //defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++
++
+     ehci_dev = bcm_add_usb_host(CAP_TYPE_EHCI, 0, USB_EHCI_PHYS_BASE,
+         0x100, INTERRUPT_ID_USB_EHCI, "ehci-platform", &bcm_ehci_pdata);
+     ohci_dev = bcm_add_usb_host(CAP_TYPE_OHCI, 0, USB_OHCI_PHYS_BASE,
+@@ -363,11 +433,21 @@
+ #if defined CONFIG_USB_EHCI_HCD_MODULE || defined CONFIG_USB_XHCI_HCD_MODULE
+ static void bcm_mod_cleanup(void)
+ {
++#if defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++		if (USB3_ENABLE)
++		{
++		    // we want to just disable usb interrupts and power down usb
++		    // we'll probably be restart later, re-add resources ok then?
++		    platform_device_del(xhci_dev);
++		}
++#else
+     // we want to just disable usb interrupts and power down usb
+     // we'll probably be restart later, re-add resources ok then?
+ #if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
+     platform_device_del(xhci_dev);
+ #endif
++#endif //defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++
+     platform_device_del(ehci_dev);
+     platform_device_del(ohci_dev);
+     pmc_usb_power_down(PMC_USB_HOST_ALL);

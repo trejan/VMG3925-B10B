@@ -102,6 +102,7 @@ typedef struct objIndex_s {
 }objIndex_t;
 
 #define MAX_PARMNAME_LEN PARAMETER_NAME_BUFF_SIZE
+#define CONCURRENT_WAN_BR_NAME "br_ccw"
 
 typedef struct {
 	uint32_t num_1;
@@ -132,6 +133,8 @@ typedef struct {
 	uint32_t attr;
 } zcfgParmQryAttr_t;
 
+typedef zcfgParmQryAttr_t zcfgParmQryValue_t;
+
 #define IID_INIT(IID) memset(&IID, 0, sizeof(objIndex_t))
 #define GET_OBJ_INFO_BY_OID(OID) (objInfo_t *)(schemaShmAddr + OID)
 #define GET_FIRST_PARAMETER_INFO(OBJ_INFO) (parameterInfo_t *)(OBJ_INFO+1)
@@ -147,6 +150,9 @@ typedef struct {
 #define CA_PATH "/var/cert/ca/"
 #define TR69CLIENT_CRT_NAME CERT_DIR"/tr69_cert.crt"
 #define TR69CLIENT_KEY_NAME CERT_DIR"/tr69_cert.key"
+
+// Support Feature of Idle Timeout Mechanism for CLI connection
+#define IDLE_TIMEOUT_FILE "/var/accountIdleTime"
 
 /* for openwrt 3.4 insmod */
 #ifdef BROADCOM_PLATFORM

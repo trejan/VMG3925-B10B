@@ -47,6 +47,7 @@ extern zcfgRet_t lanDevHostsObjAttrSet(char *, int, char *, int , struct json_ob
 
 extern zcfgRet_t lanDevHostObjGet(char *tr98FullPathName, int handler, struct json_object **tr98Jobj, bool updateFlag);
 #ifdef ZYXEL_ELIMINATE_DHCP_LEASE
+extern zcfgRet_t lanDevHostsObjSet(char *tr98FullPathName, int handler, struct json_object *tr98Jobj, struct json_object *multiJobj, char *paramfault);
 extern zcfgRet_t lanDevHostObjSet(char *tr98FullPathName, int handler, struct json_object *tr98Jobj, struct json_object *multiJobj, char *paramfault);
 #endif
 extern zcfgRet_t lanDevHostObjNotify(char *, char *, struct json_object *, int, struct json_object **);

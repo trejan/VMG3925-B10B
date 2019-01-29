@@ -71,3 +71,6 @@ echo 2 > /proc/sys/kernel/printk
 if [ `cat /proc/meminfo | grep 'MemTotal:' | awk '{print $2}'` -gt 110000 ]; then
 	echo 5120 > /proc/sys/vm/min_free_kbytes
 fi
+
+#ZYXEL, for SONiQ, the event might lost from driver to zywifid
+echo 360448 > /proc/sys/net/core/rmem_max

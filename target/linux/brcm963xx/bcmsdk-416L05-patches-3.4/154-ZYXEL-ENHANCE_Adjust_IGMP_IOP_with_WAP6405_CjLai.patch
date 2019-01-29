@@ -1,0 +1,49 @@
+Index: linux-3.4.11/net/bridge/Makefile
+===================================================================
+--- linux-3.4.11.orig/net/bridge/Makefile	2017-07-03 16:41:09.187988825 +0800
++++ linux-3.4.11/net/bridge/Makefile	2017-07-03 17:48:07.591968600 +0800
+@@ -10,6 +10,22 @@
+ endif
+ endif #BCM_KF #defined(CONFIG_BCM_KF_WLAN)
+ 
++
++EXTRA_CFLAGS    += -I $(TOPDIR)/include/asm-generic -I$(INC_BRCMDRIVER_PUB_PATH)/$(BRCM_BOARD) -I$(INC_BRCMSHARED_PUB_PATH)/$(BRCM_BOARD)
++## 20170703, Cj add ZyXEL compile flags
++#ifdef VENDOR_ZYXEL
++ifeq ($(strip ${ZYXEL}),y)
++EXTRA_CFLAGS += -DZYXEL=1
++ifneq ("$(strip ${ZYXEL_PRODUCT})","")
++EXTRA_CFLAGS += -DZYPRJ_$(ZYXEL_PRODUCT)=1
++endif
++ifeq ($(strip ${ZYXEL_PARTITION}),y)
++EXTRA_CFLAGS += -DZYXEL_PARTITION=1
++endif
++endif
++
++
++
+ obj-$(CONFIG_BRIDGE) += bridge.o
+ 
+ bridge-y	:= br.o br_device.o br_fdb.o br_forward.o br_if.o br_input.o \
+Index: linux-3.4.11/net/bridge/br_forward.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_forward.c	2017-07-03 16:41:09.179988825 +0800
++++ linux-3.4.11/net/bridge/br_forward.c	2017-07-03 17:48:03.993529800 +0800
+@@ -145,7 +145,17 @@
+ 		{
+ 			if ((p->br->igmp_snooping) && (pigmp->type != IGMP_HOST_MEMBERSHIP_QUERY)) 
+ 			{
++/*Flood IGMP report to LAN side even though snooping is enabled, chchien*/
++#if defined(ZYXEL) && (defined(ZYPRJ_EMG3415) || defined(ZYPRJ_VMG9823))
++				//if( igmp_type == IGMP_HOST_MEMBERSHIP_REPORT ){
++				//	printk(KERN_CRIT "igmp report\n");
++                //}
++				printk("###### forward IGMP to LAN ######\n");
++
++#else
++
+ 				return 0;
++#endif
+ 			}
+ 		}
+ #endif

@@ -1,0 +1,157 @@
+Index: linux-3.4.11/Kconfig.bcm
+===================================================================
+--- linux-3.4.11.orig/Kconfig.bcm	2018-05-04 17:30:31.902233276 +0800
++++ linux-3.4.11/Kconfig.bcm	2018-05-04 19:09:12.036163152 +0800
+@@ -1256,4 +1256,8 @@
+ 	bool "Support for 512MB DDR"
+ 	select SYS_SUPPORTS_HIGHMEM
+ 	select HIGHMEM
++
++config UDP_CUST_SESSION_TIMEOUT
++	bool "UDP customized session timeout"
++
+ endif
+Index: linux-3.4.11/include/linux/blog.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/blog.h	2018-05-04 17:30:32.926233304 +0800
++++ linux-3.4.11/include/linux/blog.h	2018-05-07 09:55:55.027682932 +0800
+@@ -308,6 +308,11 @@
+ struct sk_buff;                         /* linux/skbuff.h                     */
+ struct fkbuff;                          /* linux/nbuff.h                      */
+ 
++#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
++#define BLOG_NAT_UDP_CUSTOMIZED_DST_PORT 1600
++#define BLOG_NAT_UDP_CUSTOMIZED_IDLE_TIMEOUT (600 *HZ)
++#endif
++
+ /* See RFC 4008 */
+ #define BLOG_NAT_TCP_DEFAULT_IDLE_TIMEOUT (86400 *HZ)
+ #define BLOG_NAT_UDP_DEFAULT_IDLE_TIMEOUT (300 *HZ)
+Index: linux-3.4.11/net/core/blog.c
+===================================================================
+--- linux-3.4.11.orig/net/core/blog.c	2018-05-04 17:30:32.930233304 +0800
++++ linux-3.4.11/net/core/blog.c	2018-05-07 09:47:30.334686128 +0800
+@@ -75,6 +75,11 @@
+ 
+ /*--- globals ---*/
+ 
++#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
++uint32_t blog_nat_udp_customized_dst_port = BLOG_NAT_UDP_CUSTOMIZED_DST_PORT;
++uint32_t blog_nat_udp_customized_idle_timeout = BLOG_NAT_UDP_CUSTOMIZED_IDLE_TIMEOUT;
++#endif
++
+ /* RFC4008 */
+ uint32_t blog_nat_tcp_def_idle_timeout = BLOG_NAT_TCP_DEFAULT_IDLE_TIMEOUT; /* 1 DAY */
+ uint32_t blog_nat_udp_def_idle_timeout = BLOG_NAT_UDP_DEFAULT_IDLE_TIMEOUT; /* 300 seconds */
+@@ -1344,8 +1349,18 @@
+             else
+ #endif
+                 if (test_bit(IPS_SEEN_REPLY_BIT, &ct->status))
++#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
++                    if(htons(blog_nat_udp_customized_dst_port) == (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.udp.port))
++                        ct_time_p->extra_jiffies = blog_nat_udp_customized_idle_timeout;
++                    else
++#endif
+                     ct_time_p->extra_jiffies = blog_nat_udp_def_idle_timeout_stream;
+                 else
++#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
++                    if(htons(blog_nat_udp_customized_dst_port) == (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.udp.port))
++                        ct_time_p->extra_jiffies = blog_nat_udp_customized_idle_timeout;
++                    else
++#endif
+                     ct_time_p->extra_jiffies = blog_nat_udp_def_idle_timeout;
+         else /* default:non-TCP|UDP timer refresh */
+             ct_time_p->extra_jiffies = blog_nat_generic_def_idle_timeout;
+Index: linux-3.4.11/net/netfilter/nf_conntrack_core.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_core.c	2018-05-04 17:30:32.934233304 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_core.c	2018-05-07 09:34:20.283306565 +0800
+@@ -67,6 +67,13 @@
+ #endif /* CONFIG_BCM_RUNNER */
+ #endif /* CONFIG_BCM_KF_RUNNER */
+ 
++#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
++#define PROC_STB_PORT	"zy_nf_ct_udp_STB_port"
++#define PROC_STB_TIMEOUT	"zy_nf_ct_udp_STB_timeout"
++unsigned int nf_ct_udp_STB_timeout __read_mostly = 600*HZ;
++unsigned int nf_ct_udp_STB_port __read_mostly = 1600;
++#endif
++
+ #define NF_CONNTRACK_VERSION	"0.5.0"
+ 
+ int (*nfnetlink_parse_nat_setup_hook)(struct nf_conn *ct,
+Index: linux-3.4.11/net/netfilter/nf_conntrack_proto_udp.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_proto_udp.c	2018-05-04 17:30:31.954233277 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_proto_udp.c	2018-05-07 10:14:47.247445108 +0800
+@@ -29,6 +29,11 @@
+ #include <linux/blog.h>
+ #endif
+ 
++#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
++extern unsigned int nf_ct_udp_STB_timeout __read_mostly;
++extern unsigned int nf_ct_udp_STB_port __read_mostly;
++#endif
++
+ enum udp_conntrack {
+ 	UDP_CT_UNREPLIED,
+ 	UDP_CT_REPLIED,
+@@ -89,10 +94,33 @@
+ 		      unsigned int hooknum,
+ 		      unsigned int *timeouts)
+ {
++
++#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
++	const struct udphdr *hp;
++	struct udphdr _hdr;
++	int mFlag = 0;
++
++	//parse UDP header
++	/* Actually only need first 8 bytes. */
++	hp = skb_header_pointer(skb, dataoff, sizeof(_hdr), &_hdr);
++	if (hp != NULL)
++	{
++		//if match the dest. port, set flag
++		if (( hp->source == htons(nf_ct_udp_STB_port)) || ( hp->dest == htons(nf_ct_udp_STB_port)))
++		{
++			mFlag=1;
++			// printk(">>> STB mFlag=1  sport=%d dport=%d <<<\n", hp->source, hp->dest);
++		} else {
++			//printk(">>>  UDP sport=%d dport=%d <<<\n", hp->source, hp->dest);
++		}
++	}
++#endif
+ 	/* If we've seen traffic both ways, this is some kind of UDP
+ 	   stream.  Extend timeout. */
+ 	if (test_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {
+-#if defined(CONFIG_BCM_KF_NETFILTER)
++#if defined(CONFIG_UDP_CUST_SESSION_TIMEOUT)
++ 		nf_ct_refresh_acct(ct, ctinfo, skb, (mFlag)? nf_ct_udp_STB_timeout : timeouts[UDP_CT_REPLIED] );
++#elif defined(CONFIG_BCM_KF_NETFILTER)
+                 unsigned timeout = udp_timeouts[UDP_CT_REPLIED];
+                 if (ct->derived_timeout == 0xFFFFFFFF){
+                         timeout = 60*60*HZ;
+@@ -101,15 +129,18 @@
+                 }
+                 nf_ct_refresh_acct(ct, ctinfo, skb, timeout);
+ #else
+-		nf_ct_refresh_acct(ct, ctinfo, skb,
+-				   timeouts[UDP_CT_REPLIED]);
++		nf_ct_refresh_acct(ct, ctinfo, skb, timeouts[UDP_CT_REPLIED]);
+ #endif
+ 		/* Also, more likely to be important, and not a probe */
+ 		if (!test_and_set_bit(IPS_ASSURED_BIT, &ct->status))
+ 			nf_conntrack_event_cache(IPCT_ASSURED, ct);
+-	} else {
+-		nf_ct_refresh_acct(ct, ctinfo, skb,
+-				   timeouts[UDP_CT_UNREPLIED]);
++	}
++	else {
++#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
++ 		nf_ct_refresh_acct(ct, ctinfo, skb, (mFlag)? nf_ct_udp_STB_timeout :timeouts[UDP_CT_UNREPLIED] );
++#else
++		nf_ct_refresh_acct(ct, ctinfo, skb, timeouts[UDP_CT_UNREPLIED]);
++#endif
+ 	}
+ 	return NF_ACCEPT;
+ }

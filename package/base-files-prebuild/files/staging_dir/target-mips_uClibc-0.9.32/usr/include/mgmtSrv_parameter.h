@@ -39,6 +39,7 @@ tr98Parameter_t para_MgmtSrv[] = {
 	{ "X_ZYXEL_AcsSpvNotifyRequired", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_AcsUrlModifyAndClearTransData", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_UtilizeDelayApply", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_SpvOnSessionComplete", PARAMETER_ATTR_WRITE, 0, json_type_boolean},	
 	{ NULL, 0, 0, 0}
 };
 

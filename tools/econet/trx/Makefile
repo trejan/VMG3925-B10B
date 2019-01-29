@@ -14,7 +14,7 @@ PKG_NAME := econet-trx
 PKG_VERSION:=$(call qstrip,$(CONFIG_TC_SDK_VERSION))
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=@ZyXEL_SITE/private/Trendchip/tools
-DL_DIR:=$(TOPDIR)/dl/private
+DL_DIR:=$(TOPDIR)/dl
 PATCH_DIR:=patches-$(PKG_VERSION)
 
 HOST_BUILD_PARALLEL:=1

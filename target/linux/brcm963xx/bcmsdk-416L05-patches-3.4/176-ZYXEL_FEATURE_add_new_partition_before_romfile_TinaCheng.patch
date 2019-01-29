@@ -1,0 +1,16 @@
+Index: linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/bcm63xx-nand.c	2017-09-26 23:18:55.331958193 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c	2017-09-27 16:54:03.521149433 +0800
+@@ -388,7 +388,11 @@
+             if(extra_single_part_size >  mtd->erasesize) {
+                 extra+=extra_single_part_size;
+                 bcm63XX_nand_parts[nr_parts].name = misc_mtd_partition_names[i];
++#if 1 //Extra partion(ex. misc1) offset should be adjusted by/from romfile offset
++                bcm63XX_nand_parts[nr_parts].offset = (nvram.ulNandRomfilePartOfsKb * 1024) - extra;
++#else
+                 bcm63XX_nand_parts[nr_parts].offset = (nvram.ulNandPartOfsKb[NP_DATA] * 1024) - extra;
++#endif
+                 bcm63XX_nand_parts[nr_parts].size = extra_single_part_size;
+                 bcm63XX_nand_parts[nr_parts].ecclayout = mtd->ecclayout;
+                 nr_parts++;

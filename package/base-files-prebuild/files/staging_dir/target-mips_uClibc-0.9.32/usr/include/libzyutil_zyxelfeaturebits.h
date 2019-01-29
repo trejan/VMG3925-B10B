@@ -110,5 +110,19 @@ zcfgRet_t libzyutil_zyxelfeaturebits_wifi5GExAntGet(int *value);
  *  @return zcfgRet_t       ZCFG_SUCCESS:success(0), ZCFG_INTERNAL_ERROR:fail(-5).
  */
 zcfgRet_t libzyutil_zyxelfeaturebits_voipGet(int *value);
+/*!
+ *  Check if it only support single VoIP.
+ *
+ *  @param[out] value       1:single voip, 0:dobule voip(default).
+ *  @return zcfgRet_t       ZCFG_SUCCESS:success(0), ZCFG_INTERNAL_ERROR:fail(-5).
+ */
+zcfgRet_t libzyutil_zyxelfeaturebits_voipSinglePortGet(int *value);
+/*!
+ *  Check if it support ZigBee.
+ *
+ *  @param[out] value       1:support, 0:not support.
+ *  @return zcfgRet_t       ZCFG_SUCCESS:success(0), ZCFG_INTERNAL_ERROR:fail(-5).
+ */
+zcfgRet_t libzyutil_zyxelfeaturebits_zigbeeGet(int *value);
 
 #endif	/* _LIBZYUTIL_ZYXELFEATUREBITS_H */

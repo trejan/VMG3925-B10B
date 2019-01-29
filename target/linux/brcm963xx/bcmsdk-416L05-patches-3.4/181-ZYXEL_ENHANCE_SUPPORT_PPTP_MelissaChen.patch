@@ -1,0 +1,31 @@
+Index: linux-3.4.11/Kconfig.zyxel
+===================================================================
+--- linux-3.4.11.orig/Kconfig.zyxel	2017-11-27 14:42:15.865103948 +0800
++++ linux-3.4.11/Kconfig.zyxel	2017-11-27 14:44:47.968025001 +0800
+@@ -5,6 +5,9 @@
+ config ZYXEL_NF_SESSION_CTL
+         bool "ZyXEL feature - netfilter session control"
+ 
++config ZYXEL_PPTP_SUPPORT
++		bool "Support PPTP VPN"
++		
+ config I2C_SX9310
+ 	tristate "Support for I2C SEMTECH SX9310"
+ 	depends on I2C
+Index: linux-3.4.11/drivers/net/ppp/ppp_generic.c
+===================================================================
+--- linux-3.4.11.orig/drivers/net/ppp/ppp_generic.c	2017-11-23 17:58:26.533733686 +0800
++++ linux-3.4.11/drivers/net/ppp/ppp_generic.c	2017-11-23 18:30:56.296285455 +0800
+@@ -3106,6 +3106,11 @@
+       num[2] = u<<(32-(FIELD2))>>(32-FIELD2);
+       if (num[1] == 0)
+       {
++	#if defined(CONFIG_ZYXEL_PPTP_SUPPORT)/* __ZyXEL__, MelissaChen, 20171122, Support PPTP VPN.  */
++		if (num[2] == 11 ) {
++		 sprintf(dev->name, "ppp%d", num[2]);
++		} else
++	#endif
+          sprintf(dev->name, "ppp%d", num[0]);
+       }
+       else if (num[1] == 1) /* vlan mux */
+

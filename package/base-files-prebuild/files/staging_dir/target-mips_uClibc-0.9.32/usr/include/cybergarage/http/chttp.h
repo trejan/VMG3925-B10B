@@ -146,6 +146,14 @@ extern "C" {
 #define CG_HTTP_USERAGENT "User-Agent"
 #define CG_HTTP_LAST_MODIFIED "Last-Modified"
 #define CG_HTTP_IF_MMODIFIED_SINCE "If-Modified-Since"
+#define CG_HTTP_XFRAME "X-Frame-Options"
+#define CG_HTTP_XFRAME_SAMEORIGIN "sameorigin"
+#define CG_HTTP_XFRAME_DENY "deny"
+#define CG_HTTP_CSP "Content-Security-Policy"
+#define CG_HTTP_CSP_SELF "frame-ancestors \'self\'"
+#define CG_HTTP_CSP_NONE "frame-ancestors \'none\'"
+
+
 
 /**** SOAP Extention ****/
 #define CG_HTTP_SOAP_ACTION "SOAPACTION"
@@ -319,10 +327,16 @@ typedef struct _CgHttpRequest {
 	int timeout;
 #ifdef ZYXEL_PATCH /*support ssl, ZyXEL 2013*/
 	void *ctxdata;
+
+	void *httpServer;
 	CgHttpAuth authData;
 	CgHttpForm form;
 	char loginUserName[32];
 	char loginLevel[16];
+	int sessionID;
+	BOOL needChgPasswd;
+	BOOL showSkipBtn; /* show skip button in change password page if password is automatically generated */
+	BOOL needQuickStart;
 #endif
 	void *authList;
 } CgHttpRequest;
@@ -546,9 +560,13 @@ BOOL cg_http_request_postlastchunk(CgHttpRequest *httpReq);
 #ifdef ZYXEL_PATCH
 #define cg_http_request_setcookiedata(httpRes, data) (httpRes->cookieData = (void *)data)
 #define cg_http_request_getcookiedata(httpRes) (httpRes->cookieData)
+#define cg_http_request_sethttpserver(httpReq, svr) (httpReq->httpServer = (void *)svr)
+#define cg_http_request_retrievehttpserver(httpReq) (httpReq->httpServer)
 #else
 #define cg_http_request_setcookiedata(httpRes, data) do{}while(0)
 #define cg_http_request_getcookiedata(httpRes) NULL
+#define cg_http_request_sethttpserver(httpReq, svr) { }
+#define cg_http_request_retrievehttpserver(httpReq) NULL
 #endif
 
 /**** Local Address/Port ****/
@@ -721,8 +739,8 @@ char *cg_http_getservername(char *buf, int bufSize);
 #define cg_http_server_gettimeout(httpServer) (httpServer->timeout)
 
 /**** Mutex ****/
-#define cg_http_server_lock(httpServer) cg_mutex_lock(httpServer->mutex)
-#define cg_http_server_unlock(httpServer) cg_mutex_unlock(httpServer->mutex)
+#define cg_http_server_lock(httpServer) if(httpServer) cg_mutex_lock(httpServer->mutex)
+#define cg_http_server_unlock(httpServer) if(httpServer) cg_mutex_unlock(httpServer->mutex)
 
 /****************************************
 * Function (Server List)
@@ -806,12 +824,12 @@ char *cg_http_vallist_dump(CgHttpValList *valList);
 
 #endif
 
-#if defined(ZyXEL_Online_Firmware_Upgrade) || defined(ZYXEL_FWUPGRADE_DHCP_SUB_OPTION43)
+//#if defined(ZyXEL_Online_Firmware_Upgrade) || defined(ZYXEL_FWUPGRADE_DHCP_SUB_OPTION43) || defined (ZYXEL_WEB_GUI_SHOW_ENABLE_ONLINE_FW_UPGRADE)
 /*******************************************
 * cg_http_customrequest_post
 ********************************************/
 CgHttpResponse *cg_http_customrequest_post(CgHttpRequest *httpReq, char *ipaddr, int port, char *savedFile);
-#endif
+//#endif
 
 #ifdef  __cplusplus
 }

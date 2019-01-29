@@ -10,3 +10,4 @@ mtd:data        /data   jffs2   ,               0       0
 
 mtd:bootfs      /bootfs jffs2   ro              0       0
 
+mtd:misc1       /misc   jffs2   ,               0       0

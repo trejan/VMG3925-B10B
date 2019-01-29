@@ -8,8 +8,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=samba
+
+ifeq ($(CONFIG_ZYXEL_SUPPORT_SMB2),y)
+PKG_VERSION:=3.6.25
+PKG_RELEASE:=10
+else
 PKG_VERSION:=3.0.37
 PKG_RELEASE:=1
+endif
 
 PKG_SOURCE_URL:=@ZyXEL_SITE/opensource/network/services
 
@@ -20,8 +26,13 @@ PATCH_DIR=patches_${PKG_VERSION}
 
 include $(INCLUDE_DIR)/package.mk
 
+ifeq ($(CONFIG_ZYXEL_SUPPORT_SMB2),y)
+MAKE_PATH:=source3
+CONFIGURE_PATH:=source3
+else
 MAKE_PATH:=source
 CONFIGURE_PATH:=source
+endif
 PKG_BUILD_BIN:=$(PKG_BUILD_DIR)/$(MAKE_PATH)/bin
 
 define Package/samba
@@ -42,6 +53,68 @@ endef
 define CheckDependencies
 endef
 
+ifeq ($(CONFIG_ZYXEL_SUPPORT_SMB2),y)
+CONFIGURE_VARS += \
+	ac_cv_lib_attr_getxattr=no \
+	ac_cv_search_getxattr=no \
+	ac_cv_file__proc_sys_kernel_core_pattern=yes \
+	libreplace_cv_HAVE_C99_VSNPRINTF=yes \
+	libreplace_cv_HAVE_GETADDRINFO=yes \
+	libreplace_cv_HAVE_IFACE_IFCONF=yes \
+	LINUX_LFS_SUPPORT=yes \
+	samba_cv_CC_NEGATIVE_ENUM_VALUES=yes \
+	samba_cv_HAVE_GETTIMEOFDAY_TZ=yes \
+	samba_cv_HAVE_IFACE_IFCONF=yes \
+	samba_cv_HAVE_KERNEL_OPLOCKS_LINUX=yes \
+	samba_cv_HAVE_SECURE_MKSTEMP=yes \
+	samba_cv_HAVE_WRFILE_KEYTAB=no \
+	samba_cv_USE_SETREUID=yes \
+	samba_cv_USE_SETRESUID=yes \
+	samba_cv_have_setreuid=yes \
+	samba_cv_have_setresuid=yes \
+	ac_cv_header_libunwind_h=no \
+	ac_cv_header_zlib_h=no \
+	samba_cv_zlib_1_2_3=no \
+	ac_cv_path_PYTHON="" \
+	ac_cv_path_PYTHON_CONFIG=""
+
+CONFIGURE_ARGS += \
+	--exec-prefix=/usr \
+	--prefix=/ \
+	--disable-avahi \
+	--disable-cups \
+	--disable-external-libtalloc \
+	--disable-pie \
+	--disable-relro \
+	--disable-static \
+	--disable-swat \
+	--disable-shared-libs \
+	--with-libiconv="$(ICONV_PREFIX)" \
+	--with-codepagedir=/var/samba \
+	--with-configdir=/var/samba \
+	--with-included-iniparser \
+	--with-included-popt \
+	--with-lockdir=/var/lock \
+	--with-logfilebase=/var/log \
+	--with-nmbdsocketdir=/var/samba/nmbd \
+	--with-piddir=/var/run \
+	--with-privatedir=/var/samba \
+	--with-sendfile-support \
+	--without-acl-support \
+	--without-cluster-support \
+	--without-ads \
+	--without-krb5 \
+	--without-ldap \
+	--without-pam \
+	--without-winbind \
+	--without-libtdb \
+	--without-libtalloc \
+	--without-libnetapi \
+	--without-libsmbclient \
+	--without-libsmbsharemodes \
+	--without-libtevent \
+	--without-libaddns
+else
 CONFIGURE_VARS+= \
 	SMB_BUILD_CC_NEGATIVE_ENUM_VALUES=yes \
 	samba_cv_USE_SETEUID=no \
@@ -79,8 +152,8 @@ CONFIGURE_ARGS+= \
 	--without-libnetapi \
 	--without-libsmbclient \
 	--without-libsmbsharemodes \
-	--without-libaddns 
-	
+	--without-libaddns
+endif
 ZCFLAGS += -DZYXEL_PATCH
 	
 TARGET_CFLAGS += -DAVM_SMALLER -DAVM_NO_PRINTING -DMAX_DEBUG_LEVEL=2 $(ZCFLAGS)
@@ -94,9 +167,15 @@ MAKE_FLAGS += OWRT_NO_PRINTING=1 OWRT_SMALLER=1
 define Package/samba/install
 	$(INSTALL_DIR) $(1)/var/samba
 	$(INSTALL_DIR) $(1)/var/samba/nmbd
+ifeq ($(CONFIG_ZYXEL_SUPPORT_SMB2),y)
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/codepages/lowcase.dat $(1)/var/samba
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/codepages/upcase.dat $(1)/var/samba
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/codepages/valid.dat $(1)/var/samba
+else
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/$(MAKE_PATH)/codepages/lowcase.dat $(1)/var/samba
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/$(MAKE_PATH)/codepages/upcase.dat $(1)/var/samba
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/$(MAKE_PATH)/codepages/valid.dat $(1)/var/samba
+endif
 	$(INSTALL_DIR) $(1)/usr/lib
 #	$(INSTALL_BIN) $(PKG_BUILD_BIN)/libtalloc.so.1 $(1)/usr/lib
 #	$(INSTALL_BIN) $(PKG_BUILD_BIN)/libtdb.so.1 $(1)/usr/lib

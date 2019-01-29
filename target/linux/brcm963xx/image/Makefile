@@ -68,6 +68,9 @@ export NVRAM_TM_MEMORY_ALLOCATION=$(call qstrip,$(CONFIG_BCM63138_NVRAM_TM_MEMOR
 export NVRAM_DHD0_MEMORY_ALLOCATION=$(call qstrip,$(CONFIG_BCM63138_NVRAM_DHD0_MEMORY_ALLOCATION))
 export NVRAM_DHD1_MEMORY_ALLOCATION=$(call qstrip,$(CONFIG_BCM63138_NVRAM_DHD1_MEMORY_ALLOCATION))
 export NVRAM_DHD2_MEMORY_ALLOCATION=$(call qstrip,$(CONFIG_BCM63138_NVRAM_DHD2_MEMORY_ALLOCATION))
+export BRCM_MISC1_PARTITION_SIZE=$($(shell echo CONFIG_BRCMSDK$(CONFIG_BRCM_SDK_VERSION)_BRCM_MISC1_PARTITION_SIZE))
+export BRCM_MISC2_PARTITION_SIZE=$($(shell echo CONFIG_BRCMSDK$(CONFIG_BRCM_SDK_VERSION)_BRCM_MISC2_PARTITION_SIZE))
+export BRCM_MISC3_PARTITION_SIZE=$($(shell echo CONFIG_BRCMSDK$(CONFIG_BRCM_SDK_VERSION)_BRCM_MISC3_PARTITION_SIZE))
 
 # Get common options
 ZYXEL_RAS_FORMAT=$($(shell echo CONFIG_BRCMSDK${CONFIG_BRCM_SDK_VERSION}_ZYXEL_RSA_FORMAT))
@@ -77,11 +80,15 @@ ZYXEL_ZYTOOL_SCRIPT_DIR=$(TOPDIR)/target/linux/brcm963xx/$(SUBTARGET)
 
 define Image/Build/multi_zld
 	##doing zytool shell script
-	if [ -e $(ZYXEL_ZYTOOL_SCRIPT_DIR)/zytool_multi_zld.sh -a -e $(HOSTTOOLS_DIR)/zytool ]; then \
-		$(ZYXEL_ZYTOOL_SCRIPT_DIR)/zytool_multi_zld.sh $(HOSTTOOLS_DIR) $(BIN_DIR)/zyxel $(BRCM_CHIP) $(ARCH_ENDIAN); \
+	if [ -e $(ZYXEL_ZYTOOL_SCRIPT_DIR)/zytool_multi_zld.sh ]; then \
+	if [ -e $(HOSTTOOLS_DIR)/zytool ]; then \
+	$(ZYXEL_ZYTOOL_SCRIPT_DIR)/zytool_multi_zld.sh $(HOSTTOOLS_DIR) $(BIN_DIR)/zyxel $(BRCM_CHIP) $(ARCH_ENDIAN); \
 	elif [ ! -e $(HOSTTOOLS_DIR)/zytool ]; then \
-		echo "Please clean and rebuild host tools !!"; \
-		exit -1; \
+	echo "Please clean and rebuild host tools !!"; \
+	exit -1; \
+	fi \
+	elif [ ! -e $(ZYXEL_ZYTOOL_SCRIPT_DIR)/zytool_multi_zld.sh ]; then \
+	echo; \
 	fi
 endef
 
@@ -98,7 +105,9 @@ else
 endif
 	cp $(BIN_DIR)/openwrt-nand-$(BOARDNAME)-jffs2-$(JFFS2_BLOCKSIZE).bin.w $(BIN_DIR)/zyxel/ras.bin
 	dd if=$(BIN_DIR)/openwrt-nand-$(BOARDNAME)-jffs2-$(JFFS2_BLOCKSIZE)-cfe.bin.w of=$(BIN_DIR)/zyxel/zld.bin bs=1k count=$(FLASHBLK_SIZE)
+ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L05)), )
 	$(call Image/Build/multi_zld)
+endif
 endef
 
 define Image/Build/CFE
@@ -113,7 +122,9 @@ else
 endif
 	cp $(BIN_DIR)/openwrt-nand-$(4)-$(1).bin.w $(BIN_DIR)/zyxel/ras.bin
 	dd if=$(BIN_DIR)/openwrt-nand-$(4)-$(1)-cfe.bin.w of=$(BIN_DIR)/zyxel/zld.bin bs=1k count=$(FLASHBLK_SIZE)
+ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L05)), )
 	$(call Image/Build/multi_zld)
+endif
 else
 	$(HOSTTOOLS_DIR)/bcmImageBuilder --output $(BIN_DIR)/openwrt-$(4)-$(1).bin --chip $(3) --board $(2) --blocksize $(SQUASHFS_BLOCKSIZE) --image-version 4143GW2801456 --cfefile $(BIN_DIR)/brcm-cfe/cfe$(BRCM_CHIP).bin --rootfsfile $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) --kernelfile $(KDIR)/vmlinux.lz
 	cp $(BIN_DIR)/openwrt-$(4)-$(1).bin $(BIN_DIR)/zyxel/ras.bin

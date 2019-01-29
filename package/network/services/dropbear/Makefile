@@ -8,14 +8,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dropbear
-PKG_VERSION:=2012.55
-PKG_RELEASE:=3
+PKG_VERSION:=2018.76
+PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 #PKG_SOURCE_URL:= \
 	http://matt.ucc.asn.au/dropbear/releases/ \
 	http://www.mirrors.wiretapped.net/security/cryptography/apps/ssh/dropbear/
-PKG_MD5SUM:=8c784baec3054cdb1bb4bfa792c87812
+PKG_MD5SUM:=c3912f7fcdcc57c99937e4a79480d2c2
 PKG_SOURCE_URL:=@ZyXEL_SITE/opensource/network/services
 
 PKG_LICENSE:=MIT
@@ -73,11 +73,25 @@ CONFIGURE_ARGS += \
 
 TARGET_CFLAGS += -DARGTYPE=3 -ffunction-sections -fdata-sections
 TARGET_LDFLAGS += -Wl,--gc-sections
+BUILD_APPS = scp
+LN_SCP = ln -sf ../sbin/dropbear $(1)/usr/bin/scp
+LN_DBCLIENT = ln -sf ../sbin/dropbear $(1)/usr/bin/dbclient
+export BUILD_APPS
+export LN_SCP
+export LN_DBCLIENT
+
+#Remote Access privilege feature
+export CONFIG_ZYXEL_REMOTE_ACCESS_PRIVILEGE
+
+export CONFIG_ZYXEL_REMOMGMT_ONLY_HTTPS_ALLOWS_FOR_WLAN_CONNECT
+
+#CLI idle timeout feature
+export CONFIG_ZYXEL_CLI_IDLE_TIMEOUT
 
 define Build/Compile
 	+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) \
 		$(TARGET_CONFIGURE_OPTS) \
-		PROGRAMS="dropbear dropbearkey" \
+		PROGRAMS="dropbear dbclient dropbearkey $(BUILD_APPS)" \
 		MULTI=1 SCPPROGRESS=1
 #		PROGRAMS="dropbear dbclient dropbearkey scp" \
 #		MULTI=1 SCPPROGRESS=1
@@ -90,6 +104,8 @@ define Package/dropbear/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dropbearmulti $(1)/usr/sbin/dropbear
 	$(INSTALL_DIR) $(1)/usr/bin
+	$(LN_SCP)
+	$(LN_DBCLIENT)
 #	ln -sf ../sbin/dropbear $(1)/usr/bin/scp
 #	ln -sf ../sbin/dropbear $(1)/usr/bin/ssh
 #	ln -sf ../sbin/dropbear $(1)/usr/bin/dbclient
@@ -102,10 +118,16 @@ define Package/dropbear/install
 #	$(INSTALL_DIR) $(1)/etc/dropbear
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/openssl.cnf $(1)/etc/config
+	$(INSTALL_DIR) $(1)/etc/dropbear
+	ln -s /data/dropbear/dropbear_dss_host_key $(1)/etc/dropbear/dropbear_dss_host_key
+	ln -s /data/dropbear/dropbear_rsa_host_key $(1)/etc/dropbear/dropbear_rsa_host_key
 #	touch $(1)/etc/dropbear/dropbear_rsa_host_key
 #	touch $(1)/etc/dropbear/dropbear_dss_host_key
 	$(INSTALL_DIR) -d -m 755 $(1)/etc/mycert
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dropbear_rsa_host_key.ZyXEL $(1)/etc/mycert/ssh.rsa
+	ln -s /data/dropbear/dropbear_rsa_host_key $(1)/etc/mycert/ssh.rsa
+###	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dropbear_rsa_host_key.ZyXEL $(1)/etc/mycert/ssh.rsa
+	$(CP) ./files/authorized_keys $(1)/etc/
+	chmod 644 $(1)/etc/authorized_keys
 endef
 
 #define Package/dropbearconvert/install

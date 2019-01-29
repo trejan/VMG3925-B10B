@@ -1,8 +1,8 @@
 Index: libzcfg_fe_dal-1.0/Makefile
 ===================================================================
---- libzcfg_fe_dal-1.0.orig/Makefile	2017-11-13 17:49:53.275800740 +0800
-+++ libzcfg_fe_dal-1.0/Makefile	2017-11-13 17:50:34.132966000 +0800
-@@ -167,6 +167,10 @@
+--- libzcfg_fe_dal-1.0.orig/Makefile	2017-11-13 17:02:31.447787005 +0800
++++ libzcfg_fe_dal-1.0/Makefile	2017-11-13 17:02:31.603787006 +0800
+@@ -179,6 +179,10 @@
  CFLAGS += -DZYXEL_NAT_LOG
  endif
  
@@ -10,13 +10,13 @@ Index: libzcfg_fe_dal-1.0/Makefile
 +CFLAGS += -DCONFIG_ZYXEL_PPP_AUTH_MENU_CHAP_PAP_CTL
 +endif
 +
- LDFLAGS += $(LIB_PATH) $(LINK_LIB)
- CFLAGS += $(INC_PATH) -std=gnu99
- 
+ ##Co-FW
+ ifeq ($(CONFIG_SAME_FW_FOR_TWO_BOARD),y)
+ CFLAGS += -DSAME_FW_FOR_TWO_BOARD
 Index: libzcfg_fe_dal-1.0/network/broadband/zcfg_fe_dal_wwanbackup.c
 ===================================================================
---- libzcfg_fe_dal-1.0.orig/network/broadband/zcfg_fe_dal_wwanbackup.c	2017-11-13 17:49:53.539800741 +0800
-+++ libzcfg_fe_dal-1.0/network/broadband/zcfg_fe_dal_wwanbackup.c	2017-11-13 17:52:37.886966000 +0800
+--- libzcfg_fe_dal-1.0.orig/network/broadband/zcfg_fe_dal_wwanbackup.c	2017-11-13 17:02:31.351787004 +0800
++++ libzcfg_fe_dal-1.0/network/broadband/zcfg_fe_dal_wwanbackup.c	2017-11-13 17:00:50.919460500 +0800
 @@ -27,6 +27,9 @@
  /* set PPP object */
  {"Username", dalType_string, 0, 0, NULL},
@@ -63,9 +63,9 @@ Index: libzcfg_fe_dal-1.0/network/broadband/zcfg_fe_dal_wwanbackup.c
  	else
 Index: libzcfg_fe_dal-1.0/zcfg_fe_dal.c
 ===================================================================
---- libzcfg_fe_dal-1.0.orig/zcfg_fe_dal.c	2017-11-13 17:49:53.603800742 +0800
-+++ libzcfg_fe_dal-1.0/zcfg_fe_dal.c	2017-11-13 17:50:49.489966000 +0800
-@@ -1982,7 +1982,7 @@
+--- libzcfg_fe_dal-1.0.orig/zcfg_fe_dal.c	2017-11-13 17:02:31.599787006 +0800
++++ libzcfg_fe_dal-1.0/zcfg_fe_dal.c	2017-11-13 17:02:31.607787006 +0800
+@@ -1997,7 +1997,7 @@
  
  	if(json_object_object_get(Jobj, "cmdtype")){	// GUI show Jobj, but CLI cannot show Jobj. Rex add 20170918
  		if(!strcmp(json_object_get_string(json_object_object_get(Jobj, "cmdtype")),"GUI"))

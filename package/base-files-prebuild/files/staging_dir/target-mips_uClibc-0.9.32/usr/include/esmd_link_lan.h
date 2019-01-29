@@ -6,3 +6,5 @@ extern int removeIfaceGroup(char *portName, bool confirmed);
 #else
 int removeIfaceGroup(char *portName);
 #endif
+
+int wpsMsgStatusHandle(uint32_t , char *, int);

@@ -1,6 +1,21 @@
 #ifndef _ZCFG_BE_RDM_ACCESS_H
 #define _ZCFG_BE_RDM_ACCESS_H
 
+#define ZCMD_SET_NORMAL		0
+#define ZCMD_SET_WITHOUT_APPLY		1
+#define ZCMD_GET_NORMAL		1 << 1
+#define ZCMD_GET_WITHOUT_UPDATE	1 << 2
+#define ZCMD_ADD_NORMAL		1 << 3
+#define ZCMD_ADD_WITHOUT_APPLY		1 << 4
+#define ZCMD_PARTIAL_SET		1 << 5
+
+#define ZCMD_QUERY_OBJ_EXIST		1 << 6
+
+#define ZCMD_RPC_REQUEST_ADDITIONS	1 << 8
+
+#define ZCMD_UTILIZE_DISTINCT_VALUE	1 << 11
+#define ZCMD_RE_APPLY			1 << 12
+
 zcfgRet_t zcfgBeObjGetNext(zcfg_offset_t, objIndex_t *, void **);
 zcfgRet_t zcfgBeObjGetNextWithoutUpdate(zcfg_offset_t, objIndex_t *, void **);
 zcfgRet_t zcfgBeObjGet(zcfg_offset_t, objIndex_t *, void **);
@@ -24,7 +39,17 @@ void zcfgBeReqMappingTableRebuild();
 #define zcfgBeReqMappingTableRebuild() {}
 #endif
 
+zcfgRet_t zcfgBeRdmReqGetNext(zcfg_offset_t rdmObjId, objIndex_t *objIid, char **jstr, uint8_t op);
+zcfgRet_t zcfgBeRdmReqSet(zcfg_offset_t , objIndex_t *, void *, uint32_t , char *);
+zcfgRet_t zcfgBeRdmReqSetWitoutApply(zcfg_offset_t , objIndex_t *, void *, uint32_t , char *);
+
+zcfgRet_t zcfgBeLanAppySyncDhcp4Server();
+
 struct json_object *zcfgBeApplyObjRetrievePartialObj(void *obj);
+
+zcfgRet_t zcfgBeClearAllTr98WANConnectNumParam(const char *wanConnectNumParam);
+zcfgRet_t zcfgBeSyncTr98WANConnectNum(uint32_t oid, objIndex_t *objIid, const char *wanConnectNumParam, struct json_object **replyNotifyObj, int num);
+zcfgRet_t zcfgBeNotifyMsgSend(struct json_object *notify);
 
 void zcfgBeCreateConfigSymLink(char *);
 void zcfgBeRemoveConfigSymLink(char *);

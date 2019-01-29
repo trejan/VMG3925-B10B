@@ -46,7 +46,9 @@ typedef struct {
 zcfgRet_t zcfg98To181ObjMappingAdd(zcfg_name_t seqnum, objIndex_t *tr98ObjIid, zcfg_offset_t oid, objIndex_t *objIid);
 zcfgRet_t zcfgObjMappingGet(uint32_t msgType, uint32_t num_1, objIndex_t *objIdxData_1, uint32_t *num_2, objIndex_t *objIdxData_2);
 zcfgRet_t zcfgFeMultiParmAttrSet(zcfgFeSetParmAttrLst_t *setParmAttrLst);
+zcfgRet_t zcfgFeTr98ObjValueQry(zcfg_name_t seqnum, objIndex_t *tr98ObjIid, const char *parmName, struct json_object **valueObj, int);
 zcfgRet_t zcfgFeParmAttrQry(zcfg_name_t seqnum, objIndex_t *tr98ObjIid, const char *parmName, zcfg_offset_t *oid, objIndex_t *objIid, char *queriedParmName, uint32_t *attr);
+zcfgRet_t zcfgFeMsgObjQryInstances(uint32_t type, zcfg_name_t nameSeqNum, objIndex_t *queryObjIid, char **instances);
 zcfgRet_t zcfgFeTr181ParmAttrQry(zcfg_offset_t , objIndex_t *, char *, zcfg_name_t *, objIndex_t *, const char *, uint32_t *);
 zcfgRet_t zcfgFeObjParamAttrQry(uint32_t , objIndex_t *, struct json_object **, uint32_t );
 #endif

@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # OpenWrt version: Barrier Breaker (unknown)
-# Tue Apr 10 11:52:39 2018
+# Fri Aug 24 13:17:30 2018
 #
 CONFIG_MODULES=y
 CONFIG_HAVE_DOT_CONFIG=y
@@ -9,7 +9,7 @@ CONFIG_HAVE_DOT_CONFIG=y
 #
 # ZyXEL Project Configuration
 #
-CONFIG_ZYXEL_FIRMWARE_VERSION="V5.13(AAVF.11)C0"
+CONFIG_ZYXEL_FIRMWARE_VERSION="V5.13(AAVF.12)C0"
 CONFIG_ZYXEL_FIRMWARE_ID="AAVF"
 CONFIG_ZYXEL_GUI_PATCH_DIR="ZyXEL_Generic"
 
@@ -64,6 +64,7 @@ CONFIG_BCM63138_NVRAM_DHD2_MEMORY_ALLOCATION=0
 CONFIG_FILL_IN_PARTITION_INFO_INTO_NVRAM=y
 CONFIG_TARGET_NAND_FLASH_TOTAL_SIZE=128
 # CONFIG_ZYXEL_RMA_FW_SUPPORT is not set
+CONFIG_ZYXEL_SYS_FWUR_SUPPORT=y
 
 #
 # Supported components on hardware
@@ -72,6 +73,7 @@ CONFIG_DSL_SUPPORT=y
 # CONFIG_XPON_SUPPORT is not set
 # CONFIG_LTE_SUPPORT is not set
 # CONFIG_PROXIMITY_SENSOR_SUPPORT is not set
+# CONFIG_ZYXEL_ZIGBEE_SUPPORT is not set
 
 #
 # Hardware depend misc.
@@ -80,7 +82,17 @@ CONFIG_DSL_SUPPORT=y
 # CONFIG_ZYXEL_WPS_SPOTLIGHT is not set
 # CONFIG_ZYXEL_SFP_MODULE_SUPPORT is not set
 CONFIG_ZYXEL_FEM_DETECT=y
+# CONFIG_ZYXEL_BOARD_DETECT_BY_GPIO is not set
+# CONFIG_ZYXEL_SUPPORT_BOTH_256_512_FLASH is not set
 # CONFIG_ZYXEL_NEW_ATEN_ATSE is not set
+
+#
+# Customization design for new id
+#
+# CONFIG_ZYXEL_DISABLE_TXRX_FOR_WAN_ACT is not set
+# CONFIG_ZYXEL_WIND_NEW_XDSL_BEHAVIOR is not set
+# CONFIG_ZYXEL_SUPPORT_SW_LAN_AGGREGATE_LED is not set
+CONFIG_ZYXEL_SUPPORT_SMB2=y
 # CONFIG_TARGET_ppc40x is not set
 # CONFIG_TARGET_ppc44x is not set
 # CONFIG_TARGET_realview is not set
@@ -132,63 +144,22 @@ CONFIG_TARGET_brcm963xx=y
 # CONFIG_TARGET_ramips_rt288x is not set
 # CONFIG_TARGET_ramips_rt305x is not set
 # CONFIG_TARGET_ramips_rt3883 is not set
-# CONFIG_TARGET_adm5120_router_le is not set
-# CONFIG_TARGET_adm5120_router_be is not set
-# CONFIG_TARGET_adm5120_rb1xx is not set
-# CONFIG_TARGET_lantiq_xway is not set
-# CONFIG_TARGET_lantiq_ase is not set
-# CONFIG_TARGET_lantiq_falcon is not set
-# CONFIG_TARGET_orion_generic is not set
-# CONFIG_TARGET_orion_harddisk is not set
-# CONFIG_TARGET_orion_dns323 is not set
-# CONFIG_TARGET_ixp4xx_generic is not set
-# CONFIG_TARGET_ixp4xx_harddisk is not set
-# CONFIG_TARGET_mt75xx_mt7505 is not set
-# CONFIG_TARGET_mt75xx_mt7520 is not set
-# CONFIG_TARGET_mt75xx_mt7525_tw is not set
-# CONFIG_TARGET_mt75xx_pmg5317_t20a is not set
-# CONFIG_TARGET_mt75xx_pmg1006_t20a is not set
-# CONFIG_TARGET_mt75xx_pmg2006_t20a is not set
-# CONFIG_TARGET_brcm963xx_96838GWOV is not set
-# CONFIG_TARGET_brcm963xx_963138ref is not set
-# CONFIG_TARGET_brcm963xx_963269bhr is not set
-# CONFIG_TARGET_brcm963xx_emg3415 is not set
-# CONFIG_TARGET_brcm963xx_fmg3586 is not set
-# CONFIG_TARGET_brcm963xx_vmg1312 is not set
-# CONFIG_TARGET_brcm963xx_vmg3625 is not set
-# CONFIG_TARGET_brcm963xx_vmg3925 is not set
-# CONFIG_TARGET_brcm963xx_vmg3925_b10c is not set
-# CONFIG_TARGET_brcm963xx_vmg3925_b30c is not set
-CONFIG_TARGET_brcm963xx_vmg3926=y
-# CONFIG_TARGET_brcm963xx_vmg3926b is not set
-# CONFIG_TARGET_brcm963xx_vmg5313b is not set
-# CONFIG_TARGET_brcm963xx_vmg8823_b10b is not set
-# CONFIG_TARGET_brcm963xx_vmg8823_b30b is not set
-# CONFIG_TARGET_brcm963xx_vmg8823_b50b is not set
-# CONFIG_TARGET_brcm963xx_vmg8823_b60b is not set
-# CONFIG_TARGET_brcm963xx_vmg8924 is not set
-# CONFIG_TARGET_brcm963xx_vmg8924_b10a is not set
-# CONFIG_TARGET_brcm963xx_vmg8924_b10d is not set
-# CONFIG_TARGET_brcm963xx_vmg8924_b30d is not set
-# CONFIG_TARGET_brcm963xx_vmg8948 is not set
-# CONFIG_TARGET_brcm963xx_vmg9823 is not set
-# CONFIG_TARGET_brcm963xx_xmg3512 is not set
-# CONFIG_TARGET_brcm963xx_xmg3563_b10a is not set
-# CONFIG_TARGET_at91_9g20 is not set
-# CONFIG_TARGET_at91_9260 is not set
-# CONFIG_TARGET_at91_9263 is not set
-# CONFIG_TARGET_ar7_generic is not set
-# CONFIG_TARGET_ar7_ac49x is not set
 # CONFIG_TARGET_au1000_au1500 is not set
 # CONFIG_TARGET_au1000_au1550 is not set
-# CONFIG_TARGET_ar71xx_generic is not set
-# CONFIG_TARGET_ar71xx_nand is not set
-# CONFIG_TARGET_omap35xx_beagleboard is not set
-# CONFIG_TARGET_omap35xx_gumstix is not set
+# CONFIG_TARGET_en75xx_en7512 is not set
+# CONFIG_TARGET_en75xx_en7521 is not set
+# CONFIG_TARGET_en75xx_pmg5317_t20b is not set
+# CONFIG_TARGET_en75xx_vmg1302_t20a is not set
+# CONFIG_TARGET_en75xx_vmg1312_t20a is not set
+# CONFIG_TARGET_en75xx_vmg1312_t20b is not set
+# CONFIG_TARGET_en75xx_vmg3312_t20a is not set
+# CONFIG_TARGET_en75xx_vmg3625_t20a is not set
 # CONFIG_TARGET_xburst_qi_lb60 is not set
 # CONFIG_TARGET_xburst_n516 is not set
 # CONFIG_TARGET_xburst_n526 is not set
 # CONFIG_TARGET_xburst_id800wt is not set
+# CONFIG_TARGET_ixp4xx_generic is not set
+# CONFIG_TARGET_ixp4xx_harddisk is not set
 # CONFIG_TARGET_x86_generic is not set
 # CONFIG_TARGET_x86_olpc is not set
 # CONFIG_TARGET_x86_xen_domu is not set
@@ -199,18 +170,63 @@ CONFIG_TARGET_brcm963xx_vmg3926=y
 # CONFIG_TARGET_x86_alix2 is not set
 # CONFIG_TARGET_x86_thincan is not set
 # CONFIG_TARGET_x86_rdc is not set
+# CONFIG_TARGET_adm5120_router_le is not set
+# CONFIG_TARGET_adm5120_router_be is not set
+# CONFIG_TARGET_adm5120_rb1xx is not set
+# CONFIG_TARGET_ar71xx_generic is not set
+# CONFIG_TARGET_ar71xx_nand is not set
+# CONFIG_TARGET_ar7_generic is not set
+# CONFIG_TARGET_ar7_ac49x is not set
+# CONFIG_TARGET_lantiq_xway is not set
+# CONFIG_TARGET_lantiq_ase is not set
+# CONFIG_TARGET_lantiq_falcon is not set
+# CONFIG_TARGET_brcm963xx_96838GWOV is not set
+# CONFIG_TARGET_brcm963xx_963138ref is not set
+# CONFIG_TARGET_brcm963xx_963269bhr is not set
+# CONFIG_TARGET_brcm963xx_emg3415 is not set
+# CONFIG_TARGET_brcm963xx_emg6726_b10a is not set
+# CONFIG_TARGET_brcm963xx_fmg3586 is not set
+# CONFIG_TARGET_brcm963xx_vmg1312 is not set
+# CONFIG_TARGET_brcm963xx_vmg3625 is not set
+# CONFIG_TARGET_brcm963xx_vmg3925 is not set
+# CONFIG_TARGET_brcm963xx_vmg3925_b10c is not set
+# CONFIG_TARGET_brcm963xx_vmg3925_b30c is not set
+CONFIG_TARGET_brcm963xx_vmg3926=y
+# CONFIG_TARGET_brcm963xx_vmg3926b is not set
+# CONFIG_TARGET_brcm963xx_vmg3927_b50b is not set
+# CONFIG_TARGET_brcm963xx_vmg4927_b50a is not set
+# CONFIG_TARGET_brcm963xx_vmg5313b is not set
+# CONFIG_TARGET_brcm963xx_vmg8823_b10b is not set
+# CONFIG_TARGET_brcm963xx_vmg8823_b30b is not set
+# CONFIG_TARGET_brcm963xx_vmg8823_b50b is not set
+# CONFIG_TARGET_brcm963xx_vmg8823_b60b is not set
+# CONFIG_TARGET_brcm963xx_vmg8825_b50b is not set
+# CONFIG_TARGET_brcm963xx_vmg8825_b50k is not set
+# CONFIG_TARGET_brcm963xx_vmg8924 is not set
+# CONFIG_TARGET_brcm963xx_vmg8924_b10a is not set
+# CONFIG_TARGET_brcm963xx_vmg8924_b10d is not set
+# CONFIG_TARGET_brcm963xx_vmg8924_b30d is not set
+# CONFIG_TARGET_brcm963xx_vmg8948 is not set
+# CONFIG_TARGET_brcm963xx_vmg9823 is not set
+# CONFIG_TARGET_brcm963xx_xmg3512 is not set
+# CONFIG_TARGET_brcm963xx_xmg3563_b10a is not set
+# CONFIG_TARGET_brcm963xx_xmg8825_b50a is not set
+# CONFIG_TARGET_orion_generic is not set
+# CONFIG_TARGET_orion_harddisk is not set
+# CONFIG_TARGET_orion_dns323 is not set
+# CONFIG_TARGET_at91_9g20 is not set
+# CONFIG_TARGET_at91_9260 is not set
+# CONFIG_TARGET_at91_9263 is not set
 # CONFIG_TARGET_malta_le is not set
 # CONFIG_TARGET_malta_be is not set
-# CONFIG_TARGET_en75xx_en7512 is not set
-# CONFIG_TARGET_en75xx_en7521 is not set
-# CONFIG_TARGET_en75xx_pmg5317_t20b is not set
-# CONFIG_TARGET_en75xx_vmg1312_t20a is not set
-# CONFIG_TARGET_en75xx_vmg1312_t20b is not set
-# CONFIG_TARGET_en75xx_vmg3312_t20a is not set
-# CONFIG_TARGET_en75xx_vmg3625_t20a is not set
-# CONFIG_TARGET_gemini_Default is not set
-# CONFIG_TARGET_imx21_Default is not set
-# CONFIG_TARGET_realview_Default is not set
+# CONFIG_TARGET_omap35xx_beagleboard is not set
+# CONFIG_TARGET_omap35xx_gumstix is not set
+# CONFIG_TARGET_mt75xx_mt7505 is not set
+# CONFIG_TARGET_mt75xx_mt7520 is not set
+# CONFIG_TARGET_mt75xx_mt7525_tw is not set
+# CONFIG_TARGET_mt75xx_pmg5317_t20a is not set
+# CONFIG_TARGET_mt75xx_pmg1006_t20a is not set
+# CONFIG_TARGET_mt75xx_pmg2006_t20a is not set
 # CONFIG_TARGET_ramips_rt288x_Default is not set
 # CONFIG_TARGET_ramips_rt288x_RTN15 is not set
 # CONFIG_TARGET_ramips_rt288x_F5D8235V1 is not set
@@ -232,6 +248,73 @@ CONFIG_TARGET_brcm963xx_vmg3926=y
 # CONFIG_TARGET_ramips_rt3883_DIR645 is not set
 # CONFIG_TARGET_ramips_rt3883_TEW691GR is not set
 # CONFIG_TARGET_ramips_rt3883_TEW692GR is not set
+# CONFIG_TARGET_ppc40x_Default is not set
+# CONFIG_TARGET_au1000_au1500_Atheros is not set
+# CONFIG_TARGET_au1000_au1500_InternetBox is not set
+# CONFIG_TARGET_au1000_au1500_MeshCube is not set
+# CONFIG_TARGET_au1000_au1550_DBAu1550 is not set
+# CONFIG_TARGET_omap4_Default is not set
+# CONFIG_TARGET_brcm47xx_Broadcom-b43 is not set
+# CONFIG_TARGET_brcm47xx_Broadcom-wl is not set
+# CONFIG_TARGET_brcm47xx_Broadcom-ath5k is not set
+# CONFIG_TARGET_brcm47xx_Broadcom-none is not set
+# CONFIG_TARGET_brcm47xx_Bcm4705-b43 is not set
+# CONFIG_TARGET_brcm47xx_Bcm4705-wl is not set
+# CONFIG_TARGET_brcm47xx_Bcm4705-none is not set
+# CONFIG_TARGET_brcm47xx_Ps1208mfg is not set
+# CONFIG_TARGET_brcm47xx_WGT634U is not set
+# CONFIG_TARGET_brcm47xx_WL500GPv1 is not set
+# CONFIG_TARGET_brcm47xx_WRT350Nv1 is not set
+# CONFIG_TARGET_brcm47xx_WRTSL54GS is not set
+# CONFIG_TARGET_rb532_Default is not set
+# CONFIG_TARGET_ep93xx_Default is not set
+# CONFIG_TARGET_ep93xx_Simone is not set
+# CONFIG_TARGET_octeon_generic is not set
+# CONFIG_TARGET_octeon_mototech is not set
+# CONFIG_TARGET_sibyte_Default is not set
+# CONFIG_TARGET_gemini_Default is not set
+# CONFIG_TARGET_sparc_Default is not set
+# CONFIG_TARGET_en75xx_en7512_Default is not set
+# CONFIG_TARGET_en75xx_en7521_Default is not set
+# CONFIG_TARGET_en75xx_pmg5317_t20b_Default is not set
+# CONFIG_TARGET_en75xx_vmg1302_t20a_Default is not set
+# CONFIG_TARGET_en75xx_vmg1312_t20a_Default is not set
+# CONFIG_TARGET_en75xx_vmg1312_t20b_Default is not set
+# CONFIG_TARGET_en75xx_vmg3312_t20a_Default is not set
+# CONFIG_TARGET_en75xx_vmg3625_t20a_Default is not set
+# CONFIG_TARGET_omap24xx_n810-base is not set
+# CONFIG_TARGET_omap24xx_n810-gui is not set
+# CONFIG_TARGET_xburst_qi_lb60_Default is not set
+# CONFIG_TARGET_xburst_n516_Default is not set
+# CONFIG_TARGET_xburst_n526_Default is not set
+# CONFIG_TARGET_xburst_id800wt_Default is not set
+# CONFIG_TARGET_ixp4xx_generic_Default is not set
+# CONFIG_TARGET_ixp4xx_generic_Atheros-ath5k is not set
+# CONFIG_TARGET_ixp4xx_generic_NSLU2 is not set
+# CONFIG_TARGET_ixp4xx_generic_NAS100d is not set
+# CONFIG_TARGET_ixp4xx_generic_DSMG600RevA is not set
+# CONFIG_TARGET_ixp4xx_generic_USR8200 is not set
+# CONFIG_TARGET_ixp4xx_harddisk_FSG3 is not set
+# CONFIG_TARGET_ppc44x_Default is not set
+# CONFIG_TARGET_avr32_Default is not set
+# CONFIG_TARGET_cobalt_Default is not set
+# CONFIG_TARGET_coldfire_Default is not set
+# CONFIG_TARGET_x86_generic_Generic is not set
+# CONFIG_TARGET_x86_generic_Soekris45xx is not set
+# CONFIG_TARGET_x86_generic_Soekris48xx is not set
+# CONFIG_TARGET_x86_generic_Wrap is not set
+# CONFIG_TARGET_x86_olpc_Default is not set
+# CONFIG_TARGET_x86_xen_domu_Default is not set
+# CONFIG_TARGET_x86_ep80579_Default is not set
+# CONFIG_TARGET_x86_net5501_Default is not set
+# CONFIG_TARGET_x86_kvm_guest_Default is not set
+# CONFIG_TARGET_x86_geos_Default is not set
+# CONFIG_TARGET_x86_alix2_Default is not set
+# CONFIG_TARGET_x86_thincan_DBE61 is not set
+# CONFIG_TARGET_x86_rdc_ar525w is not set
+# CONFIG_TARGET_x86_rdc_bifferboard is not set
+# CONFIG_TARGET_x86_rdc_r8610 is not set
+# CONFIG_TARGET_x86_rdc_sitecom is not set
 # CONFIG_TARGET_adm5120_router_le_Generic is not set
 # CONFIG_TARGET_adm5120_router_le_EB-214A is not set
 # CONFIG_TARGET_adm5120_router_le_CAS630 is not set
@@ -262,102 +345,16 @@ CONFIG_TARGET_brcm963xx_vmg3926=y
 # CONFIG_TARGET_adm5120_router_be_P334WT is not set
 # CONFIG_TARGET_adm5120_router_be_P335WT is not set
 # CONFIG_TARGET_adm5120_rb1xx_RouterBoard is not set
-# CONFIG_TARGET_lantiq_xway_ARV4525PW is not set
-# CONFIG_TARGET_lantiq_xway_ARV7525PW is not set
-# CONFIG_TARGET_lantiq_xway_ARV4518PW is not set
-# CONFIG_TARGET_lantiq_xway_ARV4510PW is not set
-# CONFIG_TARGET_lantiq_xway_ARV7518PW is not set
-# CONFIG_TARGET_lantiq_xway_ARV4520PW is not set
-# CONFIG_TARGET_lantiq_xway_ARV452CQW is not set
-# CONFIG_TARGET_lantiq_xway_ARV752DPW is not set
-# CONFIG_TARGET_lantiq_xway_ARV752DPW22 is not set
-# CONFIG_TARGET_lantiq_xway_FRITZ7320 is not set
-# CONFIG_TARGET_lantiq_xway_FRITZ3370 is not set
-# CONFIG_TARGET_lantiq_xway_WBMRA is not set
-# CONFIG_TARGET_lantiq_xway_WBMRB is not set
-# CONFIG_TARGET_lantiq_xway_EASY50712 is not set
-# CONFIG_TARGET_lantiq_xway_EASY80920NOR is not set
-# CONFIG_TARGET_lantiq_xway_EASY80920NAND is not set
-# CONFIG_TARGET_lantiq_xway_DGN3500 is not set
-# CONFIG_TARGET_lantiq_xway_DGN3500B is not set
-# CONFIG_TARGET_lantiq_ase_DGN1000B is not set
-# CONFIG_TARGET_lantiq_falcon_EASY98000NOR is not set
-# CONFIG_TARGET_lantiq_falcon_EASY98000SFLASH is not set
+# CONFIG_TARGET_brcm63xx_Broadcom is not set
+# CONFIG_TARGET_brcm63xx_Broadcom-wl is not set
+# CONFIG_TARGET_brcm63xx_Atheros is not set
+# CONFIG_TARGET_brcm63xx_Ralink is not set
+# CONFIG_TARGET_brcm63xx_NoWiFi is not set
+# CONFIG_TARGET_brcm63xx_Broadcom-brcmsmac is not set
+# CONFIG_TARGET_brcm63xx_GW6X00 is not set
 # CONFIG_TARGET_pxa_Default is not set
 # CONFIG_TARGET_pxa_Gumstix is not set
-# CONFIG_TARGET_iop32x_Default is not set
-# CONFIG_TARGET_orion_generic_Default is not set
-# CONFIG_TARGET_orion_harddisk_Default is not set
-# CONFIG_TARGET_orion_dns323_Default is not set
-# CONFIG_TARGET_mpc52xx_Default is not set
 # CONFIG_TARGET_cns21xx_Default is not set
-# CONFIG_TARGET_ppc40x_Default is not set
-# CONFIG_TARGET_brcm2708_RaspberryPi is not set
-# CONFIG_TARGET_sibyte_Default is not set
-# CONFIG_TARGET_omap4_Default is not set
-# CONFIG_TARGET_mpc85xx_Default is not set
-# CONFIG_TARGET_ixp4xx_generic_Default is not set
-# CONFIG_TARGET_ixp4xx_generic_Atheros-ath5k is not set
-# CONFIG_TARGET_ixp4xx_generic_NSLU2 is not set
-# CONFIG_TARGET_ixp4xx_generic_NAS100d is not set
-# CONFIG_TARGET_ixp4xx_generic_DSMG600RevA is not set
-# CONFIG_TARGET_ixp4xx_generic_USR8200 is not set
-# CONFIG_TARGET_ixp4xx_harddisk_FSG3 is not set
-# CONFIG_TARGET_mt75xx_mt7505_Default is not set
-# CONFIG_TARGET_mt75xx_mt7520_Default is not set
-# CONFIG_TARGET_mt75xx_mt7525_tw_Default is not set
-# CONFIG_TARGET_mt75xx_pmg5317_t20a_Default is not set
-# CONFIG_TARGET_mt75xx_pmg5317_t20a_Sdk180 is not set
-# CONFIG_TARGET_mt75xx_pmg1006_t20a_Default is not set
-# CONFIG_TARGET_mt75xx_pmg1006_t20a_Sdk180 is not set
-# CONFIG_TARGET_mt75xx_pmg2006_t20a_Default is not set
-# CONFIG_TARGET_mt75xx_pmg2006_t20a_Sdk180 is not set
-# CONFIG_TARGET_atheros_Default is not set
-# CONFIG_TARGET_brcm963xx_96838GWOV_Default is not set
-# CONFIG_TARGET_brcm963xx_963138ref_Default is not set
-# CONFIG_TARGET_brcm963xx_963269bhr_Default is not set
-# CONFIG_TARGET_brcm963xx_emg3415_Default is not set
-# CONFIG_TARGET_brcm963xx_fmg3586_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg1312_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg3625_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg3925_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg3925_b10c_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg3925_b30c_Default is not set
-CONFIG_TARGET_brcm963xx_vmg3926_Default=y
-# CONFIG_TARGET_brcm963xx_vmg3926b_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg5313b_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg8823_b10b_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg8823_b30b_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg8823_b50b_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg8823_b60b_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg8924_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg8924_b10a_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg8924_b10d_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg8924_b30d_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg8948_Default is not set
-# CONFIG_TARGET_brcm963xx_vmg9823_Default is not set
-# CONFIG_TARGET_brcm963xx_xmg3512_Default is not set
-# CONFIG_TARGET_brcm963xx_xmg3563_b10a_Default is not set
-# CONFIG_TARGET_at91_9g20_Default is not set
-# CONFIG_TARGET_at91_9260_flexibity-minimal is not set
-# CONFIG_TARGET_at91_9260_flexibity-xwrt is not set
-# CONFIG_TARGET_at91_9260_flexibity-luci is not set
-# CONFIG_TARGET_at91_9263_Default is not set
-# CONFIG_TARGET_cns3xxx_Default is not set
-# CONFIG_TARGET_ar7_generic_Annex-A is not set
-# CONFIG_TARGET_ar7_generic_Annex-B is not set
-# CONFIG_TARGET_ar7_generic_Texas is not set
-# CONFIG_TARGET_ar7_generic_None is not set
-# CONFIG_TARGET_ar7_ac49x_None is not set
-# CONFIG_TARGET_omap24xx_n810-base is not set
-# CONFIG_TARGET_omap24xx_n810-gui is not set
-# CONFIG_TARGET_kirkwood_Default is not set
-# CONFIG_TARGET_au1000_au1500_Atheros is not set
-# CONFIG_TARGET_au1000_au1500_InternetBox is not set
-# CONFIG_TARGET_au1000_au1500_MeshCube is not set
-# CONFIG_TARGET_au1000_au1550_DBAu1550 is not set
-# CONFIG_TARGET_octeon_generic is not set
-# CONFIG_TARGET_octeon_mototech is not set
 # CONFIG_TARGET_ar71xx_generic_Default is not set
 # CONFIG_TARGET_ar71xx_generic_Minimal is not set
 # CONFIG_TARGET_ar71xx_generic_ath5k is not set
@@ -449,73 +446,102 @@ CONFIG_TARGET_brcm963xx_vmg3926_Default=y
 # CONFIG_TARGET_ar71xx_generic_NBG6616 is not set
 # CONFIG_TARGET_ar71xx_nand_DefaultNoWifi is not set
 # CONFIG_TARGET_ar71xx_nand_Ath5k is not set
-# CONFIG_TARGET_sparc_Default is not set
+# CONFIG_TARGET_mpc85xx_Default is not set
+# CONFIG_TARGET_imx21_Default is not set
+# CONFIG_TARGET_leon_Default is not set
+# CONFIG_TARGET_mpc83xx_Default is not set
+# CONFIG_TARGET_ar7_generic_Annex-A is not set
+# CONFIG_TARGET_ar7_generic_Annex-B is not set
+# CONFIG_TARGET_ar7_generic_Texas is not set
+# CONFIG_TARGET_ar7_generic_None is not set
+# CONFIG_TARGET_ar7_ac49x_None is not set
+# CONFIG_TARGET_amazon_Default is not set
+# CONFIG_TARGET_lantiq_xway_ARV4525PW is not set
+# CONFIG_TARGET_lantiq_xway_ARV7525PW is not set
+# CONFIG_TARGET_lantiq_xway_ARV4518PW is not set
+# CONFIG_TARGET_lantiq_xway_ARV4510PW is not set
+# CONFIG_TARGET_lantiq_xway_ARV7518PW is not set
+# CONFIG_TARGET_lantiq_xway_ARV4520PW is not set
+# CONFIG_TARGET_lantiq_xway_ARV452CQW is not set
+# CONFIG_TARGET_lantiq_xway_ARV752DPW is not set
+# CONFIG_TARGET_lantiq_xway_ARV752DPW22 is not set
+# CONFIG_TARGET_lantiq_xway_FRITZ7320 is not set
+# CONFIG_TARGET_lantiq_xway_FRITZ3370 is not set
+# CONFIG_TARGET_lantiq_xway_WBMRA is not set
+# CONFIG_TARGET_lantiq_xway_WBMRB is not set
+# CONFIG_TARGET_lantiq_xway_EASY50712 is not set
+# CONFIG_TARGET_lantiq_xway_EASY80920NOR is not set
+# CONFIG_TARGET_lantiq_xway_EASY80920NAND is not set
+# CONFIG_TARGET_lantiq_xway_DGN3500 is not set
+# CONFIG_TARGET_lantiq_xway_DGN3500B is not set
+# CONFIG_TARGET_lantiq_ase_DGN1000B is not set
+# CONFIG_TARGET_lantiq_falcon_EASY98000NOR is not set
+# CONFIG_TARGET_lantiq_falcon_EASY98000SFLASH is not set
+# CONFIG_TARGET_adm8668_WRTU54G-TM is not set
+# CONFIG_TARGET_brcm963xx_96838GWOV_Default is not set
+# CONFIG_TARGET_brcm963xx_963138ref_Default is not set
+# CONFIG_TARGET_brcm963xx_963269bhr_Default is not set
+# CONFIG_TARGET_brcm963xx_emg3415_Default is not set
+# CONFIG_TARGET_brcm963xx_emg6726_b10a_Default is not set
+# CONFIG_TARGET_brcm963xx_fmg3586_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg1312_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg3625_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg3925_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg3925_b10c_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg3925_b30c_Default is not set
+CONFIG_TARGET_brcm963xx_vmg3926_Default=y
+# CONFIG_TARGET_brcm963xx_vmg3926b_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg3927_b50b_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg4927_b50a_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg5313b_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8823_b10b_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8823_b30b_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8823_b50b_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8823_b60b_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8825_b50b_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8825_b50k_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8924_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8924_b10a_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8924_b10d_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8924_b30d_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg8948_Default is not set
+# CONFIG_TARGET_brcm963xx_vmg9823_Default is not set
+# CONFIG_TARGET_brcm963xx_xmg3512_Default is not set
+# CONFIG_TARGET_brcm963xx_xmg3563_b10a_Default is not set
+# CONFIG_TARGET_brcm963xx_xmg8825_b50a_Default is not set
+# CONFIG_TARGET_iop32x_Default is not set
+# CONFIG_TARGET_mpc52xx_Default is not set
+# CONFIG_TARGET_mcs814x_Generic is not set
+# CONFIG_TARGET_mcs814x_dLAN_USB_Extender is not set
+# CONFIG_TARGET_orion_generic_Default is not set
+# CONFIG_TARGET_orion_harddisk_Default is not set
+# CONFIG_TARGET_orion_dns323_Default is not set
+# CONFIG_TARGET_cns3xxx_Default is not set
+# CONFIG_TARGET_at91_9g20_Default is not set
+# CONFIG_TARGET_at91_9260_flexibity-minimal is not set
+# CONFIG_TARGET_at91_9260_flexibity-xwrt is not set
+# CONFIG_TARGET_at91_9260_flexibity-luci is not set
+# CONFIG_TARGET_at91_9263_Default is not set
+# CONFIG_TARGET_kirkwood_Default is not set
+# CONFIG_TARGET_malta_le_Default is not set
+# CONFIG_TARGET_malta_be_Default is not set
+# CONFIG_TARGET_atheros_Default is not set
+# CONFIG_TARGET_brcm2708_RaspberryPi is not set
 # CONFIG_TARGET_omap35xx_beagleboard_Beagleboard is not set
 # CONFIG_TARGET_omap35xx_gumstix_Gumstix is not set
 # CONFIG_TARGET_omap35xx_gumstix_Vpp is not set
 # CONFIG_TARGET_omap35xx_gumstix_Es is not set
-# CONFIG_TARGET_brcm47xx_Broadcom-b43 is not set
-# CONFIG_TARGET_brcm47xx_Broadcom-wl is not set
-# CONFIG_TARGET_brcm47xx_Broadcom-ath5k is not set
-# CONFIG_TARGET_brcm47xx_Broadcom-none is not set
-# CONFIG_TARGET_brcm47xx_Bcm4705-b43 is not set
-# CONFIG_TARGET_brcm47xx_Bcm4705-wl is not set
-# CONFIG_TARGET_brcm47xx_Bcm4705-none is not set
-# CONFIG_TARGET_brcm47xx_Ps1208mfg is not set
-# CONFIG_TARGET_brcm47xx_WGT634U is not set
-# CONFIG_TARGET_brcm47xx_WL500GPv1 is not set
-# CONFIG_TARGET_brcm47xx_WRT350Nv1 is not set
-# CONFIG_TARGET_brcm47xx_WRTSL54GS is not set
-# CONFIG_TARGET_leon_Default is not set
-# CONFIG_TARGET_xburst_qi_lb60_Default is not set
-# CONFIG_TARGET_xburst_n516_Default is not set
-# CONFIG_TARGET_xburst_n526_Default is not set
-# CONFIG_TARGET_xburst_id800wt_Default is not set
-# CONFIG_TARGET_mcs814x_Generic is not set
-# CONFIG_TARGET_mcs814x_dLAN_USB_Extender is not set
-# CONFIG_TARGET_ppc44x_Default is not set
-# CONFIG_TARGET_rb532_Default is not set
-# CONFIG_TARGET_avr32_Default is not set
-# CONFIG_TARGET_coldfire_Default is not set
-# CONFIG_TARGET_amazon_Default is not set
-# CONFIG_TARGET_ep93xx_Default is not set
-# CONFIG_TARGET_ep93xx_Simone is not set
-# CONFIG_TARGET_x86_generic_Generic is not set
-# CONFIG_TARGET_x86_generic_Soekris45xx is not set
-# CONFIG_TARGET_x86_generic_Soekris48xx is not set
-# CONFIG_TARGET_x86_generic_Wrap is not set
-# CONFIG_TARGET_x86_olpc_Default is not set
-# CONFIG_TARGET_x86_xen_domu_Default is not set
-# CONFIG_TARGET_x86_ep80579_Default is not set
-# CONFIG_TARGET_x86_net5501_Default is not set
-# CONFIG_TARGET_x86_kvm_guest_Default is not set
-# CONFIG_TARGET_x86_geos_Default is not set
-# CONFIG_TARGET_x86_alix2_Default is not set
-# CONFIG_TARGET_x86_thincan_DBE61 is not set
-# CONFIG_TARGET_x86_rdc_ar525w is not set
-# CONFIG_TARGET_x86_rdc_bifferboard is not set
-# CONFIG_TARGET_x86_rdc_r8610 is not set
-# CONFIG_TARGET_x86_rdc_sitecom is not set
-# CONFIG_TARGET_malta_le_Default is not set
-# CONFIG_TARGET_malta_be_Default is not set
-# CONFIG_TARGET_cobalt_Default is not set
-# CONFIG_TARGET_mpc83xx_Default is not set
-# CONFIG_TARGET_brcm63xx_Broadcom is not set
-# CONFIG_TARGET_brcm63xx_Broadcom-wl is not set
-# CONFIG_TARGET_brcm63xx_Atheros is not set
-# CONFIG_TARGET_brcm63xx_Ralink is not set
-# CONFIG_TARGET_brcm63xx_NoWiFi is not set
-# CONFIG_TARGET_brcm63xx_Broadcom-brcmsmac is not set
-# CONFIG_TARGET_brcm63xx_GW6X00 is not set
+# CONFIG_TARGET_mt75xx_mt7505_Default is not set
+# CONFIG_TARGET_mt75xx_mt7520_Default is not set
+# CONFIG_TARGET_mt75xx_mt7525_tw_Default is not set
+# CONFIG_TARGET_mt75xx_pmg5317_t20a_Default is not set
+# CONFIG_TARGET_mt75xx_pmg5317_t20a_Sdk180 is not set
+# CONFIG_TARGET_mt75xx_pmg1006_t20a_Default is not set
+# CONFIG_TARGET_mt75xx_pmg1006_t20a_Sdk180 is not set
+# CONFIG_TARGET_mt75xx_pmg2006_t20a_Default is not set
+# CONFIG_TARGET_mt75xx_pmg2006_t20a_Sdk180 is not set
+# CONFIG_TARGET_realview_Default is not set
 # CONFIG_TARGET_uml_Default is not set
-# CONFIG_TARGET_adm8668_WRTU54G-TM is not set
-# CONFIG_TARGET_en75xx_en7512_Default is not set
-# CONFIG_TARGET_en75xx_en7521_Default is not set
-# CONFIG_TARGET_en75xx_pmg5317_t20b_Default is not set
-# CONFIG_TARGET_en75xx_vmg1312_t20a_Default is not set
-# CONFIG_TARGET_en75xx_vmg1312_t20b_Default is not set
-# CONFIG_TARGET_en75xx_vmg3312_t20a_Default is not set
-# CONFIG_TARGET_en75xx_vmg3625_t20a_Default is not set
 CONFIG_HAS_SUBTARGETS=y
 CONFIG_TARGET_BOARD="brcm963xx"
 CONFIG_TARGET_ARCH_PACKAGES="brcm963xx"
@@ -1061,6 +1087,7 @@ CONFIG_BRCMSDK416L05_BUILD_ZCFG=y
 # CONFIG_BRCMSDK416L05_ZCFG_TR98_COMPATIBLE is not set
 CONFIG_BRCMSDK416L05_ZYXEL=y
 # CONFIG_BRCMSDK416L05_ZYXEL_L2_WAN_SAME_MAC is not set
+# CONFIG_BRCMSDK416L05_ZYXEL_L3_WAN_SAME_MAC is not set
 # CONFIG_BRCMSDK416L05_ZYXEL_3925 is not set
 # CONFIG_BRCMSDK416L05_ZYXEL_VMG3925_B10C is not set
 # CONFIG_BRCMSDK416L05_ZYXEL_VMG3925_B30C is not set
@@ -2526,7 +2553,7 @@ CONFIG_PACKAGE_kmod-ebtables=y
 # CONFIG_PACKAGE_kmod-ebtables-watchers is not set
 CONFIG_PACKAGE_kmod-ip6tables=y
 CONFIG_PACKAGE_kmod-ipt-core=y
-# CONFIG_PACKAGE_kmod-ipt-conntrack is not set
+CONFIG_PACKAGE_kmod-ipt-conntrack=y
 # CONFIG_PACKAGE_kmod-ipt-conntrack-extra is not set
 # CONFIG_PACKAGE_kmod-ipt-debug is not set
 # CONFIG_PACKAGE_kmod-ipt-extra is not set
@@ -2546,8 +2573,8 @@ CONFIG_PACKAGE_kmod-ipt-iprange=y
 # CONFIG_PACKAGE_kmod-ipt-tproxy is not set
 # CONFIG_PACKAGE_kmod-ipt-u32 is not set
 # CONFIG_PACKAGE_kmod-ipt-ulog is not set
-# CONFIG_PACKAGE_kmod-nf-conntrack-netlink is not set
-# CONFIG_PACKAGE_kmod-nfnetlink is not set
+CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y
+CONFIG_PACKAGE_kmod-nfnetlink=y
 # CONFIG_PACKAGE_kmod-nfnetlink-log is not set
 # CONFIG_PACKAGE_kmod-nfnetlink-queue is not set
 
@@ -2835,6 +2862,11 @@ CONFIG_ECN_5G_DRIVER_DATE="20170126"
 # CONFIG_PACKAGE_kmod-zd1211rw is not set
 
 #
+# ZyXEL Kernel Features
+#
+# CONFIG_PACKAGE_kmod-zyinetled is not set
+
+#
 # Boot Loaders
 #
 CONFIG_PACKAGE_brcm-cfe=y
@@ -2862,7 +2894,6 @@ CONFIG_BRCM_CFE_BOOT_FROM_NAND=y
 #
 # Zyxel Packages
 #
-CONFIG_PACKAGE_SpeedTest=y
 # CONFIG_PACKAGE_ZyIMS is not set
 # CONFIG_PACKAGE_app-agent is not set
 # CONFIG_PACKAGE_base-files-prebuild is not set
@@ -2870,7 +2901,6 @@ CONFIG_PACKAGE_SpeedTest=y
 CONFIG_PACKAGE_dalcmd=y
 CONFIG_PACKAGE_esmd=y
 CONFIG_PACKAGE_fw_upgrade=y
-CONFIG_PACKAGE_hostpolling=y
 # CONFIG_PACKAGE_iptk_8_2_2 is not set
 CONFIG_PACKAGE_libzcfg_fe_dal=y
 CONFIG_PACKAGE_libzcfg_fe_rdm_access=y
@@ -2878,17 +2908,19 @@ CONFIG_PACKAGE_libzcfg_fe_rdm_string=y
 CONFIG_PACKAGE_libzcfg_fe_rdm_struct=y
 CONFIG_PACKAGE_libzcfg_fe_schema=y
 CONFIG_PACKAGE_libzcfg_fe_tr98=y
-CONFIG_PACKAGE_libzcfg_msg=y
 CONFIG_PACKAGE_libzcmd_tool=y
 CONFIG_PACKAGE_libzyutil=y
 # CONFIG_PACKAGE_libzywlan is not set
 CONFIG_PACKAGE_libzywwan=y
 CONFIG_PACKAGE_netprobe=y
+# CONFIG_PACKAGE_powermonitor is not set
 CONFIG_PACKAGE_ramonitor=y
+# CONFIG_PACKAGE_redirect_console is not set
 CONFIG_PACKAGE_tty_log_echo=y
 CONFIG_PACKAGE_vcautohunt=y
 CONFIG_PACKAGE_vlanautohunt=y
-CONFIG_PACKAGE_webgui=y
+# CONFIG_PACKAGE_webgui is not set
+CONFIG_PACKAGE_webgui_vue=y
 CONFIG_PACKAGE_wwan=y
 CONFIG_PACKAGE_wwanbackupd=y
 CONFIG_PACKAGE_zatm_oam=y
@@ -2907,12 +2939,16 @@ CONFIG_ZCFG_TR98_COMPATIBLE=y
 # CONFIG_ZCFG_VMG1312_B10D_Turkey is not set
 # CONFIG_ZCFG_VMG3625_B10A_Generic is not set
 # CONFIG_ZCFG_VMG3925_B10A_Generic is not set
+# CONFIG_ZCFG_VMG3925_B10A_Retail is not set
 # CONFIG_ZCFG_VMG3925_B10C_Generic is not set
 # CONFIG_ZCFG_VMG3925_B30C_Generic is not set
 CONFIG_ZCFG_VMG3926_B10A_Generic=y
 # CONFIG_ZCFG_VMG3926_B10A_Elisa is not set
 # CONFIG_ZCFG_VMG3926_B10B_Generic is not set
+# CONFIG_ZCFG_VMG3927_B50B_Generic is not set
 # CONFIG_ZCFG_VMG4825_B10A_Generic is not set
+# CONFIG_ZCFG_VMG4927_B50A_Generic is not set
+# CONFIG_ZCFG_EMG6726_B10A_Generic is not set
 # CONFIG_ZCFG_VMG5313_Generic is not set
 # CONFIG_ZCFG_VMG5313_B10B_Generic is not set
 # CONFIG_ZCFG_VMG5313-B10B_SOL is not set
@@ -2924,6 +2960,9 @@ CONFIG_ZCFG_VMG3926_B10A_Generic=y
 # CONFIG_ZCFG_VMG8823_B50B_Generic is not set
 # CONFIG_ZCFG_VMG8823_B50B_WIND is not set
 # CONFIG_ZCFG_VMG8823_B60B_Generic is not set
+# CONFIG_ZCFG_VMG8825_B50B_Generic is not set
+# CONFIG_ZCFG_VMG8825_B50B_WIND is not set
+# CONFIG_ZCFG_VMG8825_B50K_Eircom is not set
 # CONFIG_ZCFG_VMG8924_B10B_Generic is not set
 # CONFIG_ZCFG_VMG8924_B10A_Generic is not set
 # CONFIG_ZCFG_VMG8924_B10A_DU is not set
@@ -2940,12 +2979,15 @@ CONFIG_ZCFG_VMG3926_B10A_Generic=y
 # CONFIG_ZCFG_VMG4825_B10A_FairPoint is not set
 # CONFIG_ZCFG_XMG3512_B10A_Generic is not set
 # CONFIG_ZCFG_XMG3563_B10A_Generic is not set
+# CONFIG_ZCFG_XMG8825_B50A_Generic is not set
 # CONFIG_ZCFG_EN7512_Generic is not set
 # CONFIG_ZCFG_MT7520_Generic is not set
 # CONFIG_ZCFG_MT7525G_Generic is not set
 # CONFIG_ZCFG_PMG5317_T20A_Generic is not set
 # CONFIG_ZCFG_PMG1006_T20A_Generic is not set
 # CONFIG_ZCFG_PMG2006_T20A_Generic is not set
+# CONFIG_ZCFG_VMG1302_T20A_Oi is not set
+# CONFIG_ZCFG_VMG1302_T20A_Brazil is not set
 # CONFIG_ZCFG_VMG1312_T20A_Generic is not set
 # CONFIG_ZCFG_VMG1312_T20A_Brazil is not set
 # CONFIG_ZCFG_VMG1312_T20A_Algar is not set
@@ -2954,9 +2996,11 @@ CONFIG_ZCFG_VMG3926_B10A_Generic=y
 # CONFIG_ZCFG_VMG1312_T20B_Generic is not set
 # CONFIG_ZCFG_VMG1312_T20B_Shatel is not set
 # CONFIG_ZCFG_VMG3625_T20A_Generic is not set
+# CONFIG_ZCFG_VMG3625_T20A_Codetel is not set
 # CONFIG_ZCFG_EN7525G_Generic is not set
 # CONFIG_ZCFG_PMG5317_T20B_Generic is not set
 # CONFIG_ZCFG_VMG3625_T20A_WIND is not set
+# CONFIG_ZCFG_VMG3625_T20A_Oi is not set
 CONFIG_ZCFG_PROJECT="VMG3926-B10A_Generic"
 CONFIG_ZCFG_DEFAULT_ROMFILE=""
 # CONFIG_ZCFG_TR98_PARAM_GUARD is not set
@@ -3008,12 +3052,12 @@ CONFIG_ZY_WIFI_CHIP_BRCM=y
 # Wifi feature
 #
 CONFIG_ZY_WIFI_BRCM_EXT_WLCONF=y
-# CONFIG_ZY_WIFI_BRCM_5G is not set
 # CONFIG_ZY_WIFI_ECONET_5G is not set
 CONFIG_ZY_WIFI_FIX_MACADDR=y
 CONFIG_ZY_WIFI_EVENT_HANDLER=y
 CONFIG_ZY_WIFI_ASSOCDEV_UPDATE=y
-CONFIG_ZY_WIFI_CTL=y
+# CONFIG_ZYXEL_WLAN_WPS_CO_BTN is not set
+# CONFIG_ZYXEL_WPS_BTN_SHORT_AND_WLAN_BTN_LONG is not set
 # CONFIG_ZY_WIFI_WPSHWPBC_5G_FIRST is not set
 CONFIG_ZYXEL_WPS_PBC_OVERLAP_CHECK=y
 # CONFIG_ZY_WIFI_AIRTIME_FAIRNESS is not set
@@ -3031,10 +3075,30 @@ CONFIG_PACKAGE_syslog-ng=y
 # CONFIG_PACKAGE_kmod-qca-wifi is not set
 
 #
+# Zyxel public package
+#
+CONFIG_PACKAGE_libzcfg_msg=y
+CONFIG_PACKAGE_libzlog=y
+CONFIG_PACKAGE_libzos=y
+
+#
 # Mail
 #
 CONFIG_PACKAGE_mailsend=y
 CONFIG_MAILSEND_SSL=y
+
+#
+# Silicon Lab test Packages
+#
+# CONFIG_PACKAGE_Z3GatewayHost is not set
+# CONFIG_PACKAGE_Z3GatewayMqtt is not set
+# CONFIG_PACKAGE_ZigbeeGateway is not set
+# CONFIG_PACKAGE_ZigbeeNcpUpdate is not set
+
+#
+# Oi Packages
+#
+# CONFIG_PACKAGE_oiwizard is not set
 
 #
 # FW Testing Packages
@@ -3048,13 +3112,15 @@ CONFIG_MAILSEND_SSL=y
 #
 # File Transfer
 #
-CONFIG_PACKAGE_curl=y
+CONFIG_PACKAGE_atftp=y
+# CONFIG_PACKAGE_atftpd is not set
+# CONFIG_PACKAGE_curl is not set
 
 #
 # Firewall
 #
 # CONFIG_PACKAGE_arptables is not set
-# CONFIG_PACKAGE_conntrack-tools is not set
+CONFIG_PACKAGE_conntrack-tools=y
 CONFIG_PACKAGE_ebtables=y
 # CONFIG_PACKAGE_ebtables-utils is not set
 CONFIG_PACKAGE_iptables=y
@@ -3150,14 +3216,16 @@ CONFIG_PACKAGE_chat=y
 # CONFIG_PACKAGE_iputils-tracepath6 is not set
 # CONFIG_PACKAGE_iputils-traceroute6 is not set
 # CONFIG_PACKAGE_iw is not set
-CONFIG_PACKAGE_nbtscan=y
-# CONFIG_PACKAGE_p0f is not set
+# CONFIG_PACKAGE_mosquitto-client-nossl is not set
+# CONFIG_PACKAGE_mosquitto-client-ssl is not set
+# CONFIG_PACKAGE_mosquitto-nossl is not set
 CONFIG_PACKAGE_ppp=y
 CONFIG_PACKAGE_ppp-mod-pppoa=y
 CONFIG_PACKAGE_ppp-mod-pppoe=y
 # CONFIG_PACKAGE_ppp-mod-radius is not set
 # CONFIG_PACKAGE_pppdump is not set
 # CONFIG_PACKAGE_pppstats is not set
+# CONFIG_PACKAGE_pptp is not set
 # CONFIG_PACKAGE_rssileds is not set
 CONFIG_PACKAGE_samba=y
 # CONFIG_PACKAGE_samba36-client is not set
@@ -3220,8 +3288,9 @@ CONFIG_PACKAGE_expat=y
 CONFIG_PACKAGE_glib2=y
 CONFIG_PACKAGE_libblkid=y
 # CONFIG_PACKAGE_libblobmsg-json is not set
+# CONFIG_PACKAGE_libcares is not set
 # CONFIG_PACKAGE_libcharset is not set
-CONFIG_PACKAGE_libcurl=y
+# CONFIG_PACKAGE_libcurl is not set
 CONFIG_PACKAGE_libedit=y
 # CONFIG_PACKAGE_libevent2 is not set
 # CONFIG_PACKAGE_libevent2-core is not set
@@ -3248,11 +3317,13 @@ CONFIG_PACKAGE_libjson=y
 # CONFIG_PACKAGE_libltdl is not set
 # CONFIG_PACKAGE_liblua is not set
 # CONFIG_PACKAGE_libmnl is not set
+# CONFIG_PACKAGE_libmosquitto-nossl is not set
+# CONFIG_PACKAGE_libmosquitto-ssl is not set
 # CONFIG_PACKAGE_libmount is not set
 # CONFIG_PACKAGE_libmxml is not set
 CONFIG_PACKAGE_libncurses=y
 # CONFIG_PACKAGE_libncursesw is not set
-# CONFIG_PACKAGE_libnetfilter-conntrack is not set
+CONFIG_PACKAGE_libnetfilter-conntrack=y
 CONFIG_PACKAGE_libnetfilter_queue=y
 CONFIG_PACKAGE_libnfnetlink=y
 # CONFIG_PACKAGE_libnl is not set
@@ -3266,7 +3337,7 @@ CONFIG_PACKAGE_libpcap=y
 # CONFIG_PCAP_HAS_USB is not set
 CONFIG_PACKAGE_libpopt=y
 # CONFIG_PACKAGE_libqmi is not set
-# CONFIG_PACKAGE_libreadline is not set
+CONFIG_PACKAGE_libreadline=y
 # CONFIG_PACKAGE_librpc is not set
 # CONFIG_PACKAGE_libsocks is not set
 # CONFIG_PACKAGE_libsrtp is not set
@@ -3287,18 +3358,10 @@ CONFIG_PACKAGE_zlib=y
 #
 # CONFIG_PACKAGE_call_qcsapi_client is not set
 # CONFIG_PACKAGE_libqcsapi_client is not set
+# CONFIG_PACKAGE_qrpe is not set
 # CONFIG_PACKAGE_qsteer is not set
 # CONFIG_PACKAGE_qtn_image is not set
 # CONFIG_PACKAGE_qtn_image_source is not set
-CONFIG_QTN_SDK_VER_37_3_0_50=y
-# CONFIG_QTN_SDK_VER_37_4_0_46 is not set
-# CONFIG_QTN_SDK_VER_37_4_0_62 is not set
-# CONFIG_QTN_SDK_VER_37_4_0_62_1 is not set
-# CONFIG_QTN_SDK_VER_37_4_15_62 is not set
-# CONFIG_QTN_SDK_VER_37_4_0_81 is not set
-# CONFIG_QTN_SDK_VER_37_4_0_89 is not set
-# CONFIG_QTN_SDK_VER_37_4_0_97 is not set
-# CONFIG_QTN_SDK_VER_37_4_5_97_1 is not set
 
 #
 # WNC Packages
@@ -3424,7 +3487,6 @@ CONFIG_PACKAGE_usb-modeswitch=y
 #
 # Extra packages
 #
-# CONFIG_PACKAGE_fast-classifier-example is not set
 
 #
 # Development
@@ -3480,6 +3542,7 @@ CONFIG_BUILD_ZYXEL_VOICE_IGNORE_DIRECT_IP=y
 # CONFIG_BUILD_ZYXEL_VOICE_ZYIMS_KEEPALIVE_WATCHDOG is not set
 # CONFIG_BUILD_ZYXEL_VOICE_ZYIMS_CMD_TEST is not set
 # CONFIG_BUILD_ZYXEL_VOICE_FAX_MODE_G711_PT_DISABLE_T38_CAP is not set
+# CONFIG_BUILD_ZYXEL_VOICE_USING_DSP_AND_PHONE_API_FROM_SINGLE_PROCESS is not set
 # CONFIG_BUILD_ZYXEL_PHONE_FXO_SUPPORT is not set
 # CONFIG_BUILD_ZYXEL_PHONE_DECT_SUPPORT is not set
 # CONFIG_BUILD_ZYXEL_PHONE_GR909_PHONE_LINE_TEST is not set
@@ -3530,6 +3593,13 @@ CONFIG_ZYXEL_WWAN_GOBINET=y
 # CONFIG_ZYXEL_MINIDLNA is not set
 
 #
+# Wlan SSID Priority & IPTV SSID WPS PBC
+#
+# CONFIG_ZYXEL_SSID_PRIORITY is not set
+# CONFIG_ZYXEL_IPTV_SSID_PRIORITY_WPS_PBC is not set
+CONFIG_ZYXEL_WPS_IPTV_GUEST_WIFI_NUM=3
+
+#
 # OneSSID
 #
 # CONFIG_ZYXEL_ONESSID is not set
@@ -3541,6 +3611,16 @@ CONFIG_ZYXEL_WWAN_GOBINET=y
 # CONFIG_BSA_SUPPORT_BCM5_DRIVER is not set
 # CONFIG_BSA_SUPPORT_ECO2_DRIVER is not set
 # CONFIG_BSA_SUPPORT_ECO5_DRIVER is not set
+# CONFIG_BSA_SUPPORT_BCM_MONITOR_MODE is not set
+# CONFIG_BSA_SUPPORT_BCM_MONITOR_MODE_TIMER is not set
+
+#
+# QRPE
+#
+# CONFIG_QRPE_SUPPORT_BCM2_DRIVER is not set
+# CONFIG_QRPE_SUPPORT_BCM5_DRIVER is not set
+# CONFIG_QRPE_SUPPORT_ECO2_DRIVER is not set
+# CONFIG_QRPE_SUPPORT_ECO5_DRIVER is not set
 
 #
 # SONiQ
@@ -3550,18 +3630,17 @@ CONFIG_ZYXEL_WWAN_GOBINET=y
 #
 # One Connect
 #
-CONFIG_ZYXEL_ONECONNECT=y
-CONFIG_ZYXEL_ONECONNECT_EU=y
-CONFIG_ZYXEL_PLC_UTILITY=y
-# CONFIG_ZYXEL_APP_AGENT is not set
-# CONFIG_ZYXEL_P0F is not set
-CONFIG_ZYXEL_HOSTPOLLING=y
-# CONFIG_ZYXEL_AP_STEERING is not set
+# CONFIG_ZYXEL_ONECONNECT is not set
+# CONFIG_ZYXEL_CONFIG_IGNORE_OWNER_CHECK is not set
+# CONFIG_ZYXEL_NO_DH_ALGO_CHECK is not set
 CONFIG_ZYXEL_RESET_WATCHDOG=y
+CONFIG_ZYXEL_MUTI_DEFAULT_GATEWAY=y
 CONFIG_ZYXEL_FIREWALL_INDEPENDENT=y
+# CONFIG_ZYXEL_USB_SET_MANUALLY is not set
 CONFIG_ZYXEL_USB_MANAGERMENT=y
 CONFIG_ZYXEL_ACCOUNT_MANAGEMENT=y
 # CONFIG_ZYXEL_USA_PRODUCT is not set
+# CONFIG_ZYXEL_USA_Generic is not set
 CONFIG_ZYXEL_DNS_TRAFFIC_ROUTE=y
 # CONFIG_ZYXEL_REPLACE_SSID_AMBIGIOUS_CHARACTER is not set
 CONFIG_ZYXEL_VLAN_GROUP=y
@@ -3572,7 +3651,10 @@ CONFIG_ZYXEL_PASSPHRASE=y
 CONFIG_ZYXEL_WOL=y
 CONFIG_ZYXEL_ENABLE_DISABLE_RADIO_BY_MAIN_SSID=y
 # CONFIG_ZY_WIFI_ONESSID_SECURITY_SYNC is not set
+# CONFIG_ZY_WIFI_24G_SUPPORT_11AC is not set
 # CONFIG_WAN_AUTO_DETECT is not set
+# CONFIG_ZYXEL_AUTO_GEN_PRESHARED_KEY_ENCRPT_BY_SHA256 is not set
+# CONFIG_ZYXEL_AUTO_GEN_RANDOM_ADMIN_PASSWORD_ENCRPT_BY_SHA256 is not set
 CONFIG_ZYXEL_HASH_ACCOUNT_PASSWORD_BY_SHA512=y
 CONFIG_ZYXEL_HASH_ACCOUNT_PASSWORD_BY_SHA512_START_VER=10
 CONFIG_ZYXEL_RANDOM_SUPERVISOR_PASSWORD=y
@@ -3580,7 +3662,15 @@ CONFIG_ZYXEL_RANDOM_SUPERVISOR_PASSWORD=y
 CONFIG_ZYXEL_RANDOM_ADMIN_PASSWORD=y
 CONFIG_ZYXEL_RANDOM_ADMIN_PASSWORD_START_YEAR=2018
 CONFIG_ZYXEL_RANDOM_ADMIN_PASSWORD_START_WEEK=1
+CONFIG_ZYXEL_RANDOM_ADMIN_PASSWORD_NEW_ALGORITHM_START_YEAR=2100
+CONFIG_ZYXEL_RANDOM_ADMIN_PASSWORD_NEW_ALGORITHM_START_WEEK=48
+CONFIG_ZYXEL_RANDOM_SUPERVISOR_PASSWORD_NEW_ALGORITHM_START_YEAR=2100
+CONFIG_ZYXEL_RANDOM_SUPERVISOR_PASSWORD_NEW_ALGORITHM_START_WEEK=48
 CONFIG_ZYXEL_INDEPENDENT_WPS_METHODS=y
+# CONFIG_ZYXEL_SUPERVISOR_LEVEL_HTTPD_LOGIN_DENY is not set
+# CONFIG_ZYXEL_SUPERVISOR_LEVEL_LOGIN_DENY is not set
+# CONFIG_ZYXEL_ADMIN_LEVEL_LOGIN_DENY is not set
+# CONFIG_ZYXEL_USER_LEVEL_LOGIN_DENY is not set
 # CONFIG_ZYXEL_USER_LEVEL_CONSOLE_LOGIN_DENY is not set
 # CONFIG_ZYXEL_ADMIN_LEVEL_CONSOLE_LOGIN_DENY is not set
 # CONFIG_ZyXEL_WEB_REDIRECT is not set
@@ -3597,12 +3687,17 @@ CONFIG_ZYXEL_SAVE_LOG_TO_FLASH=y
 # CONFIG_ZyXEL_Online_Firmware_Upgrade is not set
 # CONFIG_SMALL_RAM is not set
 # CONFIG_ZYXEL_WIFI_SUPPORT_WDS is not set
+# CONFIG_ZYXEL_WIFI_SUPPORT_WPA_MIX_MODE is not set
+# CONFIG_ZYXEL_SUPPORT_WL_WPA2_EAP is not set
 CONFIG_ZYXEL_WIFI_SUPPORT_CHANNEL_SCAN=y
 CONFIG_ZYXEL_DISABLE_WIFI_HW_BTN=y
+# CONFIG_ZYXEL_ACS_WPS_ACTIVATION is not set
 CONFIG_SEND_PADT_BEFORE_DISCOVERY=y
 # CONFIG_ZYXEL_SUPPORT_TR098_BRCM_BONDING_LINE is not set
 # CONFIG_ZCFG_LOG_USE_DEBUGCFG is not set
 # CONFIG_CORE_DUMP_ZCMD is not set
+# CONFIG_UPNP_SSDP_LIMIT is not set
+# CONFIG_ZYXEL_BLOCK_PACKETS_FROM_CPE_IN_BRIDGE is not set
 
 #
 # VDSL profile extra support
@@ -3611,36 +3706,60 @@ CONFIG_SEND_PADT_BEFORE_DISCOVERY=y
 # CONFIG_ZYXEL_VDSL_Support_35B is not set
 # CONFIG_ZCFG_RUNNING_WANDEV_INDEX_CUSTOMIZATION is not set
 CONFIG_GENERIC_TR98_LAN_IP_ALIAS=y
-# CONFIG_ZYXEL_DSL_SUPPORT_ANNEX_B is not set
 CONFIG_ZYXEL_SUPPORT_TR98_LOGIN_ACCOUNT=y
 # CONFIG_ZYXEL_LAN_L3_Isolation is not set
+# CONFIG_ZYXEL_SUPPORT_DMZ_MANAGEMENT is not set
 CONFIG_INTERNET_LED_DEPEND_ON_DEFAULT_GW=y
 # CONFIG_ZYXEL_MULTICAST_MODE_FIRST_IN is not set
 # CONFIG_ZYXEL_DUAL_ROUTE_IN_PPPOE is not set
 # CONFIG_ZYXEL_DL_DIAG_CALCULATION is not set
 # CONFIG_ZYXEL_POWER_MANAGEMENT is not set
 # CONFIG_ZYXEL_IPV6_READYLOGO_CONFORMANCE is not set
+# CONFIG_ZYXEL_TR98_IPV6SPECIFIC is not set
+# CONFIG_ZYXEL_RADVD_OPT is not set
+# CONFIG_ZYXEL_DNS_RELAY is not set
+# CONFIG_ZYXEL_NEIGHBOR_DISCOVERY is not set
+# CONFIG_ZYXEL_IPV6_GLOBAL_ENABLE is not set
+# CONFIG_ZYXEL_IPV6_ULAPREFIX is not set
+# CONFIG_ZYXEL_DHCPV6C_OPTION is not set
 CONFIG_ZYXEL_FW_ID_CHECK_FW_UPGRADE=y
 CONFIG_ZYXEL_MODEL_ID_CHECK_FW_UPGRADE=y
-# CONFIG_ZYXEL_ZYCLI_REBOOT is not set
+CONFIG_ZYXEL_ZYCLI_REBOOT=y
 # CONFIG_ZYXEL_ZYCLI_RESET_DEFAULT_REBOOT is not set
 # CONFIG_ZYXEL_ENABLE_STP is not set
 # CONFIG_ZYXEL_BLOCK_239_255_255_250 is not set
 CONFIG_ZYXEL_SUPPORT_DEVINFO_PROCSTATUS_PROC=y
+# CONFIG_ZYXEL_TR069_EXCLUDE_NONMGMTWAN_IP_CHANGE_IN_1BOOT is not set
 # CONFIG_ZYXEL_SKIP_LOG is not set
+# CONFIG_ZYXEL_IPV6_IANA_IAPD is not set
 # CONFIG_ZYXEL_WIFI_SingleSKU is not set
 # CONFIG_ZYXEL_SET_SOCKOPT is not set
 CONFIG_ZYXEL_WIFI_NUM_OF_24G_SSID_INTERFACE=4
 CONFIG_ZYXEL_WIFI_NUM_OF_5G_SSID_INTERFACE=4
 CONFIG_ZYXEL_WLAN_SCHEDULER=y
+# CONFIG_ZYXEL_WLAN_SCHEDULER_AUTO_SWITCH_RADIO_ON is not set
 # CONFIG_ZYXEL_TR69_URL_PATH_MAC is not set
 # CONFIG_ZYXEL_ELIMINATE_DHCP_LEASE is not set
 # CONFIG_ZYXEL_ACL_HIGH_THAN_REMOMGMT is not set
+# CONFIG_ZYXEL_WLAN_MAXBITRATE is not set
+# CONFIG_ZYXEL_ISOLATED_PUBLIC_LAN is not set
+# CONFIG_ZYXEL_IPV6_UPLOAD_DIAG_ENABLE is not set
+# CONFIG_ZYXEL_DHCPV6S_LEASE is not set
+# CONFIG_ZYXEL_REMOTE_ACCESS_PRIVILEGE is not set
+CONFIG_ZYXEL_SIP_ALG_REMOVE_CONNTRACK_WHEN_INSERT_REMOVE=y
+# CONFIG_ZYXEL_REMOMGMT_ONLY_HTTPS_ALLOWS_FOR_WLAN_CONNECT is not set
+# CONFIG_ZYXEL_FLOW_CONTROl_RGMII5_QTN is not set
+# CONFIG_ZYXEL_ADMIN_GUI_BASIC_VIEW is not set
+# CONFIG_ZYXEL_CLI_IDLE_TIMEOUT is not set
+# CONFIG_ZYXEL_SFP_LINKUP_DELAYTIMES is not set
+# CONFIG_ZYXEL_SIP_DELAYTIMES is not set
 
 #
 # ZyXEL Kernel Features
 #
 CONFIG_KERNEL_ZYXEL_NF_SESSION_CTL=y
+# CONFIG_KERNEL_ZYXEL_PPTP_SUPPORT is not set
+# CONFIG_KERNEL_ZYXEL_EOGRE_SUPPORT is not set
 
 #
 # ZyXEL WEB GUI
@@ -3655,14 +3774,18 @@ CONFIG_ZyXEL_WEB_GUI_HIDE_802_1x=y
 CONFIG_ZyXEL_WEB_GUI_SHOW_WWAN=y
 # CONFIG_ZyXEL_WEB_GUI_SHOW_PON is not set
 # CONFIG_ZyXEL_WEB_GUI_SHOW_CCWAN is not set
+# CONFIG_ZyXEL_WEB_GUI_SHOW_GPON_STATUS is not set
+# CONFIG_ZYXEL_WEB_GUI_SHOW_SKIP_CHANGE_PASSWD is not set
 # CONFIG_ZyXEL_WEB_GUI_SINGLE_IGMP_MLD is not set
 # CONFIG_ZyXEL_WEB_GUI_HIDE_VLAN_GROUP is not set
 # CONFIG_ZyXEL_WEB_GUI_HIDE_STB_VENDOR_ID is not set
 # CONFIG_ZyXEL_WEB_GUI_HIDE_WAKE_ON_LAN is not set
 CONFIG_ZyXEL_WEB_GUI_SHOW_IGMP_MLD_SNOOPING=y
+# CONFIG_ZYXEL_WEB_GUI_SHOW_ENABLE_ONLINE_FW_UPGRADE is not set
 # CONFIG_ZyXEL_WEB_GUI_WLAN_DFS_CHAN_CTL is not set
 # CONFIG_ZYXEL_SHOW_QOS_MONITOR is not set
 # CONFIG_ZYXEL_WEB_GUI_ECONET_QoS_STYLE is not set
+# CONFIG_ZYXEL_WEB_GUI_TRAFFIC_STATUS_FOR_ECONET is not set
 CONFIG_ZYXEL_SUPPORT_PPPOE_MTU_1500=y
 # CONFIG_ZYXEL_WEB_GUI_WLAN_HIDE_RATE_LIMIT is not set
 # CONFIG_ZyXEL_WEB_GUI_HIDE_SP_DOMAIN is not set
@@ -3670,6 +3793,12 @@ CONFIG_ZYXEL_WEB_GUI_NUM_OF_WAN_INTF=8
 # CONFIG_ZYXEL_WEB_GUI_SHOW_QOS_CLS_TARGET_INTF is not set
 # CONFIG_ZYXEL_WEB_GUI_SHOW_SAVE_PASSWORD_DIALOGUE is not set
 # CONFIG_ZYXEL_WEB_GUI_WEP_ENABLE is not set
+# CONFIG_ZYXEL_WEB_GUI_INDEX_SHOW_STATUS is not set
+# CONFIG_ZyXEL_WEB_GUI_MGMT_SET_BIND_INTF_BY_SERVICE is not set
+CONFIG_ZYXEL_WEB_GUI_SHOW_USB_SERVICE=y
+# CONFIG_ZYXEL_WEB_WIRELESS_NEW_VERSION_ONE is not set
+# CONFIG_ZYXEL_WEB_NETWORK_MAP_NEW_STYLE is not set
+# CONFIG_ZYXEL_POWERMONITOR_ENABLE is not set
 
 #
 # Customization
@@ -3707,6 +3836,8 @@ CONFIG_SUNRISE_RELEASE_DHCP_PPP_BEFORE_IFDOWN=y
 # CONFIG_ELISA_NETWORKMAP_CUSTOMIZATION is not set
 # CONFIG_ELISA_NAT_PORTFORWARD_CUSTOMIZATION is not set
 # CONFIG_ELISA_TR69_WANDSL_CUSTOMIZATION is not set
+# CONFIG_ZYXEL_DSL_AVERAGE_SIGNAL_ATTEN is not set
+# CONFIG_ZYXEL_SYNC_CCWAN_TO_ALL_DEFGW is not set
 
 #
 # SuperOnline
@@ -3760,6 +3891,13 @@ CONFIG_SAME_FW_FOR_TWO_BOARD=y
 # CONFIG_CBT_CUSTOMIZATION is not set
 
 #
+# Oi
+#
+# CONFIG_OI_CUSTOMIZATION is not set
+# CONFIG_OI_HOTSPOT_ENABLE is not set
+# CONFIG_OI_WAN_MAC_FOR_VMG3625 is not set
+
+#
 # Tiscali
 #
 # CONFIG_TISCALI_CUSTOMIZATION is not set
@@ -3806,4 +3944,9 @@ CONFIG_SAME_FW_FOR_TWO_BOARD=y
 # Hawaiian Telcom
 #
 # CONFIG_HAWAIIAN_TELCOM is not set
+
+#
+# Altibox
+#
+# CONFIG_ALTIBOX_CUSTOMIZATION is not set
 CONFIG_PACKAGE_base-files-prebuild=y

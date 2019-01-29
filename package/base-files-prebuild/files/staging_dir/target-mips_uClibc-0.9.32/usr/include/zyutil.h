@@ -5,6 +5,7 @@
 
 #define MAC_STR_LEN     17
 #define MAC_ADDR_LEN    6
+#define SERIAL_NUM_STR_LEN  13
 
 /*Common*/
 void zyUtilIfaceHwAddrGet(char *, char *);
@@ -12,6 +13,7 @@ bool zyUtilIsAppRunning(char *);
 bool zyUtilCheckIfaceUp(char *);
 void zyUtilAddIntfToBridge(char *, char *);
 void zyUtilDelIntfFromBridge(char *, char *);
+void zyUtilStrReplace (char *source, char* find_str, char*rep_str);
 void zyUtilBackslashInsert(char *);
 void zyUtilBackslashInForEcho(char *);
 int32_t zyUtilOidGet(const char *objNameAbbr);
@@ -40,6 +42,11 @@ zcfgRet_t zyUtilAppStopByPidfile(char *);
 
 zcfgRet_t zyUtilMailSend(const char *msg);
 
+
+bool zyUtilRetrieveSystemDefaultRoutIface(char *interfaceName);
+zcfgRet_t zyUtilValidIpAddr(const char *);
+int zyUtilIp4AddrDomainCmp(const char *, const char *, const char *);
+
 bool zyUtilFileExists(const char * filename);
 
 
@@ -48,6 +55,18 @@ int zyUtilQueryUtilityEid(const char *name);
 zcfgRet_t zyUtilHandleRecvdMsgDebugCfg(const char *msg);
 unsigned int zcfgMsgDebugCfgLevel(void);
 void zcfgMsgDebugCfgLevelSet(unsigned int debugCfgLevel);
+
+//compare routine type define
+//parameters:
+// void *array: sorted array[]
+// int index: indexing an array node to compare
+// void *value: a value as index to search
+// void **unit: picked array unit, while returning result equal
+//
+// return: == 0, equal, > 0, not equal, < 0, not equal
+typedef int (*compRout)(void *array, int index , void *value, void **unit);
+void *zyUtilSortedArraySearch(void *array, compRout cr, void *value, int l, int r);
+
 
 /* skconn */
 #include <sys/un.h>
@@ -105,4 +124,14 @@ void zyUtilRestoreIptablesConfig(iptCfg_t *ipt, const char *file, const char *fu
 int zyUtilAuthUserAccount(const char *username, const char *password);
 char *zyGetAccountInfoFromFile(char *username, char *filePath);
 void zyRemoveAccountInfoFromFile(char *username, char *filePath);
+
+/*!
+ *  Check serial number format.
+ *
+ *  @param[in] char *str        Input string.
+ *  @param[in] int len          Lenth of input string.
+ *  @return                     0:ok; -1:error.
+ */
+int zyUtilChkSnFormat(char *str, int len);
+
 #endif

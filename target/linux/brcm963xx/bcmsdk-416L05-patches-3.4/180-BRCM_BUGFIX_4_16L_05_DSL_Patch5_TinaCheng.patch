@@ -1,0 +1,1697 @@
+Index: linux-3.4.11/include/linux/dpistats.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/dpistats.h	2017-11-07 19:56:19.106090694 +0800
++++ linux-3.4.11/include/linux/dpistats.h	2017-11-07 19:56:27.178090741 +0800
+@@ -40,7 +40,7 @@
+ extern uint32_t dpistats_lookup( const dpi_info_t *res_p );
+ extern void dpistats_info( uint32_t idx, const DpiStatsEntry_t *stats_p );
+ extern void dpistats_update( uint32_t idx, const DpiStatsEntry_t *stats_p );
+-extern void dpistats_show( struct seq_file *s );
++extern int dpistats_show( struct seq_file *s, int id );
+ extern int dpistats_init( void );
+ #endif
+ #endif
+Index: linux-3.4.11/include/linux/blog.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/blog.h	2017-11-07 19:56:27.014090740 +0800
++++ linux-3.4.11/include/linux/blog.h	2017-11-07 19:56:27.178090741 +0800
+@@ -353,7 +353,7 @@
+ typedef unsigned long (*blog_eth_get_tx_mark_t)(void *dev_p, int priority, unsigned long mark);
+ extern blog_eth_get_tx_mark_t blog_eth_get_tx_mark_fn;
+ 
+-#if defined(CONFIG_NET_IPGRE_MODULE)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE)
+ typedef int (*blog_gre_rcv_check_t)(void *dev, BlogIpv4Hdr_t *iph, uint16_t len, 
+               void **tunl_pp, uint32_t *pkt_seqno_p);
+ extern blog_gre_rcv_check_t blog_gre_rcv_check_fn;
+@@ -1154,6 +1154,8 @@
+ #define CHKG46in4(b)    (CHKG4in4(b) || CHKG6in4(b))
+ 
+ #define PTG4(b)         (RX_GIPV4ONLY(b) && TX_GIPV4ONLY(b))
++#define TOTG4(b)        ((RX_GIP4in4(b) && TX_GIP4in4(b)) || \
++                         (RX_GIP6in4(b) && TX_GIP6in4(b)))
+ 
+ #define HDRS_EIP4in4    ((1<<ESP) | HDRS_IP4in4)
+ #define HDRS_EIP6in4    ((1<<ESP) | HDRS_IP6in4)
+@@ -1641,7 +1643,8 @@
+     struct blog_t       * vblog_p;      /* vertical list of Blog_t */
+     void                * mc_fdb;       /* physical rx network device */
+ 
+-    uint32_t            reserved9;
++    uint16_t            reserved9;
++    uint16_t            mcast_excl_udp_port; /* Multicast UDP exclude port */
+     BlogEthAddr_t       src_mac;        /* Flow src MAC */
+     BlogEthAddr_t       dst_mac;        /* Flow dst MAC */
+ 
+@@ -1730,7 +1733,8 @@
+     union {
+         uint16_t        flags2;
+         struct {
+-            uint16_t    unused     : 15;
++            uint16_t    unused     : 14;
++            uint16_t    is_ssm     :  1;
+             uint16_t    mcast_learn:  1;
+         };
+     };
+@@ -2102,7 +2106,7 @@
+ extern int blog_pre_mod_hook(Blog_t *blog_p, void *nbuff_p);
+ extern int blog_post_mod_hook(Blog_t *blog_p, void *nbuff_p);
+ 
+-#if defined(CONFIG_NET_IPGRE_MODULE)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE)
+ #define BLOG_GRE_RCV_NOT_GRE             2
+ #define BLOG_GRE_RCV_NO_SEQNO            1
+ #define BLOG_GRE_RCV_IN_SEQ              0
+Index: linux-3.4.11/include/linux/iqos.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/iqos.h	2017-11-07 19:56:27.014090740 +0800
++++ linux-3.4.11/include/linux/iqos.h	2017-11-07 19:56:27.182090742 +0800
+@@ -152,6 +152,10 @@
+ typedef void (* iqos_fap_rem_L4port_hook_t)( uint8_t ipProto, uint16_t dport,
+             uint8_t ent );
+ typedef void (* iqos_fap_dump_porttbl_hook_t)( uint8_t ipProto );
++typedef void (* iqos_fap_set_proto_prio_hook_t)( uint8_t prototype,
++            uint8_t protoval, uint8_t prio );
++typedef void (* iqos_fap_rem_proto_prio_hook_t)( uint8_t prototype,
++            uint8_t protoval );
+ #endif
+ 
+ typedef int (* iqos_runner_get_hook_t)( void *bdmf_obj, long bdmf_index, 
+Index: linux-3.4.11/include/linux/blog_net.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/blog_net.h	2017-11-07 19:56:18.982090684 +0800
++++ linux-3.4.11/include/linux/blog_net.h	2017-11-07 19:56:27.182090742 +0800
+@@ -149,6 +149,7 @@
+ #define BLOG_ETH_ADDR_LEN       6
+ #define BLOG_ETH_TYPE_LEN       sizeof(uint16_t)
+ #define BLOG_ETH_HDR_LEN        ((BLOG_ETH_ADDR_LEN * 2) + BLOG_ETH_TYPE_LEN)
++#define BLOG_ETH_TYPE_MIN       1536
+ 
+ #define BLOG_ETH_MIN_LEN        60
+ #define BLOG_ETH_FCS_LEN        4
+Index: linux-3.4.11/include/net/ip6_fib.h
+===================================================================
+--- linux-3.4.11.orig/include/net/ip6_fib.h	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/include/net/ip6_fib.h	2017-11-07 19:56:27.182090742 +0800
+@@ -125,50 +125,35 @@
+ 
+ static inline void rt6_clean_expires(struct rt6_info *rt)
+ {
+-	if (!(rt->rt6i_flags & RTF_EXPIRES) && rt->dst.from)
+-		dst_release(rt->dst.from);
+-
+ 	rt->rt6i_flags &= ~RTF_EXPIRES;
+-	rt->dst.from = NULL;
+ }
+ 
+ static inline void rt6_set_expires(struct rt6_info *rt, unsigned long expires)
+ {
+-	if (!(rt->rt6i_flags & RTF_EXPIRES) && rt->dst.from)
+-		dst_release(rt->dst.from);
+-
+-	rt->rt6i_flags |= RTF_EXPIRES;
+ 	rt->dst.expires = expires;
++	rt->rt6i_flags |= RTF_EXPIRES;
+ }
+ 
+-static inline void rt6_update_expires(struct rt6_info *rt, int timeout)
++static inline void rt6_update_expires(struct rt6_info *rt0, int timeout)
+ {
+-	if (!(rt->rt6i_flags & RTF_EXPIRES)) {
+-		if (rt->dst.from)
+-			dst_release(rt->dst.from);
+-		/* dst_set_expires relies on expires == 0 
+-		 * if it has not been set previously.
+-		 */
+-		rt->dst.expires = 0;
+-	}
++	struct rt6_info *rt;
+ 
+-	dst_set_expires(&rt->dst, timeout);
+-	rt->rt6i_flags |= RTF_EXPIRES;
++	for (rt = rt0; rt && !(rt->rt6i_flags & RTF_EXPIRES);
++	     rt = (struct rt6_info *)rt->dst.from);
++	if (rt && rt != rt0)
++		rt0->dst.expires = rt->dst.expires;
++
++	dst_set_expires(&rt0->dst, timeout);
++	rt0->rt6i_flags |= RTF_EXPIRES;
+ }
+ 
+ static inline void rt6_set_from(struct rt6_info *rt, struct rt6_info *from)
+ {
+ 	struct dst_entry *new = (struct dst_entry *) from;
+ 
+-	if (!(rt->rt6i_flags & RTF_EXPIRES) && rt->dst.from) {
+-		if (new == rt->dst.from)
+-			return;
+-		dst_release(rt->dst.from);
+-	}
+-
+ 	rt->rt6i_flags &= ~RTF_EXPIRES;
+-	rt->dst.from = new;
+ 	dst_hold(new);
++	rt->dst.from = new;
+ }
+ 
+ struct fib6_walker_t {
+Index: linux-3.4.11/include/net/dst.h
+===================================================================
+--- linux-3.4.11.orig/include/net/dst.h	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/include/net/dst.h	2017-11-07 19:56:27.182090742 +0800
+@@ -36,12 +36,9 @@
+ 	struct net_device       *dev;
+ 	struct  dst_ops	        *ops;
+ 	unsigned long		_metrics;
+-	union {
+-		unsigned long           expires;
+-		/* point to where the dst_entry copied from */
+-		struct dst_entry        *from;
+-	};
++	unsigned long		expires;
+ 	struct dst_entry	*path;
++	struct dst_entry	*from;
+ 	struct neighbour __rcu	*_neighbour;
+ #ifdef CONFIG_XFRM
+ 	struct xfrm_state	*xfrm;
+@@ -66,11 +63,6 @@
+ 	short			obsolete;
+ 	unsigned short		header_len;	/* more space at head required */
+ 	unsigned short		trailer_len;	/* space to reserve at tail */
+-#ifdef CONFIG_IP_ROUTE_CLASSID
+-	__u32			tclassid;
+-#else
+-	__u32			__pad2;
+-#endif
+ 
+ 	/*
+ 	 * Align __refcnt to a 64 bytes alignment
+@@ -92,6 +84,9 @@
+ 		struct rt6_info		*rt6_next;
+ 		struct dn_route __rcu	*dn_next;
+ 	};
++#ifdef CONFIG_IP_ROUTE_CLASSID
++	__u32			tclassid;
++#endif
+ };
+ 
+ static inline struct neighbour *dst_get_neighbour_noref(struct dst_entry *dst)
+Index: linux-3.4.11/include/net/netfilter/nf_conntrack.h
+===================================================================
+--- linux-3.4.11.orig/include/net/netfilter/nf_conntrack.h	2017-11-07 19:56:22.602090709 +0800
++++ linux-3.4.11/include/net/netfilter/nf_conntrack.h	2017-11-07 19:56:27.182090742 +0800
+@@ -132,6 +132,8 @@
+ 	uint16_t flags;
+ 	unsigned int url_id;
+ } dpi_info_t;
++
++int nf_conntrack_dpistat_update(struct net *net);
+ #endif
+ 
+ struct nf_conn {
+Index: linux-3.4.11/net/ipv4/tcp_ipv4.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv4/tcp_ipv4.c	2017-11-07 19:56:20.690090696 +0800
++++ linux-3.4.11/net/ipv4/tcp_ipv4.c	2017-11-07 19:56:27.186090742 +0800
+@@ -1674,66 +1674,51 @@
+ 
+ #if defined(CONFIG_BCM_KF_BLOG) && defined(CONFIG_BLOG)
+ 
+-inline struct sk_buff *bcm_find_skb_by_flow_id(uint32_t flowid)
++static inline struct sk_buff *bcm_find_skb_by_flow_id(uint32_t flowid)
+ {
+ 	/* TODO add this function later,needed for coalescing */
+ 	return NULL;
+ }
+ 
+-inline struct sk_buff *bcm_fkb_to_skb_tcp(FkBuff_t *fkb, struct net_device *dev)
++static inline void set_skb_fields(FkBuff_t *fkb, struct sk_buff *skb
++	, struct net_device *dev)
+ {
+-	struct sk_buff *skb;
+-
+-	/* find the skb for flowid or allocate a new skb */
+-	skb = bcm_find_skb_by_flow_id(fkb->flowid);
+-
+-	if(!skb)
+-	{
+-		skb = skb_xlate_dp(fkb, NULL);
+-		if(!skb)
+-		{
+-			nbuff_free(fkb);
+-			return NULL;
+-		}
+-
+-		skb->dev = dev;
++	/*TODO check if we can use skb_dst_set_noref as blog holds reference*/
++	dst_hold(fkb->dst_entry);
++	skb_dst_set(skb, fkb->dst_entry);
++	skb->dev = dev;
++}
+ 
+-		skb->mark=0;
+-		skb->priority=0;
+ 
+-		/*TODO check if we can use skb_dst_set_noref as blog holds reference*/
+-		dst_hold(fkb->dst_entry);
+-		skb_dst_set(skb, fkb->dst_entry);
++static inline int position_skb_ptrs_to_transport(struct sk_buff *skb)
++{
++	uint16_t network_offset = BLOG_ETH_HDR_LEN;
++	uint16_t transport_offset = BLOG_ETH_HDR_LEN + BLOG_IPV4_HDR_LEN;
+ 
+-		/*initialize ip & tcp header related fields in skb */
+-		skb_set_mac_header(skb, 0); 
+-		skb_set_network_header(skb, 14);
+-		skb_set_transport_header(skb, 34);/*assumes no ip options*/
+ 
+-		/*set the data pointer to start of TCP header */
+-		skb->data += 34;
+-		skb->len -= 34;
++	/*initialize ip & tcp header related fields in skb */
++	skb_set_mac_header(skb, 0);
+ 
+-		skb->pkt_type = PACKET_HOST;
++	skb_set_network_header(skb, network_offset);
+ 
+-#if ((defined(CONFIG_BCM_KF_RECVFILE) && defined(CONFIG_BCM_RECVFILE)) \
+-     && (defined(CONFIG_BCM963138) || defined(CONFIG_BCM963148)))
+-		/* on 63138 & 63148 pkt is invalidated on RX, so we can optimize/reduce
+-		 * invaldiation during recycle by setting dirtyp.
+-		 * the assumption here is pkt is not modified(not dirty in cache)
+-		 * after standard tcp header
+-		 */
+-		{
+-			/*for now just use this for samba ports */
+-			uint16_t dport=ntohs(tcp_hdr(skb)->dest);
+ 
+-			if((dport == 139) ||  (dport == 445))
+-				skb_shinfo(skb)->dirty_p = skb->data +20;
++	/*check IP HDR csum */
++	{
++		const struct iphdr *iph = ip_hdr(skb);
++		__u8 iph_ihl = *(__u8 *)iph & 0xf;
++		/*make sure len holds atleast a TCP header with no options */
++		if (unlikely((skb->len < (transport_offset+ 20)) ||
++					ip_fast_csum((u8 *)iph, iph_ihl))){
++			IP_INC_STATS_BH(dev_net(skb->dev), IPSTATS_MIB_INHDRERRORS);
++			return -1;
+ 		}
+-#endif
+ 	}
+ 
+-	return skb;
++	skb_set_transport_header(skb, transport_offset);/*assumes no ip options*/
++	skb_pull(skb,transport_offset);
++	skb->pkt_type = PACKET_HOST;
++
++	return 0;
+ }
+ 
+ 
+@@ -1742,43 +1727,58 @@
+ {
+ 
+ 	struct sk_buff *skb;
++	FkBuff_t * fkb;
+ 
+ 	if(IS_FKBUFF_PTR(pNBuff))
+ 	{
++		fkb = PNBUFF_2_FKBUFF(pNBuff);
+ 		/* Translate the fkb to skb */
+-		skb = bcm_fkb_to_skb_tcp(PNBUFF_2_FKBUFF(pNBuff), dev); 
++		/* find the skb for flowid or allocate a new skb */
++		skb = bcm_find_skb_by_flow_id(fkb->flowid);
++
++		if(!skb)
++		{
++			skb = skb_xlate_dp(fkb, NULL);
++
++			if(!skb)
++			{
++				nbuff_free(FKBUFF_2_PNBUFF(fkb));
++				return 0;
++			}
++
++			skb->mark=0;
++			skb->priority=0;
++		}
+ 	}
+ 	else
+ 	{
+-		FkBuff_t * fkb;
+ 		skb = PNBUFF_2_SKBUFF(pNBuff);
+-
+ 		fkb = (FkBuff_t *)&skb->fkbInSkb;
++	}
+ 
+-		skb->dev = dev;
++	set_skb_fields(fkb, skb, dev);
++	if(position_skb_ptrs_to_transport(skb)){
++		kfree_skb(skb);
++		return 0;
++	}
+ 
+-		/*TODO check if we can use skb_dst_set_noref as blog holds reference*/
+-		dst_hold(fkb->dst_entry);
+-		skb_dst_set(skb, fkb->dst_entry);
+-
+-		/*initialize ip & tcp header related fields in skb */
+-		skb_set_mac_header(skb, 0); 
+-		skb_set_network_header(skb, 14);
+-		skb_set_transport_header(skb, 34);/*assumes no ip options*/
+-
+-		/*set the data pointer to start of TCP header */
+-		skb->data += 34;
+-		skb->len -= 34;
++#if ((defined(CONFIG_BCM_KF_RECVFILE) && defined(CONFIG_BCM_RECVFILE)) \
++	&& (defined(CONFIG_BCM963138) || defined(CONFIG_BCM963148)))
++		/* on 63138 & 63148 pkt is invalidated on RX, so we can optimize/reduce
++		 * invaldiation during recycle by setting dirtyp.
++		 * the assumption here is pkt is not modified(not dirty in cache)
++		 * after standard tcp header
++		 */
++		{
++			/*for now just use this for samba ports */
++			uint16_t dport=ntohs(tcp_hdr(skb)->dest);
+ 
+-		skb->pkt_type = PACKET_HOST;
+-	}
++			if((dport == 139) ||  (dport == 445))
++				skb_shinfo(skb)->dirty_p = skb->data +20;
++		}
++#endif
+ 
+-	/* calling tcp_v4_rcv with blog lock can cause deadlock issue
+-	 * if a xmit is trigged by tcp_v4_rcv
+-	 *
+-	 * For now release blog lock, as there is nothing to protect with blog 
+-	 * lock from this point
+-	 *
++	 /*
+ 	 * bh_disable is needed to prevent deadlock on sock_lock when TCP timers 
+ 	 * are executed
+ 	 */
+Index: linux-3.4.11/net/core/blog.c
+===================================================================
+--- linux-3.4.11.orig/net/core/blog.c	2017-11-07 19:56:27.030090741 +0800
++++ linux-3.4.11/net/core/blog.c	2017-11-07 19:56:27.186090742 +0800
+@@ -263,7 +263,7 @@
+ blog_xtm_get_tx_chan_t blog_xtm_get_tx_chan_fn = (blog_xtm_get_tx_chan_t) NULL;
+ blog_eth_get_tx_mark_t blog_eth_get_tx_mark_fn = (blog_eth_get_tx_mark_t) NULL;
+ 
+-#if defined(CONFIG_NET_IPGRE_MODULE)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE)
+ blog_gre_rcv_check_t blog_gre_rcv_check_fn = NULL;
+ blog_gre_xmit_upd_t blog_gre_xmit_update_fn = NULL;
+ #endif
+@@ -1128,9 +1128,9 @@
+             switch (param2)
+             {
+                 case BLOG_PARAM2_IPV4:
+-                    if (RX_IPV4_DEL(blog_p))
+-                        idx = BLOG_CT_DEL;
+-                    else if (RX_IPV4(blog_p))
++                    if (RX_IPV4_DEL(blog_p) && (blog_p->ct_p[BLOG_CT_DEL] == NULL))
++                            idx = BLOG_CT_DEL;
++                    else if (RX_IPV4(blog_p) && (blog_p->ct_p[BLOG_CT_PLD] == NULL))
+                         idx = BLOG_CT_PLD;
+                     else if (blog_p->ct_p[BLOG_CT_DEL] == NULL)
+                         idx = BLOG_CT_DEL;
+@@ -1139,9 +1139,9 @@
+                     break;
+ 
+                 case BLOG_PARAM2_IPV6:
+-                    if (RX_IPV6_DEL(blog_p))
++                    if (RX_IPV6_DEL(blog_p) && (blog_p->ct_p[BLOG_CT_DEL] == NULL))
+                         idx = BLOG_CT_DEL;
+-                    else if (RX_IPV6(blog_p))
++                    else if (RX_IPV6(blog_p) && (blog_p->ct_p[BLOG_CT_PLD] == NULL))
+                          idx = BLOG_CT_PLD;
+                     else if (blog_p->ct_p[BLOG_CT_DEL] == NULL)
+                         idx = BLOG_CT_DEL;
+@@ -1404,7 +1404,7 @@
+                     /*check blog_key[param1] should be BLOG_KEY_NONE */
+                     if(((struct nf_conn *)net_p)->blog_key[param1] != BLOG_KEY_NONE )
+                     {
+-                        blog_error("blog_key corruption when adding flow net_p=%p"
++                        blog_error("blog_key corruption when adding flow net_p=%p "
+                             "dir=%d old_key=0x%08x new_key=0x%08x\n", net_p, param1,
+                              ((struct nf_conn *)net_p)->blog_key[param1], param2);
+                     }
+@@ -1610,7 +1610,7 @@
+             return 0;
+         }
+ 
+-#if defined(CONFIG_NET_IPGRE_MODULE)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE)
+         case GRE_TUNL_XMIT:
+         {
+             blog_assertr( ((BlogIpv4Hdr_t *)param1 != NULL), 0 );
+@@ -1773,7 +1773,7 @@
+     BlogHash_t blogHash;
+     BlogAction_t action = PKT_NORM;
+     BlogFcArgs_t args;
+-#if defined(CONFIG_NET_IPGRE_MODULE) || defined(CONFIG_ACCEL_PPTP)   
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE) || defined(CONFIG_ACCEL_PPTP)
+     int gre_rcv_version;
+ #endif   
+ #if defined(CONFIG_SMP) || defined(CONFIG_PREEMPT)
+@@ -1797,10 +1797,10 @@
+                 channel, strBlogPhy[blogHash.l1_tuple.phyType],
+                 rfc2684HdrLength[blogHash.l1_tuple.phyLen],
+                 blogHash.match );   
+-#if defined(CONFIG_NET_IPGRE_MODULE) || defined(CONFIG_ACCEL_PPTP)                                           
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE) || defined(CONFIG_ACCEL_PPTP)
+     gre_rcv_version = blog_rcv_chk_gre (fkb_p, encap);     
+ #endif           
+-#if defined(CONFIG_NET_IPGRE_MODULE)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE)
+     if (blog_gre_tunnel_accelerated() && gre_rcv_version == PPTP_GRE_VER_0)
+     {
+         int gre_status;
+@@ -2002,7 +2002,7 @@
+     struct sk_buff * skb_p;
+     Blog_t * blog_p;
+     BlogAction_t action = PKT_NORM;   
+-#if defined(CONFIG_NET_IPGRE_MODULE) || defined(CONFIG_ACCEL_PPTP)    
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE) || defined(CONFIG_ACCEL_PPTP)
+     int gre_xmit_version;
+ #endif    
+     // outer inline function has already verified this is a skbuff
+@@ -2047,11 +2047,11 @@
+ 
+ bypass:
+ 	
+-#if defined(CONFIG_NET_IPGRE_MODULE) || defined(CONFIG_ACCEL_PPTP)	
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE) || defined(CONFIG_ACCEL_PPTP)
+ 	gre_xmit_version = blog_xmit_chk_gre(skb_p, encap);
+ #endif	
+ 
+-#if defined(CONFIG_NET_IPGRE_MODULE)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE)
+     if(gre_xmit_version == PPTP_GRE_VER_0)
+     {	
+     	blog_gre_xmit(skb_p, encap);
+@@ -3040,7 +3040,7 @@
+     .notifier_call = blog_notify_netevent,
+ };
+ 
+-#if defined(CONFIG_NET_IPGRE_MODULE) || defined(CONFIG_ACCEL_PPTP)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE) || defined(CONFIG_ACCEL_PPTP)
+ /*
+  * Macro specific to parsing: Used in blog_gre_rcv().
+  * - Fetch the next encapsulation
+@@ -3223,7 +3223,7 @@
+ 
+ #endif
+ 
+-#if defined(CONFIG_NET_IPGRE_MODULE)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE)
+ /*
+  *------------------------------------------------------------------------------
+  * Function     : blog_gre_rcv
+@@ -3632,7 +3632,7 @@
+ int blog_support_gre_g = BLOG_GRE_DISABLE; /* = CC_BLOG_SUPPORT_GRE; */
+ void blog_support_gre(int enable) {blog_support_gre_g = BLOG_GRE_DISABLE;}
+ 
+-#if defined(CONFIG_NET_IPGRE_MODULE)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE)
+ blog_gre_rcv_check_t blog_gre_rcv_check_fn = NULL;
+ blog_gre_xmit_upd_t blog_gre_xmit_update_fn = NULL;
+ #endif
+@@ -3739,7 +3739,7 @@
+ Blog_t * blog_deactivate( uint32_t key, BlogTraffic_t traffic,
+                           BlogClient_t client ) { return BLOG_NULL; }
+ 
+-#if defined(CONFIG_NET_IPGRE_MODULE)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE)
+ int blog_gre_rcv( struct fkbuff *fkb_p, void * dev_p, uint32_t h_proto, 
+                   void **tunl_pp, uint32_t *pkt_seqno_p ) { return 1; }
+ void blog_gre_xmit(struct sk_buff *skb_p, uint32_t h_proto) { return; }
+@@ -3775,7 +3775,7 @@
+ EXPORT_SYMBOL(blog_gre_tunnel_accelerated_g);
+ EXPORT_SYMBOL(blog_support_gre_g);
+ EXPORT_SYMBOL(blog_support_gre);
+-#if defined(CONFIG_NET_IPGRE_MODULE)
++#if defined(CONFIG_NET_IPGRE) || defined(CONFIG_NET_IPGRE_MODULE)
+ EXPORT_SYMBOL(blog_gre_rcv_check_fn);
+ EXPORT_SYMBOL(blog_gre_xmit_update_fn);
+ EXPORT_SYMBOL(blog_gre_rcv);
+Index: linux-3.4.11/net/core/dpistats.c
+===================================================================
+--- linux-3.4.11.orig/net/core/dpistats.c	2017-11-07 19:56:20.618090696 +0800
++++ linux-3.4.11/net/core/dpistats.c	2017-11-07 19:56:27.186090742 +0800
+@@ -35,6 +35,18 @@
+ #include <linux/devinfo.h>
+ #include <linux/seq_file.h>
+ 
++static DEFINE_SPINLOCK(dpistat_lock_g);
++void dpistat_lock(void)
++{
++    spin_lock( &dpistat_lock_g );
++}
++
++void dpistat_unlock(void)
++{
++    spin_unlock( &dpistat_lock_g );
++}
++
++
+ typedef struct {
+     DpiStats_t      * htable[ DPISTATS_HTABLE_SIZE ];
+     DpiStats_t        etable[ DPISTATS_MAX_ENTRIES ];
+@@ -160,6 +172,11 @@
+ 
+     dpistats_print("enter");
+ 
++    if ( unlikely(res_p->dev_key == DEVINFO_IX_INVALID) ||
++         unlikely(res_p->app_id == 0) )
++        return DPISTATS_IX_INVALID;
++
++    dpistat_lock();
+     stats_p = dpistats_alloc();
+     if ( unlikely(stats_p == DPISTATS_NULL) )
+     {
+@@ -171,6 +188,7 @@
+     stats_p->entry.result.dev_key = res_p->dev_key;
+ 
+     dpistats_hashin(stats_p, hashix);              /* Insert into hash table */
++    dpistat_unlock();
+ 
+     dpistats_print("idx<%u>", stats_p->entry.idx);
+ 
+@@ -261,6 +279,10 @@
+     uint32_t idx;
+     uint32_t hashix;
+ 
++    if ( unlikely(res_p->dev_key == DEVINFO_IX_INVALID) ||
++         unlikely(res_p->app_id == 0) )
++        return DPISTATS_IX_INVALID;
++
+     hashix = _dpistats_hash(res_p->app_id, res_p->dev_key);
+ 
+     dpistats_print("hashix<%u> appID<%06x> devkey<%u>",
+@@ -276,7 +298,8 @@
+         if (likely( _dpistats_match(&stats_p->entry.result, res_p) ))
+         {
+             dpistats_print("idx<%u>", stats_p->entry.idx);
+-            return stats_p->entry.idx;
++            idx = stats_p->entry.idx;
++            return idx;
+         }
+     }
+ 
+@@ -334,6 +357,7 @@
+ 
+         dpistats_print("Reset");
+ 
++        dpistat_lock();
+         list_p = &dpistats.usedlist;
+ 
+         if (!dll_empty(list_p))
+@@ -356,6 +380,7 @@
+                 ctk_p->bytes = 0;
+             }
+         }
++        dpistat_unlock();
+     }
+     dpistats_print("exit");
+ }
+@@ -380,6 +405,7 @@
+ 
+     dpistats_assertv( ((idx != DPISTATS_IX_INVALID) && (stats_p != NULL)) );
+ 
++    dpistat_lock();
+     elem_p = &dpistats.etable[idx];
+ 
+     ctk1_p = &elem_p->evict_up;
+@@ -395,6 +421,7 @@
+     ctk1_p->pkts += ctk2_p->pkts;
+     ctk1_p->bytes += ctk2_p->bytes;
+     if (ctk1_p->ts < ctk2_p->ts) ctk1_p->ts = ctk2_p->ts;
++    dpistat_unlock();
+ }
+ 
+ /*
+@@ -403,65 +430,64 @@
+  * Description  : show dpi statistics
+  *------------------------------------------------------------------------------
+  */
+-void dpistats_show( struct seq_file *s )
++int dpistats_show( struct seq_file *s, int id )
+ {
+-    Dll_t  *tmp_p;
+-    Dll_t  *list_p;
+     DpiStats_t *elem_p;
++    CtkStats_t *ctk_p, *evict_p;
+ 
+     dpistats_print("enter");
+ 
+-    list_p = &dpistats.usedlist;
++    if ((id == DPISTATS_IX_INVALID) ||
++        (id >=DPISTATS_MAX_ENTRIES) )
++        return 1;
+ 
+-    if (!dll_empty(list_p))
+-    {
+-        dll_for_each(tmp_p, list_p) 
+-        {
+-            CtkStats_t *ctk_p, *evict_p;
+-            elem_p = (DpiStats_t *)tmp_p;
+ 
+-            seq_printf(s, "%08x ", elem_p->entry.result.app_id);
++    elem_p = &dpistats.etable[id];;
+ 
+-            if (elem_p->entry.result.dev_key != DEVINFO_IX_INVALID)
+-            {
+-                uint8_t mac[6];
+-                DevInfoEntry_t entry;
++    if (elem_p->entry.result.app_id == 0) {
++        return 0;
++    }
+ 
+-                devinfo_getmac(elem_p->entry.result.dev_key, mac);
+-                devinfo_get(elem_p->entry.result.dev_key, &entry);
++    seq_printf(s, "%08x ", elem_p->entry.result.app_id);
+ 
+-                seq_printf(s, "%02x:%02x:%02x:%02x:%02x:%02x ",
+-                        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
++    if (elem_p->entry.result.dev_key != DEVINFO_IX_INVALID)
++    {
++        uint8_t mac[6];
++        DevInfoEntry_t entry;
+ 
+-                seq_printf(s, "%u %u %u %u %u ",
+-                        entry.vendor_id, entry.os_id, entry.class_id,
+-                        entry.type_id, entry.dev_id);
+-            }
+-            else
+-            {
+-                seq_printf(s, "NoMac ");
+-            }
++        devinfo_getmac(elem_p->entry.result.dev_key, mac);
++        devinfo_get(elem_p->entry.result.dev_key, &entry);
++
++        seq_printf(s, "%02x:%02x:%02x:%02x:%02x:%02x ",
++                mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+ 
+-            ctk_p = &elem_p->entry.upstream;
+-            evict_p = &elem_p->evict_up;
++        seq_printf(s, "%u %u %u %u %u ",
++                entry.vendor_id, entry.os_id, entry.class_id,
++                entry.type_id, entry.dev_id);
++    }
++    else
++        seq_printf(s, "NoMac 0 0 0 0 0 ");
++
++    ctk_p = &elem_p->entry.upstream;
++    evict_p = &elem_p->evict_up;
+ //            printk("%lu %llu %lu ", ctk_p->pkts + evict_p->pkts,
+ //                    ctk_p->bytes + evict_p->bytes,
+ //                    ctk_p->ts);
+-            seq_printf(s, "%lu %llu ", ctk_p->pkts + evict_p->pkts,
+-                    ctk_p->bytes + evict_p->bytes);
++    seq_printf(s, "%lu %llu ", ctk_p->pkts + evict_p->pkts,
++            ctk_p->bytes + evict_p->bytes);
+             
+-            ctk_p = &elem_p->entry.dnstream;
+-            evict_p = &elem_p->evict_dn;
++    ctk_p = &elem_p->entry.dnstream;
++    evict_p = &elem_p->evict_dn;
+ //            printk("%lu %llu %lu ", ctk_p->pkts + evict_p->pkts,
+ //                    ctk_p->bytes + evict_p->bytes,
+ //                    ctk_p->ts);
+-            seq_printf(s, "%lu %llu ", ctk_p->pkts + evict_p->pkts,
+-                    ctk_p->bytes + evict_p->bytes);
++    seq_printf(s, "%lu %llu ", ctk_p->pkts + evict_p->pkts,
++            ctk_p->bytes + evict_p->bytes);
+ 
+ //            printk("%x ", elem_p->entry.result.flags);
+-            seq_printf(s, "\n");
+-        }
+-    }
++    seq_printf(s, "\n");
++
++    return 0;
+ }
+ 
+ int dpistats_init( void )
+Index: linux-3.4.11/net/core/iqos.c
+===================================================================
+--- linux-3.4.11.orig/net/core/iqos.c	2017-11-07 19:56:27.030090741 +0800
++++ linux-3.4.11/net/core/iqos.c	2017-11-07 19:56:27.190090741 +0800
+@@ -256,10 +256,12 @@
+ iqos_fap_xtmRxDqmQueue_hook_t iqos_fap_xtmRxDqmQueue_hook_g = NULL;
+ #endif
+ 
+-iqos_fap_set_status_hook_t    iqos_fap_set_status_hook_g = NULL;
+-iqos_fap_add_L4port_hook_t    iqos_fap_add_L4port_hook_g = NULL;
+-iqos_fap_rem_L4port_hook_t    iqos_fap_rem_L4port_hook_g = NULL;
+-iqos_fap_dump_porttbl_hook_t  iqos_fap_dump_porttbl_hook_g = NULL;
++iqos_fap_set_status_hook_t     iqos_fap_set_status_hook_g = NULL;
++iqos_fap_add_L4port_hook_t     iqos_fap_add_L4port_hook_g = NULL;
++iqos_fap_rem_L4port_hook_t     iqos_fap_rem_L4port_hook_g = NULL;
++iqos_fap_dump_porttbl_hook_t   iqos_fap_dump_porttbl_hook_g = NULL;
++iqos_fap_set_proto_prio_hook_t iqos_fap_set_proto_prio_hook_g = NULL;
++iqos_fap_rem_proto_prio_hook_t iqos_fap_rem_proto_prio_hook_g = NULL;
+ #endif
+ 
+ iqos_runner_get_hook_t iqos_runner_stat_hook_g = NULL;
+@@ -315,6 +317,8 @@
+ EXPORT_SYMBOL(iqos_fap_add_L4port_hook_g);
+ EXPORT_SYMBOL(iqos_fap_rem_L4port_hook_g);
+ EXPORT_SYMBOL(iqos_fap_dump_porttbl_hook_g);
++EXPORT_SYMBOL(iqos_fap_set_proto_prio_hook_g);
++EXPORT_SYMBOL(iqos_fap_rem_proto_prio_hook_g);
+ #endif
+ EXPORT_SYMBOL(iqos_runner_stat_hook_g);
+ EXPORT_SYMBOL(iqos_runner_get_L4port_hook_g);
+Index: linux-3.4.11/net/core/dst.c
+===================================================================
+--- linux-3.4.11.orig/net/core/dst.c	2012-09-15 06:18:55.000000000 +0800
++++ linux-3.4.11/net/core/dst.c	2017-11-07 19:56:27.190090741 +0800
+@@ -171,6 +171,7 @@
+ 	dst_init_metrics(dst, dst_default_metrics, true);
+ 	dst->expires = 0UL;
+ 	dst->path = dst;
++	dst->from = NULL;
+ 	RCU_INIT_POINTER(dst->_neighbour, NULL);
+ #ifdef CONFIG_XFRM
+ 	dst->xfrm = NULL;
+Index: linux-3.4.11/net/core/devinfo.c
+===================================================================
+--- linux-3.4.11.orig/net/core/devinfo.c	2017-11-07 19:56:20.618090696 +0800
++++ linux-3.4.11/net/core/devinfo.c	2017-11-07 19:56:27.190090741 +0800
+@@ -33,6 +33,18 @@
+ #include <linux/devinfo.h>
+ #include <linux/bcm_colors.h>
+ 
++static DEFINE_SPINLOCK(devinfo_lock_g);
++
++void devinfo_lock(void)
++{
++    spin_lock( &devinfo_lock_g );
++}
++
++void devinfo_unlock(void)
++{
++    spin_unlock( &devinfo_lock_g );
++}
++
+ typedef struct {
+     DevInfo_t      * htable[ DEVINFO_HTABLE_SIZE ];
+     DevInfo_t        etable[ DEVINFO_MAX_ENTRIES ];
+@@ -155,6 +167,7 @@
+ 
+     devinfo_print("enter");
+ 
++    devinfo_lock();
+     dev_p = devinfo_alloc();
+     if ( unlikely(dev_p == DEVINFO_NULL) )
+     {
+@@ -164,6 +177,7 @@
+ 
+     memcpy(dev_p->mac, mac, ETH_ALEN);
+     devinfo_hashin(dev_p, hashix);              /* Insert into hash table */
++    devinfo_unlock();
+ 
+     devinfo_print("idx<%u>", dev_p->entry.idx);
+ 
+@@ -269,7 +283,8 @@
+         if (likely( _devinfo_match(dev_p, mac) ))
+         {
+             devinfo_print("idx<%u>", dev_p->entry.idx);
+-            return dev_p->entry.idx;
++            idx = dev_p->entry.idx;
++            return idx;
+         }
+     }
+ 
+@@ -323,6 +338,7 @@
+                   entry->idx, entry->flags, entry->vendor_id, entry->os_id,
+                   entry->class_id, entry->type_id, entry->dev_id);
+ 
++    devinfo_lock();
+     dev_p = &deviceInfo.etable[entry->idx];
+     dev_p->entry.flags = entry->flags;
+     dev_p->entry.vendor_id = entry->vendor_id;
+@@ -330,6 +346,7 @@
+     dev_p->entry.class_id = entry->class_id;
+     dev_p->entry.type_id = entry->type_id;
+     dev_p->entry.dev_id = entry->dev_id;
++    devinfo_unlock();
+ 
+     return;
+ }
+Index: linux-3.4.11/net/ipv6/route.c
+===================================================================
+--- linux-3.4.11.orig/net/ipv6/route.c	2017-11-07 19:56:20.710090696 +0800
++++ linux-3.4.11/net/ipv6/route.c	2017-11-07 19:56:27.190090741 +0800
+@@ -281,6 +281,7 @@
+ 	struct rt6_info *rt = (struct rt6_info *)dst;
+ 	struct inet6_dev *idev = rt->rt6i_idev;
+ 	struct inet_peer *peer = rt->rt6i_peer;
++	struct dst_entry *from = dst->from;
+ 
+ 	if (!(rt->dst.flags & DST_HOST))
+ 		dst_destroy_metrics_generic(dst);
+@@ -290,8 +291,8 @@
+ 		in6_dev_put(idev);
+ 	}
+ 
+-	if (!(rt->rt6i_flags & RTF_EXPIRES) && dst->from)
+-		dst_release(dst->from);
++	dst->from = NULL;
++	dst_release(from);
+ 
+ 	if (peer) {
+ 		rt->rt6i_peer = NULL;
+@@ -990,7 +991,6 @@
+ 
+ 		rt->rt6i_gateway = ort->rt6i_gateway;
+ 		rt->rt6i_flags = ort->rt6i_flags;
+-		rt6_clean_expires(rt);
+ 		rt->rt6i_metric = 0;
+ 
+ 		memcpy(&rt->rt6i_dst, &ort->rt6i_dst, sizeof(struct rt6key));
+@@ -1883,8 +1883,6 @@
+ 		if ((ort->rt6i_flags & (RTF_DEFAULT | RTF_ADDRCONF)) ==
+ 		    (RTF_DEFAULT | RTF_ADDRCONF))
+ 			rt6_set_from(rt, ort);
+-		else
+-			rt6_clean_expires(rt);
+ 		rt->rt6i_metric = 0;
+ 
+ #ifdef CONFIG_IPV6_SUBTREES
+Index: linux-3.4.11/net/netfilter/nf_conntrack_core.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_core.c	2017-11-07 19:56:27.034090741 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_core.c	2017-11-07 19:56:27.194090741 +0800
+@@ -302,8 +302,6 @@
+ 	if (ct->dpi.app_id == 0)
+ 		return;
+ 
+-	ct->stats_idx = dpistats_lookup(&ct->dpi);
+-
+ 	if (ct->stats_idx != DPISTATS_IX_INVALID) {
+ 		DpiStatsEntry_t stats;
+ 
+@@ -620,23 +618,24 @@
+   
+ 	if ( nf_ct_protonum(ct) == IPPROTO_UDP && ct->prev_idle)   /* handle case (e) */
+ 	{
+-		if( ct_time_p->idle_jiffies < ct_time_p->extra_jiffies) 
+-		{
+-			unsigned long newtime_1;
+-			if (timer_pending(&ct->timeout))
+-				del_timer(&ct->timeout);
+-
+-			ct->prev_timeout.expires = ct->timeout.expires;
+-			newtime_1= ct->timeout.expires + (ct_time_p->extra_jiffies - ct_time_p->idle_jiffies);
+-			ct->timeout.expires = newtime_1;
+-			add_timer(&ct->timeout);
+-			ct->prev_idle = ct_time_p->idle_jiffies;
++	    if( ct_time_p->idle_jiffies < ct_time_p->extra_jiffies)
++	    {
++	        unsigned long newtime_1;
++	        if (timer_pending(&ct->timeout))
++			    del_timer(&ct->timeout);
++
++		    ct->prev_timeout.expires = ct->timeout.expires;
++		    newtime_1= ct->timeout.expires + (ct_time_p->extra_jiffies - ct_time_p->idle_jiffies);
++		    ct->timeout.expires = newtime_1;
++		    add_timer(&ct->timeout);
++	        ct->prev_idle = ct_time_p->idle_jiffies;
++
+ 		}else {
+-			if (timer_pending(&ct->timeout))
+-				del_timer(&ct->timeout);
++		    if (timer_pending(&ct->timeout))
++			    del_timer(&ct->timeout);
+ 
+-			death_by_timeout((unsigned long) ct);
+-		}
++		    death_by_timeout((unsigned long) ct);
++	    }
+ 	} else if ((!ct->prev_idle) || (!ct_time_p->idle_jiffies)) {
+ 		unsigned long newtime;
+ 
+@@ -2460,6 +2459,80 @@
+     return 0;
+ }
+ EXPORT_SYMBOL(blog_dpi_ctk_update);
++
++int nf_conntrack_dpistat_update(struct net *net)
++{
++	struct nf_conntrack_tuple_hash *h;
++	struct nf_conn *ct;
++	struct hlist_nulls_node *n;
++	unsigned int bucket=0;
++
++	for (; bucket < net->ct.htable_size; bucket++) {
++		if (bucket < net->ct.htable_size) {
++			hlist_nulls_for_each_entry_rcu(h, n, &net->ct.hash[bucket], hnnode) {
++				if (NF_CT_DIRECTION(h) != IP_CT_DIR_ORIGINAL)
++					continue;
++				ct = nf_ct_tuplehash_to_ctrack(h);
++
++				if ( ct->dpi.app_id != 0 )
++				{
++					DpiStatsEntry_t stats;
++
++					if (ct->stats_idx == DPISTATS_IX_INVALID)
++						continue;
++
++					stats.result.app_id = ct->dpi.app_id;
++					stats.result.dev_key = ct->dpi.dev_key;
++					stats.result.flags = ct->dpi.flags;
++
++					if (!IS_CTK_INIT_FROM_WAN(ct))
++					{
++						if (conntrack_get_stats(ct, IP_CT_DIR_ORIGINAL, &stats.upstream))
++						{
++							printk("1conntrack_get_stats(upstream) fails");
++							continue;
++						}
++
++						if ((test_bit(IPS_SEEN_REPLY_BIT, &ct->status)))
++						{
++							if (conntrack_get_stats(ct, IP_CT_DIR_REPLY, &stats.dnstream))
++							{
++								printk("1conntrack_get_stats(dnstream) fails");
++								continue;
++							}
++						}
++						else
++							memset(&stats.dnstream, 0 , sizeof(CtkStats_t));
++					}
++					else /* origin direction is dnstream */
++					{
++						if (conntrack_get_stats(ct, IP_CT_DIR_ORIGINAL, &stats.dnstream))
++						{
++							printk("2conntrack_get_stats(dnstream) fails");
++							continue;
++						}
++
++						if ((test_bit(IPS_SEEN_REPLY_BIT, &ct->status)))
++						{
++							if (conntrack_get_stats(ct, IP_CT_DIR_REPLY, &stats.upstream))
++							{
++								printk("2conntrack_get_stats(upstream) fails");
++								continue;
++							}
++						}
++						else
++							memset(&stats.upstream, 0 , sizeof(CtkStats_t));
++					}
++
++					dpistats_info(ct->stats_idx, &stats);
++				}
++			}
++		}
++	}
++
++    return 0;
++}
++EXPORT_SYMBOL(nf_conntrack_dpistat_update);
+ #endif
+ #endif
+ 
+Index: linux-3.4.11/net/netfilter/nf_conntrack_proto_esp.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_proto_esp.c	2017-11-07 19:56:26.838090739 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_proto_esp.c	2017-11-07 19:56:27.194090741 +0800
+@@ -40,6 +40,7 @@
+ #include <linux/skbuff.h>
+ #include <linux/ip.h>
+ 
++#include <net/netfilter/nf_log.h>
+ #include <net/netfilter/nf_conntrack_l4proto.h>
+ #include <net/netfilter/nf_conntrack_helper.h>
+ #include <net/netfilter/nf_conntrack_core.h>
+@@ -377,6 +378,28 @@
+    return true;
+ }
+ 
++/* Protect conntrack agaist broken packets. Code referenced from nf_conntrack_proto_tcp.c. */
++static int esp_error(struct net *net, struct nf_conn *tmpl,
++                     struct sk_buff *skb,
++                     unsigned int dataoff,
++                     enum ip_conntrack_info *ctinfo,
++                     u_int8_t pf,
++                     unsigned int hooknum)
++{
++   const struct esphdr *esphdr;
++   struct esphdr _esphdr;
++
++   /* smaller than minimal ESP header? */
++   esphdr = skb_header_pointer(skb, dataoff, sizeof(_esphdr), &_esphdr);
++   if (esphdr == NULL) {
++      if (LOG_INVALID(net, IPPROTO_ESP))
++         nf_log_packet(pf, 0, skb, NULL, NULL, NULL,
++                       "nf_ct_esp: short packet ");
++      return -NF_ACCEPT;
++   }
++   return NF_ACCEPT;
++}
++
+ /* Called when the connection is deleted. */
+ static void esp_destroy(struct nf_conn *ct)
+ {
+@@ -438,6 +461,7 @@
+    .get_timeouts    = esp_get_timeouts,
+    .packet = esp_packet,
+    .new = esp_new,
++   .error = esp_error,
+    .destroy = esp_destroy,
+    .me = THIS_MODULE,
+ };
+Index: linux-3.4.11/net/netfilter/nf_conntrack_standalone.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_standalone.c	2017-11-07 19:56:27.034090741 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_standalone.c	2017-11-07 19:56:27.194090741 +0800
+@@ -538,134 +538,55 @@
+ };
+ 
+ static void *dpi_seq_start(struct seq_file *seq, loff_t *pos)
+-	__acquires(RCU)
+ {
+-	struct ct_iter_state *st = seq->private;
++	static int statsIdx=0;
++	struct net *net = seq_file_net(seq);
+ 
+-	rcu_read_lock();
+ 	if (*pos == 0)
+-		return SEQ_START_TOKEN;
++	{
++		dpistats_info(0, NULL); //inform DpiStats module to reset
++		rcu_read_lock();
++		nf_conntrack_dpistat_update(net);
++		rcu_read_unlock();
++		statsIdx = DPISTATS_IX_INVALID;
++	}
++
++	if (statsIdx >= DPISTATS_MAX_ENTRIES)
++		return NULL;
+ 
+-	st->time_now = ktime_to_ns(ktime_get_real());
+-	return ct_get_idx(seq, *pos);
++	return &statsIdx;
+ }
+ 
+ static void *dpi_seq_next(struct seq_file *s, void *v, loff_t *pos)
+ {
+-    if (v == SEQ_START_TOKEN)
+-    {
+-        return ct_get_idx(s, *pos);
+-    }
++	int *index = (int *)v;
+ 
+ 	(*pos)++;
+-	return ct_get_next(s, v);
++	(*index)++;
++
++	if (*index >= DPISTATS_MAX_ENTRIES)
++		return NULL;
++
++	return v;
+ }
+ 
+ static void dpi_seq_stop(struct seq_file *s, void *v)
+-	__releases(RCU)
+ {
+-	dpistats_show(s);
+-	rcu_read_unlock();
+ }
+ 
+ /* return 0 on success, 1 in case of error */
+ static int dpi_seq_show(struct seq_file *s, void *v)
+ {
+-	struct nf_conntrack_tuple_hash *hash;
+-	struct nf_conn *ct;
+ 	int ret = 0;
+-	DpiStatsEntry_t stats;
++	int *index = (int *)v;
+ 
+-	if (v == SEQ_START_TOKEN) {
++	if (*index == DPISTATS_IX_INVALID) {
+ 		seq_printf(s, "AppID  Mac               Vendor OS Class Type Dev"
+ 						" UpPkt UpByte DnPkt DnByte\n");
+-		dpistats_info(0, NULL); //inform DpiStats module to reset
+ 		return ret;
+ 	}
+ 
+-	hash = v;
+-	ct = nf_ct_tuplehash_to_ctrack(hash);
+-
+-	NF_CT_ASSERT(ct);
+-	if (unlikely(!atomic_inc_not_zero(&ct->ct_general.use)))
+-		return 0;
+-
+-	/* we only want to print DIR_ORIGINAL */
+-	if (NF_CT_DIRECTION(hash))
+-		goto release;
+-
+-#if 0
+-    if (ct->stats_idx == DPISTATS_IX_INVALID)
+-    {
+-        if (ct->dpi.app_id == 0) goto release;
+-
+-        ct->stats_idx = dpistats_lookup(&ct->dpi);
+-
+-        if (ct->stats_idx == DPISTATS_IX_INVALID)
+-        {
+-            printk("fail to alloc dpistats_id?\n");
+-            goto release;
+-        }
+-    }
+-#endif
+-    if (ct->dpi.app_id == 0) goto release;
+-
+-    ct->stats_idx = dpistats_lookup(&ct->dpi);
+-    if (ct->stats_idx == DPISTATS_IX_INVALID)
+-    {
+-        printk("fail to alloc dpistats_id?\n");
+-        goto release;
+-    }
+-
+-	stats.result.app_id = ct->dpi.app_id;
+-	stats.result.dev_key = ct->dpi.dev_key;
+-	stats.result.flags = ct->dpi.flags;
+-
+-	/* origin direction is upstream */
+-	if (!IS_CTK_INIT_FROM_WAN(ct))
+-	{
+-		if (conntrack_get_stats(ct, IP_CT_DIR_ORIGINAL, &stats.upstream))
+-        {
+-            printk("1conntrack_get_stats(upstream) fails");
+-			goto release;
+-        }
+-
+-		if ((test_bit(IPS_SEEN_REPLY_BIT, &ct->status)))
+-        {
+-			if (conntrack_get_stats(ct, IP_CT_DIR_REPLY, &stats.dnstream))
+-            {
+-                printk("1conntrack_get_stats(dnstream) fails");
+-				goto release;
+-            }
+-        }
+-        else
+-	        memset(&stats.dnstream, 0 , sizeof(CtkStats_t));
+-	}
+-	else /* origin direction is dnstream */
+-	{
+-		if (conntrack_get_stats(ct, IP_CT_DIR_ORIGINAL, &stats.dnstream))
+-        {
+-            printk("2conntrack_get_stats(dnstream) fails");
+-			goto release;
+-        }
+-
+-		if ((test_bit(IPS_SEEN_REPLY_BIT, &ct->status)))
+-        {
+-			if (conntrack_get_stats(ct, IP_CT_DIR_REPLY, &stats.upstream))
+-            {
+-                printk("2conntrack_get_stats(upstream) fails");
+-				goto release;
+-            }
+-        }
+-        else
+-        	memset(&stats.upstream, 0 , sizeof(CtkStats_t));
+-	}
+-
+-	dpistats_info(ct->stats_idx, &stats);
+-
+-release:
+-	nf_ct_put(ct);
+-	return ret;
++	return dpistats_show(s, *index);
+ }
+ 
+ static const struct seq_operations dpi_seq_ops = {
+Index: linux-3.4.11/net/bridge/br_igmp.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_igmp.c	2017-11-07 19:56:27.038090740 +0800
++++ linux-3.4.11/net/bridge/br_igmp.c	2017-11-07 19:56:27.194090741 +0800
+@@ -424,8 +424,8 @@
+ {
+ 	struct net_bridge_mc_fdb_entry *mcast_group;
+ 	int                             i;
+-	/* the largest timeout is BR_IGMP_MEMBERSHIP_TIMEOUT */
+-	unsigned long                   tstamp = jiffies + (BR_IGMP_MEMBERSHIP_TIMEOUT*HZ*2);
++	/* the largest timeout is multiConfig.igmp_general_query_timeout_secs */
++	unsigned long                   tstamp = jiffies + (multiConfig.igmp_general_query_timeout_secs * HZ );
+ 	unsigned int                    found = 0;
+ 	unsigned long                   pendTimeout = br_igmp_get_next_timer_expiry( br, &found );
+ 
+@@ -676,7 +676,7 @@
+ 					if(rep_entry)
+ 					{
+ 						rep_entry->rep.s_addr = rep->s_addr;
+-						rep_entry->tstamp = jiffies + BR_IGMP_MEMBERSHIP_TIMEOUT*HZ;
++						rep_entry->tstamp = jiffies + multiConfig.igmp_general_query_timeout_secs * HZ;
+ 						memcpy(rep_entry->repMac, repMac, ETH_ALEN);
+ 						rep_entry->rep_proto_ver = rep_proto_ver;
+ 						list_add_tail(&rep_entry->list, &dst->rep_list);
+@@ -685,7 +685,7 @@
+ 				}
+ 				else
+ 				{
+-					reporter->tstamp = jiffies + BR_IGMP_MEMBERSHIP_TIMEOUT*HZ;
++					reporter->tstamp = jiffies + multiConfig.igmp_general_query_timeout_secs * HZ;
+ 					br_igmp_set_timer(br);
+ 				}
+ 				ret = 1;
+@@ -802,7 +802,7 @@
+ 	mc_fdb->lanppp = lanppp;
+ 	INIT_LIST_HEAD(&mc_fdb->rep_list);
+ 	rep_entry->rep.s_addr = rep->s_addr;
+-	rep_entry->tstamp = jiffies + BR_IGMP_MEMBERSHIP_TIMEOUT * HZ;
++	rep_entry->tstamp = jiffies + multiConfig.igmp_general_query_timeout_secs * HZ;
+ 	memcpy(rep_entry->repMac, repMac, ETH_ALEN);
+ 	rep_entry->rep_proto_ver = rep_proto_ver;
+ 	list_add_tail(&rep_entry->list, &mc_fdb->rep_list);
+@@ -828,6 +828,27 @@
+ }
+ EXPORT_SYMBOL(br_igmp_mc_fdb_add);
+ 
++void br_igmp_mc_fdb_wipe_group(struct net_bridge *br, struct net_bridge_port *prt, struct in_addr* groupAddr)
++{
++	struct net_bridge_mc_fdb_entry *mcFdb;
++	int i;
++
++	spin_lock_bh(&br->mcl_lock);
++	for (i = 0; i < BR_IGMP_HASH_SIZE; i++)
++	{
++		struct hlist_node *h, *n;
++		hlist_for_each_entry_safe(mcFdb, h, n, &br->mc_hash[i], hlist)
++		{
++			if ((mcFdb->rxGrp.s_addr == groupAddr->s_addr) && (mcFdb->dst == prt))
++			{
++				br_igmp_mc_fdb_del_entry(br, mcFdb, NULL, NULL);
++			}
++		}
++	}
++	br_igmp_set_timer(br);
++	spin_unlock_bh(&br->mcl_lock);
++}
++
+ void br_igmp_mc_fdb_cleanup(struct net_bridge *br)
+ {
+ 	struct net_bridge_mc_fdb_entry *dst;
+@@ -1087,10 +1108,17 @@
+ 			else
+ #endif
+ 			{
++				struct net_bridge_port *bridgePort = NULL;
+ 				spin_lock_bh(&br->mcl_lock);
+ 				rcu_read_lock();
+-				if(br_port_get_rcu(skb->dev))
++				bridgePort = br_port_get_rcu(skb->dev);
++				if(bridgePort)
+ 				{ 
++					if ((pigmp->type == IGMP_HOST_MEMBERSHIP_QUERY) && (!is_routed) && (br->igmp_snooping))
++					{
++						bridgePort->querying_port = 1;
++						mod_timer(&bridgePort->querying_port_timer, jiffies + multiConfig.igmp_general_query_timeout_secs*HZ);
++					}
+ 					status = mcpd_process_skb(br, skb, ETH_P_IP);
+ 					if (status == 1) 
+ 					{
+@@ -1599,6 +1627,7 @@
+ 	struct net_device *dev = v;
+ 	struct net_bridge *br = netdev_priv(dev);
+ 	int i;
++	struct net_bridge_port *p, *p_n;
+ 
+ 	seq_printf(seq, "igmp snooping %d  lan2lan-snooping %d/%d, rate-limit %dpps, priority %d\n",
+ 	           br->igmp_snooping, 
+@@ -1606,6 +1635,19 @@
+ 	           br_mcast_get_lan2lan_snooping(BR_MCAST_PROTO_IGMP, br),
+ 	           br->igmp_rate_limit,
+ 	           br_mcast_get_pri_queue());
++	seq_printf(seq, " Port Name    Querier      Timeout\n");
++	list_for_each_entry_safe(p, p_n, &br->port_list, list) {
++		int tstamp = p->querying_port ? (int)(p->querying_port_timer.expires - jiffies) / HZ : 0;
++		struct net_device* lowerDev = p->dev;
++		if (lowerDev)
++		{
++			seq_printf(seq, "    %-6s        %-3s          %03d\n",
++			           lowerDev->name,
++			           p->querying_port ? "YES" : " NO",
++			           tstamp);
++			dev_put(lowerDev);
++		}
++	}
+ 	seq_printf(seq, "bridge device src-dev #tags lan-tci  wan-tci");
+ #if defined(CONFIG_BCM_KF_BLOG) && defined(CONFIG_BLOG)
+ 	seq_printf(seq, "    group           mode RxGroup         source          reporter        timeout Index      ExcludPt\n");
+Index: linux-3.4.11/net/bridge/br_mcast.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mcast.c	2017-11-07 19:56:27.038090740 +0800
++++ linux-3.4.11/net/bridge/br_mcast.c	2017-11-07 19:56:27.198090742 +0800
+@@ -61,6 +61,8 @@
+ #if (defined(CONFIG_BCM_KF_IGMP) && defined(CONFIG_BR_IGMP_SNOOP)) || (defined(CONFIG_BCM_KF_MLD) && defined(CONFIG_BR_MLD_SNOOP))
+ t_MCAST_CFG multiConfig = { -1,  /* mcastPriQueue */
+                             0,  /* thereIsAnUplink */
++                            BR_IGMP_MEMBERSHIP_TIMEOUT_SECS,
++                            BR_MLD_MEMBERSHIP_TIMEOUT_SECS,
+                             HLIST_HEAD_INIT, /* igmp hlist initialized to NULL */
+                             HLIST_HEAD_INIT, /* mld hlist initialized to NULL */
+                             .cfgLock = __SPIN_LOCK_UNLOCKED (multiConfig.cfgLock)
+@@ -1044,6 +1046,15 @@
+ 		blog_p->rx.info.bmap.PLD_IPv6 = 1;
+ 		blog_p->tx.info.bmap.PLD_IPv6 = 1;
+ 		blog_p->wl = mld_fdb->info;
++
++		/* SSM is defined as "Multicast with non-zero Source Address" */
++		if (!( ( blog_p->tupleV6.saddr.p32[0] == 0 ) &&
++			( blog_p->tupleV6.saddr.p32[1] == 0 ) &&
++			( blog_p->tupleV6.saddr.p32[2] == 0 ) &&
++			( blog_p->tupleV6.saddr.p32[3] == 0 ) ))
++		{
++			blog_p->is_ssm = 1;
++		}
+ 	}
+ 	else
+ #endif
+@@ -1054,7 +1065,13 @@
+ 		blog_p->tx.tuple.daddr = igmp_fdb->txGrp.s_addr;
+ 		blog_p->rx.tuple.port.dest = 0;
+ 		if (igmp_fdb->excludePort != -1) {
+-			blog_p->rx.tuple.port.dest = igmp_fdb->excludePort;
++			blog_p->mcast_excl_udp_port = igmp_fdb->excludePort;
++		}
++
++		/* SSM is defined as "Multicast with non-zero Source Address" */
++		if (blog_p->rx.tuple.saddr != 0)
++		{
++			blog_p->is_ssm = 1;
+ 		}
+ 
+ 		blog_p->rtp_seq_chk = igmp_fdb->enRtpSeqCheck;
+Index: linux-3.4.11/net/bridge/br_mld.h
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mld.h	2017-11-07 19:56:26.510090737 +0800
++++ linux-3.4.11/net/bridge/br_mld.h	2017-11-07 19:56:27.198090742 +0800
+@@ -45,7 +45,6 @@
+ #define SNOOPING_BLOCKING_MODE 2
+ 
+ #define TIMER_CHECK_TIMEOUT (2*HZ)
+-#define BR_MLD_MEMBERSHIP_TIMEOUT 260 /* RFC3810 */
+ 
+ #define BR_MLD_MULTICAST_MAC_PREFIX 0x33
+ 
+Index: linux-3.4.11/net/bridge/br_private.h
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_private.h	2017-11-07 19:56:26.958090740 +0800
++++ linux-3.4.11/net/bridge/br_private.h	2017-11-07 19:56:27.198090742 +0800
+@@ -187,6 +187,10 @@
+     struct timer_list       mcast_query_timer;
+ #endif
+ #endif
++#if (defined(CONFIG_BCM_KF_IGMP) && defined(CONFIG_BR_IGMP_SNOOP))
++	unsigned char        querying_port;
++	struct timer_list    querying_port_timer;
++#endif
+ 	struct br_flow_path  *flowPath_p;
+ #endif
+ 	struct timer_list		forward_delay_timer;
+Index: linux-3.4.11/net/bridge/br_mcast.h
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mcast.h	2017-11-07 19:56:20.586090695 +0800
++++ linux-3.4.11/net/bridge/br_mcast.h	2017-11-07 19:56:27.198090742 +0800
+@@ -75,6 +75,9 @@
+ #define SNOOPING_ENABLED_MODE 1
+ #define SNOOPING_BLOCKING_MODE 2
+ 
++#define BR_IGMP_MEMBERSHIP_TIMEOUT_SECS 260 /* RFC3376 */
++#define BR_MLD_MEMBERSHIP_TIMEOUT_SECS  260 /* RFC3810 */
++
+ typedef enum br_mcast_l2l_snoop_mode {
+     BR_MCAST_L2L_SNOOP_DISABLED,
+     BR_MCAST_L2L_SNOOP_ENABLED,
+@@ -88,6 +91,20 @@
+ 	int                       if_ops;
+ } t_MCPD_WAN_INFO;
+ 
++typedef struct mcpd_igmp_drop_group_entry
++{
++   int                       br_ifindex;
++   int                       port_ifindex;
++   struct in_addr            group;
++} t_MCPD_IGMP_DROP_GROUP_ENTRY;
++
++
++typedef struct mcpd_timeout_entry
++{
++   int                       proto;
++   int                       generalMembershipTimeoutSecs;
++} t_MCPD_TIMEOUT_ENTRY;
++
+ typedef struct mcpd_igmp_snoop_entry
+ {
+ 	char                      br_name[IFNAMSIZ];
+@@ -129,9 +146,12 @@
+ typedef struct mcastCfg {
+ 	int                          mcastPriQueue;
+ 	int                          thereIsAnUplink;
++	int                          igmp_general_query_timeout_secs;
++	int                          mld_general_query_timeout_secs;
+ 	struct hlist_head            igmp_control_filter_list;
+ 	struct hlist_head            mld_control_filter_list;
+ 	spinlock_t                   cfgLock;
++
+ } t_MCAST_CFG;
+ 
+ extern t_MCAST_CFG multiConfig;
+Index: linux-3.4.11/net/bridge/br_forward.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_forward.c	2017-11-07 19:56:26.554090735 +0800
++++ linux-3.4.11/net/bridge/br_forward.c	2017-11-07 19:56:27.198090742 +0800
+@@ -151,7 +151,7 @@
+ #if defined(CONFIG_BR_IGMP_SNOOP) && !defined(CONFIG_BRIDGE_IGMP_SNOOPING)
+ 		else
+ 		{
+-			if ((p->br->igmp_snooping) && (pigmp->type != IGMP_HOST_MEMBERSHIP_QUERY)) 
++			if ((p->br->igmp_snooping) && (pigmp->type != IGMP_HOST_MEMBERSHIP_QUERY) && (0 == p->querying_port))
+ 			{
+ 				return 0;
+ 			}
+Index: linux-3.4.11/net/bridge/br_netlink_mcpd.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_netlink_mcpd.c	2017-11-07 19:56:20.594090695 +0800
++++ linux-3.4.11/net/bridge/br_netlink_mcpd.c	2017-11-07 19:56:27.202090742 +0800
+@@ -40,6 +40,7 @@
+ #include <linux/if_vlan.h>
+ #include "br_igmp.h"
+ #include "br_mld.h"
++#include "br_mcast.h"
+ 
+ static struct sock *nl_sk = NULL;
+ static int mcpd_pid = 0;
+@@ -89,7 +90,9 @@
+     MCPD_MSG_MLD_PURGE_REPORTER,
+     MCPD_MSG_CONTROLS_ADMISSION,
+     MCPD_MSG_ADMISSION_RESULT,
++    MCPD_MSG_SET_TIMEOUT,
+     MCPD_MSG_IGNORE_GROUP_LIST,
++    MCPD_MSG_IGMP_DROP_GROUP,
+     MCPD_MSG_MAX
+ } t_MCPD_MSGTYPES;
+ 
+@@ -498,6 +501,71 @@
+     return ret;
+ } /* br_igmp_is_br_port */
+ 
++
++static void mcpd_nl_process_igmp_drop_group(struct sk_buff *skb)
++{
++    struct nlmsghdr *nlh = (struct nlmsghdr *)skb->data;
++    struct net_bridge *br = NULL;
++    struct net_bridge_port *prt;
++    t_MCPD_IGMP_DROP_GROUP_ENTRY *dropGroup_entry;
++    unsigned char *ptr;
++    struct net_device* netDevBridge = NULL;
++    struct net_device* netDevLanPort = NULL;
++
++    ptr = NLMSG_DATA(nlh);
++    ptr += sizeof(t_MCPD_MSG_HDR);
++
++    dropGroup_entry = (t_MCPD_IGMP_DROP_GROUP_ENTRY *)ptr;
++
++    netDevBridge = dev_get_by_index(&init_net, dropGroup_entry->br_ifindex);
++    if (netDevBridge == NULL){
++      printk("br_netlink_mcpd.c:%d %s() error no mem\n", __LINE__, __FUNCTION__);
++      return;
++    }
++    if ((0 == (netDevBridge->priv_flags & IFF_EBRIDGE)) ||
++        (0 == (netDevBridge->flags & IFF_UP))) {
++      printk("br_netlink_mcpd.c:%d %s() Device is not a bridge.\n", __LINE__, __FUNCTION__);
++      return;
++    }
++    br = netdev_priv(netDevBridge);
++
++
++    netDevLanPort = dev_get_by_index(&init_net, dropGroup_entry->port_ifindex);
++    if (netDevLanPort == NULL){
++      printk("br_netlink_mcpd.c:%d %s() error no mem\n", __LINE__, __FUNCTION__);
++      dev_put (netDevBridge);
++      return;
++    }
++
++    rcu_read_lock();
++    prt = br_port_get_rcu(netDevLanPort);
++    br_igmp_mc_fdb_wipe_group(br, prt, &dropGroup_entry->group);
++    rcu_read_unlock();
++
++    dev_put (netDevLanPort);
++    dev_put (netDevBridge);
++}
++
++
++static void mcpd_nl_process_set_timeout(struct sk_buff *skb)
++{
++    struct nlmsghdr *nlh = (struct nlmsghdr *)skb->data;
++    unsigned char *ptr = NLMSG_DATA(nlh);
++    t_MCPD_TIMEOUT_ENTRY *timeout_entry = NULL;
++
++    ptr += sizeof(t_MCPD_MSG_HDR);
++    timeout_entry = (t_MCPD_TIMEOUT_ENTRY *)ptr;
++
++    if (timeout_entry->proto == IPPROTO_IGMP) {
++        multiConfig.igmp_general_query_timeout_secs = timeout_entry->generalMembershipTimeoutSecs;
++    }
++#if defined(CONFIG_BCM_KF_MLD) && defined(CONFIG_BR_MLD_SNOOP)
++    else if (timeout_entry->proto == IPPROTO_ICMP) {
++        multiConfig.mld_general_query_timeout_secs = timeout_entry->generalMembershipTimeoutSecs;
++    }
++#endif
++}
++
+ static void mcpd_nl_process_igmp_snoop_entry(struct sk_buff *skb)
+ {
+     struct nlmsghdr *nlh = (struct nlmsghdr *)skb->data;
+@@ -1175,9 +1243,17 @@
+                 mcpd_nl_process_admission_result(skb);
+                 break;
+ 
++            case MCPD_MSG_SET_TIMEOUT:
++                mcpd_nl_process_set_timeout(skb);
++                break;
++
+             case MCPD_MSG_IGNORE_GROUP_LIST:
+                 mcpd_nl_process_ignore_group(skb);
+                 break;
++
++            case MCPD_MSG_IGMP_DROP_GROUP:
++                mcpd_nl_process_igmp_drop_group(skb);
++                break;
+                 
+             default:
+                 printk("MCPD Unknown usr->krnl msg type -%d- \n", msg_type);
+Index: linux-3.4.11/net/bridge/br_igmp.h
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_igmp.h	2017-11-07 19:56:26.510090737 +0800
++++ linux-3.4.11/net/bridge/br_igmp.h	2017-11-07 19:56:27.202090742 +0800
+@@ -44,7 +44,6 @@
+ #if defined(CONFIG_BR_IGMP_SNOOP)
+ 
+ #define TIMER_CHECK_TIMEOUT (2*HZ)
+-#define BR_IGMP_MEMBERSHIP_TIMEOUT 260 /* RFC3376 */
+ 
+ struct net_bridge_mc_src_entry
+ {
+@@ -137,6 +136,9 @@
+                        char enRtpSeqCheck,
+                        uint32_t info);
+ 
++void br_igmp_mc_fdb_wipe_group(struct net_bridge *br,
++                               struct net_bridge_port *prt,
++                               struct in_addr *groupAddr);
+ void br_igmp_mc_fdb_cleanup(struct net_bridge *br);
+ #ifdef CONFIG_SUPPORT_RTK_SWITCH
+ int br_igmp_mc_fdb_counter(struct net_device *from_dev,
+Index: linux-3.4.11/net/bridge/br_if.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_if.c	2017-11-07 19:56:26.574090737 +0800
++++ linux-3.4.11/net/bridge/br_if.c	2017-11-07 19:56:27.202090742 +0800
+@@ -175,6 +175,9 @@
+ 	netdev_set_master(dev, NULL);
+ 
+ 	br_multicast_del_port(p);
++#if (defined(CONFIG_BCM_KF_IGMP) && defined(CONFIG_BR_IGMP_SNOOP))
++	del_timer(&p->querying_port_timer);
++#endif
+ 
+ 	kobject_uevent(&p->kobj, KOBJ_REMOVE);
+ 	kobject_del(&p->kobj);
+@@ -231,6 +234,14 @@
+ 	return (index >= BR_MAX_PORTS) ? -EXFULL : index;
+ }
+ 
++#if (defined(CONFIG_BCM_KF_IGMP) && defined(CONFIG_BR_IGMP_SNOOP))
++static void br_if_querying_timer_expired(unsigned long data)
++{
++	struct net_bridge_port *port = (struct net_bridge_port *)data;
++	port->querying_port = 0;
++}
++#endif
++
+ /* called with RTNL but without bridge lock */
+ static struct net_bridge_port *new_nbp(struct net_bridge *br,
+ 				       struct net_device *dev)
+@@ -265,6 +276,11 @@
+ 	br_stp_port_timer_init(p);
+ 	br_multicast_add_port(p);
+ 
++#if (defined(CONFIG_BCM_KF_IGMP) && defined(CONFIG_BR_IGMP_SNOOP))
++	setup_timer(&p->querying_port_timer, br_if_querying_timer_expired,
++		(unsigned long)p);
++#endif
++
+ #if defined(CONFIG_BCM_KF_BRIDGE_STP)
+ 	br_stp_notify_state_port(p);
+ #endif
+Index: linux-3.4.11/net/bridge/br_mld.c
+===================================================================
+--- linux-3.4.11.orig/net/bridge/br_mld.c	2017-11-07 19:56:27.038090740 +0800
++++ linux-3.4.11/net/bridge/br_mld.c	2017-11-07 19:56:27.202090742 +0800
+@@ -321,8 +321,8 @@
+ 		return;
+ 	}
+ 
+-	/* the largest timeout is BR_MLD_MEMBERSHIP_TIMEOUT */
+-	tstamp = jiffies + (BR_MLD_MEMBERSHIP_TIMEOUT*HZ*2);
++	/* the largest timeout is multiConfig.mld_general_query_timeout_secs */
++	tstamp = jiffies + (multiConfig.mld_general_query_timeout_secs * HZ);
+ 	found = 0;
+ 	for (i = 0; i < BR_MLD_HASH_SIZE; i++) 
+ 	{
+@@ -503,7 +503,7 @@
+ 					if(rep_entry)
+ 					{
+ 						BCM_IN6_ASSIGN_ADDR(&rep_entry->rep, rep);
+-						rep_entry->tstamp = jiffies + BR_MLD_MEMBERSHIP_TIMEOUT*HZ;
++						rep_entry->tstamp = jiffies + multiConfig.mld_general_query_timeout_secs * HZ;
+ 						memcpy(rep_entry->repMac, repMac, ETH_ALEN);
+ 						rep_entry->rep_proto_ver = rep_proto_ver;
+ 						list_add_tail(&rep_entry->list, &dst->rep_list);
+@@ -512,7 +512,7 @@
+ 				}
+ 				else 
+ 				{
+-					reporter->tstamp = jiffies + BR_MLD_MEMBERSHIP_TIMEOUT*HZ;
++					reporter->tstamp = jiffies + multiConfig.mld_general_query_timeout_secs *HZ;
+ 					br_mld_set_timer(br);
+ 				}
+ 				ret = 1;
+@@ -619,7 +619,7 @@
+ #endif
+ 	INIT_LIST_HEAD(&mc_fdb->rep_list);
+ 	BCM_IN6_ASSIGN_ADDR(&rep_entry->rep, rep);
+-	rep_entry->tstamp = jiffies + (BR_MLD_MEMBERSHIP_TIMEOUT*HZ);
++	rep_entry->tstamp = jiffies + (multiConfig.mld_general_query_timeout_secs * HZ);
+ 	memcpy(rep_entry->repMac, repMac, ETH_ALEN);
+ 	rep_entry->rep_proto_ver = rep_proto_ver;
+ 	list_add_tail(&rep_entry->list, &mc_fdb->rep_list);

@@ -15,12 +15,14 @@ mknod /dev/tty0 c 4 0
 mknod /dev/tty1 c 4 1
 mknod /dev/ttyS0 c 4 64
 mknod /dev/ttyS1 c 4 65
+mknod /dev/ttyH0 c 4 66
 mknod /dev/tty c 5 0
 mknod /dev/console c 5 1
 mknod /dev/ppp c 108 0
 mknod /dev/printer0 c 180 0
 mknod /dev/urandom c 1 9
 mknod /dev/i2c-0 c 89 0
+chmod 666 /dev/i2c-0
 mknod /dev/mtd0 c 90 0
 mknod /dev/mtd1 c 90 2
 mknod /dev/mtd2 c 90 4

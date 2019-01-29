@@ -35,7 +35,7 @@
 #define SIZE_COOKIE_VERSION	16
 #define SIZE_COOKIE_EXPIRES	32
 #define SIZE_COOKIE_SESSIONID 32
-#define SIZE_COOKIE_AUTH 64
+#define SIZE_COOKIE_AUTH 256
 
 #define CG_HTTP_COOKIE_COMMENT	"Comment"
 #define CG_HTTP_COOKIE_URL		"CommentURL"
@@ -78,6 +78,7 @@ typedef struct _CgHttpCookieData
 #define cg_http_request_getcookie(httpReq) cg_http_packet_getheadervalue((CgHttpPacket*)httpReq,CG_HTTP_COOKIE)
 
 #define cg_http_response_setcookie(httpRes,value) cg_http_packet_setheadervalue((CgHttpPacket*)httpRes,CG_HTTP_SETCOOKIE,value)
+#define cg_http_response_setcookie_multi(httpRes,value) cg_http_packet_setheadervalue_multi((CgHttpPacket*)httpRes,CG_HTTP_SETCOOKIE,value)
 #define cg_http_response_setcookie2(httpRes,value) cg_http_packet_setheadervalue((CgHttpPacket*)httpRes,CG_HTTP_SETCOOKIE2,value)
 #define cg_http_response_getcookie(httpRes) cg_http_packet_getheadervalue((CgHttpPacket*)httpRes,CG_HTTP_SETCOOKIE)
 #define cg_http_response_getcookie2(httpRes) cg_http_packet_getheadervalue((CgHttpPacket*)httpRes,CG_HTTP_SETCOOKIE2)

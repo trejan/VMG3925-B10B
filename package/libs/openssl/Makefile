@@ -116,6 +116,12 @@ endef
 #fix New OpenSSL vulnerabilities issue
 TARGET_CFLAGS += $(FPIC) -DOPENSSL_NO_HEARTBEATS
 
+#no diffie hell man key length check, for older openssl peer  support
+ifeq ($(CONFIG_ZYXEL_NO_DH_ALGO_CHECK),y)
+	TARGET_CFLAGS += -DNO_DH_ALGO_CHECK
+endif
+
+
 define Build/Compile
 	# XXX: OpenSSL "make depend" will look for installed headers before its own,
 	# so remove installed stuff first

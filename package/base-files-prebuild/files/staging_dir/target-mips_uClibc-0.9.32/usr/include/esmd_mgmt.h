@@ -30,7 +30,9 @@
 **********************/
 void mgmtNatDetect(char *msg);
 void mgmtNatClear(void);
+#if 0   /* Bell, avoid zcmd apply config thread and esmd thread dead lock issue, 2017-12-01-13:36:15*/
 void mgmtConnectUpdate(char *msg);
+#endif
 void tr64LanDeviceUpdate( void );
 
 #endif /*_ESMD_MGMT_H_*/

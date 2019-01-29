@@ -16,6 +16,7 @@ zcfgRet_t zcfgFeReqSend(uint32_t, char *);
 #define zcfgFeDelayApply(payload)       zcfgFeReqSend(ZCFG_MSG_DELAY_APPLY, payload)
 #define zcfgFeReApply()                 zcfgFeReqSend(ZCFG_MSG_RE_APPLY, NULL)
 #define zcfgFeFwUpgrade(payload)        zcfgFeReqSend(REQUEST_FIRMWARE_UPGRADE, payload)
+#define zcfgFeFwUpgradeForFWUR(payload)        zcfgFeReqSend(REQUEST_FIRMWARE_UPGRADE_FWUR, payload)
 #define zcfgFeFwUpgradeWrite(payload)   zcfgFeReqSend(REQUEST_FIRMWARE_WRITE_ONLY, payload)
 #define zcfgFeFwUpgradeCheck(payload)	zcfgFeReqSend(REQUEST_FIRMWARE_UPGRADE_CHK, payload)
 #define zcfgFeRestoreDefault(payload)   zcfgFeReqSend(REQUEST_RESTORE_DEFAULT, payload)
@@ -36,6 +37,8 @@ zcfgRet_t zcfgFeReqSend(uint32_t, char *);
 #define zcfgFeCheckModelWhenUpgradingOn(payload)     zcfgFeReqSend(ZCFG_MSG_UPGRADING_FW_CHECK_MODEL_ON, payload)
 #define zcfgFeReqTr98ParmAttrList(payload)	zcfgFeReqSend(ZCFG_MSG_REQUEST_GET_PARAM_ATTR_LIST, payload)
 #define zcfgFeReqSwitchBootPartition(payload)	zcfgFeReqSend(ZCFG_MSG_REQ_SWITCH_BOOT_PARTITION, payload)
+#define zcfgFeSysLogClean(payload)      zcfgFeReqSend(ZCFG_MSG_CLEAN_SYSLOG, payload)
+#define zcfgFeSetParamK(payload)       zcfgFeReqSend(REQUEST_SET_PARAMETERKEY, payload)
 
 /*TR98 support*/
 zcfgRet_t zcfgFeMappingNameGet(uint32_t msgType, char *fullPathName, char *result);
@@ -53,5 +56,8 @@ zcfgRet_t zcfgFe181To98ObjMappingNameGet(const char *tr181PathName, char *tr98Pa
 #endif
 
 /*End of TR98 support*/
+
+int zcfgFeObjMaxLenGet(zcfg_offset_t rdmObjId);
+int zcfgFeArrayLengthGetByName(char* tr181path);
 
 #endif

@@ -7,7 +7,22 @@
 #define CHAN_SCAN_TIME_PATH "/tmp/wifiScanTime"
 #define WIFI_MODULE_PATH "/usr/lib/wifi_module"
 
-#ifdef ZY_WIFI_CTL
+#define MAX_RATE_2G_ANT_1 150
+#define MAX_RATE_2G_ANT_2 300
+#define MAX_RATE_2G_ANT_3 450
+#define MAX_RATE_5G_ANT_1 433
+#define MAX_RATE_5G_ANT_2 867
+#define MAX_RATE_5G_ANT_3 1300
+#define MAX_RATE_5G_ANT_4 1733
+
+enum {
+	WL_1_ANTENNA = 1,
+	WL_2_ANTENNA,
+	WL_3_ANTENNA,
+	WL_4_ANTENNA,
+
+};
+
 typedef enum {
 	WLCMD_WPS_CANCEL=0,
 	WLCMD_WPS_HWPBC,
@@ -34,9 +49,11 @@ typedef enum {
 	WLCMD_GET_INTF_INFO_GEN,
 	WLCMD_GET_INTF_INFO_FAT,
 #endif
+#ifdef GUEST_SSID_WPS_PBC
+	WLCMD_WPS_IPTV,
+#endif
 	WLCMD_NONE
 } WL_CMD_TYPE_t;
-#endif
 
 enum {
 	WL_ST_NOT_INIT = 0,
@@ -199,7 +216,7 @@ typedef struct wlcap_t{
 typedef struct wlinfo_t {
 	char ifName[16];
 	int status;
-	int phytype;
+	int phytype;//to identify interface is 2.4G or 5G
 	unsigned char macaddr[MAC_ADDR_LEN];
 	zyWlanRadio_s wlanRadio[WLAN_RADIO_NUM];
 	zyWlanSsid_s wlanSsid[WLAN_MAX_BSS];
@@ -237,6 +254,7 @@ typedef struct wl_sta_info_t{
 	unsigned int txRetransFail;
 	unsigned int retryCount;
 	unsigned int multipleRetryCount;
+	unsigned int LinkRate;
 }wl_sta_info_s;
 
 #ifdef BUILD_SONIQ
@@ -362,13 +380,12 @@ typedef struct wlmodule_t {
 
 	zcfgRet_t (*beWifi_Destory)();
 #ifdef BUILD_SONIQ
-#ifdef SUPPORT_WL_BRCM_5G
-	zcfgRet_t (*beWifi_EnablePresetSSID)(wlinfo_s *, int);
-#else
-	zcfgRet_t (*beWifi_EnablePresetSSID)(int);
-#endif
+	zcfgRet_t (*beWifi_EnablePresetSSID)(const char*, int);
 	zcfgRet_t (*beWifi_EnableSoniqEvt)(bool);
 	zcfgRet_t (*beWifi_GetVlanID)(int, int, int*);
+#endif
+#ifdef SSID_PRIORITY
+	zcfgRet_t (*beWifi_StartWpsIptvPBC)(wlinfo_s *, const char *);
 #endif
 }wlmodule_s;
 

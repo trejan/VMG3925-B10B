@@ -1,0 +1,51 @@
+Index: linux-3.4.11/drivers/net/ppp/ppp_generic.c
+===================================================================
+--- linux-3.4.11.orig/drivers/net/ppp/ppp_generic.c	2018-04-26 17:18:10.654214170 +0800
++++ linux-3.4.11/drivers/net/ppp/ppp_generic.c	2018-04-27 14:04:30.019362500 +0800
+@@ -1443,9 +1443,18 @@
+ 	unsigned char *data;
+ 	int timestamp = 1;
+ 
+-	if ( proto == PPP_IP) {
+-		data = skb->data;
+-		timestamp = brcm_on_demand_filter(data);
++	if ( proto == PPP_IP || proto == PPP_IPV6) {
++        /* Only record timestamp when tx packet is sent from LAN -> WAN
++         * Packet from LAN: skb->dev->name=ppp{i}, skb->original_dev->name=br{i}
++         * Packet from CPE: skb->dev->name=ppp{i}, skb->original_dev->name=NULL
++         */
++        if (skb->original_dev->name == NULL) {
++            timestamp = 0;
++        }
++        else {
++		    data = skb->data;
++		    timestamp = brcm_on_demand_filter(data);
++        }
+ 	}
+ #endif	
+ 
+Index: linux-3.4.11/include/linux/skbuff.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/skbuff.h	2018-04-26 17:18:09.298214132 +0800
++++ linux-3.4.11/include/linux/skbuff.h	2018-04-27 14:01:23.899362500 +0800
+@@ -579,6 +579,8 @@
+  * ---------------------------------------------------------------------------
+  */
+ 
++    struct net_device   *original_dev;
++
+ 	unsigned char		*clone_wr_head; /* indicates drivers(ex:enet)about writable headroom in aggregated skb*/
+ 	unsigned char		*clone_fc_head; /* indicates fcache about writable headroom in aggregated skb */
+ 
+Index: linux-3.4.11/net/core/dev.c
+===================================================================
+--- linux-3.4.11.orig/net/core/dev.c	2018-04-26 17:18:10.534214166 +0800
++++ linux-3.4.11/net/core/dev.c	2018-04-27 14:01:49.486362500 +0800
+@@ -3706,6 +3706,7 @@
+ 	if (!skb->skb_iif)
+ 		skb->skb_iif = skb->dev->ifindex;
+ 	orig_dev = skb->dev;
++    skb->original_dev = skb->dev;
+ 
+ 	skb_reset_network_header(skb);
+ 	skb_reset_transport_header(skb);

@@ -1,0 +1,316 @@
+Index: linux-3.4.11/include/linux/blog.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/blog.h	2018-05-21 17:46:57.236343908 +0800
++++ linux-3.4.11/include/linux/blog.h	2018-05-21 17:48:35.054033489 +0800
+@@ -308,11 +308,6 @@
+ struct sk_buff;                         /* linux/skbuff.h                     */
+ struct fkbuff;                          /* linux/nbuff.h                      */
+ 
+-#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
+-#define BLOG_NAT_UDP_CUSTOMIZED_DST_PORT 1600
+-#define BLOG_NAT_UDP_CUSTOMIZED_IDLE_TIMEOUT (600 *HZ)
+-#endif
+-
+ /* See RFC 4008 */
+ #define BLOG_NAT_TCP_DEFAULT_IDLE_TIMEOUT (86400 *HZ)
+ #define BLOG_NAT_UDP_DEFAULT_IDLE_TIMEOUT (300 *HZ)
+Index: linux-3.4.11/net/core/blog.c
+===================================================================
+--- linux-3.4.11.orig/net/core/blog.c	2018-05-21 17:33:01.128874170 +0800
++++ linux-3.4.11/net/core/blog.c	2018-05-22 09:37:13.728480709 +0800
+@@ -75,10 +75,11 @@
+ 
+ /*--- globals ---*/
+ 
+-#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
+-uint32_t blog_nat_udp_customized_dst_port = BLOG_NAT_UDP_CUSTOMIZED_DST_PORT;
+-uint32_t blog_nat_udp_customized_idle_timeout = BLOG_NAT_UDP_CUSTOMIZED_IDLE_TIMEOUT;
+-#endif
++/* Altibox: Customized UDP timeout*/
++uint32_t nf_ct_udp_STB_timeout __read_mostly = 0;
++uint32_t nf_ct_udp_STB_port __read_mostly = 0;
++EXPORT_SYMBOL(nf_ct_udp_STB_port);
++EXPORT_SYMBOL(nf_ct_udp_STB_timeout);
+ 
+ /* RFC4008 */
+ uint32_t blog_nat_tcp_def_idle_timeout = BLOG_NAT_TCP_DEFAULT_IDLE_TIMEOUT; /* 1 DAY */
+@@ -1349,18 +1350,14 @@
+             else
+ #endif
+                 if (test_bit(IPS_SEEN_REPLY_BIT, &ct->status))
+-#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
+-                    if(htons(blog_nat_udp_customized_dst_port) == (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.udp.port))
+-                        ct_time_p->extra_jiffies = blog_nat_udp_customized_idle_timeout;
++                    if(htons(nf_ct_udp_STB_port) == (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.udp.port))
++                        ct_time_p->extra_jiffies = nf_ct_udp_STB_timeout*HZ;
+                     else
+-#endif
+                     ct_time_p->extra_jiffies = blog_nat_udp_def_idle_timeout_stream;
+                 else
+-#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
+-                    if(htons(blog_nat_udp_customized_dst_port) == (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.udp.port))
+-                        ct_time_p->extra_jiffies = blog_nat_udp_customized_idle_timeout;
++                    if(htons(nf_ct_udp_STB_port) == (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u.udp.port))
++                        ct_time_p->extra_jiffies = nf_ct_udp_STB_timeout*HZ;
+                     else
+-#endif
+                     ct_time_p->extra_jiffies = blog_nat_udp_def_idle_timeout;
+         else /* default:non-TCP|UDP timer refresh */
+             ct_time_p->extra_jiffies = blog_nat_generic_def_idle_timeout;
+Index: linux-3.4.11/net/netfilter/nf_conntrack_core.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_core.c	2018-05-21 17:33:01.128874170 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_core.c	2018-05-22 09:37:05.304310516 +0800
+@@ -67,12 +67,21 @@
+ #endif /* CONFIG_BCM_RUNNER */
+ #endif /* CONFIG_BCM_KF_RUNNER */
+ 
+-#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
++/* Altibox has a CA system that is used to handle entitlements for STB.
++   The STB is always talking to STB on destination port 1600 and will
++   start a new connection to CA server every 600 seconds. The CA server
++   is also used to notify STB of other events (like request to reboot etc) */
+ #define PROC_STB_PORT	"zy_nf_ct_udp_STB_port"
+ #define PROC_STB_TIMEOUT	"zy_nf_ct_udp_STB_timeout"
+-unsigned int nf_ct_udp_STB_timeout __read_mostly = 600*HZ;
+-unsigned int nf_ct_udp_STB_port __read_mostly = 1600;
+-#endif
++extern uint32_t nf_ct_udp_STB_timeout __read_mostly;
++extern uint32_t nf_ct_udp_STB_port __read_mostly;
++
++static int proc_STB_timeout_read(char *buffer,char **buffer_location,off_t offset, int buffer_length, int *eof, void *data);
++static int proc_STB_timeout_write(struct file *file, const char *buf, unsigned long count, void *data);
++static int proc_STB_port_read(char *buffer,char **buffer_location,off_t offset, int buffer_length, int *eof, void *data);
++static int proc_STB_port_write(struct file *file, const char *buf, unsigned long count, void *data);
++int Zy_UDP_init_proc(void);
++void Zy_UDP_deinit_proc(void);
+ 
+ #define NF_CONNTRACK_VERSION	"0.5.0"
+ 
+@@ -2149,6 +2158,8 @@
+ 		goto i_see_dead_people;
+ 	}
+ 
++	Zy_UDP_deinit_proc();
++
+ 	nf_ct_free_hashtable(net->ct.hash, net->ct.htable_size);
+ 	nf_conntrack_timeout_fini(net);
+ 	nf_conntrack_ecache_fini(net);
+@@ -2394,6 +2405,10 @@
+ 	if (ret < 0)
+ 		goto err_timeout;
+ 
++	ret = Zy_UDP_init_proc();
++	if (ret < 0)
++		goto err_proto_zy_udp;
++
+ #if defined(CONFIG_BCM_KF_BLOG) && defined(CONFIG_BLOG)
+ 	blog_cttime_update_fn = (blog_cttime_upd_t)__nf_ct_time_update;
+ #endif
+@@ -2402,6 +2417,8 @@
+ #endif
+ 	return 0;
+ 
++err_proto_zy_udp:
++	 Zy_UDP_deinit_proc();
+ err_timeout:
+ 	nf_conntrack_ecache_fini(net);
+ err_ecache:
+@@ -2577,3 +2594,115 @@
+ out_init_net:
+ 	return ret;
+ }
++
++static int proc_STB_timeout_read(char *buffer,char **buffer_location,
++					off_t offset, int buffer_length, int *eof, void *data)
++{
++	int ret=0;
++	char temp[80];
++
++	if (offset > 0)	{
++		/* we have finished to read, return 0 */
++ 		ret  = 0;
++	}	else 	{
++		/* fill the buffer, return the buffer size */
++		sprintf(temp,"%d\n",nf_ct_udp_STB_timeout );
++		ret = sprintf(buffer, temp);
++	}
++	return ret;
++}
++
++static int proc_STB_timeout_write(struct file *file, const char *buf, unsigned long count, void *data)
++{
++	char local_buf[20];
++	int len;
++
++	len = sizeof(local_buf) < count ? sizeof(local_buf) - 1 : count;
++	len = len - copy_from_user(local_buf, buf, len);
++	local_buf[len] = 0;
++
++	sscanf(local_buf,"%d",&nf_ct_udp_STB_timeout);
++	printk("\n Settting nf_ct_udp_STB_timeout : %d\n", nf_ct_udp_STB_timeout);
++
++    return count;
++}
++
++static int proc_STB_port_read(char *buffer,char **buffer_location,
++					off_t offset, int buffer_length, int *eof, void *data)
++{
++	int ret=0;
++	char temp[80];
++
++	if (offset > 0)	{
++		/* we have finished to read, return 0 */
++ 		ret  = 0;
++	}	else 	{
++		/* fill the buffer, return the buffer size */
++		sprintf(temp,"%d\n",nf_ct_udp_STB_port );
++		ret = sprintf(buffer, temp);
++	}
++	return ret;
++}
++
++static int proc_STB_port_write(struct file *file, const char *buf, unsigned long count, void *data)
++{
++	char local_buf[20];
++	int len;
++
++	len = sizeof(local_buf) < count ? sizeof(local_buf) - 1 : count;
++	len = len - copy_from_user(local_buf, buf, len);
++	local_buf[len] = 0;
++
++	sscanf(local_buf,"%d",&nf_ct_udp_STB_port);
++	printk("\n Settting nf_ct_udp_STB_port : %d\n", nf_ct_udp_STB_port);
++
++    return count;
++}
++
++
++int Zy_UDP_init_proc(void)
++{
++	struct proc_dir_entry *proc_zy_nf_ct_udp_STB_port, *proc_zy_nf_ct_udp_STB_timeout;
++
++	//STB port part
++	proc_zy_nf_ct_udp_STB_port = create_proc_entry(PROC_STB_PORT, 0644, NULL);
++	if (proc_zy_nf_ct_udp_STB_port == NULL) {
++		printk(KERN_ALERT "Error: Could not initialize /proc/%s\n", PROC_STB_PORT);
++		// return -ENOMEM;
++		return -1;
++	}
++
++	proc_zy_nf_ct_udp_STB_port->read_proc  = proc_STB_port_read;
++	proc_zy_nf_ct_udp_STB_port->write_proc = proc_STB_port_write;
++#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
++	proc_zy_nf_ct_udp_STB_port->owner 	 = THIS_MODULE;
++#endif
++	printk(KERN_INFO "/proc/%s created\n", PROC_STB_PORT);
++
++
++	//STB timeout part
++	proc_zy_nf_ct_udp_STB_timeout = create_proc_entry(PROC_STB_TIMEOUT, 0644, NULL);
++	if (proc_zy_nf_ct_udp_STB_timeout == NULL){
++		printk(KERN_ALERT "Error: Could not initialize /proc/%s\n", PROC_STB_TIMEOUT);
++		// return -ENOMEM;
++		return -1;
++	}
++
++	proc_zy_nf_ct_udp_STB_timeout->read_proc  = proc_STB_timeout_read;
++	proc_zy_nf_ct_udp_STB_timeout->write_proc = proc_STB_timeout_write;
++#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
++	proc_zy_nf_ct_udp_STB_timeout->owner 	 = THIS_MODULE;
++#endif
++	printk(KERN_INFO "/proc/%s created\n", PROC_STB_TIMEOUT);
++
++	return 0;	/* everything is ok */
++}
++
++void  Zy_UDP_deinit_proc(void)
++{
++	remove_proc_entry(PROC_STB_TIMEOUT, NULL);
++	printk(KERN_INFO "/proc/%s remove\n", PROC_STB_TIMEOUT);
++	remove_proc_entry(PROC_STB_PORT, NULL);
++	printk(KERN_INFO "/proc/%s remove\n", PROC_STB_PORT);
++}
++
+Index: linux-3.4.11/net/netfilter/nf_conntrack_proto_udp.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_proto_udp.c	2018-05-21 17:33:01.128874170 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_proto_udp.c	2018-05-22 09:43:14.960320701 +0800
+@@ -29,10 +29,9 @@
+ #include <linux/blog.h>
+ #endif
+ 
+-#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
+-extern unsigned int nf_ct_udp_STB_timeout __read_mostly;
+-extern unsigned int nf_ct_udp_STB_port __read_mostly;
+-#endif
++/* Altibox: Customized UDP timeout*/
++extern uint32_t nf_ct_udp_STB_timeout __read_mostly;
++extern uint32_t nf_ct_udp_STB_port __read_mostly;
+ 
+ enum udp_conntrack {
+ 	UDP_CT_UNREPLIED,
+@@ -95,7 +94,6 @@
+ 		      unsigned int *timeouts)
+ {
+ 
+-#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
+ 	const struct udphdr *hp;
+ 	struct udphdr _hdr;
+ 	int mFlag = 0;
+@@ -114,33 +112,26 @@
+ 			//printk(">>>  UDP sport=%d dport=%d <<<\n", hp->source, hp->dest);
+ 		}
+ 	}
+-#endif
+ 	/* If we've seen traffic both ways, this is some kind of UDP
+ 	   stream.  Extend timeout. */
+ 	if (test_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {
+-#if defined(CONFIG_UDP_CUST_SESSION_TIMEOUT)
+- 		nf_ct_refresh_acct(ct, ctinfo, skb, (mFlag)? nf_ct_udp_STB_timeout : timeouts[UDP_CT_REPLIED] );
+-#elif defined(CONFIG_BCM_KF_NETFILTER)
+-                unsigned timeout = udp_timeouts[UDP_CT_REPLIED];
+-                if (ct->derived_timeout == 0xFFFFFFFF){
+-                        timeout = 60*60*HZ;
+-                } else if(ct->derived_timeout > 0) {
+-                        timeout = ct->derived_timeout;
+-                }
+-                nf_ct_refresh_acct(ct, ctinfo, skb, timeout);
++#if defined(CONFIG_BCM_KF_NETFILTER)
++		unsigned timeout = udp_timeouts[UDP_CT_REPLIED];
++		if (ct->derived_timeout == 0xFFFFFFFF){
++			timeout = 60*60*HZ;
++		} else if(ct->derived_timeout > 0) {
++			timeout = ct->derived_timeout;
++		}
++		nf_ct_refresh_acct(ct, ctinfo, skb, (mFlag)? (nf_ct_udp_STB_timeout*HZ) : timeout );
+ #else
+-		nf_ct_refresh_acct(ct, ctinfo, skb, timeouts[UDP_CT_REPLIED]);
++		nf_ct_refresh_acct(ct, ctinfo, skb, (mFlag)? (nf_ct_udp_STB_timeout*HZ) : timeouts[UDP_CT_REPLIED] );
+ #endif
+ 		/* Also, more likely to be important, and not a probe */
+ 		if (!test_and_set_bit(IPS_ASSURED_BIT, &ct->status))
+ 			nf_conntrack_event_cache(IPCT_ASSURED, ct);
+ 	}
+ 	else {
+-#ifdef CONFIG_UDP_CUST_SESSION_TIMEOUT
+- 		nf_ct_refresh_acct(ct, ctinfo, skb, (mFlag)? nf_ct_udp_STB_timeout :timeouts[UDP_CT_UNREPLIED] );
+-#else
+-		nf_ct_refresh_acct(ct, ctinfo, skb, timeouts[UDP_CT_UNREPLIED]);
+-#endif
++		nf_ct_refresh_acct(ct, ctinfo, skb, (mFlag)? (nf_ct_udp_STB_timeout*HZ) : timeouts[UDP_CT_UNREPLIED] );
+ 	}
+ 	return NF_ACCEPT;
+ }
+Index: linux-3.4.11/Kconfig.bcm
+===================================================================
+--- linux-3.4.11.orig/Kconfig.bcm	2018-05-21 17:33:01.128874170 +0800
++++ linux-3.4.11/Kconfig.bcm	2018-05-22 09:38:42.468313193 +0800
+@@ -1257,7 +1257,4 @@
+ 	select SYS_SUPPORTS_HIGHMEM
+ 	select HIGHMEM
+ 
+-config UDP_CUST_SESSION_TIMEOUT
+-	bool "UDP customized session timeout"
+-
+ endif

@@ -156,7 +156,8 @@ tr98Parameter_t para_DhcpStaticAddr[] = {
 tr98Parameter_t para_DhcpOpt[] = {
 	{ "Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "Tag", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
-	{ "Value", PARAMETER_ATTR_WRITE, json_type_base64},
+	//{ "Value", PARAMETER_ATTR_WRITE, json_type_base64},
+	{ "Value", PARAMETER_ATTR_WRITE, 256, json_type_string},
 	{ NULL, 0, 0, 0}
 };
 
@@ -174,7 +175,7 @@ tr98Parameter_t para_DhcpCondServPool[] = {
 	{ "Chaddr", PARAMETER_ATTR_WRITE, 19, json_type_string},	
 	{ "ChaddrMask", PARAMETER_ATTR_WRITE, 19, json_type_string},	
 	{ "ChaddrExclude", PARAMETER_ATTR_WRITE, 0, json_type_boolean},	
-	{ "LocallyServed", PARAMETER_ATTR_WRITE, 0, json_type_boolean},	
+	//{ "LocallyServed", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "MinAddress", PARAMETER_ATTR_WRITE, 9, json_type_string},	
 	{ "MaxAddress", PARAMETER_ATTR_WRITE, 17, json_type_string},	
 	{ "ReservedAddresses", PARAMETER_ATTR_WRITE, 513, json_type_string},	
@@ -183,8 +184,8 @@ tr98Parameter_t para_DhcpCondServPool[] = {
 	{ "DomainName", PARAMETER_ATTR_WRITE, 65, json_type_string},	
 	{ "IPRouters", PARAMETER_ATTR_WRITE, 65, json_type_string},	
 	{ "DHCPLeaseTime", PARAMETER_ATTR_WRITE, 0, json_type_int},	
-	{ "UseAllocatedWAN", PARAMETER_ATTR_WRITE, 13, json_type_string},	
-	{ "AssociatedConnection", PARAMETER_ATTR_WRITE, 257, json_type_string},	
+	//{ "UseAllocatedWAN", PARAMETER_ATTR_WRITE, 13, json_type_string},
+	//{ "AssociatedConnection", PARAMETER_ATTR_WRITE, 257, json_type_string},
 	{ "DHCPServerIPAddress", PARAMETER_ATTR_WRITE, 17, json_type_string},	
 	{ "DHCPStaticAddressNumberOfEntries", PARAMETER_ATTR_READONLY, 0, json_type_uint32},	
 	{ "DHCPOptionNumberOfEntries", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
@@ -201,6 +202,7 @@ tr98Parameter_t para_DhcpCondServPoolDhcpStaticAddr[] = {
 tr98Parameter_t para_DhcpCondServPoolDhcpOpt[] = {	
 	{ "Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},	
 	{ "Tag", PARAMETER_ATTR_WRITE, 0, json_type_uint32},	
+	{ "Value", PARAMETER_ATTR_WRITE, 256, json_type_string},
 	{ NULL, 0, 0, 0}
 };
 
@@ -239,7 +241,7 @@ tr98Parameter_t para_LanDevWlanCfg[] = {
 	{ "Status", PARAMETER_ATTR_READONLY, 10, json_type_string},
 	{ "Name", PARAMETER_ATTR_READONLY, 17, json_type_string},
 	{ "BSSID", PARAMETER_ATTR_READONLY, 19, json_type_string},
-	//{ "MaxBitRate", PARAMETER_ATTR_WRITE, 5, json_type_string},
+	{ "MaxBitRate", PARAMETER_ATTR_WRITE, 5, json_type_string},
 	{ "Channel", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	{ "AutoChannelEnable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "SSID", PARAMETER_ATTR_WRITE, 33, json_type_string},
@@ -256,8 +258,8 @@ tr98Parameter_t para_LanDevWlanCfg[] = {
 	{ "IEEE11iEncryptionModes", PARAMETER_ATTR_WRITE, 28, json_type_string},
 	{ "IEEE11iAuthenticationMode", PARAMETER_ATTR_WRITE, 26, json_type_string},
 	{ "PossibleChannels", PARAMETER_ATTR_READONLY, 1025, json_type_string},
-	//{ "BasicDataTransmitRates", PARAMETER_ATTR_WRITE, 257, json_type_string},
-	//{ "OperationalDataTransmitRates", PARAMETER_ATTR_WRITE, 257, json_type_string},
+	{ "BasicDataTransmitRates", PARAMETER_ATTR_READONLY, 257, json_type_string},
+	{ "OperationalDataTransmitRates", PARAMETER_ATTR_READONLY, 257, json_type_string},
 	{ "PossibleDataTransmitRates", PARAMETER_ATTR_READONLY, 257, json_type_string},
 	{ "InsecureOOBAccessEnabled", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "BeaconAdvertisementEnabled", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
@@ -285,7 +287,7 @@ tr98Parameter_t para_LanDevWlanCfg[] = {
 	{ "TotalPacketsSent", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
 	{ "TotalPacketsReceived", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
 	{ "TotalAssociations", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
-	{ "X_ZYXEL_Auto_Channel_Skip", PARAMETER_ATTR_WRITE, 0, json_type_string},
+	{ "X_ZYXEL_Auto_Channel_Skip", PARAMETER_ATTR_WRITE, 101, json_type_string},
 #ifdef ONECONNECT
 	{ "X_ZYXEL_AP_AutoConfig", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 #endif
@@ -298,6 +300,8 @@ tr98Parameter_t para_LanDevWlanCfg[] = {
 #ifdef ZYXEL_WIFI_SingleSKU
 	{ "X_ZYXEL_SingleSKU", PARAMETER_ATTR_WRITE, 8, json_type_string},
 #endif
+	{ "X_ZYXEL_SSID_Priority_Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_SSID_Priority", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	{ NULL, 0, 0, 0}
 };
 
@@ -321,7 +325,7 @@ tr98Parameter_t para_LanDevWlanCfgStat[] = {
 tr98Parameter_t para_LanDevWlanCfgWps[] = {
 	{ "Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	//{ "DeviceName", PARAMETER_ATTR_READONLY, 33, json_type_string},
-	//{ "DevicePassword", PARAMETER_ATTR_WRITE | PARAMETER_ATTR_PASSWORD, 0, json_type_uint32},
+	{ "DevicePassword", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	//{ "UUID", PARAMETER_ATTR_READONLY, 37, json_type_string},
 	//{ "Version", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
 	{ "ConfigMethodsSupported", PARAMETER_ATTR_READONLY, 65, json_type_string},
@@ -334,9 +338,12 @@ tr98Parameter_t para_LanDevWlanCfgWps[] = {
 	//{ "RegistrarEstablished", PARAMETER_ATTR_READONLY, 0, json_type_boolean},
 #define WPS_ACCESSPOINT_PIN
 #ifdef WPS_ACCESSPOINT_PIN
+	{ "X_ZYXEL_WPS_Method", PARAMETER_ATTR_READONLY, 11, json_type_string},
+	//{ "X_ZYXEL_WPS_StationPin", PARAMETER_ATTR_WRITE | PARAMETER_ATTR_PASSWORD, 11, json_type_string},
 	{ "X_ZYXEL_WPS_Configured", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_WPS_GenDevicePin", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
-	{ "X_ZYXEL_WPS_DevicePin", PARAMETER_ATTR_READONLY | PARAMETER_ATTR_PASSWORD, 11, json_type_string},
+	//{ "X_ZYXEL_WPS_DevicePin", PARAMETER_ATTR_READONLY | PARAMETER_ATTR_PASSWORD , 11, json_type_string},
+	//
 #endif
 	{ NULL, 0, 0, 0}
 };
@@ -407,6 +414,9 @@ tr98Parameter_t para_NeiborWifiDiagResult[] = {
 };
 
 tr98Parameter_t para_Hosts[] = {
+#ifdef ZYXEL_ELIMINATE_DHCP_LEASE
+	{ "X_ZYXEL_DeleteAllLease", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+#endif
 	{ "HostNumberOfEntries", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
 	{ NULL, 0, 0, 0}
 };

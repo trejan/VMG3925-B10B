@@ -1,0 +1,13 @@
+Index: linux-3.4.11/net/netfilter/nf_conntrack_rtsp.c
+===================================================================
+--- linux-3.4.11.orig/net/netfilter/nf_conntrack_rtsp.c	2018-05-16 11:29:48.207431451 +0800
++++ linux-3.4.11/net/netfilter/nf_conntrack_rtsp.c	2018-05-16 11:30:10.605805054 +0800
+@@ -39,7 +39,7 @@
+ 
+ static DEFINE_SPINLOCK(nf_rtsp_lock);
+ 
+-#define MAX_PORTS 8
++#define MAX_PORTS 16
+ static u_int16_t ports[MAX_PORTS];
+ static unsigned int ports_c;
+ module_param_array(ports, ushort, &ports_c, 0400);

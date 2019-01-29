@@ -445,6 +445,9 @@ tr98Parameter_t para_WANIpConn[] = {
 	{ "X_ZYXEL_VlanMux8021p", PARAMETER_ATTR_WRITE, 0, json_type_int},
 	{ "X_ZYXEL_VlanMuxID", PARAMETER_ATTR_WRITE, 0, json_type_int},
 	{ "X_ZYXEL_FullConeEnabled", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+#ifdef ZYXEL_SUPPORT_DMZ_MANAGEMENT
+	{ "X_ZYXEL_DMZHost_Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+#endif
 	{ "X_ZYXEL_DMZHost", PARAMETER_ATTR_WRITE, 33, json_type_string},
 	{ "X_ZYXEL_NAT_ALG", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_SIP_ALG", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
@@ -454,8 +457,12 @@ tr98Parameter_t para_WANIpConn[] = {
 	{ "X_ZYXEL_MaxSessionPerHost", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	{ "X_ZYXEL_DefaultGatewayIface", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_IPv4Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
-	{ "X_ZYXEL_IPv6Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_ConcurrentWan", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
+	{ "X_ZYXEL_PubLan", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_PubLan_DHCP", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_PubLan_ARP", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_PubLan_IP", PARAMETER_ATTR_WRITE, 0, json_type_string},
+	{ "X_ZYXEL_PubLan_Mask", PARAMETER_ATTR_WRITE, 0, json_type_string},
 #ifdef IPV6RD_PROFILE
 #ifndef SUNRISE_TR98_CUSTOMIZATION // Sunrise
 	{ "X_ZYXEL_Enable_6RD", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
@@ -710,6 +717,9 @@ tr98Parameter_t para_WANPppConn[] = {
 	{ "X_ZYXEL_VlanMux8021p", PARAMETER_ATTR_WRITE, 0, json_type_int},
 	{ "X_ZYXEL_VlanMuxID", PARAMETER_ATTR_WRITE, 0, json_type_int},
 	{ "X_ZYXEL_FullConeEnabled", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+#ifdef ZYXEL_SUPPORT_DMZ_MANAGEMENT
+	{ "X_ZYXEL_DMZHost_Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+#endif
 	{ "X_ZYXEL_DMZHost", PARAMETER_ATTR_WRITE, 33, json_type_string},
 	{ "X_ZYXEL_NAT_ALG", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_SIP_ALG", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
@@ -719,7 +729,6 @@ tr98Parameter_t para_WANPppConn[] = {
 	{ "X_ZYXEL_MaxSessionPerHost", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	{ "X_ZYXEL_DefaultGatewayIface", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_IPv4Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
-	{ "X_ZYXEL_IPv6Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_ConcurrentWan", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 #ifdef IPV6RD_PROFILE
 #ifndef SUNRISE_TR98_CUSTOMIZATION // Sunrise

@@ -20,6 +20,7 @@ typedef struct zyWlanSsid_t {
 	bool wmmNoAck;
 	bool wmmApsd;
 	uint32_t maxAssoc;
+	uint32_t ssid_prio;
 	char bssMacAddr[18];
 	char brIfName[32];
 	/*Security*/
@@ -79,6 +80,7 @@ typedef struct zyWlanRadio_t {
 	bool apCoex;
 	bool frameburst;
 	bool atf;
+	bool ssid_prio_en;
 	uint8_t mu_mimo;
 	int8_t obss_coex;
 	int8_t protection;
@@ -295,5 +297,12 @@ enum {
 #define VHT80_2SS_RATES "520,585,650,780,866.7"
 #define VHT80_3SS_RATES "585,975,1170,1300"
 #define VHT80_4SS_RATES "1040,1560,1733.2"
+
+/*802.11b, 802.11g, 802.11a, BasicDataTxRates for 2.4GHz, 5GHz*/
+#define B2G_RATES "1,2,5.5,11"//Basic
+#define WL_B_RATES "1,2,5.5,11"
+#define WL_G_RATES "1,2,5.5,6,9,11,12,18,24,36,48,54"
+#define B5G_RATES "6,12,24"//Basic
+#define WL_A_RATES "6,9,12,18,24,36,48,54"
 
 #endif

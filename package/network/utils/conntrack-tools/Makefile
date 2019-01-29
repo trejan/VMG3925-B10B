@@ -12,10 +12,11 @@ PKG_VERSION:=1.0.0
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:= \
-	http://www.netfilter.org/projects/conntrack-tools/files \
-	ftp://ftp.netfilter.org/pub/conntrack-tools \
-	http://mirrors.evolva.ro/netfilter.org/conntrack-tools
+PKG_SOURCE_URL:=@ZyXEL_SITE/opensource/network/utils
+#PKG_SOURCE_URL:= \
+#	http://www.netfilter.org/projects/conntrack-tools/files \
+#	ftp://ftp.netfilter.org/pub/conntrack-tools \
+#	http://mirrors.evolva.ro/netfilter.org/conntrack-tools
 PKG_MD5SUM:=5add24d4761baf17af630d5627a71752
 
 PKG_MAINTAINER:=Jo-Philipp Wich <jow@openwrt.org>

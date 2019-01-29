@@ -37,7 +37,6 @@ tools-y += libjson-c-host
 ifneq (,$(CONFIG_TARGET_mt75xx)$(CONFIG_TARGET_en75xx))
 tools-y += tofrodos
 tools-y += econet/trx
-tools-y += private/econet/econet_include
 endif
 
 

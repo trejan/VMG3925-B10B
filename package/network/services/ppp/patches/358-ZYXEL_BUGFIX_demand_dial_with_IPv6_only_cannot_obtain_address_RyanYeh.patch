@@ -1,0 +1,31 @@
+Index: ppp-2.4.3/pppd/main.c
+===================================================================
+--- ppp-2.4.3.orig/pppd/main.c	2018-06-25 10:18:30.730857539 +0800
++++ ppp-2.4.3/pppd/main.c	2018-06-25 10:25:38.888037600 +0800
+@@ -398,6 +398,8 @@
+     struct passwd *pw;
+     struct protent *protp;
+     char numbuf[16];
++	bool bInit = false; // Zyxel, directly bring up the link while pppd created with demand-dial mode.
++
+ #if 1 /* ZYXEL, must change the pppd gid, or pppd sends the signal to pid 0 will cause ZCFG group receive the signal */
+ 	setpgid(0, 0);
+ #endif
+@@ -597,7 +599,7 @@
+ 	doing_callback = do_callback;
+ 	do_callback = 0;
+ 
+-	if (demand && !doing_callback) {
++	if (demand && !doing_callback && bInit) {
+ 	    /*
+ 	     * Don't do anything until we see some activity.
+ 	     */
+@@ -622,6 +624,8 @@
+ 	    info("Starting link");
+ 	}
+ 
++	bInit = true;
++
+ 	check_time();
+ 	gettimeofday(&start_time, NULL);
+ 	script_unsetenv("CONNECT_TIME");

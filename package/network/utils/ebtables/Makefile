@@ -61,11 +61,17 @@ MAKE_VARS += EXT_LIBSI="$(LIBGCC_S)"
 
 export BUILD_DIR
 
-CFLAGS="$(TARGET_CFLAGS)"
+#CFLAGS="$(TARGET_CFLAGS)"
 
-export CFLAGS
+#export CFLAGS
+
+ECONET_CFLAGS=$(TC_CFLAGS)
+ifneq ($(strip $(TCSUPPORT_CODE_SHRINK)),)
+ECONET_CFLAGS += -Os
+endif
 
 MAKE_FLAGS += \
+	ECONET_CFLAGS="$(ECONET_CFLAGS)" \
 	LIBDIR="/usr/lib/ebtables" \
 	EBT_EXT_FUNC="ip ip6 standard vlan mark_m mark time ftos skiplog AUTOMAP policer"
 

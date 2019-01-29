@@ -7,5 +7,6 @@ typedef struct zcmdBeConfigRegData_s {
 	int (*beValidate)(void *, zcfgEid_t, char *);
 } zcmdBeConfigRegData_t;
 
+int zcmdBeDataModelMode();
 void zcmdBeRegConfigObj(const zcmdBeConfigRegData_t *);
 void zcmdBeAcsSpvNotifyRequired(bool);

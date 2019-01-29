@@ -34,6 +34,15 @@ define Package/syslog-ng
   URL:=http://www.balabit.com/products/syslog_ng/
 endef
 
+define Package/syslog-ng/config
+	select PACKAGE_libzcfg_msg if PACKAGE_zcfg
+	select PACKAGE_libzcmd_tool if PACKAGE_zcfg
+	select PACKAGE_libjson if PACKAGE_zcfg
+	select PACKAGE_libzcfg_fe_rdm_access if PACKAGE_zcfg
+	select PACKAGE_libzcfg_fe_rdm_struct if PACKAGE_zcfg
+	select PACKAGE_libzcfg_fe_dal if PACKAGE_zcfg
+endef
+
 define Package/syslog-ng/description
 	syslog-ng reads and logs messages to the system console, log
 	files, other machines and/or users as specified by its
@@ -63,6 +72,7 @@ define Build/Configure
 		--enable-glibtest=no \
 		CPPFLAGS="-I$(STAGING_DIR)/usr/include $(TARGET_CPPFLAGS)" \
 		LDFLAGS="-L$(STAGING_DIR)/usr/lib $(TARGET_LDFLAGS)" \
+		LIBS="-ljson -lzcfg_msg -lzcmd_tool -lzcfg_fe_rdm_access -lzcfg_fe_rdm_struct" \
 		GLIB_CFLAGS="-I$(STAGING_DIR)/usr/include $(TARGET_CPPFLAGS)" \
 		GLIB_LIBS="$(STAGING_DIR)/usr/lib/libglib-2.0.so" \
 		EVTLOG_CFLAGS="-I$(STAGING_DIR)/usr/include/eventlog $(TARGET_CPPFLAGS)" \

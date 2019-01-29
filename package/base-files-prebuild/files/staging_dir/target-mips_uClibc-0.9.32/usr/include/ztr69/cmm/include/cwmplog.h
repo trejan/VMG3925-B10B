@@ -63,6 +63,7 @@ typedef enum
 	TR069_FILE_TRANSFER_FAILURE_TIMEOUT = 9020
 	/* 9800 - 9899: Vendor defined fault codes */
 	/* RPC Fault Code*/
+	,TR069_DOWNLOAD_SCRIPT_RUN_FAIL = 9831
 }tr069ERR_e;
 #endif
 

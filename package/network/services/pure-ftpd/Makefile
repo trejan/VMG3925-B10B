@@ -27,15 +27,31 @@ define Package/pure-ftpd
   DEPENDS:=+libzcfg_msg +libzcmd_tool +libjson +libzcfg_fe_rdm_access +libzcfg_fe_rdm_struct +libzyutil
 endef
 
+ifeq ($(CONFIG_ZYXEL_REMOTE_ACCESS_PRIVILEGE),y)
+	CFLAGS += -DZYXEL_REMOTE_ACCESS_PRIVILEGE
+endif
+
+ifeq ($(CONFIG_ZYXEL_REMOMGMT_ONLY_HTTPS_ALLOWS_FOR_WLAN_CONNECT),y)
+	CFLAGS += -DZYXEL_REMOMGMT_ONLY_HTTPS_ALLOWS_FOR_WLAN_CONNECT
+endif
+
 ifeq ($(CONFIG_SMALL_RAM),y)
 	FTP_CFLAGS += -DSMALL_RAM
+endif
+
+ifeq ($(CONFIG_HAWAIIAN_TELCOM),y)
+FTP_CFLAGS += -DHAWAIIAN_TELCOM
+endif
+
+ifeq ($(CONFIG_CBT_CUSTOMIZATION),y)
+FTP_CFLAGS += -DCBT_CUSTOMIZATION
 endif
 
 define Build/Configure
 	$(call Build/Configure/Default, \
 		--with-throttling \
 		--with-virtualchroot \
-		--with-cflags="$(FTP_CFLAGS)" \
+		CFLAGS="$(CFLAGS) $(FTP_CFLAGS)" \
 	)
 endef
 

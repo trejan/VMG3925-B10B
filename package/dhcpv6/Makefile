@@ -30,7 +30,7 @@ define Package/wide-dhcpv6/Default
   CATEGORY:=IPv6
   TITLE:=WIDE-DHCPv6
   SUBMENU:=wide-dhcpv6
-  DEPENDS:=+libzcfg_msg  +libjson
+  DEPENDS:=+libzcfg_msg  +libjson +libzcmd_tool +libzcfg_fe_rdm_access +libzcfg_fe_rdm_struct
   URL:=https://sourceforge.net/projects/wide-dhcpv6/
   MAINTAINER:=Andrew Byrne <openwrt@andy.id.au>
 endef

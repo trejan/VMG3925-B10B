@@ -180,7 +180,7 @@ Index: libzcfg_fe_dal-1.0/network/broadband/zcfg_fe_dal_advance.c
  #endif
 -	const char *adslModulationCfg = NULL;
 -	bool ADSL2_AnnexM = false;
-+	char adslModulationCfg[128] = {0};
++	char adslModulationCfg[512] = {0};
 +	bool Gdmt = false;
 +	bool Glite = false;
 +	bool T1413 = false;

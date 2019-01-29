@@ -1,0 +1,36 @@
+Index: linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/brcmnand_base.c	2017-12-26 15:23:58.787676003 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c	2017-12-26 16:20:14.290978127 +0800
+@@ -936,6 +936,19 @@
+ 		.ctrlVersion = CONFIG_MTD_BRCMNAND_VERS_3_0,
+ 	},
+ 
++	{	/* 45 */ //Zyxel,VMG8825-B50B_WIND, 512MB
++		.chipId = MXIC_MX30LF4G18AC,
++		.mafId = FLASHTYPE_MXIC,
++		.chipIdStr = "MXIC MX30LF4G18AC",
++		.options = NAND_BBT_USE_FLASH,
++		.timing1 = 0,
++		.timing2 = 0,
++		.nop=4,
++		.eccLevel=4,
++		.nbrBlocks = 4096,
++		.ctrlVersion = CONFIG_MTD_BRCMNAND_VERS_3_0,
++	},
++
+ 	{	/* LAST DUMMY ENTRY */
+ 		.chipId = 0,
+ 		.mafId = 0,
+Index: linux-3.4.11/include/linux/mtd/brcmnand.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/mtd/brcmnand.h	2017-12-26 15:23:58.807676000 +0800
++++ linux-3.4.11/include/linux/mtd/brcmnand.h	2017-12-26 16:14:22.304161895 +0800
+@@ -490,6 +490,7 @@
+ #define FLASHTYPE_MXIC          0xC2
+ #define MXIC_MX30LF2G18AC       0xDA
+ #define MXIC_MX30LF1G18AC       0xF1    //2017, 2nd source for VMG8924-B10D,VMG3925-B10C,XMG3512-B10A
++#define MXIC_MX30LF4G18AC       0xDC
+ 
+ /*---------------------------------------------------------------------------------------*/
+ 

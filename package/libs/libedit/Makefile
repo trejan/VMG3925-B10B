@@ -34,6 +34,10 @@ endef
 TARGET_CFLAGS += $(FPIC)
 TARGET_LDFLAGS += -lncurses
 
+ifeq ($(CONFIG_ZYXEL_CLI_IDLE_TIMEOUT),y)
+TARGET_CFLAGS += -DZYXEL_CLI_IDLE_TIMEOUT
+endif
+
 CONFIGURE_ARGS = \
 	--host=mips-linux \
 	ac_cv_lib_ncurses_tgetent=yes \

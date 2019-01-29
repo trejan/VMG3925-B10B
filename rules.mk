@@ -291,6 +291,11 @@ ifeq ($(CONFIG_ZYXEL_RMA_FW_SUPPORT),y)
     export CONFIG_ZYXEL_RMA_FW_SUPPORT
 endif
 
+#sys fwur command
+ifeq ($(CONFIG_ZYXEL_SYS_FWUR_SUPPORT),y)
+    export CONFIG_ZYXEL_SYS_FWUR_SUPPORT
+endif
+
 ifeq ($(CONFIG_ENABLE_LOCALE),true)
   DISABLE_NLS:=--enable-nls
 else
@@ -353,6 +358,36 @@ define file_copy
 	done; \
 	$(CP) $(1) $(2)
 endef
+
+#
+#   CP, 2018-01-08 13:48:29
+#
+#   link all files in the folder and sub-folders to the destination
+#       parameter 1 is the source directory
+#       parameter 2 is the destination directory
+#
+define link_files
+	for src_dir in `find $(1) -type d -print`; do \
+	( \
+		if [[ $$src_dir != "." ]]; \
+		then \
+			mkdir -p $(2)/$$src_dir; \
+			for src_file in `find $$src_dir -maxdepth 1 -type f -print`; do \
+			( \
+				ln -f $$src_file $2/$$src_dir; \
+			); \
+			done \
+		fi \
+	); \
+	done
+endef
+
+ZYXEL_PUBLIC_PACKAGE  := $(TOPDIR)/package/public-zyxel
+ZYXEL_PRIVATE_PACKAGE := $(TOPDIR)/package/private/zyxel
+
+export ZYXEL_PUBLIC_PACKAGE
+export ZYXEL_PRIVATE_PACKAGE
+
 
 # file extension
 ext=$(word $(words $(subst ., ,$(1))),$(subst ., ,$(1)))

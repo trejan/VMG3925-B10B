@@ -8,8 +8,10 @@ fi
 MD5="md5sum"
 FILE_PATH_BUILD="./build_dir/target-*/ "
 FILE_PATH_PACKAGE="./package/ "
+FILE_PATH_CONFIG="./configs/"
 FWID_EXT="CONFIG_ZYXEL_FIRMWARE_VERSION"
 FW_VERSION=`cat .config | grep $FWID_EXT | awk -F"=" '{print $2}' | sed "s/\"//g" | sed "s/(//g" | sed "s/)//g" | sed "s/\.//g"`
+PROECT_PROFILE=""
 MD5_INPUT_FILE=""
 MD5_OUTPUT_FILE="md5sum_$FW_VERSION.txt"
 MD5_OUTPUT_TEMP_FILE="md5sum_temp.txt"
@@ -21,24 +23,27 @@ function announcement() {
 	echo " From USG Glenn: It only make sure that the revise can response to the checksum, "
 	echo " not make sure no bug from the same checksum "
 	echo "=================================================================================================="
-	echo " PeterSu: This is only for SVD reference, not intended for SVD to reduce the testing cases. "
-	echo " 			SVD should do testing no matter it is the same or not."
-	echo " 			RD will not guarantee anything and there is no excuse for SVD. "
-	echo " 			Otherwise, RD will not provide this tool and report to SVD anymore. "
+	echo " PeterSu: This is only for PQA reference, not intended for PQA to reduce the testing cases. "
+	echo " 			PQA should do testing no matter it is the same or not."
+	echo " 			RD will not guarantee anything and there is no excuse for PQA. "
+	echo " 			Otherwise, RD will not provide this tool and report to PQA anymore. "
 	echo "=================================================================================================="
 	echo " "
 }
 
 function help() {
 	echo " "
-	echo "Usage:	$0 [-i <input file name>] [-o <output file name>] [-r <report file name>] [-h]"
+	echo "Usage:	$0 [-p <project profile>] [-i <input file name>] [-o <output file name>] [-r <report file name>] [-h]"
 	echo " "
 }
 
-for ((b=1 ; b<=5 ; b=b+1 ))
+for ((b=1 ; b<=6 ; b=b+1 ))
 do
 	if [[ $1 == "" ]] ; then
 		break
+	elif [[ $1 == "-p" ]] ; then
+		shift
+		PROJECT_PROFILE=$1
 	elif [[ $1 == "-o" ]] ; then
 		shift
 		MD5_OUTPUT_FILE=$1
@@ -66,16 +71,30 @@ if [[ $MD5_INPUT_FILE != "" ]] ; then
 	echo "MD5_INPUT_FILE=$MD5_INPUT_FILE"
 fi
 echo "MD5_REPORT_FILE=$MD5_REPORT_FILE"
+echo "PROJECT_PROFILE=$PROJECT_PROFILE"
 
 ##############################################################################
 if [[ $GEN_REPORT_ONLY != "yes" ]] ; then
 ##############################################################################
+
+
+##############################################################################
+# prepare files
+
+if [[ $PROJECT_PROFILE != "" ]] ; then
+	make P=$PROJECT_PROFILE precfg defconfig
+	make P=$PROJECT_PROFILE tools/prepare
+	make P=$PROJECT_PROFILE tools/autoconf/install
+	make P=$PROJECT_PROFILE target/prepare
+	make P=$PROJECT_PROFILE package/prepare
+fi
 
 ##############################################################################
 # all files
 
 ALL_FILES="`find $FILE_PATH_BUILD -type f` "
 ALL_FILES+="`find $FILE_PATH_PACKAGE -type f` "
+ALL_FILES+="`find $FILE_PATH_CONFIG$PROJECT_PROFILE -type f` "
 rm -f all_files.txt
 echo "$ALL_FILES" >> all_files.txt
 
@@ -102,6 +121,9 @@ find -P $FILE_PATH_BUILD -type d | grep /linux- | sed 's/\(\.\/build_dir\/\+[a-z
 
 # ./build_dir/target-mips_xxxxxxx/??????/ , exclude linux-xxxx/
 find -P $FILE_PATH_BUILD -type d | grep -v /linux- | sed 's/\(\.\/build_dir\/\+[a-z0-9A-Z_.-]*\)//g' | awk -F"/" '{print $2}' | awk ' !x[$0]++' >> category.txt
+
+# ./configs/
+find -P $FILE_PATH_CONFIG -type d | sed "s/\.\/configs\///g" | awk -F"/" '{print $1}' | awk ' !x[$0]++' >> category.txt
 
 CATEGORY_LIST=`cat category.txt | grep -v '^$' | sort -r`
 
@@ -161,9 +183,9 @@ echo "##########################################################################
 echo "Done!"
 echo "TIME_END=$TIME_END"
 if [[ $MD5_INPUT_FILE != "" ]] ; then
-	echo "Please copy $MD5_OUTPUT_FILE and $MD5_REPORT_FILE to SVD. "
+	echo "Please copy $MD5_OUTPUT_FILE and $MD5_REPORT_FILE to PQA. "
 else
-	echo "Please copy $MD5_OUTPUT_FILE to SVD. "
+	echo "Please copy $MD5_OUTPUT_FILE to PQA. "
 fi
 echo "##############################################################################"
 

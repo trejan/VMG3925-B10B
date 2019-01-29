@@ -6,22 +6,34 @@ zcfgRet_t initWanLinkInfo();
 void esmdAtmLinkStatusChanged(objIndex_t *, bool);
 void esmdPtmLinkStatusChanged(objIndex_t *, bool);
 void updateWanLinkStatus(const char *, bool skipEthWanAutoHuntProcess);
+#ifdef ZYXEL_SFP_LINKUP_DELAYTIMES
+bool updateSfpWanLinkStatus(const char *);
+#endif
 void esmdResetWanLinkStatus(int);
 void wanConnctionReadyHandle(char *, uint8_t clientEid, uint32_t clientPid);
 void wanConnctionLostHandle(char *, uint8_t clientEid, uint32_t clientPid);
 //INTERNET_LED_CONTROL
 void wanInternetLEDUpdate(void);
-bool disableDefaultGatewayWAN(int phyLinkType);
-void activeDefaultWAN(int Type);
-void HT_Timer1(int intervalTime,int startWaitTime);
-bool checkDefaultWANisUp(void);
 int getIPv6DefaultGatwayStatus(void);
 int getIPv4DefaultGatwayStatus(void);
 
 bool isVcAutoHuntEnable(void);
 bool isVlanAutoHuntEnable(void);
 
+bool isEthLinkUp;
+#ifdef HAWAIIAN_TELCOM
 #define MAX_CHECK_TIMES 10
-#define MAX_CHECK_DELAY 6
+#define MAX_CHECK_DELAY 2
+bool isAtmLinkUp;
+bool isPtmLinkUp;
+int oldWanServiceID;
+int checkInternetLinkUpNum;
+bool wanUnderHunting;
+
+bool disableDefaultGatewayWAN(char *linkType);
+void activeDefaultWAN(void);
+bool checkDefaultWANisUp(void);
+
+#endif
 
 #endif

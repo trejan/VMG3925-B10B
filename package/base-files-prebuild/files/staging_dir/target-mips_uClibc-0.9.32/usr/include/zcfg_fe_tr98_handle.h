@@ -216,6 +216,7 @@
 #define TR98_STD_UPNP_DEV			  "InternetGatewayDevice.UPnP.Device"
 
 #define TR98_ZYXEL_EXT                "InternetGatewayDevice.X_ZYXEL_EXT"
+#define TR98_DNS                      "InternetGatewayDevice.X_ZYXEL_EXT.DNS"
 #define TR98_DNS_RT_ENTRY             "InternetGatewayDevice.X_ZYXEL_EXT.DNSRouteEntry.i"
 #define TR98_DNS_ENTRY     		      "InternetGatewayDevice.X_ZYXEL_EXT.DNSEntry.i"
 #define TR98_D_DNS                    "InternetGatewayDevice.X_ZYXEL_EXT.DynamicDNS"
@@ -228,6 +229,9 @@
 #define TR98_EMAIL_SERVICE            "InternetGatewayDevice.X_ZYXEL_EXT.EmailNotification.EmailService.i"
 #define TR98_EMAIL_EVENT_CFG          "InternetGatewayDevice.X_ZYXEL_EXT.EmailNotification.EmailEventConfig.i"
 #define TR98_SYS_INFO                 "InternetGatewayDevice.X_ZYXEL_EXT.System_Info"
+#ifdef ZYXEL_SFP_MODULE_SUPPORT
+#define TR98_GPON_INFO                "InternetGatewayDevice.X_ZYXEL_EXT.Gpon_Info"
+#endif
 #define TR98_SNMP	                  "InternetGatewayDevice.X_ZYXEL_EXT.SNMP"
 #define TR98_SNMP_TRAP                "InternetGatewayDevice.X_ZYXEL_EXT.SNMP.TrapAddr.i"
 #define TR98_SCHEDULE                 "InternetGatewayDevice.X_ZYXEL_EXT.Schedule.i"
@@ -292,6 +296,47 @@
 #ifdef ZYXEL_ONESSID
 #define TR98_ONESSID                  "InternetGatewayDevice.X_ZYXEL_EXT.X_ZYXEL_ONESSID"
 #endif 
+
+#ifdef ZYXEL_IPV6SPEC
+#define TR98_IPV6SPEC					"InternetGatewayDevice.IPv6Specific"
+#define TR98_IPV6_PPP					"InternetGatewayDevice.IPv6Specific.PPP"
+#define TR98_IPV6_PPP_INTF				"InternetGatewayDevice.IPv6Specific.PPP.Interface.i"
+#define TR98_IPV6_PPP_INTF_IPV6CP		"InternetGatewayDevice.IPv6Specific.PPP.Interface.i.IPv6CP"
+#define TR98_IPV6_IP					"InternetGatewayDevice.IPv6Specific.IP"
+#define TR98_IPV6_IP_INTF				"InternetGatewayDevice.IPv6Specific.IP.Interface.i"
+#define TR98_IPV6_IP_INTF_IPV6ADDR		"InternetGatewayDevice.IPv6Specific.IP.Interface.i.IPv6Address.i"
+#define TR98_IPV6_IP_INTF_IPV6PREFIX	"InternetGatewayDevice.IPv6Specific.IP.Interface.i.IPv6Prefix.i"
+#define TR98_IPV6_ROUTING				"InternetGatewayDevice.IPv6Specific.Routing"
+#define TR98_IPV6_ROUTER				"InternetGatewayDevice.IPv6Specific.Routing.Router.i"
+#define TR98_IPV6_ROUTER_IPV6FWD		"InternetGatewayDevice.IPv6Specific.Routing.Router.i.IPv6Forwarding.i"
+#define TR98_IPV6_ROUTEINFO				"InternetGatewayDevice.IPv6Specific.Routing.RouteInformation"
+#define TR98_IPV6_ROUTEINFO_INTF		"InternetGatewayDevice.IPv6Specific.Routing.RouteInformation.InterfaceSetting.i"
+#define TR98_IPV6_ND					"InternetGatewayDevice.IPv6Specific.NeighborDiscovery"
+#define TR98_IPV6_ND_INTF				"InternetGatewayDevice.IPv6Specific.NeighborDiscovery.InterfaceSetting.i"
+#define TR98_IPV6_ROUTERADVER			"InternetGatewayDevice.IPv6Specific.RouterAdvertisement"
+#define TR98_IPV6_ROUTERADVER_INTF		"InternetGatewayDevice.IPv6Specific.RouterAdvertisement.InterfaceSetting.i"
+#define TR98_IPV6_ROUTERADVER_OPT		"InternetGatewayDevice.IPv6Specific.RouterAdvertisement.InterfaceSetting.i.Option.i"
+#define TR98_IPV6_HOSTS					"InternetGatewayDevice.IPv6Specific.Hosts"
+#define TR98_IPV6_HOSTS_HOST			"InternetGatewayDevice.IPv6Specific.Hosts.Host.i"
+#define TR98_IPV6_HOSTS_HOST_IPV6ADDR	"InternetGatewayDevice.IPv6Specific.Hosts.Host.i.IPv6Address.i"
+#define TR98_IPV6_DNS					"InternetGatewayDevice.IPv6Specific.DNS"
+#define TR98_IPV6_DNS_CLIENT			"InternetGatewayDevice.IPv6Specific.DNS.Client"
+#define TR98_IPV6_DNS_SERVER			"InternetGatewayDevice.IPv6Specific.DNS.Client.Server.i"
+#define TR98_IPV6_DNS_RELAY				"InternetGatewayDevice.IPv6Specific.DNS.Relay"
+#define TR98_IPV6_DNS_RELAYFWD			"InternetGatewayDevice.IPv6Specific.DNS.Relay.Forwarding.i"
+#define TR98_IPV6_DHCPV6				"InternetGatewayDevice.IPv6Specific.DHCPv6"
+#define TR98_IPV6_DHCPV6_CLIENT			"InternetGatewayDevice.IPv6Specific.DHCPv6.Client.i"
+#define TR98_IPV6_DHCPV6_CLIENT_SRV		"InternetGatewayDevice.IPv6Specific.DHCPv6.Client.i.Server.i"
+#define TR98_IPV6_DHCPV6_CLIENT_SENT	"InternetGatewayDevice.IPv6Specific.DHCPv6.Client.i.SentOption.i"
+#define TR98_IPV6_DHCPV6_CLIENT_RCV		"InternetGatewayDevice.IPv6Specific.DHCPv6.Client.i.ReceivedOption.i"
+#define TR98_IPV6_DHCPV6_SERVER			"InternetGatewayDevice.IPv6Specific.DHCPv6.Server"
+#define TR98_IPV6_DHCPV6_SERVER_POOL	"InternetGatewayDevice.IPv6Specific.DHCPv6.Server.Pool.i"
+#define TR98_IPV6_DHCPV6_SERVER_CNT		"InternetGatewayDevice.IPv6Specific.DHCPv6.Server.Pool.i.Client.i"
+#define TR98_IPV6_DHCPV6_SERVER_CNT_V6ADDR		"InternetGatewayDevice.IPv6Specific.DHCPv6.Server.Pool.i.Client.i.IPv6Address.i"
+#define TR98_IPV6_DHCPV6_SERVER_CNT_V6PREFIX	"InternetGatewayDevice.IPv6Specific.DHCPv6.Server.Pool.i.Client.i.IPv6Prefix.i"
+#define TR98_IPV6_DHCPV6_SERVER_CNT_OPT	"InternetGatewayDevice.IPv6Specific.DHCPv6.Server.Pool.i.Client.i.Option.i"
+#define TR98_IPV6_DHCPV6_SERVER_OPT		"InternetGatewayDevice.IPv6Specific.DHCPv6.Server.Pool.i.Option.i"
+#endif
 
 #define OBSOLETED 1
 //#define ZYXEL_EXT 1
@@ -408,9 +453,10 @@ tr98Object_t tr98Obj[] = {
 {TR98_VENDOR_SPECIFIC,                 0,              para_VendorSpecific,          zyExtVendorSpecObjGet,          zyExtVendorSpecObjSet,         NULL,             NULL,            NULL, NULL, NULL},
 {TR98_VENDOR_SPECIFIC_PROF,           ATTR_INDEX_CREA, para_VendorSpecificProf,     zyExtVendorSpecProfObjGet,     zyExtVendorSpecProfObjSet,    zyExtVendorSpecProfObjAdd,zyExtVendorSpecProfObjDel,NULL, NULL, NULL},
 #endif
-{TR98_DHCP_COND_SERVPOOL,       ATTR_INDEX_CREA,para_DhcpCondServPool,  lanDhcpCondServPoolObjGet,  lanDhcpCondServPoolObjSet,  lanDhcpCondServPoolObjAdd,  lanDhcpCondServPoolObjDel, lanDhcpCondServPoolObjNotify, lanDhcpCondServPoolObjAttrGet, lanDhcpCondServPoolObjAttrSet},
+//{TR98_DHCP_COND_SERVPOOL,       ATTR_INDEX_CREA,para_DhcpCondServPool,  lanDhcpCondServPoolObjGet,  lanDhcpCondServPoolObjSet,  lanDhcpCondServPoolObjAdd,  lanDhcpCondServPoolObjDel, lanDhcpCondServPoolObjNotify, lanDhcpCondServPoolObjAttrGet, lanDhcpCondServPoolObjAttrSet},
+{TR98_DHCP_COND_SERVPOOL,       ATTR_INDEX_CREA,para_DhcpCondServPool,  lanDhcpCondServPoolObjGet,  lanDhcpCondServPoolObjSet,  lanDhcpCondServPoolObjAdd,  lanDhcpCondServPoolObjDel, NULL, NULL, NULL},
 {TR98_SERVPOOL_DHCP_STATICADDR, ATTR_INDEX_CREA,para_DhcpCondServPoolDhcpStaticAddr,NULL, NULL, NULL, NULL, NULL, NULL, NULL},
-{TR98_SERVPOOL_DHCP_OPT,        ATTR_INDEX_CREA,para_DhcpCondServPoolDhcpOpt,NULL,  NULL,  NULL,  NULL, NULL, NULL, NULL},
+{TR98_SERVPOOL_DHCP_OPT,        ATTR_INDEX_CREA,para_DhcpCondServPoolDhcpOpt, lanDhcpCondServPoolOptObjGet,  lanDhcpCondServPoolOptObjSet,  lanDhcpCondServPoolOptObjAdd,  lanDhcpCondServPoolOptObjDel, NULL, NULL, NULL},
 {TR98_LAN_ETH_INTF_CONF,        ATTR_INDEXNODE, para_LanEthIntfConf,    lanEthIntfConfObjGet,    lanEthIntfConfObjSet,   NULL,             NULL,            lanEthIntfConfObjNotify, lanEthIntfConfObjAttrGet, lanEthIntfConfObjAttrSet},
 {TR98_LAN_ETH_INTF_CONF_STAT,   0,              para_LanEthIntfConfStat,lanEthIntfConfStatObjGet,NULL,                   NULL,             NULL,            NULL},
 //{TR98_LAN_USB_INTF_CONF,        ATTR_INDEXNODE, NULL,                   NULL,                    NULL,                   NULL,             NULL,            NULL},
@@ -425,10 +471,11 @@ tr98Object_t tr98Obj[] = {
 {TR98_PSK,                      ATTR_INDEXNODE, para_Psk,               lanDevWlanCfgPskObjGet,  lanDevWlanCfgPskObjSet, NULL,             NULL,            NULL},
 //{TR98_AP_WMM_PARAM,             ATTR_INDEXNODE, NULL,                   NULL,                    NULL,                   NULL,             NULL,            NULL},
 //{TR98_STA_WMM_PARAM,            ATTR_INDEXNODE, NULL,                   NULL,                    NULL,                   NULL,             NULL,            NULL},
-{TR98_HOSTS,                    0, para_Hosts,				lanDevHostsObjGet,			NULL,                   NULL,             NULL,            lanDevHostsObjNotify, NULL, lanDevHostsObjAttrSet},
 #ifdef ZYXEL_ELIMINATE_DHCP_LEASE
+{TR98_HOSTS,                    0, para_Hosts,				lanDevHostsObjGet,			lanDevHostsObjSet,                   NULL,             NULL,            lanDevHostsObjNotify, NULL, lanDevHostsObjAttrSet},
 {TR98_HOST,                     ATTR_INDEXNODE, para_Host,				lanDevHostObjGet,			lanDevHostObjSet,                   NULL,             NULL,            lanDevHostObjNotify, lanDevHostObjAttrGet, lanDevHostObjAttrSet},
 #else
+{TR98_HOSTS,                    0, para_Hosts,				lanDevHostsObjGet,			NULL,                   NULL,             NULL,            lanDevHostsObjNotify, NULL, lanDevHostsObjAttrSet},
 {TR98_HOST,                     ATTR_INDEXNODE, para_Host,				lanDevHostObjGet,			NULL,                   NULL,             NULL,            lanDevHostObjNotify, lanDevHostObjAttrGet, lanDevHostObjAttrSet},
 #endif
 #ifdef ONECONNECT
@@ -515,12 +562,53 @@ tr98Object_t tr98Obj[] = {
 {TR98_FIREWALL_CHAIN_RULE,      ATTR_INDEX_CREA,para_FirewallChainRule, firewallRuleObjGet,      firewallRuleObjSet,     firewallRuleObjAdd,firewallRuleObjDel,firewallRuleObjNotify, firewallRuleObjAttrGet, firewallRuleObjAttrSet},
 {TR98_STD_UPNP, 				0,				NULL,					NULL,					 NULL,					NULL,			  NULL, 	   NULL, NULL, NULL},
 {TR98_STD_UPNP_DEV, 			0,				para_Upnp,				zyExtUPnPObjGet,		 zyExtUPnPObjSet,		NULL,			  NULL, 		   NULL, NULL, NULL},
+#ifdef ZYXEL_IPV6SPEC
+{TR98_IPV6SPEC,					0,				NULL,						NULL,					 NULL,					 NULL,				NULL,			NULL},
+{TR98_IPV6_PPP,					0,				para_Ipv6Ppp,				zyIpv6PppObjGet, 				NULL, NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_PPP_INTF, 			ATTR_INDEXNODE,	para_Ipv6PppIntf,			zyIpv6PppIntfObjGet, 			zyIpv6PppIntfObjSet, NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_PPP_INTF_IPV6CP,		0,				para_Ipv6PppIpv6cp,			zyIpv6PppIpv6cpObjGet,			NULL, NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_IP, 					0,				para_Ipv6Ip,				zyIpv6IpObjGet,  				zyIpv6IpObjSet, NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_IP_INTF, 			ATTR_INDEXNODE,	para_Ipv6IpIntf,			zyIpv6IpIntfObjGet,  			zyIpv6IpIntfObjSet, 			NULL,	NULL,	NULL},
+{TR98_IPV6_IP_INTF_IPV6ADDR,	ATTR_INDEX_CREA,para_Ipv6IpIntfIpv6Addr, 	zyIpv6IpIntfIpv6AddrObjGet, 	zyIpv6IpIntfIpv6AddrObjSet,	   	zyIpv6IpIntfIpv6AddrObjAdd, zyIpv6IpIntfIpv6AddrObjDel,			NULL},
+{TR98_IPV6_IP_INTF_IPV6PREFIX,	ATTR_INDEX_CREA,para_Ipv6IpIntfIpv6Prefix,	zyIpv6IpIntfIpv6PrefixObjGet, 	zyIpv6IpIntfIpv6PrefixObjSet,   zyIpv6IpIntfIpv6PrefixObjAdd, zyIpv6IpIntfIpv6PrefixObjDel,	NULL},
+{TR98_IPV6_ROUTING,				0,				NULL,						NULL,					 NULL,					 NULL,				NULL,			NULL},
+{TR98_IPV6_ROUTER,				ATTR_INDEXNODE,	para_Ipv6Router,			zyIpv6RouterObjGet,		NULL, NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_ROUTER_IPV6FWD,		ATTR_INDEX_CREA,para_Ipv6RouterIpv6Fwd,		zyIpv6RouterIpv6FwdObjGet,	zyIpv6RouterIpv6FwdObjSet, zyIpv6RouterIpv6FwdObjAdd,	zyIpv6RouterIpv6FwdObjDel,	NULL,	NULL,	NULL},
+{TR98_IPV6_ROUTEINFO, 			0,				NULL,						NULL,					 NULL,					 NULL,				NULL,			NULL},
+{TR98_IPV6_ROUTEINFO_INTF,		ATTR_INDEXNODE,	para_Ipv6RouteInfoIntf,		zyIpv6RouteInfoIntfObjGet,	NULL, NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_ND,					0,				para_Ipv6ND, 				zyIpv6NDObjGet,	zyIpv6NDObjSet, NULL, NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_ND_INTF,				ATTR_INDEXNODE,	para_Ipv6NDIntf,			zyIpv6NDIntfObjGet, zyIpv6NDIntfObjSet, NULL, NULL, NULL,	NULL,	NULL},
+{TR98_IPV6_ROUTERADVER,			0,				para_Ipv6RouterAdver,		zyIpv6RouterAdverObjGet,  NULL, NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_ROUTERADVER_INTF,	ATTR_INDEXNODE,	para_Ipv6RouterAdverIntf,	zyIpv6RouterAdverIntfObjGet,  zyIpv6RouterAdverIntfObjSet,	NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_ROUTERADVER_OPT,		ATTR_INDEX_CREA,para_Ipv6RouterAdverOpt,	zyIpv6RouterAdverOptObjGet,  zyIpv6RouterAdverOptObjSet,	zyIpv6RouterAdverOptObjAdd,	zyIpv6RouterAdverOptObjDel,	NULL},
+{TR98_IPV6_HOSTS,				0,				NULL,						NULL,					 NULL,					 NULL,				NULL,			NULL},
+{TR98_IPV6_HOSTS_HOST, 			ATTR_INDEXNODE, para_HostsHost,				zyIpv6HostsHostObjGet,	 NULL,			NULL,		NULL, 	zyIpv6HostsHostObjNotify, zyIpv6HostsHostObjAttrGet, zyIpv6HostsHostObjAttrSet},
+{TR98_IPV6_HOSTS_HOST_IPV6ADDR,	ATTR_INDEXNODE,	para_HostsHostIpv6Addr, 	zyIpv6HostsHostIpv6AddrObjGet,	NULL, NULL, NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_DNS,					0,				NULL,						NULL,					 NULL,					 NULL,				NULL,			NULL},
+{TR98_IPV6_DNS_CLIENT, 			0,				NULL,						NULL,					 NULL,					 NULL,				NULL,			NULL},
+{TR98_IPV6_DNS_SERVER,			ATTR_INDEX_CREA,para_Ipv6DnsSvr,			zyIpv6DnsSvrObjGet,		zyIpv6DnsSvrObjSet, zyIpv6DnsSvrObjAdd,	zyIpv6DnsSvrObjDel,	NULL,	NULL,	NULL},
+{TR98_IPV6_DNS_RELAY, 			0,				para_Ipv6DnsRly,			zyIpv6DnsRlyObjGet,		zyIpv6DnsRlyObjSet,					 NULL,				NULL,			NULL},
+{TR98_IPV6_DNS_RELAYFWD,		ATTR_INDEX_CREA,para_Ipv6DnsRlyFwd,			zyIpv6DnsRlyFwdObjGet, 	zyIpv6DnsRlyFwdObjSet, zyIpv6DnsRlyFwdObjAdd,	zyIpv6DnsRlyFwdObjDel,	NULL,	NULL,	NULL},
+{TR98_IPV6_DHCPV6,				0,				para_Ipv6Dhcpv6,			zyIpv6Dhcpv6ObjGet, 	NULL, NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_DHCPV6_CLIENT,		ATTR_INDEXNODE,	para_Ipv6Dhcpv6Client,		zyIpv6Dhcpv6ClientObjGet,	zyIpv6Dhcpv6ClientObjSet, NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_DHCPV6_CLIENT_SRV,	ATTR_INDEXNODE,	para_Ipv6Dhcpv6CntSrvAddr,	zyIpv6Dhcpv6CntSrvObjGet, 	NULL,    NULL, NULL,			NULL},
+{TR98_IPV6_DHCPV6_CLIENT_SENT,	ATTR_INDEX_CREA,para_Ipv6Dhcpv6CntSentAddr,	zyIpv6Dhcpv6CntSentObjGet, 	zyIpv6Dhcpv6CntSentObjSet, zyIpv6Dhcpv6CntSentObjAdd,	zyIpv6Dhcpv6CntSentObjDel,	NULL,	NULL,	NULL},
+{TR98_IPV6_DHCPV6_CLIENT_RCV,	ATTR_INDEXNODE,	para_Ipv6Dhcpv6CntRrvAddr,	zyIpv6Dhcpv6CntRrvObjGet,	NULL,	 NULL, NULL,			NULL},
+{TR98_IPV6_DHCPV6_SERVER,		0,				para_Ipv6Dhcpv6Srv,			zyIpv6Dhcpv6SrvObjGet, 		zyIpv6Dhcpv6SrvObjSet, NULL, NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_DHCPV6_SERVER_POOL,	ATTR_INDEX_CREA,para_Ipv6Dhcpv6SrvPool,		zyIpv6Dhcpv6SrvPoolObjGet,	zyIpv6Dhcpv6SrvPoolObjSet, zyIpv6Dhcpv6SrvPoolObjAdd, zyIpv6Dhcpv6SrvPoolObjDel,	NULL,	NULL,	NULL},
+{TR98_IPV6_DHCPV6_SERVER_CNT,	ATTR_INDEXNODE,			para_Ipv6Dhcpv6SrvCnt, 		zyIpv6Dhcpv6SrvCntObjGet,	zyIpv6Dhcpv6SrvCntObjSet, NULL, NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_DHCPV6_SERVER_CNT_V6ADDR,	ATTR_INDEXNODE,	para_Ipv6Dhcpv6SrvCntV6Addr, 	zyIpv6Dhcpv6SrvCntV6AddrObjGet,	NULL, NULL, NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_DHCPV6_SERVER_CNT_V6PREFIX,	ATTR_INDEXNODE,	para_Ipv6Dhcpv6SrvCntV6Prefix,	zyIpv6Dhcpv6SrvCntV6PrefixObjGet,	NULL, NULL, NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_DHCPV6_SERVER_CNT_OPT,		ATTR_INDEXNODE,	para_Ipv6Dhcpv6SrvCntOpt,	zyIpv6Dhcpv6SrvCntOptObjGet, NULL, NULL, NULL,	NULL,	NULL,	NULL},
+{TR98_IPV6_DHCPV6_SERVER_OPT,	ATTR_INDEX_CREA,para_Ipv6Dhcpv6SrvOpt, 		zyIpv6Dhcpv6SrvOptObjGet,	zyIpv6Dhcpv6SrvOptObjSet, zyIpv6Dhcpv6SrvOptObjAdd, zyIpv6Dhcpv6SrvOptObjDel,	NULL,	NULL,	NULL},
+#endif
 #if ZYXEL_EXT
-{TR98_ZYXEL_EXT,             	0,				NULL,        			NULL,        			 NULL,       			 NULL, 				NULL,			NULL},
+{TR98_ZYXEL_EXT,                0,              para_extend,            zyExtObjGet,             zyExtObjSet, NULL, NULL, NULL, NULL, NULL},
 #ifdef ZYXEL_LANDING_PAGE_FEATURE
 {TR98_LANDING_PAGE, 			0,				para_Landing_Page,		zyExtLandingPageObjGet,	 zyExtLandingPageObjSet,	NULL,	NULL,	NULL,	NULL,	NULL},
 #endif
 {TR98_FEATURE_FLAG,				0,              para_Feature_Flag,		zyExtFeatureFlagObjGet,	 zyExtFeatureFlagObjSet,	NULL,	NULL,	NULL,	NULL,	NULL},
+{TR98_DNS,						0,				para_Dns,				zyExtDnsObjGet,			 zyExtDnsObjSet, NULL, NULL, NULL, NULL, NULL},
 {TR98_DNS_RT_ENTRY,             ATTR_INDEX_CREA,para_DnsRtEntry,        zyExtDnsRtObjGet,        zyExtDnsRtObjSet,       zyExtDnsRtObjAdd, zyExtDnsRtObjDel,zyExtDnsRtObjNotify, NULL, zyExtDnsRtObjAttrSet},
 //{TR98_DNS_ENTRY, 	            ATTR_INDEX_CREA,para_DnsEntry, 		    zyExtDnsEntryObjGet,     zyExtDnsEntryObjSet,    zyExtDnsEntryObjAdd, zyExtDnsEntryObjDel,zyExtDnsEntryObjNotify, zyExtDnsEntryObjAttrGet, zyExtDnsEntryObjAttrSet},
 {TR98_DNS_ENTRY, 	            ATTR_INDEX_CREA,para_DnsEntry, 		    zyExtDnsEntryObjGet,     zyExtDnsEntryObjSet,    zyExtDnsEntryObjAdd, zyExtDnsEntryObjDel, NULL, NULL, NULL},
@@ -537,6 +625,9 @@ tr98Object_t tr98Obj[] = {
 //{TR98_EMAIL_EVENT_CFG,          ATTR_INDEX_CREA,para_EmailEvent,	    zyExtEmailEventObjGet,   zyExtEmailEventObjSet,	 zyExtEmailEventObjAdd, zyExtEmailEventObjDel, zyExtEmailEventObjNotify, zyExtEmailEventObjAttrGet, zyExtEmailEventObjAttrSet},
 {TR98_EMAIL_EVENT_CFG,          ATTR_INDEX_CREA,para_EmailEvent,	    zyExtEmailEventObjGet,   zyExtEmailEventObjSet,	 zyExtEmailEventObjAdd, zyExtEmailEventObjDel, NULL, NULL, NULL},
 {TR98_SYS_INFO,                 0,              para_SysInfo,           zyExtSysInfoObjGet,      zyExtSysInfoObjSet,     NULL,             NULL,            zyExtSysInfoObjNotify, zyExtSysInfoObjAttrGet, zyExtSysInfoObjAttrSet},
+#ifdef ZYXEL_SFP_MODULE_SUPPORT
+{TR98_GPON_INFO,				0, 				para_GponInfo,			zyExtGponInfoObjGet,		 NULL,					 NULL,			   NULL,			NULL},
+#endif
 //{TR98_SNMP, 	                0,              para_Snmp,	            zyExtSnmpObjGet, 	     zyExtSnmpObjSet,     NULL,             NULL,            zyExtSnmpObjNotify, zyExtSnmpObjAttrGet, zyExtSnmpObjAttrSet},
 {TR98_SNMP, 	                0,              para_Snmp,	            zyExtSnmpObjGet, 	     zyExtSnmpObjSet,     NULL,             NULL,            NULL, NULL, NULL},
 {TR98_SNMP_TRAP,                ATTR_INDEX_CREA,para_SnmpTrap,          zyExtSnmpTrapObjGet,     zyExtSnmpTrapObjSet,    zyExtSnmpTrapObjAdd,	zyExtSnmpTrapObjDel, NULL, NULL, NULL},

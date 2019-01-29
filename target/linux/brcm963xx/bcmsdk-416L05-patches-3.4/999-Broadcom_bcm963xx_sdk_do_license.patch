@@ -1,6 +1,6 @@
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/barriers.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/barriers.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/barriers.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/barriers.h	2018-04-10 15:50:00.495609891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/barriers.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/barriers.h	2018-09-12 17:01:56.387589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -39,8 +39,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/barriers.h linux-3
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/clkdev.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/clkdev.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/clkdev.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/clkdev.h	2018-04-10 15:50:00.495609891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/clkdev.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/clkdev.h	2018-09-12 17:01:56.395589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -79,8 +79,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/clkdev.h linux-3.4
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/debug-macro.S linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/debug-macro.S
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/debug-macro.S	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/debug-macro.S	2018-04-10 15:50:00.491611891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/debug-macro.S	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/debug-macro.S	2018-09-12 17:01:56.395589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -119,8 +119,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/debug-macro.S linu
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/hardware.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/hardware.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/hardware.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/hardware.h	2018-04-10 15:50:00.495609891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/hardware.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/hardware.h	2018-09-12 17:01:56.395589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -159,8 +159,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/hardware.h linux-3
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/io.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/io.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/io.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/io.h	2018-04-10 15:50:00.495609891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/io.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/io.h	2018-09-12 17:01:56.399589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -199,8 +199,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/io.h linux-3.4.11/
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/irqs.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/irqs.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/irqs.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/irqs.h	2018-04-10 15:50:00.491611891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/irqs.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/irqs.h	2018-09-12 17:01:56.391589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -239,8 +239,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/irqs.h linux-3.4.1
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/memory.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/memory.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/memory.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/memory.h	2018-04-10 15:50:00.495609891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/memory.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/memory.h	2018-09-12 17:01:56.399589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -279,8 +279,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/memory.h linux-3.4
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/smp.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/smp.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/smp.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/smp.h	2018-04-10 15:50:00.495609891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/smp.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/smp.h	2018-09-12 17:01:56.395589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -319,8 +319,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/smp.h linux-3.4.11
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/system.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/system.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/system.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/system.h	2018-04-10 15:50:00.495609891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/system.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/system.h	2018-09-12 17:01:56.395589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -359,8 +359,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/system.h linux-3.4
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/timex.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/timex.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/timex.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/timex.h	2018-04-10 15:50:00.491611891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/timex.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/timex.h	2018-09-12 17:01:56.399589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -399,8 +399,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/timex.h linux-3.4.
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/uncompress.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/uncompress.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/uncompress.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/uncompress.h	2018-04-10 15:50:00.495609891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/uncompress.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/uncompress.h	2018-09-12 17:01:56.391589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -439,8 +439,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/uncompress.h linux
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/vmalloc.h linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/vmalloc.h
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/vmalloc.h	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/vmalloc.h	2018-04-10 15:50:00.495609891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/vmalloc.h	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/include/mach/vmalloc.h	2018-09-12 17:01:56.395589053 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -479,8 +479,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/include/mach/vmalloc.h linux-3.
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/irq.c linux-3.4.11/arch/arm/mach-bcm963xx/irq.c
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/irq.c	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/irq.c	2018-04-10 15:50:00.491611891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/irq.c	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/irq.c	2018-09-12 17:01:56.355589052 +0800
 @@ -5,25 +5,19 @@
  *    Copyright (c) 2013 Broadcom 
  *    All Rights Reserved
@@ -519,8 +519,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/irq.c linux-3.4.11/arch/arm/mac
  * :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/prom.c linux-3.4.11/arch/arm/mach-bcm963xx/prom.c
---- linux-3.4.11_ori/arch/arm/mach-bcm963xx/prom.c	2018-04-10 12:21:47.777663407 +0800
-+++ linux-3.4.11/arch/arm/mach-bcm963xx/prom.c	2018-04-10 15:50:00.491611891 +0800
+--- linux-3.4.11_ori/arch/arm/mach-bcm963xx/prom.c	2018-08-24 12:09:57.513875637 +0800
++++ linux-3.4.11/arch/arm/mach-bcm963xx/prom.c	2018-09-12 17:01:56.375589052 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -559,8 +559,8 @@ diff -ur linux-3.4.11_ori/arch/arm/mach-bcm963xx/prom.c linux-3.4.11/arch/arm/ma
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/b15_core.c linux-3.4.11/arch/arm/plat-bcm63xx/b15_core.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/b15_core.c	2018-04-10 12:21:47.781663407 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/b15_core.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/b15_core.c	2018-08-24 12:09:57.657875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/b15_core.c	2018-09-12 17:01:58.407589108 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -599,8 +599,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/b15_core.c linux-3.4.11/arch/arm
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63138.c linux-3.4.11/arch/arm/plat-bcm63xx/bcm63138.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63138.c	2018-04-10 12:21:47.781663407 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63138.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63138.c	2018-08-24 12:09:57.657875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63138.c	2018-09-12 17:01:58.419589109 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -639,8 +639,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63138.c linux-3.4.11/arch/arm
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63148.c linux-3.4.11/arch/arm/plat-bcm63xx/bcm63148.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63148.c	2018-04-10 12:21:47.781663407 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63148.c	2018-04-10 15:50:00.523595890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63148.c	2018-08-24 12:09:57.657875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63148.c	2018-09-12 17:01:58.391589108 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -679,8 +679,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63148.c linux-3.4.11/arch/arm
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_acp.c linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_acp.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_acp.c	2018-04-10 12:21:47.781663407 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_acp.c	2018-04-10 15:50:00.523595890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_acp.c	2018-08-24 12:09:57.657875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_acp.c	2018-09-12 17:01:58.459589110 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -719,8 +719,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_acp.c linux-3.4.11/arch/
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_cpufreq.c linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_cpufreq.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_cpufreq.c	2018-04-10 12:21:47.781663407 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_cpufreq.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_cpufreq.c	2018-08-24 12:09:57.657875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_cpufreq.c	2018-09-12 17:01:58.435589109 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -759,8 +759,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_cpufreq.c linux-3.4.11/a
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_m2mdma.c linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_m2mdma.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_m2mdma.c	2018-04-10 12:21:47.781663407 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_m2mdma.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_m2mdma.c	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_m2mdma.c	2018-09-12 17:01:58.403589108 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2015 Broadcom 
     All Rights Reserved
@@ -799,8 +799,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_m2mdma.c linux-3.4.11/ar
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_pcie.c linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_pcie.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_pcie.c	2018-04-10 12:21:47.781663407 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_pcie.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_pcie.c	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_pcie.c	2018-09-12 17:01:58.439589109 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -839,8 +839,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_pcie.c linux-3.4.11/arch
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_sata.c linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_sata.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_sata.c	2018-04-10 12:21:47.781663407 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_sata.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_sata.c	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_sata.c	2018-09-12 17:01:58.447589109 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -879,8 +879,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_sata.c linux-3.4.11/arch
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_timer.c linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_timer.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_timer.c	2018-04-10 12:21:47.781663407 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_timer.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_timer.c	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_timer.c	2018-09-12 17:01:58.367589107 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -919,8 +919,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_timer.c linux-3.4.11/arc
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_usb.c linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_usb.c	2018-04-10 12:21:49.533663372 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_usb.c	2018-08-24 12:10:03.729875808 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c	2018-09-12 17:01:58.387589108 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -959,8 +959,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/bcm63xx_usb.c linux-3.4.11/arch/
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_cache.S linux-3.4.11/arch/arm/plat-bcm63xx/ca9mp_cache.S
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_cache.S	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/ca9mp_cache.S	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_cache.S	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/ca9mp_cache.S	2018-09-12 17:01:58.435589109 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -999,8 +999,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_cache.S linux-3.4.11/arch/
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_core.c linux-3.4.11/arch/arm/plat-bcm63xx/ca9mp_core.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_core.c	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/ca9mp_core.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_core.c	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/ca9mp_core.c	2018-09-12 17:01:58.459589110 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1039,8 +1039,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_core.c linux-3.4.11/arch/a
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_timer.c linux-3.4.11/arch/arm/plat-bcm63xx/ca9mp_timer.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_timer.c	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/ca9mp_timer.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_timer.c	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/ca9mp_timer.c	2018-09-12 17:01:58.467589110 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1079,8 +1079,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/ca9mp_timer.c linux-3.4.11/arch/
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/cache-l310.c linux-3.4.11/arch/arm/plat-bcm63xx/cache-l310.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/cache-l310.c	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/cache-l310.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/cache-l310.c	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/cache-l310.c	2018-09-12 17:01:58.439589109 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1119,8 +1119,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/cache-l310.c linux-3.4.11/arch/a
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/clock.c linux-3.4.11/arch/arm/plat-bcm63xx/clock.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/clock.c	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/clock.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/clock.c	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/clock.c	2018-09-12 17:01:58.363589107 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1159,8 +1159,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/clock.c linux-3.4.11/arch/arm/pl
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/b15core.h linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/b15core.h
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/b15core.h	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/b15core.h	2018-04-10 15:50:00.523595890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/b15core.h	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/b15core.h	2018-09-12 17:01:58.479589110 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1199,8 +1199,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/b15core.h linux-3.4
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_acp.h linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bcm63xx_acp.h
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_acp.h	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bcm63xx_acp.h	2018-04-10 15:50:00.523595890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_acp.h	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bcm63xx_acp.h	2018-09-12 17:01:58.491589111 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1239,8 +1239,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_acp.h linux
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_pcie.h linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bcm63xx_pcie.h
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_pcie.h	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bcm63xx_pcie.h	2018-04-10 15:50:00.523595890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_pcie.h	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bcm63xx_pcie.h	2018-09-12 17:01:58.491589111 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1279,8 +1279,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_pcie.h linu
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_timer.h linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bcm63xx_timer.h
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_timer.h	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bcm63xx_timer.h	2018-04-10 15:50:00.523595890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_timer.h	2018-08-24 12:09:57.661875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bcm63xx_timer.h	2018-09-12 17:01:58.491589111 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1319,8 +1319,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bcm63xx_timer.h lin
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bsp.h linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bsp.h
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bsp.h	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bsp.h	2018-04-10 15:50:00.523595890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bsp.h	2018-08-24 12:09:57.665875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/bsp.h	2018-09-12 17:01:58.483589110 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1359,8 +1359,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/bsp.h linux-3.4.11/
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/ca9mpcore.h linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/ca9mpcore.h
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/ca9mpcore.h	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/ca9mpcore.h	2018-04-10 15:50:00.523595890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/ca9mpcore.h	2018-08-24 12:09:57.665875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/ca9mpcore.h	2018-09-12 17:01:58.491589111 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1399,8 +1399,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/ca9mpcore.h linux-3
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/clock.h linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/clock.h
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/clock.h	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/clock.h	2018-04-10 15:50:00.523595890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/clock.h	2018-08-24 12:09:57.665875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/include/plat/clock.h	2018-09-12 17:01:58.479589110 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1439,8 +1439,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/include/plat/clock.h linux-3.4.1
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/pcie-bcm63xx.c linux-3.4.11/arch/arm/plat-bcm63xx/pcie-bcm63xx.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2018-04-10 12:21:49.317663376 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2018-08-24 12:10:02.549875775 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2018-09-12 17:01:58.431589109 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1479,8 +1479,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/pcie-bcm63xx.c linux-3.4.11/arch
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/pcie-msi-bcm63xx.c linux-3.4.11/arch/arm/plat-bcm63xx/pcie-msi-bcm63xx.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/pcie-msi-bcm63xx.c	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/pcie-msi-bcm63xx.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/pcie-msi-bcm63xx.c	2018-08-24 12:09:57.665875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/pcie-msi-bcm63xx.c	2018-09-12 17:01:58.379589107 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1519,8 +1519,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/pcie-msi-bcm63xx.c linux-3.4.11/
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/plat-ca9mp-headsmp.S linux-3.4.11/arch/arm/plat-bcm63xx/plat-ca9mp-headsmp.S
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/plat-ca9mp-headsmp.S	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/plat-ca9mp-headsmp.S	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/plat-ca9mp-headsmp.S	2018-08-24 12:09:57.665875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/plat-ca9mp-headsmp.S	2018-09-12 17:01:58.367589107 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1559,8 +1559,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/plat-ca9mp-headsmp.S linux-3.4.1
  :>
  */
 diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/platsmp.c linux-3.4.11/arch/arm/plat-bcm63xx/platsmp.c
---- linux-3.4.11_ori/arch/arm/plat-bcm63xx/platsmp.c	2018-04-10 12:21:47.785663406 +0800
-+++ linux-3.4.11/arch/arm/plat-bcm63xx/platsmp.c	2018-04-10 15:50:00.519597890 +0800
+--- linux-3.4.11_ori/arch/arm/plat-bcm63xx/platsmp.c	2018-08-24 12:09:57.665875641 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/platsmp.c	2018-09-12 17:01:58.467589110 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -1599,8 +1599,8 @@ diff -ur linux-3.4.11_ori/arch/arm/plat-bcm63xx/platsmp.c linux-3.4.11/arch/arm/
  :>
  */
 diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/irq.c linux-3.4.11/arch/mips/bcm963xx/irq.c
---- linux-3.4.11_ori/arch/mips/bcm963xx/irq.c	2018-04-10 12:21:47.789663406 +0800
-+++ linux-3.4.11/arch/mips/bcm963xx/irq.c	2018-04-10 15:50:00.055829899 +0800
+--- linux-3.4.11_ori/arch/mips/bcm963xx/irq.c	2018-08-24 12:09:57.865875646 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/irq.c	2018-09-12 17:02:02.543589222 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2012 Broadcom 
     All Rights Reserved
@@ -1639,8 +1639,8 @@ diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/irq.c linux-3.4.11/arch/mips/bcm963
  :>
  */
 diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/ktools/bounce.c linux-3.4.11/arch/mips/bcm963xx/ktools/bounce.c
---- linux-3.4.11_ori/arch/mips/bcm963xx/ktools/bounce.c	2018-04-10 12:21:47.789663406 +0800
-+++ linux-3.4.11/arch/mips/bcm963xx/ktools/bounce.c	2018-04-10 15:50:00.055829899 +0800
+--- linux-3.4.11_ori/arch/mips/bcm963xx/ktools/bounce.c	2018-08-24 12:09:57.865875646 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/ktools/bounce.c	2018-09-12 17:02:02.587589223 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2007 Broadcom 
     All Rights Reserved
@@ -1679,8 +1679,8 @@ diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/ktools/bounce.c linux-3.4.11/arch/m
  :>
  */
 diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/ktools/pmontool.c linux-3.4.11/arch/mips/bcm963xx/ktools/pmontool.c
---- linux-3.4.11_ori/arch/mips/bcm963xx/ktools/pmontool.c	2018-04-10 12:21:47.789663406 +0800
-+++ linux-3.4.11/arch/mips/bcm963xx/ktools/pmontool.c	2018-04-10 15:50:00.055829899 +0800
+--- linux-3.4.11_ori/arch/mips/bcm963xx/ktools/pmontool.c	2018-08-24 12:09:57.865875646 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/ktools/pmontool.c	2018-09-12 17:02:02.579589223 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2007 Broadcom 
     All Rights Reserved
@@ -1719,8 +1719,8 @@ diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/ktools/pmontool.c linux-3.4.11/arch
  :>
  */
 diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/prom.c linux-3.4.11/arch/mips/bcm963xx/prom.c
---- linux-3.4.11_ori/arch/mips/bcm963xx/prom.c	2018-04-10 12:21:47.789663406 +0800
-+++ linux-3.4.11/arch/mips/bcm963xx/prom.c	2018-04-10 15:50:00.055829899 +0800
+--- linux-3.4.11_ori/arch/mips/bcm963xx/prom.c	2018-08-24 12:09:57.869875646 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/prom.c	2018-09-12 17:02:02.555589223 +0800
 @@ -5,25 +5,19 @@
  *    Copyright (c) 2004 Broadcom 
  *    All Rights Reserved
@@ -1759,8 +1759,8 @@ diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/prom.c linux-3.4.11/arch/mips/bcm96
  * :>
   
 diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/pwrmngtclk.c linux-3.4.11/arch/mips/bcm963xx/pwrmngtclk.c
---- linux-3.4.11_ori/arch/mips/bcm963xx/pwrmngtclk.c	2018-04-10 12:21:47.789663406 +0800
-+++ linux-3.4.11/arch/mips/bcm963xx/pwrmngtclk.c	2018-04-10 15:50:00.055829899 +0800
+--- linux-3.4.11_ori/arch/mips/bcm963xx/pwrmngtclk.c	2018-08-24 12:09:57.869875646 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/pwrmngtclk.c	2018-09-12 17:02:02.543589222 +0800
 @@ -6,25 +6,19 @@
   *
   * <:label-BRCM:2009:DUAL/GPL:standard
@@ -1799,8 +1799,8 @@ diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/pwrmngtclk.c linux-3.4.11/arch/mips
   * :>
   *
 diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/smp-brcm.c linux-3.4.11/arch/mips/bcm963xx/smp-brcm.c
---- linux-3.4.11_ori/arch/mips/bcm963xx/smp-brcm.c	2018-04-10 12:21:47.793663406 +0800
-+++ linux-3.4.11/arch/mips/bcm963xx/smp-brcm.c	2018-04-10 15:50:00.055829899 +0800
+--- linux-3.4.11_ori/arch/mips/bcm963xx/smp-brcm.c	2018-08-24 12:09:57.869875646 +0800
++++ linux-3.4.11/arch/mips/bcm963xx/smp-brcm.c	2018-09-12 17:02:02.575589223 +0800
 @@ -6,25 +6,19 @@
   *
   * <:label-BRCM:2011:DUAL/GPL:standard
@@ -1839,8 +1839,8 @@ diff -ur linux-3.4.11_ori/arch/mips/bcm963xx/smp-brcm.c linux-3.4.11/arch/mips/b
   * :>
   *
 diff -ur linux-3.4.11_ori/arch/mips/include/asm/bounce.h linux-3.4.11/arch/mips/include/asm/bounce.h
---- linux-3.4.11_ori/arch/mips/include/asm/bounce.h	2018-04-10 12:21:47.793663406 +0800
-+++ linux-3.4.11/arch/mips/include/asm/bounce.h	2018-04-10 15:49:59.947883901 +0800
+--- linux-3.4.11_ori/arch/mips/include/asm/bounce.h	2018-08-24 12:09:57.893875647 +0800
++++ linux-3.4.11/arch/mips/include/asm/bounce.h	2018-09-12 17:02:02.747589228 +0800
 @@ -10,25 +10,19 @@
     Copyright (c) 2007 Broadcom 
     All Rights Reserved
@@ -1879,8 +1879,8 @@ diff -ur linux-3.4.11_ori/arch/mips/include/asm/bounce.h linux-3.4.11/arch/mips/
  :>
  */
 diff -ur linux-3.4.11_ori/arch/mips/include/asm/pmonapi.h linux-3.4.11/arch/mips/include/asm/pmonapi.h
---- linux-3.4.11_ori/arch/mips/include/asm/pmonapi.h	2018-04-10 12:21:47.793663406 +0800
-+++ linux-3.4.11/arch/mips/include/asm/pmonapi.h	2018-04-10 15:49:59.955879901 +0800
+--- linux-3.4.11_ori/arch/mips/include/asm/pmonapi.h	2018-08-24 12:09:57.985875650 +0800
++++ linux-3.4.11/arch/mips/include/asm/pmonapi.h	2018-09-12 17:02:02.743589228 +0800
 @@ -8,25 +8,19 @@
     Copyright (c) 2007 Broadcom 
     All Rights Reserved
@@ -1919,8 +1919,8 @@ diff -ur linux-3.4.11_ori/arch/mips/include/asm/pmonapi.h linux-3.4.11/arch/mips
  :>
  */
 diff -ur linux-3.4.11_ori/arch/mips/kernel/cevt-r4k-bcm-pwr.c linux-3.4.11/arch/mips/kernel/cevt-r4k-bcm-pwr.c
---- linux-3.4.11_ori/arch/mips/kernel/cevt-r4k-bcm-pwr.c	2018-04-10 12:21:47.793663406 +0800
-+++ linux-3.4.11/arch/mips/kernel/cevt-r4k-bcm-pwr.c	2018-04-10 15:50:00.099807898 +0800
+--- linux-3.4.11_ori/arch/mips/kernel/cevt-r4k-bcm-pwr.c	2018-08-24 12:09:58.057875652 +0800
++++ linux-3.4.11/arch/mips/kernel/cevt-r4k-bcm-pwr.c	2018-09-12 17:02:03.055589236 +0800
 @@ -5,25 +5,19 @@
   *
   * <:label-BRCM:2009:DUAL/GPL:standard
@@ -1959,8 +1959,8 @@ diff -ur linux-3.4.11_ori/arch/mips/kernel/cevt-r4k-bcm-pwr.c linux-3.4.11/arch/
   * :>
   *
 diff -ur linux-3.4.11_ori/arch/mips/kernel/csrc-r4k-bcm-pwr.c linux-3.4.11/arch/mips/kernel/csrc-r4k-bcm-pwr.c
---- linux-3.4.11_ori/arch/mips/kernel/csrc-r4k-bcm-pwr.c	2018-04-10 12:21:47.793663406 +0800
-+++ linux-3.4.11/arch/mips/kernel/csrc-r4k-bcm-pwr.c	2018-04-10 15:50:00.091811898 +0800
+--- linux-3.4.11_ori/arch/mips/kernel/csrc-r4k-bcm-pwr.c	2018-08-24 12:09:58.081875652 +0800
++++ linux-3.4.11/arch/mips/kernel/csrc-r4k-bcm-pwr.c	2018-09-12 17:02:03.039589236 +0800
 @@ -5,25 +5,19 @@
   *
   * <:label-BRCM:2009:DUAL/GPL:standard
@@ -1999,8 +1999,8 @@ diff -ur linux-3.4.11_ori/arch/mips/kernel/csrc-r4k-bcm-pwr.c linux-3.4.11/arch/
   * :>
   *
 diff -ur linux-3.4.11_ori/drivers/mmc/host/sdhci-bcm63xx.c linux-3.4.11/drivers/mmc/host/sdhci-bcm63xx.c
---- linux-3.4.11_ori/drivers/mmc/host/sdhci-bcm63xx.c	2018-04-10 12:21:48.137663400 +0800
-+++ linux-3.4.11/drivers/mmc/host/sdhci-bcm63xx.c	2018-04-10 15:50:03.618047829 +0800
+--- linux-3.4.11_ori/drivers/mmc/host/sdhci-bcm63xx.c	2018-08-24 12:09:59.329875687 +0800
++++ linux-3.4.11/drivers/mmc/host/sdhci-bcm63xx.c	2018-09-12 17:02:05.283589298 +0800
 @@ -9,27 +9,21 @@
   * All Rights Reserved
   *
@@ -2045,8 +2045,8 @@ diff -ur linux-3.4.11_ori/drivers/mmc/host/sdhci-bcm63xx.c linux-3.4.11/drivers/
   *
   ************************************************************/
 diff -ur linux-3.4.11_ori/drivers/mtd/brcmnand/bcm63xx-nand.c linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c
---- linux-3.4.11_ori/drivers/mtd/brcmnand/bcm63xx-nand.c	2018-04-10 12:21:49.301663377 +0800
-+++ linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c	2018-04-10 15:50:00.967373881 +0800
+--- linux-3.4.11_ori/drivers/mtd/brcmnand/bcm63xx-nand.c	2018-08-24 12:10:03.077875790 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/bcm63xx-nand.c	2018-09-12 17:02:05.847589313 +0800
 @@ -8,25 +8,19 @@
         Copyright (c) 2011 Broadcom 
         All Rights Reserved
@@ -2085,8 +2085,8 @@ diff -ur linux-3.4.11_ori/drivers/mtd/brcmnand/bcm63xx-nand.c linux-3.4.11/drive
      :> 
  
 diff -ur linux-3.4.11_ori/drivers/mtd/brcmnand/brcmnand_bbt.c linux-3.4.11/drivers/mtd/brcmnand/brcmnand_bbt.c
---- linux-3.4.11_ori/drivers/mtd/brcmnand/brcmnand_bbt.c	2018-04-10 12:21:49.533663372 +0800
-+++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_bbt.c	2018-04-10 15:50:00.967373881 +0800
+--- linux-3.4.11_ori/drivers/mtd/brcmnand/brcmnand_bbt.c	2018-08-24 12:10:02.705875780 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_bbt.c	2018-09-12 17:02:05.843589313 +0800
 @@ -5,25 +5,19 @@
         Copyright (c) 2012 Broadcom 
         All Rights Reserved
@@ -2125,8 +2125,8 @@ diff -ur linux-3.4.11_ori/drivers/mtd/brcmnand/brcmnand_bbt.c linux-3.4.11/drive
      :> 
  
 diff -ur linux-3.4.11_ori/drivers/mtd/brcmnand/brcmnand_cet.c linux-3.4.11/drivers/mtd/brcmnand/brcmnand_cet.c
---- linux-3.4.11_ori/drivers/mtd/brcmnand/brcmnand_cet.c	2018-04-10 12:21:48.141663399 +0800
-+++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_cet.c	2018-04-10 15:50:00.967373881 +0800
+--- linux-3.4.11_ori/drivers/mtd/brcmnand/brcmnand_cet.c	2018-08-24 12:09:59.337875687 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_cet.c	2018-09-12 17:02:05.843589313 +0800
 @@ -5,25 +5,19 @@
         Copyright (c) 2012 Broadcom 
         All Rights Reserved
@@ -2165,8 +2165,8 @@ diff -ur linux-3.4.11_ori/drivers/mtd/brcmnand/brcmnand_cet.c linux-3.4.11/drive
      :> 
  
 diff -ur linux-3.4.11_ori/drivers/mtd/maps/bcm963xx.c linux-3.4.11/drivers/mtd/maps/bcm963xx.c
---- linux-3.4.11_ori/drivers/mtd/maps/bcm963xx.c	2018-04-10 12:21:48.141663399 +0800
-+++ linux-3.4.11/drivers/mtd/maps/bcm963xx.c	2018-04-10 15:50:00.959377882 +0800
+--- linux-3.4.11_ori/drivers/mtd/maps/bcm963xx.c	2018-08-24 12:09:59.341875687 +0800
++++ linux-3.4.11/drivers/mtd/maps/bcm963xx.c	2018-09-12 17:02:05.851589313 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -2205,8 +2205,8 @@ diff -ur linux-3.4.11_ori/drivers/mtd/maps/bcm963xx.c linux-3.4.11/drivers/mtd/m
  :>
  */
 diff -ur linux-3.4.11_ori/drivers/mtd/nand/bcm63xx_spinand.c linux-3.4.11/drivers/mtd/nand/bcm63xx_spinand.c
---- linux-3.4.11_ori/drivers/mtd/nand/bcm63xx_spinand.c	2018-04-10 12:21:49.533663372 +0800
-+++ linux-3.4.11/drivers/mtd/nand/bcm63xx_spinand.c	2018-04-10 15:50:00.935389882 +0800
+--- linux-3.4.11_ori/drivers/mtd/nand/bcm63xx_spinand.c	2018-08-24 12:10:02.705875780 +0800
++++ linux-3.4.11/drivers/mtd/nand/bcm63xx_spinand.c	2018-09-12 17:02:05.895589315 +0800
 @@ -8,25 +8,19 @@
         Copyright (c) 2011 Broadcom 
         All Rights Reserved
@@ -2245,8 +2245,8 @@ diff -ur linux-3.4.11_ori/drivers/mtd/nand/bcm63xx_spinand.c linux-3.4.11/driver
      :> 
  
 diff -ur linux-3.4.11_ori/fs/proc/proc_brcm.c linux-3.4.11/fs/proc/proc_brcm.c
---- linux-3.4.11_ori/fs/proc/proc_brcm.c	2018-04-10 12:21:48.213663398 +0800
-+++ linux-3.4.11/fs/proc/proc_brcm.c	2018-04-10 15:50:03.717997828 +0800
+--- linux-3.4.11_ori/fs/proc/proc_brcm.c	2018-08-24 12:09:59.529875692 +0800
++++ linux-3.4.11/fs/proc/proc_brcm.c	2018-09-12 17:02:10.399589439 +0800
 @@ -5,25 +5,19 @@
         Copyright (c) 2011 Broadcom 
         All Rights Reserved
@@ -2285,8 +2285,8 @@ diff -ur linux-3.4.11_ori/fs/proc/proc_brcm.c linux-3.4.11/fs/proc/proc_brcm.c
      :> 
  */
 diff -ur linux-3.4.11_ori/include/linux/bcm_log.h linux-3.4.11/include/linux/bcm_log.h
---- linux-3.4.11_ori/include/linux/bcm_log.h	2018-04-10 12:21:48.421663394 +0800
-+++ linux-3.4.11/include/linux/bcm_log.h	2018-04-10 15:50:04.149781819 +0800
+--- linux-3.4.11_ori/include/linux/bcm_log.h	2018-08-24 12:10:00.093875708 +0800
++++ linux-3.4.11/include/linux/bcm_log.h	2018-09-12 17:02:16.855589617 +0800
 @@ -5,25 +5,19 @@
  *    Copyright (c) 2012 Broadcom 
  *    All Rights Reserved
@@ -2325,8 +2325,8 @@ diff -ur linux-3.4.11_ori/include/linux/bcm_log.h linux-3.4.11/include/linux/bcm
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/bcm_log_mod.h linux-3.4.11/include/linux/bcm_log_mod.h
---- linux-3.4.11_ori/include/linux/bcm_log_mod.h	2018-04-10 12:21:48.421663394 +0800
-+++ linux-3.4.11/include/linux/bcm_log_mod.h	2018-04-10 15:50:04.141785819 +0800
+--- linux-3.4.11_ori/include/linux/bcm_log_mod.h	2018-08-24 12:10:00.093875708 +0800
++++ linux-3.4.11/include/linux/bcm_log_mod.h	2018-09-12 17:02:20.551589718 +0800
 @@ -4,25 +4,19 @@
  *    Copyright (c) 2010 Broadcom 
  *    All Rights Reserved
@@ -2365,8 +2365,8 @@ diff -ur linux-3.4.11_ori/include/linux/bcm_log_mod.h linux-3.4.11/include/linux
  * :>
  
 diff -ur linux-3.4.11_ori/include/linux/bcm_m2mdma.h linux-3.4.11/include/linux/bcm_m2mdma.h
---- linux-3.4.11_ori/include/linux/bcm_m2mdma.h	2018-04-10 12:21:48.421663394 +0800
-+++ linux-3.4.11/include/linux/bcm_m2mdma.h	2018-04-10 15:50:04.217747818 +0800
+--- linux-3.4.11_ori/include/linux/bcm_m2mdma.h	2018-08-24 12:10:00.093875708 +0800
++++ linux-3.4.11/include/linux/bcm_m2mdma.h	2018-09-12 17:02:15.439589578 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2015 Broadcom 
     All Rights Reserved
@@ -2405,8 +2405,8 @@ diff -ur linux-3.4.11_ori/include/linux/bcm_m2mdma.h linux-3.4.11/include/linux/
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/bcm_realtime.h linux-3.4.11/include/linux/bcm_realtime.h
---- linux-3.4.11_ori/include/linux/bcm_realtime.h	2018-04-10 12:21:49.537663372 +0800
-+++ linux-3.4.11/include/linux/bcm_realtime.h	2018-04-10 15:50:04.141785819 +0800
+--- linux-3.4.11_ori/include/linux/bcm_realtime.h	2018-08-24 12:10:02.713875780 +0800
++++ linux-3.4.11/include/linux/bcm_realtime.h	2018-09-12 17:02:17.387589631 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -2445,8 +2445,8 @@ diff -ur linux-3.4.11_ori/include/linux/bcm_realtime.h linux-3.4.11/include/linu
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/bcm_skb_defines.h linux-3.4.11/include/linux/bcm_skb_defines.h
---- linux-3.4.11_ori/include/linux/bcm_skb_defines.h	2018-04-10 12:21:49.177663379 +0800
-+++ linux-3.4.11/include/linux/bcm_skb_defines.h	2018-04-10 15:50:04.257727817 +0800
+--- linux-3.4.11_ori/include/linux/bcm_skb_defines.h	2018-08-24 12:10:01.313875741 +0800
++++ linux-3.4.11/include/linux/bcm_skb_defines.h	2018-09-12 17:02:19.383589686 +0800
 @@ -5,25 +5,19 @@
  *    Copyright (c) 2014 Broadcom 
  *    All Rights Reserved
@@ -2485,8 +2485,8 @@ diff -ur linux-3.4.11_ori/include/linux/bcm_skb_defines.h linux-3.4.11/include/l
  * :>
  */
 diff -ur linux-3.4.11_ori/include/linux/blog.h linux-3.4.11/include/linux/blog.h
---- linux-3.4.11_ori/include/linux/blog.h	2018-04-10 12:21:49.913663365 +0800
-+++ linux-3.4.11/include/linux/blog.h	2018-04-10 15:50:04.225743818 +0800
+--- linux-3.4.11_ori/include/linux/blog.h	2018-08-24 12:10:03.777875809 +0800
++++ linux-3.4.11/include/linux/blog.h	2018-09-12 17:02:13.219589516 +0800
 @@ -13,25 +13,19 @@
  *    Copyright (c) 2003 Broadcom 
  *    All Rights Reserved
@@ -2525,8 +2525,8 @@ diff -ur linux-3.4.11_ori/include/linux/blog.h linux-3.4.11/include/linux/blog.h
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/blog_net.h linux-3.4.11/include/linux/blog_net.h
---- linux-3.4.11_ori/include/linux/blog_net.h	2018-04-10 12:21:48.425663394 +0800
-+++ linux-3.4.11/include/linux/blog_net.h	2018-04-10 15:50:04.145783819 +0800
+--- linux-3.4.11_ori/include/linux/blog_net.h	2018-08-24 12:10:03.113875791 +0800
++++ linux-3.4.11/include/linux/blog_net.h	2018-09-12 17:02:13.407589522 +0800
 @@ -7,25 +7,19 @@
     Copyright (c) 2003 Broadcom 
     All Rights Reserved
@@ -2565,8 +2565,8 @@ diff -ur linux-3.4.11_ori/include/linux/blog_net.h linux-3.4.11/include/linux/bl
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/blog_rule.h linux-3.4.11/include/linux/blog_rule.h
---- linux-3.4.11_ori/include/linux/blog_rule.h	2018-04-10 12:21:48.425663394 +0800
-+++ linux-3.4.11/include/linux/blog_rule.h	2018-04-10 15:50:04.133789819 +0800
+--- linux-3.4.11_ori/include/linux/blog_rule.h	2018-08-24 12:10:00.093875708 +0800
++++ linux-3.4.11/include/linux/blog_rule.h	2018-09-12 17:02:18.979589675 +0800
 @@ -8,25 +8,19 @@
  *    Copyright (c) 2010 Broadcom 
  *    All Rights Reserved
@@ -2605,8 +2605,8 @@ diff -ur linux-3.4.11_ori/include/linux/blog_rule.h linux-3.4.11/include/linux/b
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/brcm_dll.h linux-3.4.11/include/linux/brcm_dll.h
---- linux-3.4.11_ori/include/linux/brcm_dll.h	2018-04-10 12:21:48.425663394 +0800
-+++ linux-3.4.11/include/linux/brcm_dll.h	2018-04-10 15:50:04.241735817 +0800
+--- linux-3.4.11_ori/include/linux/brcm_dll.h	2018-08-24 12:10:00.093875708 +0800
++++ linux-3.4.11/include/linux/brcm_dll.h	2018-09-12 17:02:13.507589524 +0800
 @@ -6,25 +6,19 @@
     Copyright (c) 2014 Broadcom 
     All Rights Reserved
@@ -2645,8 +2645,8 @@ diff -ur linux-3.4.11_ori/include/linux/brcm_dll.h linux-3.4.11/include/linux/br
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/flwstif.h linux-3.4.11/include/linux/flwstif.h
---- linux-3.4.11_ori/include/linux/flwstif.h	2018-04-10 12:21:49.401663375 +0800
-+++ linux-3.4.11/include/linux/flwstif.h	2018-04-10 15:50:04.185763818 +0800
+--- linux-3.4.11_ori/include/linux/flwstif.h	2018-08-24 12:10:02.601875777 +0800
++++ linux-3.4.11/include/linux/flwstif.h	2018-09-12 17:02:17.619589638 +0800
 @@ -11,25 +11,19 @@
  *    Copyright (c) 2014 Broadcom 
  *    All Rights Reserved
@@ -2685,8 +2685,8 @@ diff -ur linux-3.4.11_ori/include/linux/flwstif.h linux-3.4.11/include/linux/flw
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/gbpm.h linux-3.4.11/include/linux/gbpm.h
---- linux-3.4.11_ori/include/linux/gbpm.h	2018-04-10 12:21:48.429663394 +0800
-+++ linux-3.4.11/include/linux/gbpm.h	2018-04-10 15:50:04.169771818 +0800
+--- linux-3.4.11_ori/include/linux/gbpm.h	2018-08-24 12:10:00.097875708 +0800
++++ linux-3.4.11/include/linux/gbpm.h	2018-09-12 17:02:20.179589708 +0800
 @@ -8,25 +8,19 @@
     Copyright (c) 2007 Broadcom 
     All Rights Reserved
@@ -2725,8 +2725,8 @@ diff -ur linux-3.4.11_ori/include/linux/gbpm.h linux-3.4.11/include/linux/gbpm.h
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/if_mhi.h linux-3.4.11/include/linux/if_mhi.h
---- linux-3.4.11_ori/include/linux/if_mhi.h	2018-04-10 12:21:48.429663394 +0800
-+++ linux-3.4.11/include/linux/if_mhi.h	2018-04-10 15:50:04.141785819 +0800
+--- linux-3.4.11_ori/include/linux/if_mhi.h	2018-08-24 12:10:00.101875708 +0800
++++ linux-3.4.11/include/linux/if_mhi.h	2018-09-12 17:02:20.427589715 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2012 Broadcom 
     All Rights Reserved
@@ -2765,8 +2765,8 @@ diff -ur linux-3.4.11_ori/include/linux/if_mhi.h linux-3.4.11/include/linux/if_m
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/iqos.h linux-3.4.11/include/linux/iqos.h
---- linux-3.4.11_ori/include/linux/iqos.h	2018-04-10 12:21:49.913663365 +0800
-+++ linux-3.4.11/include/linux/iqos.h	2018-04-10 15:50:04.189761818 +0800
+--- linux-3.4.11_ori/include/linux/iqos.h	2018-08-24 12:10:03.113875791 +0800
++++ linux-3.4.11/include/linux/iqos.h	2018-09-12 17:02:20.231589710 +0800
 @@ -7,25 +7,19 @@
     Copyright (c) 2009 Broadcom 
     All Rights Reserved
@@ -2805,8 +2805,8 @@ diff -ur linux-3.4.11_ori/include/linux/iqos.h linux-3.4.11/include/linux/iqos.h
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/mhi.h linux-3.4.11/include/linux/mhi.h
---- linux-3.4.11_ori/include/linux/mhi.h	2018-04-10 12:21:48.433663394 +0800
-+++ linux-3.4.11/include/linux/mhi.h	2018-04-10 15:50:04.105803819 +0800
+--- linux-3.4.11_ori/include/linux/mhi.h	2018-08-24 12:10:00.105875708 +0800
++++ linux-3.4.11/include/linux/mhi.h	2018-09-12 17:02:13.059589512 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2012 Broadcom 
     All Rights Reserved
@@ -2845,8 +2845,8 @@ diff -ur linux-3.4.11_ori/include/linux/mhi.h linux-3.4.11/include/linux/mhi.h
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/mhi_l2mux.h linux-3.4.11/include/linux/mhi_l2mux.h
---- linux-3.4.11_ori/include/linux/mhi_l2mux.h	2018-04-10 12:21:48.433663394 +0800
-+++ linux-3.4.11/include/linux/mhi_l2mux.h	2018-04-10 15:50:04.221745818 +0800
+--- linux-3.4.11_ori/include/linux/mhi_l2mux.h	2018-08-24 12:10:00.105875708 +0800
++++ linux-3.4.11/include/linux/mhi_l2mux.h	2018-09-12 17:02:15.899589590 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2012 Broadcom 
     All Rights Reserved
@@ -2885,8 +2885,8 @@ diff -ur linux-3.4.11_ori/include/linux/mhi_l2mux.h linux-3.4.11/include/linux/m
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/mtd/bchp_nand_7x.h linux-3.4.11/include/linux/mtd/bchp_nand_7x.h
---- linux-3.4.11_ori/include/linux/mtd/bchp_nand_7x.h	2018-04-10 12:21:49.401663375 +0800
-+++ linux-3.4.11/include/linux/mtd/bchp_nand_7x.h	2018-04-10 15:50:04.265723817 +0800
+--- linux-3.4.11_ori/include/linux/mtd/bchp_nand_7x.h	2018-08-24 12:10:02.601875777 +0800
++++ linux-3.4.11/include/linux/mtd/bchp_nand_7x.h	2018-09-12 17:02:22.679589777 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2014 Broadcom 
     All Rights Reserved
@@ -2925,8 +2925,8 @@ diff -ur linux-3.4.11_ori/include/linux/mtd/bchp_nand_7x.h linux-3.4.11/include/
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/mtd/mtd64.h linux-3.4.11/include/linux/mtd/mtd64.h
---- linux-3.4.11_ori/include/linux/mtd/mtd64.h	2018-04-10 12:21:48.437663394 +0800
-+++ linux-3.4.11/include/linux/mtd/mtd64.h	2018-04-10 15:50:04.265723817 +0800
+--- linux-3.4.11_ori/include/linux/mtd/mtd64.h	2018-08-24 12:10:00.109875708 +0800
++++ linux-3.4.11/include/linux/mtd/mtd64.h	2018-09-12 17:02:22.683589777 +0800
 @@ -7,25 +7,19 @@
      Copyright (c) 2012 Broadcom 
      All Rights Reserved
@@ -2965,8 +2965,8 @@ diff -ur linux-3.4.11_ori/include/linux/mtd/mtd64.h linux-3.4.11/include/linux/m
   :> 
   *
 diff -ur linux-3.4.11_ori/include/linux/nbuff.h linux-3.4.11/include/linux/nbuff.h
---- linux-3.4.11_ori/include/linux/nbuff.h	2018-04-10 12:21:48.437663394 +0800
-+++ linux-3.4.11/include/linux/nbuff.h	2018-04-10 15:50:04.229741818 +0800
+--- linux-3.4.11_ori/include/linux/nbuff.h	2018-08-24 12:10:00.113875708 +0800
++++ linux-3.4.11/include/linux/nbuff.h	2018-09-12 17:02:13.287589518 +0800
 @@ -10,25 +10,19 @@
     Copyright (c) 2013 Broadcom 
     All Rights Reserved
@@ -3005,8 +3005,8 @@ diff -ur linux-3.4.11_ori/include/linux/nbuff.h linux-3.4.11/include/linux/nbuff
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/netfilter/nf_conntrack_rtsp.h linux-3.4.11/include/linux/netfilter/nf_conntrack_rtsp.h
---- linux-3.4.11_ori/include/linux/netfilter/nf_conntrack_rtsp.h	2018-04-10 12:21:48.441663394 +0800
-+++ linux-3.4.11/include/linux/netfilter/nf_conntrack_rtsp.h	2018-04-10 15:50:04.321695815 +0800
+--- linux-3.4.11_ori/include/linux/netfilter/nf_conntrack_rtsp.h	2018-08-24 12:10:00.113875708 +0800
++++ linux-3.4.11/include/linux/netfilter/nf_conntrack_rtsp.h	2018-09-12 17:02:22.003589758 +0800
 @@ -6,25 +6,19 @@
  *    Copyright (c) 2012 Broadcom 
  *    All Rights Reserved
@@ -3045,8 +3045,8 @@ diff -ur linux-3.4.11_ori/include/linux/netfilter/nf_conntrack_rtsp.h linux-3.4.
  :>
  */
 diff -ur linux-3.4.11_ori/include/linux/vlanctl_bind.h linux-3.4.11/include/linux/vlanctl_bind.h
---- linux-3.4.11_ori/include/linux/vlanctl_bind.h	2018-04-10 12:21:48.449663393 +0800
-+++ linux-3.4.11/include/linux/vlanctl_bind.h	2018-04-10 15:50:04.097807822 +0800
+--- linux-3.4.11_ori/include/linux/vlanctl_bind.h	2018-08-24 12:10:00.125875709 +0800
++++ linux-3.4.11/include/linux/vlanctl_bind.h	2018-09-12 17:02:12.999589510 +0800
 @@ -5,25 +5,19 @@
  *
  <:label-BRCM:2014:DUAL/GPL:standard 
@@ -3085,8 +3085,8 @@ diff -ur linux-3.4.11_ori/include/linux/vlanctl_bind.h linux-3.4.11/include/linu
  :>
  */
 diff -ur linux-3.4.11_ori/include/net/af_mhi.h linux-3.4.11/include/net/af_mhi.h
---- linux-3.4.11_ori/include/net/af_mhi.h	2018-04-10 12:21:48.453663393 +0800
-+++ linux-3.4.11/include/net/af_mhi.h	2018-04-10 15:50:04.049831823 +0800
+--- linux-3.4.11_ori/include/net/af_mhi.h	2018-08-24 12:10:00.129875709 +0800
++++ linux-3.4.11/include/net/af_mhi.h	2018-09-12 17:02:23.007589786 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -3125,8 +3125,8 @@ diff -ur linux-3.4.11_ori/include/net/af_mhi.h linux-3.4.11/include/net/af_mhi.h
  :>
  */
 diff -ur linux-3.4.11_ori/include/net/mhi/dgram.h linux-3.4.11/include/net/mhi/dgram.h
---- linux-3.4.11_ori/include/net/mhi/dgram.h	2018-04-10 12:21:48.453663393 +0800
-+++ linux-3.4.11/include/net/mhi/dgram.h	2018-04-10 15:50:04.061825819 +0800
+--- linux-3.4.11_ori/include/net/mhi/dgram.h	2018-08-24 12:10:00.133875709 +0800
++++ linux-3.4.11/include/net/mhi/dgram.h	2018-09-12 17:02:23.507589800 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2012 Broadcom 
     All Rights Reserved
@@ -3165,8 +3165,8 @@ diff -ur linux-3.4.11_ori/include/net/mhi/dgram.h linux-3.4.11/include/net/mhi/d
  :>
  */
 diff -ur linux-3.4.11_ori/include/net/mhi/mhdp.h linux-3.4.11/include/net/mhi/mhdp.h
---- linux-3.4.11_ori/include/net/mhi/mhdp.h	2018-04-10 12:21:48.453663393 +0800
-+++ linux-3.4.11/include/net/mhi/mhdp.h	2018-04-10 15:50:04.061825819 +0800
+--- linux-3.4.11_ori/include/net/mhi/mhdp.h	2018-08-24 12:10:00.133875709 +0800
++++ linux-3.4.11/include/net/mhi/mhdp.h	2018-09-12 17:02:23.507589800 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2012 Broadcom 
     All Rights Reserved
@@ -3205,8 +3205,8 @@ diff -ur linux-3.4.11_ori/include/net/mhi/mhdp.h linux-3.4.11/include/net/mhi/mh
  :>
  */
 diff -ur linux-3.4.11_ori/include/net/mhi/raw.h linux-3.4.11/include/net/mhi/raw.h
---- linux-3.4.11_ori/include/net/mhi/raw.h	2018-04-10 12:21:48.453663393 +0800
-+++ linux-3.4.11/include/net/mhi/raw.h	2018-04-10 15:50:04.061825819 +0800
+--- linux-3.4.11_ori/include/net/mhi/raw.h	2018-08-24 12:10:00.133875709 +0800
++++ linux-3.4.11/include/net/mhi/raw.h	2018-09-12 17:02:23.503589800 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2012 Broadcom 
     All Rights Reserved
@@ -3245,8 +3245,8 @@ diff -ur linux-3.4.11_ori/include/net/mhi/raw.h linux-3.4.11/include/net/mhi/raw
  :>
  */
 diff -ur linux-3.4.11_ori/include/net/mhi/sched.h linux-3.4.11/include/net/mhi/sched.h
---- linux-3.4.11_ori/include/net/mhi/sched.h	2018-04-10 12:21:48.453663393 +0800
-+++ linux-3.4.11/include/net/mhi/sched.h	2018-04-10 15:50:04.061825819 +0800
+--- linux-3.4.11_ori/include/net/mhi/sched.h	2018-08-24 12:10:00.133875709 +0800
++++ linux-3.4.11/include/net/mhi/sched.h	2018-09-12 17:02:23.507589800 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2012 Broadcom 
     All Rights Reserved
@@ -3285,8 +3285,8 @@ diff -ur linux-3.4.11_ori/include/net/mhi/sched.h linux-3.4.11/include/net/mhi/s
  :>
  */
 diff -ur linux-3.4.11_ori/include/net/mhi/sock.h linux-3.4.11/include/net/mhi/sock.h
---- linux-3.4.11_ori/include/net/mhi/sock.h	2018-04-10 12:21:48.453663393 +0800
-+++ linux-3.4.11/include/net/mhi/sock.h	2018-04-10 15:50:04.061825819 +0800
+--- linux-3.4.11_ori/include/net/mhi/sock.h	2018-08-24 12:10:00.133875709 +0800
++++ linux-3.4.11/include/net/mhi/sock.h	2018-09-12 17:02:23.499589800 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2012 Broadcom 
     All Rights Reserved
@@ -3325,8 +3325,8 @@ diff -ur linux-3.4.11_ori/include/net/mhi/sock.h linux-3.4.11/include/net/mhi/so
  :>
  */
 diff -ur linux-3.4.11_ori/kernel/bcm_log.c linux-3.4.11/kernel/bcm_log.c
---- linux-3.4.11_ori/kernel/bcm_log.c	2018-04-10 12:21:48.461663393 +0800
-+++ linux-3.4.11/kernel/bcm_log.c	2018-04-10 15:50:04.417647814 +0800
+--- linux-3.4.11_ori/kernel/bcm_log.c	2018-08-24 12:10:00.501875719 +0800
++++ linux-3.4.11/kernel/bcm_log.c	2018-09-12 17:02:24.003589813 +0800
 @@ -4,25 +4,19 @@
  *    Copyright (c) 2010 Broadcom 
  *    All Rights Reserved
@@ -3365,8 +3365,8 @@ diff -ur linux-3.4.11_ori/kernel/bcm_log.c linux-3.4.11/kernel/bcm_log.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/bridge/br_flows.c linux-3.4.11/net/bridge/br_flows.c
---- linux-3.4.11_ori/net/bridge/br_flows.c	2018-04-10 12:21:48.577663391 +0800
-+++ linux-3.4.11/net/bridge/br_flows.c	2018-04-10 15:50:04.585563811 +0800
+--- linux-3.4.11_ori/net/bridge/br_flows.c	2018-08-24 12:10:00.801875727 +0800
++++ linux-3.4.11/net/bridge/br_flows.c	2018-09-12 17:02:25.255589848 +0800
 @@ -3,25 +3,19 @@
   *
   * <:label-BRCM:2012:DUAL/GPL:standard
@@ -3405,8 +3405,8 @@ diff -ur linux-3.4.11_ori/net/bridge/br_flows.c linux-3.4.11/net/bridge/br_flows
   * :>
   */
 diff -ur linux-3.4.11_ori/net/bridge/br_flows.h linux-3.4.11/net/bridge/br_flows.h
---- linux-3.4.11_ori/net/bridge/br_flows.h	2018-04-10 12:21:48.577663391 +0800
-+++ linux-3.4.11/net/bridge/br_flows.h	2018-04-10 15:50:04.581565811 +0800
+--- linux-3.4.11_ori/net/bridge/br_flows.h	2018-08-24 12:10:00.801875727 +0800
++++ linux-3.4.11/net/bridge/br_flows.h	2018-09-12 17:02:25.255589848 +0800
 @@ -4,25 +4,19 @@
  *
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -3445,8 +3445,8 @@ diff -ur linux-3.4.11_ori/net/bridge/br_flows.h linux-3.4.11/net/bridge/br_flows
  :>
  */
 diff -ur linux-3.4.11_ori/net/bridge/br_igmp.c linux-3.4.11/net/bridge/br_igmp.c
---- linux-3.4.11_ori/net/bridge/br_igmp.c	2018-04-10 12:21:49.933663364 +0800
-+++ linux-3.4.11/net/bridge/br_igmp.c	2018-04-10 15:50:04.577567811 +0800
+--- linux-3.4.11_ori/net/bridge/br_igmp.c	2018-08-24 12:10:03.117875791 +0800
++++ linux-3.4.11/net/bridge/br_igmp.c	2018-09-12 17:02:25.259589848 +0800
 @@ -4,25 +4,19 @@
  *
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -3485,8 +3485,8 @@ diff -ur linux-3.4.11_ori/net/bridge/br_igmp.c linux-3.4.11/net/bridge/br_igmp.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/bridge/br_igmp.h linux-3.4.11/net/bridge/br_igmp.h
---- linux-3.4.11_ori/net/bridge/br_igmp.h	2018-04-10 12:21:49.797663367 +0800
-+++ linux-3.4.11/net/bridge/br_igmp.h	2018-04-10 15:50:04.577567811 +0800
+--- linux-3.4.11_ori/net/bridge/br_igmp.h	2018-08-24 12:10:03.121875791 +0800
++++ linux-3.4.11/net/bridge/br_igmp.h	2018-09-12 17:02:25.255589848 +0800
 @@ -4,25 +4,19 @@
  *
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -3525,8 +3525,8 @@ diff -ur linux-3.4.11_ori/net/bridge/br_igmp.h linux-3.4.11/net/bridge/br_igmp.h
  :>
  */
 diff -ur linux-3.4.11_ori/net/bridge/br_mcast.c linux-3.4.11/net/bridge/br_mcast.c
---- linux-3.4.11_ori/net/bridge/br_mcast.c	2018-04-10 12:21:49.933663364 +0800
-+++ linux-3.4.11/net/bridge/br_mcast.c	2018-04-10 15:50:04.581565811 +0800
+--- linux-3.4.11_ori/net/bridge/br_mcast.c	2018-08-24 12:10:03.117875791 +0800
++++ linux-3.4.11/net/bridge/br_mcast.c	2018-09-12 17:02:25.259589848 +0800
 @@ -4,25 +4,19 @@
  * 
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -3565,8 +3565,8 @@ diff -ur linux-3.4.11_ori/net/bridge/br_mcast.c linux-3.4.11/net/bridge/br_mcast
  :>
  */
 diff -ur linux-3.4.11_ori/net/bridge/br_mcast.h linux-3.4.11/net/bridge/br_mcast.h
---- linux-3.4.11_ori/net/bridge/br_mcast.h	2018-04-10 12:21:48.581663391 +0800
-+++ linux-3.4.11/net/bridge/br_mcast.h	2018-04-10 15:50:04.577567811 +0800
+--- linux-3.4.11_ori/net/bridge/br_mcast.h	2018-08-24 12:10:03.121875791 +0800
++++ linux-3.4.11/net/bridge/br_mcast.h	2018-09-12 17:02:25.255589848 +0800
 @@ -4,25 +4,19 @@
  *
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -3605,8 +3605,8 @@ diff -ur linux-3.4.11_ori/net/bridge/br_mcast.h linux-3.4.11/net/bridge/br_mcast
  :>
  */
 diff -ur linux-3.4.11_ori/net/bridge/br_mld.c linux-3.4.11/net/bridge/br_mld.c
---- linux-3.4.11_ori/net/bridge/br_mld.c	2018-04-10 12:21:49.933663364 +0800
-+++ linux-3.4.11/net/bridge/br_mld.c	2018-04-10 15:50:04.585563811 +0800
+--- linux-3.4.11_ori/net/bridge/br_mld.c	2018-08-24 12:10:03.121875791 +0800
++++ linux-3.4.11/net/bridge/br_mld.c	2018-09-12 17:02:25.263589848 +0800
 @@ -4,25 +4,19 @@
  *
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -3645,8 +3645,8 @@ diff -ur linux-3.4.11_ori/net/bridge/br_mld.c linux-3.4.11/net/bridge/br_mld.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/bridge/br_mld.h linux-3.4.11/net/bridge/br_mld.h
---- linux-3.4.11_ori/net/bridge/br_mld.h	2018-04-10 12:21:49.801663367 +0800
-+++ linux-3.4.11/net/bridge/br_mld.h	2018-04-10 15:50:04.585563811 +0800
+--- linux-3.4.11_ori/net/bridge/br_mld.h	2018-08-24 12:10:03.117875791 +0800
++++ linux-3.4.11/net/bridge/br_mld.h	2018-09-12 17:02:25.255589848 +0800
 @@ -4,25 +4,19 @@
  *
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -3685,8 +3685,8 @@ diff -ur linux-3.4.11_ori/net/bridge/br_mld.h linux-3.4.11/net/bridge/br_mld.h
  :>
  */
 diff -ur linux-3.4.11_ori/net/bridge/br_netlink_mcpd.c linux-3.4.11/net/bridge/br_netlink_mcpd.c
---- linux-3.4.11_ori/net/bridge/br_netlink_mcpd.c	2018-04-10 12:21:48.581663391 +0800
-+++ linux-3.4.11/net/bridge/br_netlink_mcpd.c	2018-04-10 15:50:04.581565811 +0800
+--- linux-3.4.11_ori/net/bridge/br_netlink_mcpd.c	2018-08-24 12:10:03.121875791 +0800
++++ linux-3.4.11/net/bridge/br_netlink_mcpd.c	2018-09-12 17:02:25.259589848 +0800
 @@ -4,25 +4,19 @@
  *
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -3725,8 +3725,8 @@ diff -ur linux-3.4.11_ori/net/bridge/br_netlink_mcpd.c linux-3.4.11/net/bridge/b
  :>
  */
 diff -ur linux-3.4.11_ori/net/bridge/netfilter/ebt_skiplog.c linux-3.4.11/net/bridge/netfilter/ebt_skiplog.c
---- linux-3.4.11_ori/net/bridge/netfilter/ebt_skiplog.c	2018-04-10 12:21:48.585663391 +0800
-+++ linux-3.4.11/net/bridge/netfilter/ebt_skiplog.c	2018-04-10 15:50:04.589561810 +0800
+--- linux-3.4.11_ori/net/bridge/netfilter/ebt_skiplog.c	2018-08-24 12:10:00.809875727 +0800
++++ linux-3.4.11/net/bridge/netfilter/ebt_skiplog.c	2018-09-12 17:02:25.267589848 +0800
 @@ -5,25 +5,19 @@
  *
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -3765,8 +3765,8 @@ diff -ur linux-3.4.11_ori/net/bridge/netfilter/ebt_skiplog.c linux-3.4.11/net/br
  :>
  */
 diff -ur linux-3.4.11_ori/net/core/blog.c linux-3.4.11/net/core/blog.c
---- linux-3.4.11_ori/net/core/blog.c	2018-04-10 12:21:49.925663365 +0800
-+++ linux-3.4.11/net/core/blog.c	2018-04-10 15:50:04.553579811 +0800
+--- linux-3.4.11_ori/net/core/blog.c	2018-08-24 12:10:03.777875809 +0800
++++ linux-3.4.11/net/core/blog.c	2018-09-12 17:02:25.295589849 +0800
 @@ -6,25 +6,19 @@
  *
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -3805,8 +3805,8 @@ diff -ur linux-3.4.11_ori/net/core/blog.c linux-3.4.11/net/core/blog.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/core/blog_rule.c linux-3.4.11/net/core/blog_rule.c
---- linux-3.4.11_ori/net/core/blog_rule.c	2018-04-10 12:21:48.833663386 +0800
-+++ linux-3.4.11/net/core/blog_rule.c	2018-04-10 15:50:04.549581811 +0800
+--- linux-3.4.11_ori/net/core/blog_rule.c	2018-08-24 12:10:00.809875727 +0800
++++ linux-3.4.11/net/core/blog_rule.c	2018-09-12 17:02:25.291589849 +0800
 @@ -5,25 +5,19 @@
  *    Copyright (c) 2010 Broadcom 
  *    All Rights Reserved
@@ -3845,8 +3845,8 @@ diff -ur linux-3.4.11_ori/net/core/blog_rule.c linux-3.4.11/net/core/blog_rule.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/core/devinfo.c linux-3.4.11/net/core/devinfo.c
---- linux-3.4.11_ori/net/core/devinfo.c	2018-04-10 12:21:48.837663386 +0800
-+++ linux-3.4.11/net/core/devinfo.c	2018-04-10 15:50:04.553579811 +0800
+--- linux-3.4.11_ori/net/core/devinfo.c	2018-08-24 12:10:03.117875791 +0800
++++ linux-3.4.11/net/core/devinfo.c	2018-09-12 17:02:25.291589849 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2014 Broadcom 
     All Rights Reserved
@@ -3885,8 +3885,8 @@ diff -ur linux-3.4.11_ori/net/core/devinfo.c linux-3.4.11/net/core/devinfo.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/core/dpistats.c linux-3.4.11/net/core/dpistats.c
---- linux-3.4.11_ori/net/core/dpistats.c	2018-04-10 12:21:48.837663386 +0800
-+++ linux-3.4.11/net/core/dpistats.c	2018-04-10 15:50:04.549581811 +0800
+--- linux-3.4.11_ori/net/core/dpistats.c	2018-08-24 12:10:03.117875791 +0800
++++ linux-3.4.11/net/core/dpistats.c	2018-09-12 17:02:25.295589849 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2014 Broadcom 
     All Rights Reserved
@@ -3925,8 +3925,8 @@ diff -ur linux-3.4.11_ori/net/core/dpistats.c linux-3.4.11/net/core/dpistats.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/core/flwstif.c linux-3.4.11/net/core/flwstif.c
---- linux-3.4.11_ori/net/core/flwstif.c	2018-04-10 12:21:49.401663375 +0800
-+++ linux-3.4.11/net/core/flwstif.c	2018-04-10 15:50:04.553579811 +0800
+--- linux-3.4.11_ori/net/core/flwstif.c	2018-08-24 12:10:02.601875777 +0800
++++ linux-3.4.11/net/core/flwstif.c	2018-09-12 17:02:25.291589849 +0800
 @@ -8,25 +8,19 @@
  *    Copyright (c) 2014 Broadcom 
  *    All Rights Reserved
@@ -3965,8 +3965,8 @@ diff -ur linux-3.4.11_ori/net/core/flwstif.c linux-3.4.11/net/core/flwstif.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/core/gbpm.c linux-3.4.11/net/core/gbpm.c
---- linux-3.4.11_ori/net/core/gbpm.c	2018-04-10 12:21:48.837663386 +0800
-+++ linux-3.4.11/net/core/gbpm.c	2018-04-10 15:50:04.553579811 +0800
+--- linux-3.4.11_ori/net/core/gbpm.c	2018-08-24 12:10:00.813875727 +0800
++++ linux-3.4.11/net/core/gbpm.c	2018-09-12 17:02:25.299589849 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2009 Broadcom 
     All Rights Reserved
@@ -4005,8 +4005,8 @@ diff -ur linux-3.4.11_ori/net/core/gbpm.c linux-3.4.11/net/core/gbpm.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/core/iqos.c linux-3.4.11/net/core/iqos.c
---- linux-3.4.11_ori/net/core/iqos.c	2018-04-10 12:21:49.925663365 +0800
-+++ linux-3.4.11/net/core/iqos.c	2018-04-10 15:50:04.553579811 +0800
+--- linux-3.4.11_ori/net/core/iqos.c	2018-08-24 12:10:03.117875791 +0800
++++ linux-3.4.11/net/core/iqos.c	2018-09-12 17:02:25.295589849 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2009 Broadcom 
     All Rights Reserved
@@ -4045,8 +4045,8 @@ diff -ur linux-3.4.11_ori/net/core/iqos.c linux-3.4.11/net/core/iqos.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/core/urlinfo.c linux-3.4.11/net/core/urlinfo.c
---- linux-3.4.11_ori/net/core/urlinfo.c	2018-04-10 12:21:48.841663386 +0800
-+++ linux-3.4.11/net/core/urlinfo.c	2018-04-10 15:50:04.561575811 +0800
+--- linux-3.4.11_ori/net/core/urlinfo.c	2018-08-24 12:10:00.817875728 +0800
++++ linux-3.4.11/net/core/urlinfo.c	2018-09-12 17:02:25.299589849 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2014 Broadcom 
     All Rights Reserved
@@ -4085,8 +4085,8 @@ diff -ur linux-3.4.11_ori/net/core/urlinfo.c linux-3.4.11/net/core/urlinfo.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/core/vlanctl_bind.c linux-3.4.11/net/core/vlanctl_bind.c
---- linux-3.4.11_ori/net/core/vlanctl_bind.c	2018-04-10 12:21:48.841663386 +0800
-+++ linux-3.4.11/net/core/vlanctl_bind.c	2018-04-10 15:50:04.557577811 +0800
+--- linux-3.4.11_ori/net/core/vlanctl_bind.c	2018-08-24 12:10:00.817875728 +0800
++++ linux-3.4.11/net/core/vlanctl_bind.c	2018-09-12 17:02:25.299589849 +0800
 @@ -6,25 +6,19 @@
  *
  <:label-BRCM:2014:DUAL/GPL:standard 
@@ -4125,8 +4125,8 @@ diff -ur linux-3.4.11_ori/net/core/vlanctl_bind.c linux-3.4.11/net/core/vlanctl_
  :>
  */
 diff -ur linux-3.4.11_ori/net/ipv4/netfilter/nf_nat_pt.c linux-3.4.11/net/ipv4/netfilter/nf_nat_pt.c
---- linux-3.4.11_ori/net/ipv4/netfilter/nf_nat_pt.c	2018-04-10 12:21:48.845663386 +0800
-+++ linux-3.4.11/net/ipv4/netfilter/nf_nat_pt.c	2018-04-10 15:50:04.833439805 +0800
+--- linux-3.4.11_ori/net/ipv4/netfilter/nf_nat_pt.c	2018-08-24 12:10:00.825875728 +0800
++++ linux-3.4.11/net/ipv4/netfilter/nf_nat_pt.c	2018-09-12 17:02:25.131589845 +0800
 @@ -4,25 +4,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -4165,8 +4165,8 @@ diff -ur linux-3.4.11_ori/net/ipv4/netfilter/nf_nat_pt.c linux-3.4.11/net/ipv4/n
  :>
  */
 diff -ur linux-3.4.11_ori/net/ipv4/netfilter/nf_nat_rtsp.c linux-3.4.11/net/ipv4/netfilter/nf_nat_rtsp.c
---- linux-3.4.11_ori/net/ipv4/netfilter/nf_nat_rtsp.c	2018-04-10 12:21:48.849663386 +0800
-+++ linux-3.4.11/net/ipv4/netfilter/nf_nat_rtsp.c	2018-04-10 15:50:04.829441805 +0800
+--- linux-3.4.11_ori/net/ipv4/netfilter/nf_nat_rtsp.c	2018-08-24 12:10:00.825875728 +0800
++++ linux-3.4.11/net/ipv4/netfilter/nf_nat_rtsp.c	2018-09-12 17:02:25.135589845 +0800
 @@ -6,25 +6,19 @@
   *
   * <:label-BRCM:2011:DUAL/GPL:standard
@@ -4205,8 +4205,8 @@ diff -ur linux-3.4.11_ori/net/ipv4/netfilter/nf_nat_rtsp.c linux-3.4.11/net/ipv4
   * :>
   *
 diff -ur linux-3.4.11_ori/net/mhi/l2mux.c linux-3.4.11/net/mhi/l2mux.c
---- linux-3.4.11_ori/net/mhi/l2mux.c	2018-04-10 12:21:48.865663385 +0800
-+++ linux-3.4.11/net/mhi/l2mux.c	2018-04-10 15:50:04.741485808 +0800
+--- linux-3.4.11_ori/net/mhi/l2mux.c	2018-08-24 12:10:00.845875728 +0800
++++ linux-3.4.11/net/mhi/l2mux.c	2018-09-12 17:02:25.367589851 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -4245,8 +4245,8 @@ diff -ur linux-3.4.11_ori/net/mhi/l2mux.c linux-3.4.11/net/mhi/l2mux.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/mhi/l3mhdp.c linux-3.4.11/net/mhi/l3mhdp.c
---- linux-3.4.11_ori/net/mhi/l3mhdp.c	2018-04-10 12:21:48.865663385 +0800
-+++ linux-3.4.11/net/mhi/l3mhdp.c	2018-04-10 15:50:04.741485808 +0800
+--- linux-3.4.11_ori/net/mhi/l3mhdp.c	2018-08-24 12:10:00.845875728 +0800
++++ linux-3.4.11/net/mhi/l3mhdp.c	2018-09-12 17:02:25.367589851 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -4285,8 +4285,8 @@ diff -ur linux-3.4.11_ori/net/mhi/l3mhdp.c linux-3.4.11/net/mhi/l3mhdp.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/mhi/l3mhi.c linux-3.4.11/net/mhi/l3mhi.c
---- linux-3.4.11_ori/net/mhi/l3mhi.c	2018-04-10 12:21:48.865663385 +0800
-+++ linux-3.4.11/net/mhi/l3mhi.c	2018-04-10 15:50:04.741485808 +0800
+--- linux-3.4.11_ori/net/mhi/l3mhi.c	2018-08-24 12:10:00.845875728 +0800
++++ linux-3.4.11/net/mhi/l3mhi.c	2018-09-12 17:02:25.367589851 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -4325,8 +4325,8 @@ diff -ur linux-3.4.11_ori/net/mhi/l3mhi.c linux-3.4.11/net/mhi/l3mhi.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/mhi/l3phonet.c linux-3.4.11/net/mhi/l3phonet.c
---- linux-3.4.11_ori/net/mhi/l3phonet.c	2018-04-10 12:21:48.865663385 +0800
-+++ linux-3.4.11/net/mhi/l3phonet.c	2018-04-10 15:50:04.741485808 +0800
+--- linux-3.4.11_ori/net/mhi/l3phonet.c	2018-08-24 12:10:00.845875728 +0800
++++ linux-3.4.11/net/mhi/l3phonet.c	2018-09-12 17:02:25.367589851 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -4365,8 +4365,8 @@ diff -ur linux-3.4.11_ori/net/mhi/l3phonet.c linux-3.4.11/net/mhi/l3phonet.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/mhi/mhi_dgram.c linux-3.4.11/net/mhi/mhi_dgram.c
---- linux-3.4.11_ori/net/mhi/mhi_dgram.c	2018-04-10 12:21:48.865663385 +0800
-+++ linux-3.4.11/net/mhi/mhi_dgram.c	2018-04-10 15:50:04.741485808 +0800
+--- linux-3.4.11_ori/net/mhi/mhi_dgram.c	2018-08-24 12:10:00.845875728 +0800
++++ linux-3.4.11/net/mhi/mhi_dgram.c	2018-09-12 17:02:25.367589851 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -4405,8 +4405,8 @@ diff -ur linux-3.4.11_ori/net/mhi/mhi_dgram.c linux-3.4.11/net/mhi/mhi_dgram.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/mhi/mhi_proto.c linux-3.4.11/net/mhi/mhi_proto.c
---- linux-3.4.11_ori/net/mhi/mhi_proto.c	2018-04-10 12:21:48.865663385 +0800
-+++ linux-3.4.11/net/mhi/mhi_proto.c	2018-04-10 15:50:04.741485808 +0800
+--- linux-3.4.11_ori/net/mhi/mhi_proto.c	2018-08-24 12:10:00.845875728 +0800
++++ linux-3.4.11/net/mhi/mhi_proto.c	2018-09-12 17:02:25.367589851 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -4445,8 +4445,8 @@ diff -ur linux-3.4.11_ori/net/mhi/mhi_proto.c linux-3.4.11/net/mhi/mhi_proto.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/mhi/mhi_raw.c linux-3.4.11/net/mhi/mhi_raw.c
---- linux-3.4.11_ori/net/mhi/mhi_raw.c	2018-04-10 12:21:48.865663385 +0800
-+++ linux-3.4.11/net/mhi/mhi_raw.c	2018-04-10 15:50:04.741485808 +0800
+--- linux-3.4.11_ori/net/mhi/mhi_raw.c	2018-08-24 12:10:00.845875728 +0800
++++ linux-3.4.11/net/mhi/mhi_raw.c	2018-09-12 17:02:25.367589851 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -4485,8 +4485,8 @@ diff -ur linux-3.4.11_ori/net/mhi/mhi_raw.c linux-3.4.11/net/mhi/mhi_raw.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/mhi/mhi_socket.c linux-3.4.11/net/mhi/mhi_socket.c
---- linux-3.4.11_ori/net/mhi/mhi_socket.c	2018-04-10 12:21:48.865663385 +0800
-+++ linux-3.4.11/net/mhi/mhi_socket.c	2018-04-10 15:50:04.741485808 +0800
+--- linux-3.4.11_ori/net/mhi/mhi_socket.c	2018-08-24 12:10:00.845875728 +0800
++++ linux-3.4.11/net/mhi/mhi_socket.c	2018-09-12 17:02:25.367589851 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -4525,8 +4525,8 @@ diff -ur linux-3.4.11_ori/net/mhi/mhi_socket.c linux-3.4.11/net/mhi/mhi_socket.c
  :>
  */
 diff -ur linux-3.4.11_ori/net/netfilter/xt_SKIPLOG.c linux-3.4.11/net/netfilter/xt_SKIPLOG.c
---- linux-3.4.11_ori/net/netfilter/xt_SKIPLOG.c	2018-04-10 12:21:48.877663385 +0800
-+++ linux-3.4.11/net/netfilter/xt_SKIPLOG.c	2018-04-10 15:50:04.773469807 +0800
+--- linux-3.4.11_ori/net/netfilter/xt_SKIPLOG.c	2018-08-24 12:10:00.857875729 +0800
++++ linux-3.4.11/net/netfilter/xt_SKIPLOG.c	2018-09-12 17:02:25.203589847 +0800
 @@ -4,25 +4,19 @@
  *
  <:label-BRCM:2012:DUAL/GPL:standard
@@ -4565,8 +4565,8 @@ diff -ur linux-3.4.11_ori/net/netfilter/xt_SKIPLOG.c linux-3.4.11/net/netfilter/
  :>
  */
 diff -ur linux-3.4.11_ori/net/phonet/ld_phonet.c linux-3.4.11/net/phonet/ld_phonet.c
---- linux-3.4.11_ori/net/phonet/ld_phonet.c	2018-04-10 12:21:48.877663385 +0800
-+++ linux-3.4.11/net/phonet/ld_phonet.c	2018-04-10 15:50:04.733489808 +0800
+--- linux-3.4.11_ori/net/phonet/ld_phonet.c	2018-08-24 12:10:00.861875729 +0800
++++ linux-3.4.11/net/phonet/ld_phonet.c	2018-09-12 17:02:25.339589850 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2011 Broadcom 
     All Rights Reserved
@@ -4605,8 +4605,8 @@ diff -ur linux-3.4.11_ori/net/phonet/ld_phonet.c linux-3.4.11/net/phonet/ld_phon
  :>
  */
 diff -ur linux-3.4.11_ori/net/phonet/ld_tmodem.c linux-3.4.11/net/phonet/ld_tmodem.c
---- linux-3.4.11_ori/net/phonet/ld_tmodem.c	2018-04-10 12:21:48.877663385 +0800
-+++ linux-3.4.11/net/phonet/ld_tmodem.c	2018-04-10 15:50:04.733489808 +0800
+--- linux-3.4.11_ori/net/phonet/ld_tmodem.c	2018-08-24 12:10:00.861875729 +0800
++++ linux-3.4.11/net/phonet/ld_tmodem.c	2018-09-12 17:02:25.339589850 +0800
 @@ -5,25 +5,19 @@
     Copyright (c) 2014 Broadcom 
     All Rights Reserved

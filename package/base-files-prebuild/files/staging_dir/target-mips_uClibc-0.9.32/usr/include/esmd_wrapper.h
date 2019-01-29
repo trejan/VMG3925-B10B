@@ -15,4 +15,6 @@ void handleXtmUpInit(wanLinkType currXtmType, wanLinkType prevXTMType);
 void esmdSupportCAT3Cable(void);
 void esmdLanPhyReset();
 //INTERNET_LED_CONTROL
+#if !defined(ZYXEL_ZYINETLED)
 void esmdWanCtlInternetLED(internet_led_t type, internet_led_state_t state);
+#endif

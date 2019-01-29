@@ -1,0 +1,56 @@
+diff -Naur linux-3.4.11.orig/net/bridge/br_igmp.c linux-3.4.11/net/bridge/br_igmp.c
+--- linux-3.4.11.orig/net/bridge/br_igmp.c	2017-10-26 16:52:20.303591923 +0800
++++ linux-3.4.11/net/bridge/br_igmp.c	2017-10-26 17:19:09.623563103 +0800
+@@ -662,13 +662,18 @@
+ 			if((src->s_addr == dst->src_entry.src.s_addr) &&
+ 			   (filt_mode == dst->src_entry.filt_mode) && 
+ 			   (dst->from_dev == from_dev) &&
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++               (dst->dst_dev == prt->dev) &&
++#else
+ 			   (dst->dst == prt) &&
++#endif
+ 			   (dst->info == info))
+ 			{
+ 				/* found entry - update TS */
+ 				struct net_bridge_mc_rep_entry *reporter = br_igmp_rep_find(dst, rep, NULL);
+ #ifdef CONFIG_SUPPORT_RTK_SWITCH
+ 				dst->leave_flag = 0;
++                dst->dst = prt;
+ #endif
+ 				if(reporter == NULL)
+ 				{
+@@ -781,6 +786,7 @@
+ 
+ #ifdef CONFIG_SUPPORT_RTK_SWITCH
+ 	mc_fdb->leave_flag = 0;
++    mc_fdb->dst_dev = prt->dev;
+ #endif
+ 	mc_fdb->txGrp.s_addr = txGrp->s_addr;
+ 	mc_fdb->rxGrp.s_addr = rxGrp->s_addr;
+@@ -1146,6 +1152,12 @@
+ 			continue;
+ 		}
+ 
++#ifdef CONFIG_SUPPORT_RTK_SWITCH
++        /*+++ Kide@zyxel: there is no listener binding on the port */
++        if (dst->leave_flag)
++            continue;
++#endif
++
+ 		/* routed packet will have bridge as dev - cannot match to mc_fdb */
+ 		if ( is_routed ) {
+ 			if ( dst->type != MCPD_IF_TYPE_ROUTED ) {
+diff -Naur linux-3.4.11.orig/net/bridge/br_igmp.h linux-3.4.11/net/bridge/br_igmp.h
+--- linux-3.4.11.orig/net/bridge/br_igmp.h	2017-10-26 16:52:20.343591922 +0800
++++ linux-3.4.11/net/bridge/br_igmp.h	2017-10-26 17:14:39.931567933 +0800
+@@ -84,7 +84,8 @@
+    char                            enRtpSeqCheck;  
+    struct net_device              *from_dev;
+ #ifdef CONFIG_SUPPORT_RTK_SWITCH
+-	int leave_flag;
++    int leave_flag;
++    struct net_device             *dst_dev;
+ #endif
+ };
+ 

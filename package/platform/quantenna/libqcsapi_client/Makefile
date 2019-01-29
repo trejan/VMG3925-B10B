@@ -6,31 +6,15 @@
 include $(TOPDIR)/rules.mk
 
 #These lines concatanate the package name and list the URL location from which the package source code is to be downloaded
+QVER=
+PKG_VERSION=$(QVER)
+PATCH_DIR=patches_$(QVER)
 PKG_NAME:=libqcsapi_client
-#PKG_VERSION:=36.6.0.11
-#PKG_VERSION:=36.7.4.17
-PKG_VERSION:=36.7.0.31
 PKG_RELEASE:=1
-PATCH_DIR:=patches
-
-PKG_SOURCE:=$(PKG_NAME)_$(PKG_VERSION).tar.bz2
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE=$(PKG_NAME)_$(PKG_VERSION).tar.bz2
+PKG_BUILD_DIR=$(BUILD_DIR)/$(PKG_NAME)_$(PKG_VERSION)
 PKG_SOURCE_URL:=@ZyXEL_SITE/public/Quantenna/network/tools
 DL_DIR:=$(TOPDIR)/dl
-
-ifneq ("$(strip $(CONFIG_QTN_SDK_VER))","")
-	QVER=
-	ifeq ("$(QVER)","37.3.0.25")
-		PKG_VERSION=r3.0-$(QVER)
-		PKG_SOURCE=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
-		PKG_BUILD_DIR=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
-	else
-		PKG_VERSION=$(QVER)
-		PKG_SOURCE=$(PKG_NAME)_$(PKG_VERSION).tar.bz2
-		PKG_BUILD_DIR=$(BUILD_DIR)/$(PKG_NAME)_$(PKG_VERSION)
-	endif
-	PATCH_DIR=patches_$(QVER)
-endif
 
 
 include $(INCLUDE_DIR)/package.mk

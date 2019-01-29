@@ -23,12 +23,20 @@
 #define have_option_61_filter(x) (strcmp((x)->SourceMACFromClientIDFilter, "") != 0)
 #define have_option_125_filter(x) (strcmp((x)->X_ZYXEL_SourceMACFromVSIFilter, "") != 0)
 
+#ifdef ZYXEL_SIP_DELAYTIMES
+void SipDelayTimer(int startWaitTime);
+#endif
+bool checkSfpLinkUp (void);
+int getSfpDelayTimes(int delayType);
+
 //zcfgRet_t esmdWanIpConnectionUp(objIndex_t *, bool);
 void esmdProcessPingMsg(char *);
 void esmdProcessPingSvrsMsg(char *);
 void esmdProcessTracertMsg(char *msg);
 zcfgRet_t esmdWanIpConnectionUp(objIndex_t *);
+#if 0   /* Bell, avoid zcmd apply config thread and esmd thread dead lock issue, 2017-12-01-13:36:15*/
 zcfgRet_t esmdWanPppConnectionUp(objIndex_t *, bool);
+#endif
 zcfgRet_t esmdWanPppConnect(objIndex_t *, bool isConnect, uint8_t clientEid, uint32_t clientPid);
 zcfgRet_t esmdWanIpRenew(objIndex_t *, bool isRenew, uint8_t clientEid, uint32_t clientPid);
 #if 1 //ZyXEL, Renew add WAN release/renew command, Albert
@@ -42,8 +50,17 @@ zcfgRet_t processDhcpcMsg(char *msg);
 zcfgRet_t processPppdMsg(char *msg);
 
 zcfgRet_t processRaInfo(char *msg);
+#ifdef OI_CUSTOMIZATION
+zcfgRet_t processRaIPv6Lost();
+#endif /* OI_CUSTOMIZATION */
 zcfgRet_t processDhcp6cMsg(char *msg);
-
+#if defined(ECONET_PLATFORM) && defined(ZYXEL_DHCPV6S_LEASE)
+zcfgRet_t processDhcp6sMsg(char *msg);
+#endif
+#ifdef ZYXEL_DHCPV6C_OPTION 
+zcfgRet_t processDhcp6cMsgClientServer(char *msg);
+zcfgRet_t processDhcp6cMsgOption(char *msg);
+#endif
 void esmdProcessNslookupMsg(char *msg);
 void esmdProcessAtmF5LoMsg(char *msg);
 void esmdProcessAtmF4LoMsg(char *msg);
@@ -51,6 +68,8 @@ void esmdProcessAtmF4LoMsg(char *msg);
 #ifdef ZYXEL_WIND_ITALY_CUSTOMIZATION
 void sipWanCheckHandle();
 #endif
+
+void esmdSetDhcp6cObj(char *, bool , bool);
 
 zcfgRet_t esmdProcessDhcpdOption(const char *msg, uint8_t clientEid, uint32_t clientPid);
 
@@ -66,5 +85,6 @@ void esmdUlDiagComplete(char *msg);
 #define ZCFG_CONFIG_FILE_PATH ZCFG_CONFIG_DIR"/"ZCFG_CONFIG_FILE
 unsigned short zyxelFileChecksum(const char *path);
 void processAtshGetRomfileCksum(uint8_t clientEid, uint32_t clientPid);
+void processFakeroot_Command_Reply(uint8_t clientEid, uint32_t clientPid);
 
 #endif // _ESMD_CONNECTION_H

@@ -18,6 +18,8 @@ zcfgRet_t zcfgFeSubInObjJsonGetNext(zcfg_offset_t oid, objIndex_t *objIid, objIn
 zcfgRet_t zcfgFeSubInObjJsonGetNextWithoutUpdate(zcfg_offset_t , objIndex_t *, objIndex_t *, struct json_object **);
 zcfgRet_t zcfgFeObjJsonSet(zcfg_offset_t, objIndex_t *, struct json_object *, char *);
 zcfgRet_t zcfgFeObjJsonSetWithoutApply(zcfg_offset_t, objIndex_t *, struct json_object *, char *);
+zcfgRet_t zcfgFeObjJsonSetWithAdditions(zcfg_offset_t , objIndex_t *, struct json_object *, char *, uint32_t , struct json_object *);
+zcfgRet_t zcfgFeMultiObjJsonRunValid(struct json_object *multiJobj, char *feedbackmsg);
 zcfgRet_t zcfgFeMultiObjJsonSet(struct json_object *, char *);
 zcfgRet_t zcfgFeObjJsonAdd(zcfg_offset_t, objIndex_t *, char *);
 zcfgRet_t zcfgFeObjJsonDelayRdmDel(zcfg_offset_t , objIndex_t *, char *);

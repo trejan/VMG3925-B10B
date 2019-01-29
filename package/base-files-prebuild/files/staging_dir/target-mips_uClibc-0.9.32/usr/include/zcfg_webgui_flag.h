@@ -28,7 +28,13 @@
 #define VOICE_CODEC_G726_SPECIAL_CASE	(1 << 25) //33554432, Michael.20161005.001: add for (a)supporting G726-32 ONLY first now and (b)reserved for some other special G726 codec case(s) in the future.
 #define HIDE_WLAN_ENABLE                (1 << 26) //67108864
 #define HIDE_WLAN_CHANNEL_1213          (1 << 27) // 134217728
-#define HIDE_WLAN_WEP                   (1 << 28) //For Oi product, WEP setting is needed. 
+#define HIDE_WLAN_WEP                   (1 << 28) //For Oi product, WEP setting is needed.
+#define SHOW_DHCPv6S_PAGE               (1 << 29) //For Oi product
+#define OI_HOTSPOT_HIDE                 (1 << 30) //For Oi product, when hotspot enable WLAN guest#3 will only show if user login as 'supervisor'
 /* End of Flag1*/
+
+/* Flag3 */
+#define TR069_PAGE_READ_ONLY			(1 << 0)
+/* End of Flag3*/
 
 

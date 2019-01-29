@@ -961,8 +961,8 @@ menu "ZyXEL Voice (ZyIMS VoIP)"
 		default n
 
 	config BUILD_ZYXEL_VOICE_SIP_HEARTBEAT_MECHANISM
-                bool "Support SIP Heartbeat Mechanism to periodically send SIP OPTIONS to SIP server for Keep-alive."
-                default n
+		bool "Support SIP Heartbeat Mechanism to periodically send SIP OPTIONS to SIP server for Keep-alive."
+		default n
 
 	config BUILD_ZYXEL_VOICE_RFC3611_RTCP_XR
 		bool "Support RFC-3611 RTCP eXtended Reports (XR)."
@@ -985,6 +985,17 @@ menu "ZyXEL Voice (ZyIMS VoIP)"
 		    it MUST be AUTO Enabled/Supported accordingly. However, this function is originally designed to be a stand-alone call feature,
 		    thus, if the 'BUILD_ZYXEL_VOICE_CONFIG_TR069_FAXT38_ENABLE_MAPPING_TO_FAXMODE' somewhere in the below is NOT enabled,
 		    it can also control by itself.
+
+	config BUILD_ZYXEL_VOICE_USING_DSP_AND_PHONE_API_FROM_SINGLE_PROCESS
+		bool "Support to Use/Access the platform's DSP and Phone API through ONLY the MM module's Process."
+		default n
+		help
+		    For some platforms, it's required to MUST utilize the DSP and Phone API through a Single Process
+		    to ensure the function should be Normal (i.e. Identical all the time).
+		    This is because some of the (global) operation parameters are stored in these DSP and Phone APIs' userspace parts, and
+		    accessing/utilizing these APIs from DIFFerent Processes MAY use DIFFerent values of such kind of operation parameters
+		    to trigger the functions to (consequently) have DIFFerent operation behaviors/results.
+
 
 	#-------------------------------------------------------------------------------------------------------------------------------------------
 	config BUILD_ZYXEL_PHONE_FXO_SUPPORT
@@ -1420,6 +1431,22 @@ menu "ZyXEL Userspace Features"
 			
 	endmenu
 
+	menu "Wlan SSID Priority & IPTV SSID WPS PBC"
+
+		config ZYXEL_SSID_PRIORITY
+			bool "support SSID traffic priority feature (toad and toast for Brcm)"
+			default n
+
+		config ZYXEL_IPTV_SSID_PRIORITY_WPS_PBC
+			bool "enable WPS PBC on IPTV SSID, usually 5G guest wifi"
+			default n
+
+		config ZYXEL_WPS_IPTV_GUEST_WIFI_NUM
+			int "define which guest wifi to run WPS IPTV"
+			default 3
+
+	endmenu
+
 	menu "OneSSID"
 	
 		config ZYXEL_ONESSID
@@ -1446,6 +1473,34 @@ menu "ZyXEL Userspace Features"
 			bool "bsa support Econet 5G"
 			default n
 
+		config BSA_SUPPORT_BCM_MONITOR_MODE
+			bool "bsa support BCM monitor mode"
+			default n
+
+		config BSA_SUPPORT_BCM_MONITOR_MODE_TIMER
+			bool "bsa support BCM monitor mode (default every 30 seconds)"
+			default 30
+
+	endmenu
+
+	menu "QRPE"
+
+		config QRPE_SUPPORT_BCM2_DRIVER
+			bool "qrpe support Broadcom 2.4G"
+			default n
+
+		config QRPE_SUPPORT_BCM5_DRIVER
+			bool "qrpe support Broadcom 5G"
+			default n
+
+		config QRPE_SUPPORT_ECO2_DRIVER
+			bool "qrpe support Econet 2.4G"
+			default n
+
+		config QRPE_SUPPORT_ECO5_DRIVER
+			bool "qrpe support Econet 5G"
+			default n
+
 	endmenu
 
 	menu "SONiQ"
@@ -1455,7 +1510,7 @@ menu "ZyXEL Userspace Features"
 			default n
 			select PACKAGE_qsteer
 			select PACKAGE_bsa
-			select QTN_SDK_VER_37_4_0_97
+			select PACKAGE_qrpe
 			select PACKAGE_netprobe
 			select ZYXEL_ONESSID
 
@@ -1518,15 +1573,31 @@ menu "ZyXEL Userspace Features"
 			
 	endmenu	
 	
+	config ZYXEL_CONFIG_IGNORE_OWNER_CHECK
+		bool "Ignore config owner account check when restoring"
+		default n
+
+	config ZYXEL_NO_DH_ALGO_CHECK
+		bool "Ignore OpenSSL Diffie-Hellman key length check"
+		default n
+	
 	config ZYXEL_RESET_WATCHDOG
 		bool "Reset Hardware Watchdog"
-		default n		
+		default n
+
+	config ZYXEL_MUTI_DEFAULT_GATEWAY
+		bool "Removed the limitation on the WAN default gateway if WAN type was same"
+		default n
 	
 	config ZYXEL_FIREWALL_INDEPENDENT
 		bool "Enable IPv4/IPv6 Firewall seperately"
 		default n
 		
-	config ZYXEL_USB_MANAGERMENT
+	config ZYXEL_USB_SET_MANUALLY
+		bool "Usb can be set by user manually"
+		default n
+	
+    config ZYXEL_USB_MANAGERMENT
 		bool "Usb account management"
 		default n
 		
@@ -1537,7 +1608,11 @@ menu "ZyXEL Userspace Features"
 	config ZYXEL_USA_PRODUCT
 		bool "The USA Product management flag"
 		default n
-		
+
+	config ZYXEL_USA_Generic
+		bool "USA Generic projects"
+		default n
+
 	config ZYXEL_DNS_TRAFFIC_ROUTE
 		bool "DNS route will apply to traffic route"
 		default n
@@ -1582,10 +1657,22 @@ menu "ZyXEL Userspace Features"
 	config ZY_WIFI_ONESSID_SECURITY_SYNC
                 bool "One SSID security sync for Dual Band"
                 default n
+
+	config ZY_WIFI_24G_SUPPORT_11AC
+		bool "2.4G chip can support 11ac(vht feature), MCS 8 & 9"
+		default n
 	
 	config WAN_AUTO_DETECT
 		bool "wan auto dectct, Ethernet priority is higher than DSL"
 		default y
+
+	config ZYXEL_AUTO_GEN_PRESHARED_KEY_ENCRPT_BY_SHA256
+		bool "Use SHA256 to encrypt preshared key"
+		default n
+
+	config ZYXEL_AUTO_GEN_RANDOM_ADMIN_PASSWORD_ENCRPT_BY_SHA256
+		bool "Use SHA256 to encrypt admin random password"
+		default n
 
 	config ZYXEL_HASH_ACCOUNT_PASSWORD_BY_SHA512
 		bool "Use SHA512 algorithm to hash Account Password"
@@ -1618,9 +1705,45 @@ menu "ZyXEL Userspace Features"
 		default 1
 		depends on ZYXEL_RANDOM_ADMIN_PASSWORD
 
+	config ZYXEL_RANDOM_ADMIN_PASSWORD_NEW_ALGORITHM_START_YEAR
+		int "Random admin account password start year"
+		default 2100
+		depends on ZYXEL_RANDOM_ADMIN_PASSWORD
+
+	config ZYXEL_RANDOM_ADMIN_PASSWORD_NEW_ALGORITHM_START_WEEK
+		int "Random admin account password start week"
+		default 48
+		depends on ZYXEL_RANDOM_ADMIN_PASSWORD
+
+	config ZYXEL_RANDOM_SUPERVISOR_PASSWORD_NEW_ALGORITHM_START_YEAR
+		int "Random root/supervisor account password start year"
+		default 2100
+		depends on ZYXEL_RANDOM_SUPERVISOR_PASSWORD
+
+	config ZYXEL_RANDOM_SUPERVISOR_PASSWORD_NEW_ALGORITHM_START_WEEK
+		int "Random root/supervisor account password start week"
+		default 48
+		depends on ZYXEL_RANDOM_SUPERVISOR_PASSWORD
+		
 	config ZYXEL_INDEPENDENT_WPS_METHODS
 		bool "Enable/Disable three WPS methods independently"
 		default y
+
+	config ZYXEL_SUPERVISOR_LEVEL_HTTPD_LOGIN_DENY
+		bool "Deny SUPERVISOR level account login via GUI"
+		default n
+
+	config ZYXEL_SUPERVISOR_LEVEL_LOGIN_DENY
+		bool "Deny SUPERVISOR level account login to linux via console, telnet, ssh, ftp, etc..."
+		default n
+
+	config ZYXEL_ADMIN_LEVEL_LOGIN_DENY
+		bool "Deny ADMIN level account login to linux via console, telnet, ssh, ftp, etc..."
+		default n
+
+	config ZYXEL_USER_LEVEL_LOGIN_DENY
+		bool "Deny USER level account login to linux via console, telnet, ssh, ftp, etc... DON'T enable this flag and ZYXEL_USER_LEVEL_CONSOLE_LOGIN_DENY at same time"
+		default n
 
 	config ZYXEL_USER_LEVEL_CONSOLE_LOGIN_DENY
 		bool "Deny user level account login from console"
@@ -1686,6 +1809,14 @@ menu "ZyXEL Userspace Features"
 		bool "Support WiFi WDS"
 		default n
 		
+	config ZYXEL_WIFI_SUPPORT_WPA_MIX_MODE
+		bool "Support WiFi Security Mode WPA/WPA2-PSK"
+		default n
+		
+	config ZYXEL_SUPPORT_WL_WPA2_EAP
+		bool "Support WiFi Security Mode WPA2-Enterprise"
+		default n
+		
 	config ZYXEL_WIFI_SUPPORT_CHANNEL_SCAN
 		bool "Support WiFi channel scan"
 		default y
@@ -1693,6 +1824,10 @@ menu "ZyXEL Userspace Features"
 	config ZYXEL_DISABLE_WIFI_HW_BTN
 		bool "Support WiFi/WPS hardware button can be disabled by configuration"
 		default y
+
+	config ZYXEL_ACS_WPS_ACTIVATION
+		bool "Support ACS could start WPS activation"
+		default n
 
 	config SEND_PADT_BEFORE_DISCOVERY
 		bool "Send PADT before PPPoE discovery procedure"
@@ -1708,6 +1843,15 @@ menu "ZyXEL Userspace Features"
 
         config CORE_DUMP_ZCMD
                 bool "Save the zcmd core dump log to /var/log/core_zcmd"
+                default n
+
+
+        config UPNP_SSDP_LIMIT
+                bool "Handle 1 SSDP packet at 1 second for zUPnP"
+                default n
+
+        config ZYXEL_BLOCK_PACKETS_FROM_CPE_IN_BRIDGE
+                bool "Block packet from CPE in bridge mode"
                 default n
 
 	menu "VDSL profile extra support"
@@ -1727,16 +1871,16 @@ menu "ZyXEL Userspace Features"
  		bool "TR98 Lan Ip Alias Objects"
  		default n
 	
-	config ZYXEL_DSL_SUPPORT_ANNEX_B
-        bool "Support DSL Annex B"
-        default n
-
  	config ZYXEL_SUPPORT_TR98_LOGIN_ACCOUNT
  		bool "Support TR98 Login Account Objects"
  		default n
 
 	config ZYXEL_LAN_L3_Isolation
 		bool "Isolate L3 unicast packet between different LAN subnet"
+		default n
+
+	config ZYXEL_SUPPORT_DMZ_MANAGEMENT
+		bool "Support DMZ Management "
 		default n
 
 	config INTERNET_LED_DEPEND_ON_DEFAULT_GW
@@ -1763,6 +1907,34 @@ menu "ZyXEL Userspace Features"
 		bool "Support IPv6 Ready Logo Conformance"
 		default n
 		
+	config ZYXEL_TR98_IPV6SPECIFIC
+		bool "Support IPv6 Specific objects on TR98 table"
+		default n
+	
+	config ZYXEL_RADVD_OPT
+		bool "Support RouterAdvertisement Option Objects"
+		default n
+	
+	config ZYXEL_DNS_RELAY
+		bool "Support Dns Relay Objects"
+		default n
+		
+	config ZYXEL_NEIGHBOR_DISCOVERY
+		bool "Support NeighborDiscovery Objects"
+		default n
+	
+	config ZYXEL_IPV6_GLOBAL_ENABLE
+		bool "Support ipv6 global system enable on TR98 table"
+		default n
+
+	config ZYXEL_IPV6_ULAPREFIX
+		bool "Support ipv6 ULA prefix on TR98 table"
+		default n
+
+	config ZYXEL_DHCPV6C_OPTION
+		bool "Support dhcpv6 client options on TR98 table"
+		default n
+
 	config ZYXEL_WEB_GUI_SHOW_PWR_MGMT
 		bool "Zyxel Web Gui show Power Management related pages"
 		default n
@@ -1796,9 +1968,17 @@ menu "ZyXEL Userspace Features"
         bool "Support Device.DeviceInfo.ProcessStatus.Process.i."
         default y
 
+	config ZYXEL_TR069_EXCLUDE_NONMGMTWAN_IP_CHANGE_IN_1BOOT
+		bool "TR069 1 BOOT + 4 VAULE CHANGE enent don't include those notifications for non TR069 used WAN"
+		default n
+
 	config ZYXEL_SKIP_LOG
 		bool "Support feature not to accelerate dedicated traffic."
 		default n
+
+	config ZYXEL_IPV6_IANA_IAPD
+		bool "Support IPv6 IA_NA and IA_PD Option"
+		default n		
 		
 	config ZYXEL_WIFI_SingleSKU
 		bool "Support WiFi Change SingleSKU"
@@ -1820,6 +2000,10 @@ menu "ZyXEL Userspace Features"
 		bool "The scheduler allows you to permit internet traffic from each wireless network interfaces."
                 default n
 
+        config ZYXEL_WLAN_SCHEDULER_AUTO_SWITCH_RADIO_ON
+                bool "Auto switch ON of all the WLAN radios for Extended functionality of WLAN SCHEDULER."
+                default n
+
 	config ZYXEL_TR69_URL_PATH_MAC
 		bool "Use WAN MAC to generate TR069 URL."
 		default n
@@ -1831,13 +2015,68 @@ menu "ZyXEL Userspace Features"
         config ZYXEL_ACL_HIGH_THAN_REMOMGMT
                 bool "Set iptabled chain INPUT_CF(ACL) priority high then INPUT_REMOMGMT"
                 default n
-#
+
+	config ZYXEL_WLAN_MAXBITRATE
+		bool "Enable MaxBitRate setting for WLAN."
+		default n
+
+        config ZYXEL_ISOLATED_PUBLIC_LAN
+                bool "Isolate public lan and let them be restricted to access other bridges."
+                default n
+	
+	config ZYXEL_IPV6_UPLOAD_DIAG_ENABLE
+		bool "Enable IPv6 upload diagnostic."
+		default n
+
+	config ZYXEL_DHCPV6S_LEASE
+		bool "Enable DHCPv6S lease manually."
+		default n
+
+	config ZYXEL_REMOTE_ACCESS_PRIVILEGE
+                bool "The function is meant to manage the remote accounts (more than one) as separated from local Lan/Wlan accounts."
+                default n
+	config ZYXEL_SIP_ALG_REMOVE_CONNTRACK_WHEN_INSERT_REMOVE
+		bool "Fix the issue that disabling and enabling SIP alg will make the SIP phone has wrong behavior."
+		default y
+		select PACKAGE_conntrack-tools
+
+        config ZYXEL_REMOMGMT_ONLY_HTTPS_ALLOWS_FOR_WLAN_CONNECT
+                bool "With Wi-Fi, you can only connect to REMOMGMT using HTTPS."
+                default n
+
+        config ZYXEL_FLOW_CONTROl_RGMII5_QTN
+                bool "Enable the BRCM flow control for CPU port5 with 5G QTN. The CSP:4183012"
+                default n
+
+	config ZYXEL_ADMIN_GUI_BASIC_VIEW
+                bool "Add Basic View in GUI for admin group level."
+                default n
+                
+	config ZYXEL_CLI_IDLE_TIMEOUT
+		bool "Support CLI idle timeout mechanism"
+		default n
+
+      config ZYXEL_SFP_LINKUP_DELAYTIMES
+                bool "Add SFP inteface Linkup delaytimes."
+                default n
+      config ZYXEL_SIP_DELAYTIMES
+                bool "Add Sip Linkup delaytimes."
+                default n
+                                
 endmenu
 
 menu "ZyXEL Kernel Features"
 
 	config KERNEL_ZYXEL_NF_SESSION_CTL
 		bool "Enable /proc/net/nf_session_ctl"
+		default n
+
+	config KERNEL_ZYXEL_PPTP_SUPPORT
+		bool "Support PPTP VPN"
+		default n
+		
+	config KERNEL_ZYXEL_EOGRE_SUPPORT
+		bool "Support EoGRE Tunnel"
 		default n
 
 endmenu
@@ -1883,6 +2122,14 @@ menu "ZyXEL WEB GUI"
 	config ZyXEL_WEB_GUI_SHOW_CCWAN
 		bool "Zyxel Web Gui show con-current WAN related pages and options"
 		default n
+	
+	config ZyXEL_WEB_GUI_SHOW_GPON_STATUS
+		bool "Zyxel Web Gui show GPON status pages"
+		default n
+
+	config ZYXEL_WEB_GUI_SHOW_SKIP_CHANGE_PASSWD
+		bool "Change password page show skip button"
+		default n
 
 	config ZyXEL_WEB_GUI_SHOW_CCWAN_WITHOUT_DEFGW
 		bool "Zyxel Web Gui show con-current WAN without default GW"
@@ -1908,6 +2155,10 @@ menu "ZyXEL WEB GUI"
 	config ZyXEL_WEB_GUI_SHOW_IGMP_MLD_SNOOPING
 		bool "Set Zyxel Web Gui to show IGMP/MLD snooping option in Home Networking page"
 		default n
+
+	config ZYXEL_WEB_GUI_SHOW_ENABLE_ONLINE_FW_UPGRADE
+		bool "Set Zyxel Web Gui to show Firmware Upgrade online enable option in firmware upgrade page"
+		default n
 		
 	config ZyXEL_WEB_GUI_WLAN_DFS_CHAN_CTL
 		bool "Zyxel Web Gui control DFS channel enable/disable"
@@ -1919,6 +2170,10 @@ menu "ZyXEL WEB GUI"
 
 	config ZYXEL_WEB_GUI_ECONET_QoS_STYLE
 		bool "Zyxel Web Gui Set and hide QoS Queue page objects for ECONET project"
+		default n
+
+	config ZYXEL_WEB_GUI_TRAFFIC_STATUS_FOR_ECONET
+		bool "Zyxel Web Gui Traffic Status for ECONET project"
 		default n
 
 	config ZYXEL_SUPPORT_PPPOE_MTU_1500
@@ -1947,6 +2202,29 @@ menu "ZyXEL WEB GUI"
 
 	config ZYXEL_WEB_GUI_WEP_ENABLE
 		bool "Enable WiFi WEP security setting in Web Gui"
+		default n
+
+	config ZYXEL_WEB_GUI_INDEX_SHOW_STATUS
+		bool "Show status on index"
+		default n
+
+	config ZyXEL_WEB_GUI_MGMT_SET_BIND_INTF_BY_SERVICE
+		bool "Zyxel Web Gui Set Remote MGMT Interface Binding By Each Service"
+
+	config ZYXEL_WEB_GUI_SHOW_USB_SERVICE
+		bool "Zyxel Web Gui show USB Service related pages and options"
+		default y
+
+        config ZYXEL_WEB_WIRELESS_NEW_VERSION_ONE
+                bool "Show new style of wireless page that was copied from CBT aim at original wireless page instead."
+                default n
+				
+        config ZYXEL_WEB_NETWORK_MAP_NEW_STYLE
+                bool "Show new style of networkMap page that was copied from CBT aim at original networkMap page instead."
+                default n
+
+    config ZYXEL_POWERMONITOR_ENABLE
+		bool "Zyxel Web Gui show Power Status"
 		default n
 
 endmenu
@@ -2058,6 +2336,14 @@ menu "Customization"
 			help
 			  Returning default values for getting DSL realted parameters of non-DSL WAN interfaces
 
+		config ZYXEL_DSL_AVERAGE_SIGNAL_ATTEN
+			bool "Elisa want to see the total signal attenuation at ACS that average of different bands"
+			default n
+		
+                config ZYXEL_SYNC_CCWAN_TO_ALL_DEFGW
+                        bool "Set one of the CCWAN will sync to other default GW CCWAN"
+                        default n
+
 	endmenu
 
 	menu "SuperOnline"
@@ -2160,6 +2446,21 @@ menu "Customization"
 
 	endmenu
 	
+	menu "Oi"
+		config OI_CUSTOMIZATION
+		bool "Oi Customization"
+		default n
+		
+		config OI_HOTSPOT_ENABLE
+		bool "Hide WLAN guest#3 (for hotspot) when user login as 'admin' in WEB GUI, change WLAN BSSIDs generate sequence in MT7603/NT7612."
+		default n
+		
+		config OI_WAN_MAC_FOR_VMG3625
+		bool "Change WAN MAC for OI VMG3625-T20A_Oi to match WLAN BSSID."
+		default n
+
+	endmenu
+	
 	menu "Tiscali"
 		config TISCALI_CUSTOMIZATION
 		bool "Tiscali Customization"
@@ -2233,6 +2534,12 @@ menu "Customization"
 
         endmenu
 
+	menu "Altibox"
+		config ALTIBOX_CUSTOMIZATION
+		bool "Altibox customization"
+		default n
+
+	endmenu
 
 endmenu
 

@@ -16,6 +16,8 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
+#IPv6 Ready Logo Conformance
+export CONFIG_ZYXEL_IPV6_READYLOGO_CONFORMANCE
 
 #BRCM_LIBS:=+libatmctl +libxdslctl +libcms_boardctl +libcms_util
 

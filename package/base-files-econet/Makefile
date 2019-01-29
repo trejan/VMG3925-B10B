@@ -125,7 +125,7 @@ define Package/$(PKG_NAME)/install
 	# force use dnsmasq as cpe dns proxy server.
 	echo "nameserver 127.0.0.1" > $(1)/etc/resolv.conf
 
-	chmod 0600 $(1)/usr/etc/shadow
+	#chmod 0600 $(1)/usr/etc/shadow
 
 	$(call ImageConfigOptions,$(1))
 	$(call Package/$(PKG_NAME)/install-target,$(1))

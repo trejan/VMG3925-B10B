@@ -1,17 +1,21 @@
 #ifndef _ZCFG_RDM_OBJ_H
 #define _ZCFG_RDM_OBJ_H
-typedef struct rdm_Device_s{
+
+typedef struct rdm_Device_s {   // RDM_OID_DEVICE 
 	char RootDataModelVersion[33];
 	char DeviceSummary[257];
 	uint32_t InterfaceStackNumberOfEntries;
-}rdm_Device_t;
-typedef struct rdm_Service_s{
-}rdm_Service_t;
-typedef struct rdm_VoiceSrv_s{
+} rdm_Device_t;
+
+typedef struct rdm_Service_s {   // RDM_OID_SERVICE 
+} rdm_Service_t;
+
+typedef struct rdm_VoiceSrv_s {   // RDM_OID_VOICE_SRV 
 	uint32_t VoiceProfileNumberOfEntries;
 	uint32_t X_ZYXEL_LoggingLevel;
-}rdm_VoiceSrv_t;
-typedef struct rdm_VoiceCapb_s{
+} rdm_VoiceSrv_t;
+
+typedef struct rdm_VoiceCapb_s {   // RDM_OID_VOICE_CAPB 
 	uint32_t MaxProfileCount;
 	uint32_t MaxLineCount;
 	uint32_t MaxSessionsPerLine;
@@ -44,8 +48,9 @@ typedef struct rdm_VoiceCapb_s{
 	bool NumberingPlan;
 	bool ButtonMap;
 	bool VoicePortTests;
-}rdm_VoiceCapb_t;
-typedef struct rdm_VoiceCapbSip_s{
+} rdm_VoiceCapb_t;
+
+typedef struct rdm_VoiceCapbSip_s {   // RDM_OID_VOICE_CAPB_SIP 
 	char Role[33];
 	char Extensions[257];
 	char Transports[33];
@@ -57,23 +62,27 @@ typedef struct rdm_VoiceCapbSip_s{
 	char TLSEncryptionProtocols[33];
 	char TLSEncryptionKeySizes[257];
 	char TLSKeyExchangeProtocols[33];
-}rdm_VoiceCapbSip_t;
-typedef struct rdm_VoiceCapbMgcp_s{
+} rdm_VoiceCapbSip_t;
+
+typedef struct rdm_VoiceCapbMgcp_s {   // RDM_OID_VOICE_CAPB_MGCP 
 	char Extensions[257];
-}rdm_VoiceCapbMgcp_t;
-typedef struct rdm_VoiceCapbH323_s{
+} rdm_VoiceCapbMgcp_t;
+
+typedef struct rdm_VoiceCapbH323_s {   // RDM_OID_VOICE_CAPB_H323 
 	bool FastStart;
 	char H235AuthenticationMethods[257];
-}rdm_VoiceCapbH323_t;
-typedef struct rdm_VoiceCapbCodec_s{
+} rdm_VoiceCapbH323_t;
+
+typedef struct rdm_VoiceCapbCodec_s {   // RDM_OID_VOICE_CAPB_CODEC 
 	char Alias[65];
 	uint32_t EntryID;
 	char Codec[65];
 	uint32_t BitRate;
 	char PacketizationPeriod[257];
 	bool SilenceSuppression;
-}rdm_VoiceCapbCodec_t;
-typedef struct rdm_VoiceProf_s{
+} rdm_VoiceCapbCodec_t;
+
+typedef struct rdm_VoiceProf_s {   // RDM_OID_VOICE_PROF 
 	uint32_t X_ZYXEL_ProfObjID;
 	char Enable[17];
 	bool Reset;
@@ -111,14 +120,18 @@ typedef struct rdm_VoiceProf_s{
 	uint32_t X_ZYXEL_VoipIOPFlags;
 	char X_ZYXEL_P_AccessNetworkInfo[129];
 	bool X_ZYXEL_IgnoreDirectIP;
-}rdm_VoiceProf_t;
-typedef struct rdm_VoiceProfSrvProInfo_s{
+	char X_ZYXEL_DNS_SRV_OperationMode[33];
+	char X_ZYXEL_REGISTER_ReqLineURI[33];
+} rdm_VoiceProf_t;
+
+typedef struct rdm_VoiceProfSrvProInfo_s {   // RDM_OID_VOICE_PROF_SRV_PRO_INFO 
 	char Name[257];
 	char URL[257];
 	char ContactPhoneNumber[33];
 	char EmailAddress[257];
-}rdm_VoiceProfSrvProInfo_t;
-typedef struct rdm_VoiceProfSip_s{
+} rdm_VoiceProfSrvProInfo_t;
+
+typedef struct rdm_VoiceProfSip_s {   // RDM_OID_VOICE_PROF_SIP 
 	char ProxyServer[257];
 	uint32_t ProxyServerPort;
 	char ProxyServerTransport[33];
@@ -181,39 +194,45 @@ typedef struct rdm_VoiceProfSip_s{
 	bool X_ZYXEL_Rfc3263Support;
 	bool X_ZYXEL_Option120Use;
 	char X_ZYXEL_Option120Server[257];
-}rdm_VoiceProfSip_t;
-typedef struct rdm_VoiceProfSipSubscribeObj_s{
+} rdm_VoiceProfSip_t;
+
+typedef struct rdm_VoiceProfSipSubscribeObj_s {   // RDM_OID_VOICE_PROF_SIP_SUBSCRIBE_OBJ 
 	char Event[33];
 	char Notifier[257];
 	uint32_t NotifierPort;
 	char NotifierTransport[33];
 	uint32_t ExpireTime;
-}rdm_VoiceProfSipSubscribeObj_t;
-typedef struct rdm_VoiceProfSipRespMapObj_s{
+} rdm_VoiceProfSipSubscribeObj_t;
+
+typedef struct rdm_VoiceProfSipRespMapObj_s {   // RDM_OID_VOICE_PROF_SIP_RESP_MAP_OBJ 
 	uint32_t SIPResponseNumber;
 	char TextMessage[65];
 	uint32_t Tone;
-}rdm_VoiceProfSipRespMapObj_t;
-typedef struct rdm_VoiceProfRtp_s{
+} rdm_VoiceProfSipRespMapObj_t;
+
+typedef struct rdm_VoiceProfRtp_s {   // RDM_OID_VOICE_PROF_RTP 
 	uint32_t LocalPortMin;
 	uint32_t LocalPortMax;
 	uint32_t DSCPMark;
 	int VLANIDMark;
 	int EthernetPriorityMark;
 	uint32_t TelephoneEventPayloadType;
-}rdm_VoiceProfRtp_t;
-typedef struct rdm_VoiceProfRtpRtcp_s{
+} rdm_VoiceProfRtp_t;
+
+typedef struct rdm_VoiceProfRtpRtcp_s {   // RDM_OID_VOICE_PROF_RTP_RTCP 
 	bool Enable;
 	uint32_t TxRepeatInterval;
 	char LocalCName[65];
-}rdm_VoiceProfRtpRtcp_t;
-typedef struct rdm_VoiceProfRtpSrtp_s{
+} rdm_VoiceProfRtpRtcp_t;
+
+typedef struct rdm_VoiceProfRtpSrtp_s {   // RDM_OID_VOICE_PROF_RTP_SRTP 
 	bool Enable;
 	char KeyingMethods[257];
 	char EncryptionKeySizes[257];
 	char X_ZYXEL_Crypto_Suite_Name[65];
-}rdm_VoiceProfRtpSrtp_t;
-typedef struct rdm_VoiceProfRtpRedundancy_s{
+} rdm_VoiceProfRtpSrtp_t;
+
+typedef struct rdm_VoiceProfRtpRedundancy_s {   // RDM_OID_VOICE_PROF_RTP_REDUNDANCY 
 	bool Enable;
 	uint32_t PayloadType;
 	uint32_t BlockPayloadType;
@@ -222,8 +241,9 @@ typedef struct rdm_VoiceProfRtpRedundancy_s{
 	int DTMFRedundancy;
 	int VoiceRedundancy;
 	uint32_t MaxSessionsUsingRedundancy;
-}rdm_VoiceProfRtpRedundancy_t;
-typedef struct rdm_VoiceProfNumPlan_s{
+} rdm_VoiceProfRtpRedundancy_t;
+
+typedef struct rdm_VoiceProfNumPlan_s {   // RDM_OID_VOICE_PROF_NUM_PLAN 
 	uint32_t MinimumNumberOfDigits;
 	uint32_t MaximumNumberOfDigits;
 	uint32_t InterDigitTimerStd;
@@ -233,8 +253,9 @@ typedef struct rdm_VoiceProfNumPlan_s{
 	uint32_t InvalidNumberTone;
 	uint32_t PrefixInfoMaxEntries;
 	uint32_t PrefixInfoNumberOfEntries;
-}rdm_VoiceProfNumPlan_t;
-typedef struct rdm_VoiceProfNumPlanPrefixInfo_s{
+} rdm_VoiceProfNumPlan_t;
+
+typedef struct rdm_VoiceProfNumPlanPrefixInfo_s {   // RDM_OID_VOICE_PROF_NUM_PLAN_PREFIX_INFO 
 	char PrefixRange[43];
 	uint32_t PrefixMinNumberOfDigits;
 	uint32_t PrefixMaxNumberOfDigits;
@@ -243,17 +264,20 @@ typedef struct rdm_VoiceProfNumPlanPrefixInfo_s{
 	uint32_t DialTone;
 	char FacilityAction[65];
 	char FacilityActionArgument[257];
-}rdm_VoiceProfNumPlanPrefixInfo_t;
-typedef struct rdm_VoiceProfTone_s{
+} rdm_VoiceProfNumPlanPrefixInfo_t;
+
+typedef struct rdm_VoiceProfTone_s {   // RDM_OID_VOICE_PROF_TONE 
 	uint32_t EventNumberOfEntries;
 	uint32_t DescriptionNumberOfEntries;
 	uint32_t PatternNumberOfEntries;
-}rdm_VoiceProfTone_t;
-typedef struct rdm_VoiceProfToneEvent_s{
+} rdm_VoiceProfTone_t;
+
+typedef struct rdm_VoiceProfToneEvent_s {   // RDM_OID_VOICE_PROF_TONE_EVENT 
 	char Function[33];
 	uint32_t ToneID;
-}rdm_VoiceProfToneEvent_t;
-typedef struct rdm_VoiceProfToneDescription_s{
+} rdm_VoiceProfToneEvent_t;
+
+typedef struct rdm_VoiceProfToneDescription_s {   // RDM_OID_VOICE_PROF_TONE_DESCRIPTION 
 	uint32_t EntryID;
 	bool ToneEnable;
 	char ToneName[65];
@@ -261,8 +285,9 @@ typedef struct rdm_VoiceProfToneDescription_s{
 	char ToneFile[257];
 	uint32_t ToneRepetitions;
 	char ToneText[65];
-}rdm_VoiceProfToneDescription_t;
-typedef struct rdm_VoiceProfTonePattern_s{
+} rdm_VoiceProfToneDescription_t;
+
+typedef struct rdm_VoiceProfTonePattern_s {   // RDM_OID_VOICE_PROF_TONE_PATTERN 
 	uint32_t EntryID;
 	bool ToneOn;
 	uint32_t Frequency1;
@@ -277,16 +302,18 @@ typedef struct rdm_VoiceProfTonePattern_s{
 	int ModulationPower;
 	uint32_t Duration;
 	uint32_t NextEntryID;
-}rdm_VoiceProfTonePattern_t;
-typedef struct rdm_VoiceProfFaxT38_s{
+} rdm_VoiceProfTonePattern_t;
+
+typedef struct rdm_VoiceProfFaxT38_s {   // RDM_OID_VOICE_PROF_FAX_T38 
 	bool Enable;
 	uint32_t BitRate;
 	uint32_t HighSpeedPacketRate;
 	uint32_t HighSpeedRedundancy;
 	uint32_t LowSpeedRedundancy;
 	char TCFMethod[33];
-}rdm_VoiceProfFaxT38_t;
-typedef struct rdm_VoiceLine_s{
+} rdm_VoiceProfFaxT38_t;
+
+typedef struct rdm_VoiceLine_s {   // RDM_OID_VOICE_LINE 
 	uint32_t X_ZYXEL_LineID;
 	char Enable[17];
 	char DirectoryNumber[33];
@@ -301,8 +328,9 @@ typedef struct rdm_VoiceLine_s{
 	uint32_t RingVolumeStatus;
 	uint32_t X_ZYXEL_CMAcntNum;
 	uint32_t X_ZYXEL_DoRegister;
-}rdm_VoiceLine_t;
-typedef struct rdm_VoiceLineSip_s{
+} rdm_VoiceLine_t;
+
+typedef struct rdm_VoiceLineSip_s {   // RDM_OID_VOICE_LINE_SIP 
 	char AuthUserName[129];
 	char AuthPassword[129];
 	char URI[390];
@@ -313,35 +341,41 @@ typedef struct rdm_VoiceLineSip_s{
 	char X_ZYXEL_MixerMode[33];
 	char X_ZYXEL_RemoteRingbackTone[33];
 	char X_ZYXEL_P_AccessNetworkInfo[129];
-}rdm_VoiceLineSip_t;
-typedef struct rdm_VoiceLineSipEventSubs_s{
+} rdm_VoiceLineSip_t;
+
+typedef struct rdm_VoiceLineSipEventSubs_s {   // RDM_OID_VOICE_LINE_SIP_EVENT_SUBS 
 	char Event[33];
 	char AuthUserName[129];
 	char AuthPassword[129];
-}rdm_VoiceLineSipEventSubs_t;
-typedef struct rdm_VoiceLineRinger_s{
+} rdm_VoiceLineSipEventSubs_t;
+
+typedef struct rdm_VoiceLineRinger_s {   // RDM_OID_VOICE_LINE_RINGER 
 	uint32_t EventNumberOfEntries;
 	uint32_t DescriptionNumberOfEntries;
 	uint32_t PatternNumberOfEntries;
-}rdm_VoiceLineRinger_t;
-typedef struct rdm_VoiceLineRingerEvent_s{
+} rdm_VoiceLineRinger_t;
+
+typedef struct rdm_VoiceLineRingerEvent_s {   // RDM_OID_VOICE_LINE_RINGER_EVENT 
 	char Function[33];
 	uint32_t RingID;
-}rdm_VoiceLineRingerEvent_t;
-typedef struct rdm_VoiceLineRingerDescription_s{
+} rdm_VoiceLineRingerEvent_t;
+
+typedef struct rdm_VoiceLineRingerDescription_s {   // RDM_OID_VOICE_LINE_RINGER_DESCRIPTION 
 	uint32_t EntryID;
 	bool RingEnable;
 	char RingName[65];
 	uint32_t RingPattern;
 	char RingFile[257];
-}rdm_VoiceLineRingerDescription_t;
-typedef struct rdm_VoiceLineRingerPattern_s{
+} rdm_VoiceLineRingerDescription_t;
+
+typedef struct rdm_VoiceLineRingerPattern_s {   // RDM_OID_VOICE_LINE_RINGER_PATTERN 
 	uint32_t EntryID;
 	bool RingerOn;
 	uint32_t Duration;
 	uint32_t NextEntryID;
-}rdm_VoiceLineRingerPattern_t;
-typedef struct rdm_VoiceLineCallingFeature_s{
+} rdm_VoiceLineRingerPattern_t;
+
+typedef struct rdm_VoiceLineCallingFeature_s {   // RDM_OID_VOICE_LINE_CALLING_FEATURE 
 	bool CallerIDEnable;
 	bool CallerIDNameEnable;
 	char CallerIDName[257];
@@ -403,15 +437,17 @@ typedef struct rdm_VoiceLineCallingFeature_s{
 	bool X_ZYXEL_VMWIEnable;
 	bool X_ZYXEL_EnumEnablee;
 	bool X_ZYXEL_EnumStart;
-}rdm_VoiceLineCallingFeature_t;
-typedef struct rdm_VoiceLineProcessing_s{
+} rdm_VoiceLineCallingFeature_t;
+
+typedef struct rdm_VoiceLineProcessing_s {   // RDM_OID_VOICE_LINE_PROCESSING 
 	int TransmitGain;
 	int ReceiveGain;
 	bool EchoCancellationEnable;
 	bool EchoCancellationInUse;
 	uint32_t EchoCancellationTail;
-}rdm_VoiceLineProcessing_t;
-typedef struct rdm_VoiceLineCodec_s{
+} rdm_VoiceLineProcessing_t;
+
+typedef struct rdm_VoiceLineCodec_s {   // RDM_OID_VOICE_LINE_CODEC 
 	char TransmitCodec[65];
 	char ReceiveCodec[65];
 	uint32_t TransmitBitRate;
@@ -419,8 +455,9 @@ typedef struct rdm_VoiceLineCodec_s{
 	bool TransmitSilenceSuppression;
 	bool ReceiveSilenceSuppression;
 	uint32_t TransmitPacketizationPeriod;
-}rdm_VoiceLineCodec_t;
-typedef struct rdm_VoiceLineCodecList_s{
+} rdm_VoiceLineCodec_t;
+
+typedef struct rdm_VoiceLineCodecList_s {   // RDM_OID_VOICE_LINE_CODEC_LIST 
 	uint32_t EntryID;
 	char Codec[65];
 	uint32_t BitRate;
@@ -430,15 +467,17 @@ typedef struct rdm_VoiceLineCodecList_s{
 	bool Enable;
 	uint32_t Priority;
 	bool X_ZYXEL_ComfortNoise;
-}rdm_VoiceLineCodecList_t;
-typedef struct rdm_VoiceLineSession_s{
+} rdm_VoiceLineCodecList_t;
+
+typedef struct rdm_VoiceLineSession_s {   // RDM_OID_VOICE_LINE_SESSION 
 	char SessionStartTime[32];
 	uint32_t SessionDuration;
 	char FarEndIPAddress[65];
 	uint32_t FarEndUDPPort;
 	uint32_t LocalUDPPort;
-}rdm_VoiceLineSession_t;
-typedef struct rdm_VoiceLineStats_s{
+} rdm_VoiceLineSession_t;
+
+typedef struct rdm_VoiceLineStats_s {   // RDM_OID_VOICE_LINE_STATS 
 	bool ResetStatistics;
 	uint32_t PacketsSent;
 	uint32_t PacketsReceived;
@@ -470,12 +509,12 @@ typedef struct rdm_VoiceLineStats_s{
 	char X_ZYXEL_LastIncommingNumber[65];
 	char X_ZYXEL_LastOutgoingNumber[65];
 	bool X_ZYXEL_MWIStatus;
-}rdm_VoiceLineStats_t;
-typedef struct rdm_VoicePhyIntf_s{
+} rdm_VoiceLineStats_t;
+
+typedef struct rdm_VoicePhyIntf_s {   // RDM_OID_VOICE_PHY_INTF 
 	char PhyPort[3];
 	uint32_t InterfaceID;
 	char Description[33];
-	uint32_t NumberOfLines;
 	char X_ZYXEL_PotsType[33];
 	char X_ZYXEL_DialingType[33];
 	char X_ZYXEL_DialToneType[33];
@@ -497,16 +536,18 @@ typedef struct rdm_VoicePhyIntf_s{
 	uint32_t X_ZYXEL_MsnOutgoingSelect;
 	uint32_t X_ZYXEL_HowlerToneTimeout;
 	bool X_ZYXEL_Pound;
-}rdm_VoicePhyIntf_t;
-typedef struct rdm_VoicePstn_s{
+} rdm_VoicePhyIntf_t;
+
+typedef struct rdm_VoicePstn_s {   // RDM_OID_VOICE_PSTN 
 	char OutgoingCallDialPlan[129];
 	char IncomingCallRoutingMode[33];
 	char IncomingCallRoutingDest[257];
 	char ForcePSTNTab[37];
 	uint32_t Flags;
 	char Reversed[3];
-}rdm_VoicePstn_t;
-typedef struct rdm_VoiceCommon_s{
+} rdm_VoicePstn_t;
+
+typedef struct rdm_VoiceCommon_s {   // RDM_OID_VOICE_COMMON 
 	char IfName[33];
 	uint32_t VoipPort;
 	bool Ivrsyspermit;
@@ -521,46 +562,56 @@ typedef struct rdm_VoiceCommon_s{
 	bool CustomUserAgentNameEnable;
 	char CustomUserAgentName[129];
 	char P_AccessNetworkInfo[129];
-}rdm_VoiceCommon_t;
-typedef struct rdm_VoicePhoneBook_s{
-}rdm_VoicePhoneBook_t;
-typedef struct rdm_SpeedDialBook_s{
+} rdm_VoiceCommon_t;
+
+typedef struct rdm_VoicePhoneBook_s {   // RDM_OID_VOICE_PHONE_BOOK 
+} rdm_VoicePhoneBook_t;
+
+typedef struct rdm_SpeedDialBook_s {   // RDM_OID_SPEED_DIAL_BOOK 
 	uint32_t SpeedDialBookNumberOfEntries;
-}rdm_SpeedDialBook_t;
-typedef struct rdm_SpeedDialBookList_s{
+} rdm_SpeedDialBook_t;
+
+typedef struct rdm_SpeedDialBookList_s {   // RDM_OID_SPEED_DIAL_BOOK_LIST 
 	char OrigNumber[129];
 	char ForceSipURI[257];
 	char SpeedNumber[129];
 	char Name[129];
 	char Flags[33];
 	char Type[33];
-}rdm_SpeedDialBookList_t;
-typedef struct rdm_CallPolicyBook_s{
+} rdm_SpeedDialBookList_t;
+
+typedef struct rdm_CallPolicyBook_s {   // RDM_OID_CALL_POLICY_BOOK 
 	uint32_t CallPolicyBookNumberOfEntries;
 	char Type[13];
-}rdm_CallPolicyBook_t;
-typedef struct rdm_CallPolicyBookList_s{
+} rdm_CallPolicyBook_t;
+
+typedef struct rdm_CallPolicyBookList_s {   // RDM_OID_CALL_POLICY_BOOK_LIST 
 	bool Enable;
 	char PhoneNumber[129];
 	char Direction[13];
 	char Method[16];
 	char ForwardToNumber[129];
 	char Description[129];
-}rdm_CallPolicyBookList_t;
-typedef struct rdm_VoiceInternalPhoneNumberBook_s{
+} rdm_CallPolicyBookList_t;
+
+typedef struct rdm_VoiceInternalPhoneNumberBook_s {   // RDM_OID_VOICE_INTERNAL_PHONE_NUMBER_BOOK 
 	uint32_t NumberOfInterface;
-}rdm_VoiceInternalPhoneNumberBook_t;
-typedef struct rdm_VoiceInternalPhoneNumberBookIfList_s{
+} rdm_VoiceInternalPhoneNumberBook_t;
+
+typedef struct rdm_VoiceInternalPhoneNumberBookIfList_s {   // RDM_OID_VOICE_INTERNAL_PHONE_NUMBER_BOOK_IF_LIST 
 	char NameOfPhonePortType[65];
 	uint32_t NumberOfPhonePortType;
-}rdm_VoiceInternalPhoneNumberBookIfList_t;
-typedef struct rdm_VoiceInternalPhoneNumberBookPortList_s{
+} rdm_VoiceInternalPhoneNumberBookIfList_t;
+
+typedef struct rdm_VoiceInternalPhoneNumberBookPortList_s {   // RDM_OID_VOICE_INTERNAL_PHONE_NUMBER_BOOK_PORT_LIST 
 	char PhoneNumber[65];
-}rdm_VoiceInternalPhoneNumberBookPortList_t;
-typedef struct rdm_VoiceFxo_s{
+} rdm_VoiceInternalPhoneNumberBookPortList_t;
+
+typedef struct rdm_VoiceFxo_s {   // RDM_OID_VOICE_FXO 
 	uint32_t NumberOfPort;
-}rdm_VoiceFxo_t;
-typedef struct rdm_VoiceFxoPort_s{
+} rdm_VoiceFxo_t;
+
+typedef struct rdm_VoiceFxoPort_s {   // RDM_OID_VOICE_FXO_PORT 
 	uint32_t FxoDialLongInterval;
 	uint32_t FxoPhoneSelect;
 	uint32_t FxoDTMFPauseDuration;
@@ -571,11 +622,13 @@ typedef struct rdm_VoiceFxoPort_s{
 	uint32_t Reversed2;
 	uint32_t PollingPollarityTime;
 	uint32_t DetectCIDInterval;
-}rdm_VoiceFxoPort_t;
-typedef struct rdm_VoiceDect_s{
+} rdm_VoiceFxoPort_t;
+
+typedef struct rdm_VoiceDect_s {   // RDM_OID_VOICE_DECT 
 	uint32_t NumberOfHandset;
-}rdm_VoiceDect_t;
-typedef struct rdm_VoiceDectBS_s{
+} rdm_VoiceDect_t;
+
+typedef struct rdm_VoiceDectBS_s {   // RDM_OID_VOICE_DECT_B_S 
 	bool FunctionEnable;
 	char Name[14];
 	char PINcode[5];
@@ -595,8 +648,9 @@ typedef struct rdm_VoiceDectBS_s{
 	uint32_t PagingHSOnDuration;
 	bool DoFirmwareUpgrade;
 	char FirmwareURL[257];
-}rdm_VoiceDectBS_t;
-typedef struct rdm_VoiceDectHS_s{
+} rdm_VoiceDectBS_t;
+
+typedef struct rdm_VoiceDectHS_s {   // RDM_OID_VOICE_DECT_H_S 
 	bool RegisterStatus;
 	char Name[33];
 	uint32_t Index;
@@ -609,8 +663,9 @@ typedef struct rdm_VoiceDectHS_s{
 	char InternalPhoneNumber[65];
 	uint32_t State;
 	char LineSelect[257];
-}rdm_VoiceDectHS_t;
-typedef struct rdm_VoiceCallStatus_s{
+} rdm_VoiceDectHS_t;
+
+typedef struct rdm_VoiceCallStatus_s {   // RDM_OID_VOICE_CALL_STATUS 
 	char Status[129];
 	char CallStartTime[129];
 	char SelfNumber[513];
@@ -619,8 +674,9 @@ typedef struct rdm_VoiceCallStatus_s{
 	char FromPhonePortType[65];
 	char ToPhonePortType[65];
 	char CallType[129];
-}rdm_VoiceCallStatus_t;
-typedef struct rdm_DevInfo_s{
+} rdm_VoiceCallStatus_t;
+
+typedef struct rdm_DevInfo_s {   // RDM_OID_DEV_INFO 
 	char Manufacturer[65];
 	char ManufacturerOUI[7];
 	char FixManufacturerOUI[7];
@@ -642,40 +698,47 @@ typedef struct rdm_DevInfo_s{
 	uint32_t ProcessorNumberOfEntries;
 	uint32_t VendorLogFileNumberOfEntries;
 	uint32_t LocationNumberOfEntries;
-}rdm_DevInfo_t;
-typedef struct rdm_DevInfoVendConfFile_s{
+} rdm_DevInfo_t;
+
+typedef struct rdm_DevInfoVendConfFile_s {   // RDM_OID_DEV_INFO_VEND_CONF_FILE 
 	char Alias[65];
 	char Name[65];
 	char Version[17];
 	char Date[32];
 	char Description[257];
-}rdm_DevInfoVendConfFile_t;
-typedef struct rdm_DevInfoSupDataModel_s{
+} rdm_DevInfoVendConfFile_t;
+
+typedef struct rdm_DevInfoSupDataModel_s {   // RDM_OID_DEV_INFO_SUP_DATA_MODEL 
 	char Alias[65];
 	char URL[257];
 	char URN[257];
 	char Features[257];
-}rdm_DevInfoSupDataModel_t;
-typedef struct rdm_DevInfoMemStat_s{
+} rdm_DevInfoSupDataModel_t;
+
+typedef struct rdm_DevInfoMemStat_s {   // RDM_OID_DEV_INFO_MEM_STAT 
 	uint32_t Total;
 	uint32_t Free;
-}rdm_DevInfoMemStat_t;
-typedef struct rdm_DevInfoPsStat_s{
+} rdm_DevInfoMemStat_t;
+
+typedef struct rdm_DevInfoPsStat_s {   // RDM_OID_DEV_INFO_PS_STAT 
 	uint32_t CPUUsage;
 	uint32_t ProcessNumberOfEntries;
-}rdm_DevInfoPsStat_t;
-typedef struct rdm_DevInfoPsStatPs_s{
+} rdm_DevInfoPsStat_t;
+
+typedef struct rdm_DevInfoPsStatPs_s {   // RDM_OID_DEV_INFO_PS_STAT_PS 
 	uint32_t PID;
 	char Command[257];
 	uint32_t Size;
 	uint32_t Priority;
 	uint32_t CPUTime;
 	char State[27];
-}rdm_DevInfoPsStatPs_t;
-typedef struct rdm_TempStat_s{
+} rdm_DevInfoPsStatPs_t;
+
+typedef struct rdm_TempStat_s {   // RDM_OID_TEMP_STAT 
 	uint32_t TemperatureSensorNumberOfEntries;
-}rdm_TempStat_t;
-typedef struct rdm_TempStatTempSensor_s{
+} rdm_TempStat_t;
+
+typedef struct rdm_TempStatTempSensor_s {   // RDM_OID_TEMP_STAT_TEMP_SENSOR 
 	char Alias[65];
 	bool Enable;
 	char Status[9];
@@ -693,35 +756,46 @@ typedef struct rdm_TempStatTempSensor_s{
 	int HighAlarmValue;
 	uint32_t PollingInterval;
 	char HighAlarmTime[32];
-}rdm_TempStatTempSensor_t;
-typedef struct rdm_NetworkProp_s{
+} rdm_TempStatTempSensor_t;
+
+typedef struct rdm_NetworkProp_s {   // RDM_OID_NETWORK_PROP 
 	uint32_t MaxTCPWindowSize;
 	char TCPImplementation[266];
-}rdm_NetworkProp_t;
-typedef struct rdm_DevInfoProcessor_s{
+} rdm_NetworkProp_t;
+
+typedef struct rdm_DevInfoProcessor_s {   // RDM_OID_DEV_INFO_PROCESSOR 
 	char Alias[65];
 	char Architecture[8];
-}rdm_DevInfoProcessor_t;
-typedef struct rdm_DevInfoVendorLogFile_s{
+} rdm_DevInfoProcessor_t;
+
+typedef struct rdm_DevInfoVendorLogFile_s {   // RDM_OID_DEV_INFO_VENDOR_LOG_FILE 
 	char Alias[65];
 	char Name[65];
 	uint32_t MaximumSize;
 	bool Persistent;
-}rdm_DevInfoVendorLogFile_t;
-typedef struct rdm_DevInfoProxierInfo_s{
+} rdm_DevInfoVendorLogFile_t;
+
+typedef struct rdm_DevInfoProxierInfo_s {   // RDM_OID_DEV_INFO_PROXIER_INFO 
 	char ManufacturerOUI[7];
 	char ProductClass[65];
 	char SerialNumber[65];
 	char ProxyProtocol[65];
-}rdm_DevInfoProxierInfo_t;
-typedef struct rdm_DevInfoLoc_s{
+} rdm_DevInfoProxierInfo_t;
+
+typedef struct rdm_DevInfoLoc_s {   // RDM_OID_DEV_INFO_LOC 
 	char Source[9];
 	char AcquiredTime[32];
 	char ExternalSource[257];
 	char ExternalProtocol[26];
 	char DataObject[1201];
-}rdm_DevInfoLoc_t;
-typedef struct rdm_MgmtSrv_s{
+} rdm_DevInfoLoc_t;
+
+typedef struct rdm_DevInfoPowerStat_s {   // RDM_OID_DEV_INFO_POWER_STAT 
+	uint32_t Max;
+	uint32_t Current;
+} rdm_DevInfoPowerStat_t;
+
+typedef struct rdm_MgmtSrv_s {   // RDM_OID_MGMT_SRV 
 	bool EnableCWMP;
 	char URL[257];
 	char X_ZYXEL_FallbackURL[257];
@@ -782,50 +856,62 @@ typedef struct rdm_MgmtSrv_s{
 	char X_ZYXEL_v6ConnectionRequestURL[257];
 	char X_ZYXEL_SetConnReqURLMode[33];
 	bool X_ZYXEL_UtilizeDelayApply;
+	bool X_ZYXEL_SpvOnSessionComplete;
 	bool X_ZYXEL_AcsSpvNotifyRequired;
 	bool X_ZYXEL_AcsUrlModifyAndClearTransData;
+	bool X_ZYXEL_CheckCertificate;
 	bool X_ZYXEL_CheckCertificateCN;
 	bool X_ZYXEL_TR181SpvPartialSet;
-}rdm_MgmtSrv_t;
-typedef struct rdm_MgmtSrvMgabDev_s{
+	uint32_t X_ZYXEL_MaxIndexObjectQueryNum;
+	bool X_ZYXEL_PreSharedKeyOperation;
+} rdm_MgmtSrv_t;
+
+typedef struct rdm_MgmtSrvMgabDev_s {   // RDM_OID_MGMT_SRV_MGAB_DEV 
 	char Alias[65];
 	char ManufacturerOUI[7];
 	char SerialNumber[65];
 	char ProductClass[65];
 	char Host[1025];
 	char X_ZYXEL_MacAddress[18];
-}rdm_MgmtSrvMgabDev_t;
-typedef struct rdm_MgmtSrvAutoTransCompletePol_s{
+} rdm_MgmtSrvMgabDev_t;
+
+typedef struct rdm_MgmtSrvAutoTransCompletePol_s {   // RDM_OID_MGMT_SRV_AUTO_TRANS_COMPLETE_POL 
 	bool Enable;
 	char TransferTypeFilter[9];
 	char ResultTypeFilter[8];
 	char FileTypeFilter[1025];
-}rdm_MgmtSrvAutoTransCompletePol_t;
-typedef struct rdm_MgmtSrvDlAvail_s{
-}rdm_MgmtSrvDlAvail_t;
-typedef struct rdm_MgmtSrvDlAvailAnncmnt_s{
+} rdm_MgmtSrvAutoTransCompletePol_t;
+
+typedef struct rdm_MgmtSrvDlAvail_s {   // RDM_OID_MGMT_SRV_DL_AVAIL 
+} rdm_MgmtSrvDlAvail_t;
+
+typedef struct rdm_MgmtSrvDlAvailAnncmnt_s {   // RDM_OID_MGMT_SRV_DL_AVAIL_ANNCMNT 
 	bool Enable;
 	char Status[9];
 	uint32_t GroupNumberOfEntries;
-}rdm_MgmtSrvDlAvailAnncmnt_t;
-typedef struct rdm_MgmtSrvDlAvailAnncmntGroup_s{
+} rdm_MgmtSrvDlAvailAnncmnt_t;
+
+typedef struct rdm_MgmtSrvDlAvailAnncmntGroup_s {   // RDM_OID_MGMT_SRV_DL_AVAIL_ANNCMNT_GROUP 
 	char Alias[65];
 	bool Enable;
 	char Status[9];
 	char URL[257];
-}rdm_MgmtSrvDlAvailAnncmntGroup_t;
-typedef struct rdm_MgmtSrvDlAvailQuery_s{
+} rdm_MgmtSrvDlAvailAnncmntGroup_t;
+
+typedef struct rdm_MgmtSrvDlAvailQuery_s {   // RDM_OID_MGMT_SRV_DL_AVAIL_QUERY 
 	bool Enable;
 	char Status[9];
 	char URL[257];
-}rdm_MgmtSrvDlAvailQuery_t;
-typedef struct rdm_MgmtSrvDuStateChangeComplPol_s{
+} rdm_MgmtSrvDlAvailQuery_t;
+
+typedef struct rdm_MgmtSrvDuStateChangeComplPol_s {   // RDM_OID_MGMT_SRV_DU_STATE_CHANGE_COMPL_POL 
 	bool Enable;
 	char OperationTypeFilter[10];
 	char ResultTypeFilter[9];
 	char FaultCodeFilter[6];
-}rdm_MgmtSrvDuStateChangeComplPol_t;
-typedef struct rdm_MgmtSrvEmbededDev_s{
+} rdm_MgmtSrvDuStateChangeComplPol_t;
+
+typedef struct rdm_MgmtSrvEmbededDev_s {   // RDM_OID_MGMT_SRV_EMBEDED_DEV 
 	char ControllerID[257];
 	char ProxiedDeviceID[257];
 	char Reference[257];
@@ -835,20 +921,23 @@ typedef struct rdm_MgmtSrvEmbededDev_s{
 	char CommandProcessed[10];
 	char CommandProcessingErrMsg[1025];
 	char LastSyncTime[32];
-}rdm_MgmtSrvEmbededDev_t;
-typedef struct rdm_MgmtSrvVirtualDev_s{
+} rdm_MgmtSrvEmbededDev_t;
+
+typedef struct rdm_MgmtSrvVirtualDev_s {   // RDM_OID_MGMT_SRV_VIRTUAL_DEV 
 	char ManufacturerOUI[7];
 	char ProductClass[65];
 	char SerialNumber[65];
 	char Host[65];
 	char ProxyProtocol[65];
-}rdm_MgmtSrvVirtualDev_t;
-typedef struct rdm_GatewayInfo_s{
+} rdm_MgmtSrvVirtualDev_t;
+
+typedef struct rdm_GatewayInfo_s {   // RDM_OID_GATEWAY_INFO 
 	char ManufacturerOUI[7];
 	char ProductClass[65];
 	char SerialNumber[65];
-}rdm_GatewayInfo_t;
-typedef struct rdm_Time_s{
+} rdm_GatewayInfo_t;
+
+typedef struct rdm_Time_s {   // RDM_OID_TIME 
 	bool Enable;
 	char Status[27];
 	char NTPServer1[65];
@@ -875,8 +964,9 @@ typedef struct rdm_Time_s{
 	uint32_t X_ZYXEL_EndHour;
 	uint32_t X_ZYXEL_EndMin;
 	uint32_t X_ZYXEL_Sync_Interval;
-}rdm_Time_t;
-typedef struct rdm_UsrIntf_s{
+} rdm_Time_t;
+
+typedef struct rdm_UsrIntf_s {   // RDM_OID_USR_INTF 
 	bool PasswordRequired;
 	bool PasswordUserSelectable;
 	bool PasswordReset;
@@ -898,15 +988,18 @@ typedef struct rdm_UsrIntf_s{
 	char UserUpdateServer[257];
 	char AvailableLanguages[257];
 	char CurrentLanguage[17];
+	bool CurrentGUIView;
 	int X_ZYXEL_Timeout;
-}rdm_UsrIntf_t;
-typedef struct rdm_UsrIntfRemoAcess_s{
+} rdm_UsrIntf_t;
+
+typedef struct rdm_UsrIntfRemoAcess_s {   // RDM_OID_USR_INTF_REMO_ACESS 
 	bool Enable;
 	uint32_t Port;
 	char SupportedProtocols[7];
 	char Protocol[257];
-}rdm_UsrIntfRemoAcess_t;
-typedef struct rdm_UsrIntfLocalDisp_s{
+} rdm_UsrIntfRemoAcess_t;
+
+typedef struct rdm_UsrIntfLocalDisp_s {   // RDM_OID_USR_INTF_LOCAL_DISP 
 	bool Movable;
 	bool Resizable;
 	int PosX;
@@ -915,20 +1008,23 @@ typedef struct rdm_UsrIntfLocalDisp_s{
 	uint32_t Height;
 	uint32_t DisplayWidth;
 	uint32_t DisplayHeight;
-}rdm_UsrIntfLocalDisp_t;
-typedef struct rdm_IfaceStack_s{
+} rdm_UsrIntfLocalDisp_t;
+
+typedef struct rdm_IfaceStack_s {   // RDM_OID_IFACE_STACK 
 	char Alias[65];
 	char HigherLayer[257];
 	char LowerLayer[257];
 	char HigherAlias[65];
 	char LowerAlias[65];
-}rdm_IfaceStack_t;
-typedef struct rdm_Dsl_s{
+} rdm_IfaceStack_t;
+
+typedef struct rdm_Dsl_s {   // RDM_OID_DSL 
 	uint32_t LineNumberOfEntries;
 	uint32_t ChannelNumberOfEntries;
 	uint32_t BondingGroupNumberOfEntries;
-}rdm_Dsl_t;
-typedef struct rdm_DslLine_s{
+} rdm_Dsl_t;
+
+typedef struct rdm_DslLine_s {   // RDM_OID_DSL_LINE 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -998,6 +1094,7 @@ typedef struct rdm_DslLine_s{
 	bool X_ZYXEL_VDSL_35b;
 	bool X_ZYXEL_VDSL_US0_8a;
 	bool X_ZYXEL_ADSL2_AnnexM;
+	char X_ZYXEL_ADSL2_AnnexA_B[17];
 	char X_ZYXEL_PhoneLinePair[17];
 	char X_ZYXEL_Bitswap[9];
 	char X_ZYXEL_SRA[9];
@@ -1092,8 +1189,10 @@ typedef struct rdm_DslLine_s{
 	char X_ZYXEL_EOC_VENDOR_ID[33];
 	char X_ZYXEL_EOC_SERIAL[33];
 	char X_ZYXEL_EOC_VERSION[33];
-}rdm_DslLine_t;
-typedef struct rdm_DslLineSt_s{
+	char X_ZYXEL_DSL_Up_Time[33];
+} rdm_DslLine_t;
+
+typedef struct rdm_DslLineSt_s {   // RDM_OID_DSL_LINE_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -1107,8 +1206,9 @@ typedef struct rdm_DslLineSt_s{
 	uint32_t LastShowtimeStart;
 	uint32_t CurrentDayStart;
 	uint32_t QuarterHourStart;
-}rdm_DslLineSt_t;
-typedef struct rdm_DslLineStTotal_s{
+} rdm_DslLineSt_t;
+
+typedef struct rdm_DslLineStTotal_s {   // RDM_OID_DSL_LINE_ST_TOTAL 
 	uint32_t ErroredSecs;
 	uint32_t SeverelyErroredSecs;
 	uint32_t X_ZYXEL_ReceiveBlocks;
@@ -1128,8 +1228,9 @@ typedef struct rdm_DslLineStTotal_s{
 	uint32_t X_ZYXEL_ATUCHECErrors;
 	uint32_t X_ZYXEL_CRCErrors;
 	uint32_t X_ZYXEL_ATUCCRCErrors;
-}rdm_DslLineStTotal_t;
-typedef struct rdm_DslLineStShowtime_s{
+} rdm_DslLineStTotal_t;
+
+typedef struct rdm_DslLineStShowtime_s {   // RDM_OID_DSL_LINE_ST_SHOWTIME 
 	uint32_t ErroredSecs;
 	uint32_t SeverelyErroredSecs;
 	uint32_t X_ZYXEL_ReceiveBlocks;
@@ -1149,12 +1250,14 @@ typedef struct rdm_DslLineStShowtime_s{
 	uint32_t X_ZYXEL_ATUCHECErrors;
 	uint32_t X_ZYXEL_CRCErrors;
 	uint32_t X_ZYXEL_ATUCCRCErrors;
-}rdm_DslLineStShowtime_t;
-typedef struct rdm_DslLineStLastShowtime_s{
+} rdm_DslLineStShowtime_t;
+
+typedef struct rdm_DslLineStLastShowtime_s {   // RDM_OID_DSL_LINE_ST_LAST_SHOWTIME 
 	uint32_t ErroredSecs;
 	uint32_t SeverelyErroredSecs;
-}rdm_DslLineStLastShowtime_t;
-typedef struct rdm_DslLineStLastCurDay_s{
+} rdm_DslLineStLastShowtime_t;
+
+typedef struct rdm_DslLineStLastCurDay_s {   // RDM_OID_DSL_LINE_ST_LAST_CUR_DAY 
 	uint32_t ErroredSecs;
 	uint32_t SeverelyErroredSecs;
 	uint32_t X_ZYXEL_ReceiveBlocks;
@@ -1174,12 +1277,14 @@ typedef struct rdm_DslLineStLastCurDay_s{
 	uint32_t X_ZYXEL_ATUCHECErrors;
 	uint32_t X_ZYXEL_CRCErrors;
 	uint32_t X_ZYXEL_ATUCCRCErrors;
-}rdm_DslLineStLastCurDay_t;
-typedef struct rdm_DslLineStLastQuarHr_s{
+} rdm_DslLineStLastCurDay_t;
+
+typedef struct rdm_DslLineStLastQuarHr_s {   // RDM_OID_DSL_LINE_ST_LAST_QUAR_HR 
 	uint32_t ErroredSecs;
 	uint32_t SeverelyErroredSecs;
-}rdm_DslLineStLastQuarHr_t;
-typedef struct rdm_DslLineTestParams_s{
+} rdm_DslLineStLastQuarHr_t;
+
+typedef struct rdm_DslLineTestParams_s {   // RDM_OID_DSL_LINE_TEST_PARAMS 
 	uint32_t HLOGGds;
 	uint32_t HLOGGus;
 	char HLOGpsds[2560];
@@ -1202,8 +1307,9 @@ typedef struct rdm_DslLineTestParams_s{
 	char LATNus[25];
 	char SATNds[25];
 	char SATNus[25];
-}rdm_DslLineTestParams_t;
-typedef struct rdm_DslChannel_s{
+} rdm_DslLineTestParams_t;
+
+typedef struct rdm_DslChannel_s {   // RDM_OID_DSL_CHANNEL 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -1223,8 +1329,10 @@ typedef struct rdm_DslChannel_s{
 	int LSYMB;
 	uint32_t UpstreamCurrRate;
 	uint32_t DownstreamCurrRate;
-}rdm_DslChannel_t;
-typedef struct rdm_DslChannelSt_s{
+	char DSLUpTime[33];
+} rdm_DslChannel_t;
+
+typedef struct rdm_DslChannelSt_s {   // RDM_OID_DSL_CHANNEL_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -1238,48 +1346,54 @@ typedef struct rdm_DslChannelSt_s{
 	uint32_t LastShowtimeStart;
 	uint32_t CurrentDayStart;
 	uint32_t QuarterHourStart;
-}rdm_DslChannelSt_t;
-typedef struct rdm_DslChannelStTotal_s{
+} rdm_DslChannelSt_t;
+
+typedef struct rdm_DslChannelStTotal_s {   // RDM_OID_DSL_CHANNEL_ST_TOTAL 
 	uint32_t XTURFECErrors;
 	uint32_t XTUCFECErrors;
 	uint32_t XTURHECErrors;
 	uint32_t XTUCHECErrors;
 	uint32_t XTURCRCErrors;
 	uint32_t XTUCCRCErrors;
-}rdm_DslChannelStTotal_t;
-typedef struct rdm_DslChannelStShowtime_s{
+} rdm_DslChannelStTotal_t;
+
+typedef struct rdm_DslChannelStShowtime_s {   // RDM_OID_DSL_CHANNEL_ST_SHOWTIME 
 	uint32_t XTURFECErrors;
 	uint32_t XTUCFECErrors;
 	uint32_t XTURHECErrors;
 	uint32_t XTUCHECErrors;
 	uint32_t XTURCRCErrors;
 	uint32_t XTUCCRCErrors;
-}rdm_DslChannelStShowtime_t;
-typedef struct rdm_DslChannelStLastShowtime_s{
+} rdm_DslChannelStShowtime_t;
+
+typedef struct rdm_DslChannelStLastShowtime_s {   // RDM_OID_DSL_CHANNEL_ST_LAST_SHOWTIME 
 	uint32_t XTURFECErrors;
 	uint32_t XTUCFECErrors;
 	uint32_t XTURHECErrors;
 	uint32_t XTUCHECErrors;
 	uint32_t XTURCRCErrors;
 	uint32_t XTUCCRCErrors;
-}rdm_DslChannelStLastShowtime_t;
-typedef struct rdm_DslChannelStCurDay_s{
+} rdm_DslChannelStLastShowtime_t;
+
+typedef struct rdm_DslChannelStCurDay_s {   // RDM_OID_DSL_CHANNEL_ST_CUR_DAY 
 	uint32_t XTURFECErrors;
 	uint32_t XTUCFECErrors;
 	uint32_t XTURHECErrors;
 	uint32_t XTUCHECErrors;
 	uint32_t XTURCRCErrors;
 	uint32_t XTUCCRCErrors;
-}rdm_DslChannelStCurDay_t;
-typedef struct rdm_DslChannelStQuarHr_s{
+} rdm_DslChannelStCurDay_t;
+
+typedef struct rdm_DslChannelStQuarHr_s {   // RDM_OID_DSL_CHANNEL_ST_QUAR_HR 
 	uint32_t XTURFECErrors;
 	uint32_t XTUCFECErrors;
 	uint32_t XTURHECErrors;
 	uint32_t XTUCHECErrors;
 	uint32_t XTURCRCErrors;
 	uint32_t XTUCCRCErrors;
-}rdm_DslChannelStQuarHr_t;
-typedef struct rdm_DslBondGp_s{
+} rdm_DslChannelStQuarHr_t;
+
+typedef struct rdm_DslBondGp_s {   // RDM_OID_DSL_BOND_GP 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -1300,14 +1414,17 @@ typedef struct rdm_DslBondGp_s{
 	uint32_t DownstreamDifferentialDelayTolerance;
 	uint32_t BondedChannelNumberOfEntries;
 	uint32_t X_ZYXEL_TimeStampLastChange;
-}rdm_DslBondGp_t;
-typedef struct rdm_DslBondGpBondedChannel_s{
+} rdm_DslBondGp_t;
+
+typedef struct rdm_DslBondGpBondedChannel_s {   // RDM_OID_DSL_BOND_GP_BONDED_CHANNEL 
 	char Alias[65];
 	char Channel[257];
-}rdm_DslBondGpBondedChannel_t;
-typedef struct rdm_DslBondGpBondedChannelEth_s{
-}rdm_DslBondGpBondedChannelEth_t;
-typedef struct rdm_DslBondGpBondedChannelEthSt_s{
+} rdm_DslBondGpBondedChannel_t;
+
+typedef struct rdm_DslBondGpBondedChannelEth_s {   // RDM_OID_DSL_BOND_GP_BONDED_CHANNEL_ETH 
+} rdm_DslBondGpBondedChannelEth_t;
+
+typedef struct rdm_DslBondGpBondedChannelEthSt_s {   // RDM_OID_DSL_BOND_GP_BONDED_CHANNEL_ETH_ST 
 	uint32_t UnderflowErrorsSent;
 	uint32_t CRCErrorsReceived;
 	uint32_t AlignmentErrorsReceived;
@@ -1316,8 +1433,9 @@ typedef struct rdm_DslBondGpBondedChannelEthSt_s{
 	uint32_t OverflowErrorsReceived;
 	uint32_t PauseFramesReceived;
 	uint32_t FramesDropped;
-}rdm_DslBondGpBondedChannelEthSt_t;
-typedef struct rdm_DslBondGpSt_s{
+} rdm_DslBondGpBondedChannelEthSt_t;
+
+typedef struct rdm_DslBondGpSt_s {   // RDM_OID_DSL_BOND_GP_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -1336,8 +1454,9 @@ typedef struct rdm_DslBondGpSt_s{
 	uint32_t TotalStart;
 	uint32_t CurrentDayStart;
 	uint32_t QuarterHourStart;
-}rdm_DslBondGpSt_t;
-typedef struct rdm_DslBondGpStTotal_s{
+} rdm_DslBondGpSt_t;
+
+typedef struct rdm_DslBondGpStTotal_s {   // RDM_OID_DSL_BOND_GP_ST_TOTAL 
 	char FailureReasons[20];
 	uint32_t UpstreamRate;
 	uint32_t DownstreamRate;
@@ -1349,8 +1468,9 @@ typedef struct rdm_DslBondGpStTotal_s{
 	uint32_t ErroredSeconds;
 	uint32_t SeverelyErroredSeconds;
 	uint32_t UnavailableSeconds;
-}rdm_DslBondGpStTotal_t;
-typedef struct rdm_DslBondGpStCurrentDay_s{
+} rdm_DslBondGpStTotal_t;
+
+typedef struct rdm_DslBondGpStCurrentDay_s {   // RDM_OID_DSL_BOND_GP_ST_CURRENT_DAY 
 	char FailureReasons[20];
 	uint32_t UpstreamRate;
 	uint32_t DownstreamRate;
@@ -1362,8 +1482,9 @@ typedef struct rdm_DslBondGpStCurrentDay_s{
 	uint32_t ErroredSeconds;
 	uint32_t SeverelyErroredSeconds;
 	uint32_t UnavailableSeconds;
-}rdm_DslBondGpStCurrentDay_t;
-typedef struct rdm_DslBondGpStQtrHr_s{
+} rdm_DslBondGpStCurrentDay_t;
+
+typedef struct rdm_DslBondGpStQtrHr_s {   // RDM_OID_DSL_BOND_GP_ST_QTR_HR 
 	char FailureReasons[20];
 	uint32_t UpstreamRate;
 	uint32_t DownstreamRate;
@@ -1375,10 +1496,12 @@ typedef struct rdm_DslBondGpStQtrHr_s{
 	uint32_t ErroredSeconds;
 	uint32_t SeverelyErroredSeconds;
 	uint32_t UnavailableSeconds;
-}rdm_DslBondGpStQtrHr_t;
-typedef struct rdm_DslBondGpEth_s{
-}rdm_DslBondGpEth_t;
-typedef struct rdm_DslBondGpEthSt_s{
+} rdm_DslBondGpStQtrHr_t;
+
+typedef struct rdm_DslBondGpEth_s {   // RDM_OID_DSL_BOND_GP_ETH 
+} rdm_DslBondGpEth_t;
+
+typedef struct rdm_DslBondGpEthSt_s {   // RDM_OID_DSL_BOND_GP_ETH_ST 
 	uint32_t PAFErrors;
 	uint32_t PAFSmallFragments;
 	uint32_t PAFLargeFragments;
@@ -1395,10 +1518,12 @@ typedef struct rdm_DslBondGpEthSt_s{
 	uint32_t LongPacketsReceived;
 	uint32_t OverflowErrorsReceived;
 	uint32_t FramesDropped;
-}rdm_DslBondGpEthSt_t;
-typedef struct rdm_DslDiag_s{
-}rdm_DslDiag_t;
-typedef struct rdm_DslDiagAdslLineTest_s{
+} rdm_DslBondGpEthSt_t;
+
+typedef struct rdm_DslDiag_s {   // RDM_OID_DSL_DIAG 
+} rdm_DslDiag_t;
+
+typedef struct rdm_DslDiagAdslLineTest_s {   // RDM_OID_DSL_DIAG_ADSL_LINE_TEST 
 	char DiagnosticsState[15];
 	char Interface[257];
 	int ACTPSDds;
@@ -1435,11 +1560,13 @@ typedef struct rdm_DslDiagAdslLineTest_s{
 	uint32_t SNRMTus;
 	char BITSpsds[61431];
 	char BITSpsus[61431];
-}rdm_DslDiagAdslLineTest_t;
-typedef struct rdm_Opt_s{
+} rdm_DslDiagAdslLineTest_t;
+
+typedef struct rdm_Opt_s {   // RDM_OID_OPT 
 	uint32_t InterfaceNumberOfEntries;
-}rdm_Opt_t;
-typedef struct rdm_OptIntf_s{
+} rdm_Opt_t;
+
+typedef struct rdm_OptIntf_s {   // RDM_OID_OPT_INTF 
 	bool Enable;
 	char Status[15];
 	char Alias[65];
@@ -1453,8 +1580,9 @@ typedef struct rdm_OptIntf_s{
 	int TransmitOpticalLevel;
 	int LowerTransmitPowerThreshold;
 	int UpperTransmitPowerThreshold;
-}rdm_OptIntf_t;
-typedef struct rdm_OptIntfSt_s{
+} rdm_OptIntf_t;
+
+typedef struct rdm_OptIntfSt_s {   // RDM_OID_OPT_INTF_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -1463,11 +1591,13 @@ typedef struct rdm_OptIntfSt_s{
 	uint32_t ErrorsReceived;
 	uint32_t DiscardPacketsSent;
 	uint32_t DiscardPacketsReceived;
-}rdm_OptIntfSt_t;
-typedef struct rdm_Atm_s{
+} rdm_OptIntfSt_t;
+
+typedef struct rdm_Atm_s {   // RDM_OID_ATM 
 	uint32_t LinkNumberOfEntries;
-}rdm_Atm_t;
-typedef struct rdm_AtmLink_s{
+} rdm_Atm_t;
+
+typedef struct rdm_AtmLink_s {   // RDM_OID_ATM_LINK 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -1489,8 +1619,9 @@ typedef struct rdm_AtmLink_s{
 	char X_ZYXEL_SchedulerAlgorithm[4];
 	uint32_t X_ZYXEL_QueueWeight;
 	uint32_t X_ZYXEL_QueuePrecedence;
-}rdm_AtmLink_t;
-typedef struct rdm_AtmLinkSt_s{
+} rdm_AtmLink_t;
+
+typedef struct rdm_AtmLinkSt_s {   // RDM_OID_ATM_LINK_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -1510,17 +1641,20 @@ typedef struct rdm_AtmLinkSt_s{
 	uint32_t ReceivedBlocks;
 	uint32_t CRCErrors;
 	uint32_t HECErrors;
-}rdm_AtmLinkSt_t;
-typedef struct rdm_AtmLinkQos_s{
+} rdm_AtmLinkSt_t;
+
+typedef struct rdm_AtmLinkQos_s {   // RDM_OID_ATM_LINK_QOS 
 	char QoSClass[9];
 	uint32_t PeakCellRate;
 	uint32_t MaximumBurstSize;
 	uint32_t SustainableCellRate;
 	int X_ZYXEL_ATMMinimumCellRate;
-}rdm_AtmLinkQos_t;
-typedef struct rdm_AtmDiag_s{
-}rdm_AtmDiag_t;
-typedef struct rdm_AtmDiagF5Lo_s{
+} rdm_AtmLinkQos_t;
+
+typedef struct rdm_AtmDiag_s {   // RDM_OID_ATM_DIAG 
+} rdm_AtmDiag_t;
+
+typedef struct rdm_AtmDiagF5Lo_s {   // RDM_OID_ATM_DIAG_F5_LO 
 	char DiagnosticsState[17];
 	char Interface[257];
 	uint32_t NumberOfRepetitions;
@@ -1532,8 +1666,9 @@ typedef struct rdm_AtmDiagF5Lo_s{
 	uint32_t MaximumResponseTime;
 	char X_ZYXEL_Creator[23];
 	bool X_ZYXEL_SegmentLoopback;
-}rdm_AtmDiagF5Lo_t;
-typedef struct rdm_AtmDiagF4Lo_s{
+} rdm_AtmDiagF5Lo_t;
+
+typedef struct rdm_AtmDiagF4Lo_s {   // RDM_OID_ATM_DIAG_F4_LO 
 	char DiagnosticsState[17];
 	char Interface[257];
 	uint32_t NumberOfRepetitions;
@@ -1545,11 +1680,13 @@ typedef struct rdm_AtmDiagF4Lo_s{
 	uint32_t MaximumResponseTime;
 	char Creator[23];
 	bool SegmentLoopback;
-}rdm_AtmDiagF4Lo_t;
-typedef struct rdm_Ptm_s{
+} rdm_AtmDiagF4Lo_t;
+
+typedef struct rdm_Ptm_s {   // RDM_OID_PTM 
 	uint32_t LinkNumberOfEntries;
-}rdm_Ptm_t;
-typedef struct rdm_PtmLink_s{
+} rdm_Ptm_t;
+
+typedef struct rdm_PtmLink_s {   // RDM_OID_PTM_LINK 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -1572,8 +1709,9 @@ typedef struct rdm_PtmLink_s{
 	int X_ZYXEL_QueueMinimumRate;
 	char X_ZYXEL_ConnectionMode[19];
 	bool X_ZYXEL_EnableADSLPtm;
-}rdm_PtmLink_t;
-typedef struct rdm_PtmLinkSt_s{
+} rdm_PtmLink_t;
+
+typedef struct rdm_PtmLinkSt_s {   // RDM_OID_PTM_LINK_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -1589,14 +1727,16 @@ typedef struct rdm_PtmLinkSt_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_PtmLinkSt_t;
-typedef struct rdm_Eth_s{
+} rdm_PtmLinkSt_t;
+
+typedef struct rdm_Eth_s {   // RDM_OID_ETH 
 	uint32_t InterfaceNumberOfEntries;
 	uint32_t LinkNumberOfEntries;
 	uint32_t VLANTerminationNumberOfEntries;
 	uint32_t RMONStatsNumberOfEntries;
-}rdm_Eth_t;
-typedef struct rdm_EthRmonSt_s{
+} rdm_Eth_t;
+
+typedef struct rdm_EthRmonSt_s {   // RDM_OID_ETH_RMON_ST 
 	bool Enable;
 	char Status[25];
 	char Alias[65];
@@ -1619,8 +1759,9 @@ typedef struct rdm_EthRmonSt_s{
 	uint64_t Packets256to511Bytes;
 	uint64_t Packets512to1023Bytes;
 	uint64_t Packets1024to1518Bytes;
-}rdm_EthRmonSt_t;
-typedef struct rdm_EthIface_s{
+} rdm_EthRmonSt_t;
+
+typedef struct rdm_EthIface_s {   // RDM_OID_ETH_IFACE 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -1629,6 +1770,7 @@ typedef struct rdm_EthIface_s{
 	char LowerLayers[1025];
 	bool Upstream;
 	char MACAddress[18];
+	bool IntfEnable;
 	int MaxBitRate;
 	char DuplexMode[6];
 	char X_ZYXEL_DuplexMode[6];
@@ -1636,8 +1778,9 @@ typedef struct rdm_EthIface_s{
 	char X_ZYXEL_LanPort[65];
 	bool X_ZYXEL_SwitchToWAN;
 	bool X_ZYXEL_Upstream;
-}rdm_EthIface_t;
-typedef struct rdm_EthIntfSt_s{
+} rdm_EthIface_t;
+
+typedef struct rdm_EthIntfSt_s {   // RDM_OID_ETH_INTF_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -1653,8 +1796,9 @@ typedef struct rdm_EthIntfSt_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_EthIntfSt_t;
-typedef struct rdm_EthLink_s{
+} rdm_EthIntfSt_t;
+
+typedef struct rdm_EthLink_s {   // RDM_OID_ETH_LINK 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -1667,8 +1811,9 @@ typedef struct rdm_EthLink_s{
 	char X_ZYXEL_WanMacType[17];
 	char X_ZYXEL_WanMacAddr[18];
 	char X_ZYXEL_WanMacClientIP[16];
-}rdm_EthLink_t;
-typedef struct rdm_EthLinkSt_s{
+} rdm_EthLink_t;
+
+typedef struct rdm_EthLinkSt_s {   // RDM_OID_ETH_LINK_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -1684,8 +1829,9 @@ typedef struct rdm_EthLinkSt_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_EthLinkSt_t;
-typedef struct rdm_EthVlanTerm_s{
+} rdm_EthLinkSt_t;
+
+typedef struct rdm_EthVlanTerm_s {   // RDM_OID_ETH_VLAN_TERM 
 	bool Enable;
 	bool X_ZYXEL_VLANEnable;
 	char Status[17];
@@ -1697,8 +1843,9 @@ typedef struct rdm_EthVlanTerm_s{
 	int VLANID;
 	int X_ZYXEL_VLANPriority;
 	uint32_t X_ZYXEL_MAC_Index;
-}rdm_EthVlanTerm_t;
-typedef struct rdm_EthVlanTermSt_s{
+} rdm_EthVlanTerm_t;
+
+typedef struct rdm_EthVlanTermSt_s {   // RDM_OID_ETH_VLAN_TERM_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -1714,12 +1861,14 @@ typedef struct rdm_EthVlanTermSt_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_EthVlanTermSt_t;
-typedef struct rdm_Usb_s{
+} rdm_EthVlanTermSt_t;
+
+typedef struct rdm_Usb_s {   // RDM_OID_USB 
 	uint32_t InterfaceNumberOfEntries;
 	uint32_t PortNumberOfEntries;
-}rdm_Usb_t;
-typedef struct rdm_UsbIntf_s{
+} rdm_Usb_t;
+
+typedef struct rdm_UsbIntf_s {   // RDM_OID_USB_INTF 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -1731,8 +1880,9 @@ typedef struct rdm_UsbIntf_s{
 	uint32_t MaxBitRate;
 	char Port[257];
 	char X_ZYXEL_IfName[33];
-}rdm_UsbIntf_t;
-typedef struct rdm_UsbIntfStat_s{
+} rdm_UsbIntf_t;
+
+typedef struct rdm_UsbIntfStat_s {   // RDM_OID_USB_INTF_STAT 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -1748,8 +1898,9 @@ typedef struct rdm_UsbIntfStat_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_UsbIntfStat_t;
-typedef struct rdm_UsbPort_s{
+} rdm_UsbIntfStat_t;
+
+typedef struct rdm_UsbPort_s {   // RDM_OID_USB_PORT 
 	char Alias[65];
 	char Name[65];
 	char Standard[5];
@@ -1758,11 +1909,13 @@ typedef struct rdm_UsbPort_s{
 	char Rate[55];
 	char Power[8];
 	char X_ZYXEL_Portnum[6];
-}rdm_UsbPort_t;
-typedef struct rdm_UsbUsbhosts_s{
+} rdm_UsbPort_t;
+
+typedef struct rdm_UsbUsbhosts_s {   // RDM_OID_USB_USBHOSTS 
 	uint32_t HostNumberOfEntries;
-}rdm_UsbUsbhosts_t;
-typedef struct rdm_UsbUsbhostsHost_s{
+} rdm_UsbUsbhosts_t;
+
+typedef struct rdm_UsbUsbhostsHost_s {   // RDM_OID_USB_USBHOSTS_HOST 
 	char Alias[65];
 	bool Enable;
 	char Name[65];
@@ -1771,8 +1924,9 @@ typedef struct rdm_UsbUsbhostsHost_s{
 	bool PowerManagementEnable;
 	char USBVersion[5];
 	uint32_t DeviceNumberOfEntries;
-}rdm_UsbUsbhostsHost_t;
-typedef struct rdm_UsbUsbhostsHostDev_s{
+} rdm_UsbUsbhostsHost_t;
+
+typedef struct rdm_UsbUsbhostsHostDev_s {   // RDM_OID_USB_USBHOSTS_HOST_DEV 
 	uint32_t DeviceNumber;
 	char USBVersion[5];
 	char DeviceClass[3];
@@ -1793,28 +1947,33 @@ typedef struct rdm_UsbUsbhostsHostDev_s{
 	bool IsSelfPowered;
 	uint32_t ConfigurationNumberOfEntries;
 	char X_ZYXEL_MountPoint[257];
-}rdm_UsbUsbhostsHostDev_t;
-typedef struct rdm_UsbUsbhostsHostDevPar_s{
+} rdm_UsbUsbhostsHostDev_t;
+
+typedef struct rdm_UsbUsbhostsHostDevPar_s {   // RDM_OID_USB_USBHOSTS_HOST_DEV_PAR 
 	char PartitionName[17];
 	uint32_t Capacity;
 	uint32_t UsedSpace;
-}rdm_UsbUsbhostsHostDevPar_t;
-typedef struct rdm_UsbUsbhostsHostDevCfg_s{
+} rdm_UsbUsbhostsHostDevPar_t;
+
+typedef struct rdm_UsbUsbhostsHostDevCfg_s {   // RDM_OID_USB_USBHOSTS_HOST_DEV_CFG 
 	uint32_t ConfigurationNumber;
 	uint32_t InterfaceNumberOfEntries;
-}rdm_UsbUsbhostsHostDevCfg_t;
-typedef struct rdm_UsbUsbhostsHostDevCfgIntf_s{
+} rdm_UsbUsbhostsHostDevCfg_t;
+
+typedef struct rdm_UsbUsbhostsHostDevCfgIntf_s {   // RDM_OID_USB_USBHOSTS_HOST_DEV_CFG_INTF 
 	uint32_t InterfaceNumber;
 	char InterfaceClass[2];
 	char InterfaceSubClass[2];
 	char InterfaceProtocol[2];
-}rdm_UsbUsbhostsHostDevCfgIntf_t;
-typedef struct rdm_Cellular_s{
+} rdm_UsbUsbhostsHostDevCfgIntf_t;
+
+typedef struct rdm_Cellular_s {   // RDM_OID_CELLULAR 
 	bool RoamingEnabled;
 	uint32_t InterfaceNumberOfEntries;
 	uint32_t AccessPointNumberOfEntries;
-}rdm_Cellular_t;
-typedef struct rdm_CellularInterface_s{
+} rdm_Cellular_t;
+
+typedef struct rdm_CellularInterface_s {   // RDM_OID_CELLULAR_INTERFACE 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -1828,13 +1987,15 @@ typedef struct rdm_CellularInterface_s{
 	char NetworkRequested[65];
 	char NetworkInUse[65];
 	int RSSI;
-}rdm_CellularInterface_t;
-typedef struct rdm_CellularIfaceUSIM_s{
+} rdm_CellularInterface_t;
+
+typedef struct rdm_CellularIfaceUSIM_s {   // RDM_OID_CELLULAR_IFACE_U_S_I_M 
 	char Status[17];
 	char IMSI[16];
 	char PIN[5];
-}rdm_CellularIfaceUSIM_t;
-typedef struct rdm_CellularAccessPoint_s{
+} rdm_CellularIfaceUSIM_t;
+
+typedef struct rdm_CellularAccessPoint_s {   // RDM_OID_CELLULAR_ACCESS_POINT 
 	bool Enable;
 	char Alias[65];
 	char APN[101];
@@ -1843,11 +2004,13 @@ typedef struct rdm_CellularAccessPoint_s{
 	char Username[257];
 	char Password[257];
 	char Interface[33];
-}rdm_CellularAccessPoint_t;
-typedef struct rdm_Hpna_s{
+} rdm_CellularAccessPoint_t;
+
+typedef struct rdm_Hpna_s {   // RDM_OID_HPNA 
 	uint32_t InterfaceNumberOfEntries;
-}rdm_Hpna_t;
-typedef struct rdm_HpnaIntf_s{
+} rdm_Hpna_t;
+
+typedef struct rdm_HpnaIntf_s {   // RDM_OID_HPNA_INTF 
 	bool Enable;
 	char Status[18];
 	char Alias[65];
@@ -1875,8 +2038,9 @@ typedef struct rdm_HpnaIntf_s{
 	uint32_t NegMulticastRate;
 	char MasterSelectionMode[59];
 	uint32_t AssociatedDeviceNumberOfEntries;
-}rdm_HpnaIntf_t;
-typedef struct rdm_HpnaIntfSt_s{
+} rdm_HpnaIntf_t;
+
+typedef struct rdm_HpnaIntfSt_s {   // RDM_OID_HPNA_INTF_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSend;
@@ -1892,11 +2056,13 @@ typedef struct rdm_HpnaIntfSt_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_HpnaIntfSt_t;
-typedef struct rdm_HpnaIntfQos_s{
+} rdm_HpnaIntfSt_t;
+
+typedef struct rdm_HpnaIntfQos_s {   // RDM_OID_HPNA_INTF_QOS 
 	uint32_t FlowSpecNumberOfEntries;
-}rdm_HpnaIntfQos_t;
-typedef struct rdm_HpnaIntfQosFlowSpec_s{
+} rdm_HpnaIntfQos_t;
+
+typedef struct rdm_HpnaIntfQosFlowSpec_s {   // RDM_OID_HPNA_INTF_QOS_FLOW_SPEC 
 	bool Enable;
 	char Status[21];
 	char Alias[65];
@@ -1911,8 +2077,9 @@ typedef struct rdm_HpnaIntfQosFlowSpec_s{
 	uint32_t MaxRate;
 	uint32_t PER;
 	uint32_t Timeout;
-}rdm_HpnaIntfQosFlowSpec_t;
-typedef struct rdm_HpnaIntfAssocDev_s{
+} rdm_HpnaIntfQosFlowSpec_t;
+
+typedef struct rdm_HpnaIntfAssocDev_s {   // RDM_OID_HPNA_INTF_ASSOC_DEV 
 	char MacAddress[18];
 	uint32_t NodeID;
 	bool IsMaster;
@@ -1921,10 +2088,12 @@ typedef struct rdm_HpnaIntfAssocDev_s{
 	uint32_t MaxBitRate;
 	bool PHYDiagnosticsEnable;
 	bool Active;
-}rdm_HpnaIntfAssocDev_t;
-typedef struct rdm_HpnaDiag_s{
-}rdm_HpnaDiag_t;
-typedef struct rdm_HpnaDiagPhyThroughput_s{
+} rdm_HpnaIntfAssocDev_t;
+
+typedef struct rdm_HpnaDiag_s {   // RDM_OID_HPNA_DIAG 
+} rdm_HpnaDiag_t;
+
+typedef struct rdm_HpnaDiagPhyThroughput_s {   // RDM_OID_HPNA_DIAG_PHY_THROUGHPUT 
 	char DiagnosticsState[28];
 	char Interface[257];
 	uint32_t NumPacketsInBurst;
@@ -1935,8 +2104,9 @@ typedef struct rdm_HpnaDiagPhyThroughput_s{
 	char PayloadType[14];
 	uint32_t PriorityLevel;
 	uint32_t ResultNumberOfEntries;
-}rdm_HpnaDiagPhyThroughput_t;
-typedef struct rdm_HpnaDiagPhyThroughputResult_s{
+} rdm_HpnaDiagPhyThroughput_t;
+
+typedef struct rdm_HpnaDiagPhyThroughputResult_s {   // RDM_OID_HPNA_DIAG_PHY_THROUGHPUT_RESULT 
 	char SrcMACAddress[18];
 	char DestMACAddress[18];
 	uint32_t PHYRate;
@@ -1944,18 +2114,21 @@ typedef struct rdm_HpnaDiagPhyThroughputResult_s{
 	uint32_t SNR;
 	uint32_t PacketsReceived;
 	uint32_t Attenuation;
-}rdm_HpnaDiagPhyThroughputResult_t;
-typedef struct rdm_HpnaDiagPerfMont_s{
+} rdm_HpnaDiagPhyThroughputResult_t;
+
+typedef struct rdm_HpnaDiagPerfMont_s {   // RDM_OID_HPNA_DIAG_PERF_MONT 
 	char DiagnosticsState[28];
 	char Interface[257];
 	uint32_t SampleInterval;
-}rdm_HpnaDiagPerfMont_t;
-typedef struct rdm_HpnaDiagPerfMonitorNodes_s{
+} rdm_HpnaDiagPerfMont_t;
+
+typedef struct rdm_HpnaDiagPerfMonitorNodes_s {   // RDM_OID_HPNA_DIAG_PERF_MONITOR_NODES 
 	char CurrentStat[32];
 	char CurrentEnd[32];
 	uint32_t NodeNumberOfEntries;
-}rdm_HpnaDiagPerfMonitorNodes_t;
-typedef struct rdm_HpnaDiagPerfMonitorNodesNode_s{
+} rdm_HpnaDiagPerfMonitorNodes_t;
+
+typedef struct rdm_HpnaDiagPerfMonitorNodesNode_s {   // RDM_OID_HPNA_DIAG_PERF_MONITOR_NODES_NODE 
 	char MACAddress[18];
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
@@ -1981,12 +2154,14 @@ typedef struct rdm_HpnaDiagPerfMonitorNodesNode_s{
 	uint32_t PacketsReceivedQueued;
 	uint32_t PacketsReceivedFowardUnknown;
 	uint32_t NodeUtilization;
-}rdm_HpnaDiagPerfMonitorNodesNode_t;
-typedef struct rdm_HpnaDiagPerfMonitorChannels_s{
+} rdm_HpnaDiagPerfMonitorNodesNode_t;
+
+typedef struct rdm_HpnaDiagPerfMonitorChannels_s {   // RDM_OID_HPNA_DIAG_PERF_MONITOR_CHANNELS 
 	char TimeStamp[32];
 	uint32_t ChannelNumberOfEntries;
-}rdm_HpnaDiagPerfMonitorChannels_t;
-typedef struct rdm_HpnaDiagPerfMonitorChannelsChannel_s{
+} rdm_HpnaDiagPerfMonitorChannels_t;
+
+typedef struct rdm_HpnaDiagPerfMonitorChannelsChannel_s {   // RDM_OID_HPNA_DIAG_PERF_MONITOR_CHANNELS_CHANNEL 
 	char HostSrcMACAddress[18];
 	char HostDestMACAddress[18];
 	char HPNASrcMACAddress[18];
@@ -1998,11 +2173,13 @@ typedef struct rdm_HpnaDiagPerfMonitorChannelsChannel_s{
 	uint32_t PacketsReceived;
 	uint32_t LARQPacketsReceived;
 	char FlowSpec[257];
-}rdm_HpnaDiagPerfMonitorChannelsChannel_t;
-typedef struct rdm_Moca_s{
+} rdm_HpnaDiagPerfMonitorChannelsChannel_t;
+
+typedef struct rdm_Moca_s {   // RDM_OID_MOCA 
 	uint32_t InterfaceNumberOfEntries;
-}rdm_Moca_t;
-typedef struct rdm_MocaIntf_s{
+} rdm_Moca_t;
+
+typedef struct rdm_MocaIntf_s {   // RDM_OID_MOCA_INTF 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -2038,8 +2215,9 @@ typedef struct rdm_MocaIntf_s{
 	uint32_t TxBcastPowerReduction;
 	bool QAM256Capable;
 	uint32_t AssociatedDeviceNumberOfEntries;
-}rdm_MocaIntf_t;
-typedef struct rdm_MocaIntfSt_s{
+} rdm_MocaIntf_t;
+
+typedef struct rdm_MocaIntfSt_s {   // RDM_OID_MOCA_INTF_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -2055,21 +2233,24 @@ typedef struct rdm_MocaIntfSt_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_MocaIntfSt_t;
-typedef struct rdm_MocaIntfQos_s{
+} rdm_MocaIntfSt_t;
+
+typedef struct rdm_MocaIntfQos_s {   // RDM_OID_MOCA_INTF_QOS 
 	uint32_t EgressNumFlows;
 	uint32_t IngressNumFlows;
 	uint32_t FlowStatsNumberOfEntries;
-}rdm_MocaIntfQos_t;
-typedef struct rdm_MocaIntfQosFlowSt_s{
+} rdm_MocaIntfQos_t;
+
+typedef struct rdm_MocaIntfQosFlowSt_s {   // RDM_OID_MOCA_INTF_QOS_FLOW_ST 
 	uint32_t FlowID;
 	char PacketDA[18];
 	uint32_t MaxRate;
 	uint32_t MaxBurstSize;
 	uint32_t LeaseTimeLeft;
 	uint32_t FlowPackets;
-}rdm_MocaIntfQosFlowSt_t;
-typedef struct rdm_MocaIntfAssocDev_s{
+} rdm_MocaIntfQosFlowSt_t;
+
+typedef struct rdm_MocaIntfAssocDev_s {   // RDM_OID_MOCA_INTF_ASSOC_DEV 
 	char MACAddress[18];
 	uint32_t NodeID;
 	bool PreferredNC;
@@ -2087,11 +2268,13 @@ typedef struct rdm_MocaIntfAssocDev_s{
 	uint32_t PacketAggregationCapability;
 	uint32_t RxSNR;
 	bool Active;
-}rdm_MocaIntfAssocDev_t;
-typedef struct rdm_Ghn_s{
+} rdm_MocaIntfAssocDev_t;
+
+typedef struct rdm_Ghn_s {   // RDM_OID_GHN 
 	uint32_t InterfaceNumberOfEntries;
-}rdm_Ghn_t;
-typedef struct rdm_GhnIntf_s{
+} rdm_Ghn_t;
+
+typedef struct rdm_GhnIntf_s {   // RDM_OID_GHN_INTF 
 	bool Enable;
 	char Status[18];
 	char Alias[65];
@@ -2114,8 +2297,9 @@ typedef struct rdm_GhnIntf_s{
 	bool NodeTypeDMStatus;
 	bool NodeTypeSCStatus;
 	uint32_t AssociatedDeviceNumberOfEntries;
-}rdm_GhnIntf_t;
-typedef struct rdm_GhnIntfSt_s{
+} rdm_GhnIntf_t;
+
+typedef struct rdm_GhnIntfSt_s {   // RDM_OID_GHN_INTF_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -2131,18 +2315,21 @@ typedef struct rdm_GhnIntfSt_s{
 	uint64_t BroadicastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_GhnIntfSt_t;
-typedef struct rdm_GhnIntfAssocDev_s{
+} rdm_GhnIntfSt_t;
+
+typedef struct rdm_GhnIntfAssocDev_s {   // RDM_OID_GHN_INTF_ASSOC_DEV 
 	char MACAddress[18];
 	uint32_t DeviceId;
 	uint32_t TxPhyRate;
 	uint32_t RxPhyRate;
 	bool Active;
-}rdm_GhnIntfAssocDev_t;
-typedef struct rdm_HomePlug_s{
+} rdm_GhnIntfAssocDev_t;
+
+typedef struct rdm_HomePlug_s {   // RDM_OID_HOME_PLUG 
 	uint32_t InterfaceNumberOfEntries;
-}rdm_HomePlug_t;
-typedef struct rdm_HomeplugIntf_s{
+} rdm_HomePlug_t;
+
+typedef struct rdm_HomeplugIntf_s {   // RDM_OID_HOMEPLUG_INTF 
 	bool Enable;
 	char Status[18];
 	char Alias[65];
@@ -2159,8 +2346,9 @@ typedef struct rdm_HomeplugIntf_s{
 	char OtherNetworksPresent[65];
 	uint32_t MaxBitRate;
 	uint32_t AssociatedDeviceNumberOfEntries;
-}rdm_HomeplugIntf_t;
-typedef struct rdm_HomeplugIntfSt_s{
+} rdm_HomeplugIntf_t;
+
+typedef struct rdm_HomeplugIntfSt_s {   // RDM_OID_HOMEPLUG_INTF_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -2181,8 +2369,9 @@ typedef struct rdm_HomeplugIntfSt_s{
 	uint64_t MPDUTxFailed;
 	uint64_t MPDURxAck;
 	uint64_t MPDURxFailed;
-}rdm_HomeplugIntfSt_t;
-typedef struct rdm_HomeplugIntfAssocDev_s{
+} rdm_HomeplugIntfSt_t;
+
+typedef struct rdm_HomeplugIntfAssocDev_s {   // RDM_OID_HOMEPLUG_INTF_ASSOC_DEV 
 	char MACAdress[18];
 	uint32_t TxPhyRate;
 	uint32_t RxPhyRate;
@@ -2190,11 +2379,13 @@ typedef struct rdm_HomeplugIntfAssocDev_s{
 	uint32_t AvgAttenuation;
 	char EndStationMACs[18];
 	bool Active;
-}rdm_HomeplugIntfAssocDev_t;
-typedef struct rdm_Upa_s{
+} rdm_HomeplugIntfAssocDev_t;
+
+typedef struct rdm_Upa_s {   // RDM_OID_UPA 
 	uint32_t InterfaceNumberOfEntries;
-}rdm_Upa_t;
-typedef struct rdm_UpaIntf_s{
+} rdm_Upa_t;
+
+typedef struct rdm_UpaIntf_s {   // RDM_OID_UPA_INTF 
 	bool Enable;
 	char Status[18];
 	char Alias[65];
@@ -2216,8 +2407,9 @@ typedef struct rdm_UpaIntf_s{
 	uint32_t ActiveNotchNumberOfEntries;
 	uint32_t AssociatedDeviceNumberOfEntries;
 	uint32_t BridgeForNumberOfEntries;
-}rdm_UpaIntf_t;
-typedef struct rdm_UpaIntfSt_s{
+} rdm_UpaIntf_t;
+
+typedef struct rdm_UpaIntfSt_s {   // RDM_OID_UPA_INTF_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -2233,8 +2425,9 @@ typedef struct rdm_UpaIntfSt_s{
 	uint64_t BroadicastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_UpaIntfSt_t;
-typedef struct rdm_UpaIntfAssocDev_s{
+} rdm_UpaIntfSt_t;
+
+typedef struct rdm_UpaIntfAssocDev_s {   // RDM_OID_UPA_INTF_ASSOC_DEV 
 	char MACAddress[18];
 	uint32_t Port;
 	char LogicalNetwork[21];
@@ -2246,40 +2439,47 @@ typedef struct rdm_UpaIntfAssocDev_s{
 	char SmartRouteIntermediatePLCMAC[18];
 	bool DirectRoute;
 	bool Active;
-}rdm_UpaIntfAssocDev_t;
-typedef struct rdm_UpaIntfActiveNotch_s{
+} rdm_UpaIntfAssocDev_t;
+
+typedef struct rdm_UpaIntfActiveNotch_s {   // RDM_OID_UPA_INTF_ACTIVE_NOTCH 
 	bool Enable;
 	char Alias[65];
 	uint32_t StartFreq;
 	uint32_t StopFreq;
 	uint32_t Depth;
-}rdm_UpaIntfActiveNotch_t;
-typedef struct rdm_UpaIntfBridgeFor_s{
+} rdm_UpaIntfActiveNotch_t;
+
+typedef struct rdm_UpaIntfBridgeFor_s {   // RDM_OID_UPA_INTF_BRIDGE_FOR 
 	char Alias[65];
 	char MACAddress[18];
 	uint32_t Port;
-}rdm_UpaIntfBridgeFor_t;
-typedef struct rdm_UpaDiag_s{
-}rdm_UpaDiag_t;
-typedef struct rdm_UpaDiagIntfMeasurement_s{
+} rdm_UpaIntfBridgeFor_t;
+
+typedef struct rdm_UpaDiag_s {   // RDM_OID_UPA_DIAG 
+} rdm_UpaDiag_t;
+
+typedef struct rdm_UpaDiagIntfMeasurement_s {   // RDM_OID_UPA_DIAG_INTF_MEASUREMENT 
 	char DiagnosticsState[18];
 	char Type[4];
 	char Interface[257];
 	uint32_t Port;
 	char Measurements[3073];
 	int RxGain;
-}rdm_UpaDiagIntfMeasurement_t;
-typedef struct rdm_Wifi_s{
+} rdm_UpaDiagIntfMeasurement_t;
+
+typedef struct rdm_Wifi_s {   // RDM_OID_WIFI 
 	uint32_t RadioNumberOfEntries;
 	uint32_t SSIDNumberOfEntries;
 	uint32_t AccessPointNumberOfEntries;
 	uint32_t EndPointNumberOfEntries;
 	char X_ZYXEL_SSIDType[5];
-}rdm_Wifi_t;
-typedef struct rdm_WifiOneSsid_s{
+} rdm_Wifi_t;
+
+typedef struct rdm_WifiOneSsid_s {   // RDM_OID_WIFI_ONE_SSID 
 	bool Enable;
-}rdm_WifiOneSsid_t;
-typedef struct rdm_WifiRadio_s{
+} rdm_WifiOneSsid_t;
+
+typedef struct rdm_WifiRadio_s {   // RDM_OID_WIFI_RADIO 
 	bool Enable;
 	char Status[18];
 	char Alias[65];
@@ -2307,6 +2507,9 @@ typedef struct rdm_WifiRadio_s{
 	bool IEEE80211hSupported;
 	bool EEE80211hEnabled;
 	char RegulatoryDomain[4];
+	char BasicDataTransmitRates[257];
+	char OperationalDataTransmitRates[257];
+	char SupportedDataTransmitRates[257];
 	char X_ZYXEL_Auto_Channel_Skip[101];
 	char X_ZYXEL_CountryCode[129];
 	uint32_t X_ZYXEL_AutoChannel_Policy;
@@ -2344,8 +2547,10 @@ typedef struct rdm_WifiRadio_s{
 	bool X_ZYXEL_AirtimeFairness;
 	bool X_ZYXEL_Support_ATF;
 	char X_ZYXEL_SingleSKU[9];
-}rdm_WifiRadio_t;
-typedef struct rdm_WifiRadioSt_s{
+	bool X_ZYXEL_SSID_Priority_Enable;
+} rdm_WifiRadio_t;
+
+typedef struct rdm_WifiRadioSt_s {   // RDM_OID_WIFI_RADIO_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -2355,8 +2560,9 @@ typedef struct rdm_WifiRadioSt_s{
 	uint32_t DiscardPacketsSent;
 	uint32_t DiscardPacketsReceived;
 	char X_ZYXEL_Rate[17];
-}rdm_WifiRadioSt_t;
-typedef struct rdm_WifiSsid_s{
+} rdm_WifiRadioSt_t;
+
+typedef struct rdm_WifiSsid_s {   // RDM_OID_WIFI_SSID 
 	bool Enable;
 	char Status[18];
 	char Alias[65];
@@ -2378,8 +2584,14 @@ typedef struct rdm_WifiSsid_s{
 	bool X_ZYXEL_MasterMain;
 	bool X_ZYXEL_MasterGuest;
 	bool X_ZYXEL_Autoconfig;
-}rdm_WifiSsid_t;
-typedef struct rdm_WifiSsidStat_s{
+	char X_ZYXEL_MasterMainSSID[33];
+	char X_ZYXEL_MasterMainPassword[64];
+	char X_ZYXEL_MasterGuestSSID[33];
+	char X_ZYXEL_MasterGuestPassword[64];
+	uint32_t X_ZYXEL_SSID_Priority;
+} rdm_WifiSsid_t;
+
+typedef struct rdm_WifiSsidStat_s {   // RDM_OID_WIFI_SSID_STAT 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -2395,8 +2607,9 @@ typedef struct rdm_WifiSsidStat_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_WifiSsidStat_t;
-typedef struct rdm_WifiAccessPoint_s{
+} rdm_WifiSsidStat_t;
+
+typedef struct rdm_WifiAccessPoint_s {   // RDM_OID_WIFI_ACCESS_POINT 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
@@ -2411,8 +2624,9 @@ typedef struct rdm_WifiAccessPoint_s{
 	uint32_t MaxAssociatedDevices;
 	bool IsolationEnable;
 	bool X_ZYXEL_BssIdIsolation;
-}rdm_WifiAccessPoint_t;
-typedef struct rdm_WifiAccessPointSec_s{
+} rdm_WifiAccessPoint_t;
+
+typedef struct rdm_WifiAccessPointSec_s {   // RDM_OID_WIFI_ACCESS_POINT_SEC 
 	bool Reset;
 	char ModesSupported[129];
 	char ModeEnabled[25];
@@ -2454,8 +2668,9 @@ typedef struct rdm_WifiAccessPointSec_s{
 	char X_ZYXEL_11iEncryption[26];
 	bool X_ZYXEL_Preauth;
 	uint32_t X_ZYXEL_ReauthInterval;
-}rdm_WifiAccessPointSec_t;
-typedef struct rdm_WifiAccessPointAccounting_s{
+} rdm_WifiAccessPointSec_t;
+
+typedef struct rdm_WifiAccessPointAccounting_s {   // RDM_OID_WIFI_ACCESS_POINT_ACCOUNTING 
 	bool Enable;
 	char ServerIPAddr[46];
 	char SecondaryServerIPAddr[46];
@@ -2464,8 +2679,9 @@ typedef struct rdm_WifiAccessPointAccounting_s{
 	char Secret[129];
 	char SecondarySecret[129];
 	uint32_t InterimInterval;
-}rdm_WifiAccessPointAccounting_t;
-typedef struct rdm_WifiAccessPointWps_s{
+} rdm_WifiAccessPointAccounting_t;
+
+typedef struct rdm_WifiAccessPointWps_s {   // RDM_OID_WIFI_ACCESS_POINT_WPS 
 	bool Enable;
 	char ConfigMethodsSupported[65];
 	char ConfigMethodsEnabled[256];
@@ -2481,8 +2697,9 @@ typedef struct rdm_WifiAccessPointWps_s{
 	bool X_ZYXEL_WPS_EnableAPPin;
 	char X_ZYXEL_WPS_PairingID[257];
 	char X_ZYXEL_WPS_PairingID_Mode[7];
-}rdm_WifiAccessPointWps_t;
-typedef struct rdm_WifiAccessPointAssocDev_s{
+} rdm_WifiAccessPointWps_t;
+
+typedef struct rdm_WifiAccessPointAssocDev_s {   // RDM_OID_WIFI_ACCESS_POINT_ASSOC_DEV 
 	char MACAddress[18];
 	char OperatingStandard[13];
 	bool AuthenticationState;
@@ -2493,8 +2710,9 @@ typedef struct rdm_WifiAccessPointAssocDev_s{
 	int X_ZYXEL_SNR;
 	int X_ZYXEL_SNRLevel;
 	bool Active;
-}rdm_WifiAccessPointAssocDev_t;
-typedef struct rdm_WifiAccessPointAssocDevSt_s{
+} rdm_WifiAccessPointAssocDev_t;
+
+typedef struct rdm_WifiAccessPointAssocDevSt_s {   // RDM_OID_WIFI_ACCESS_POINT_ASSOC_DEV_ST 
 	uint32_t BytesSent;
 	uint32_t BytesReceived;
 	uint32_t PacketsSent;
@@ -2504,53 +2722,62 @@ typedef struct rdm_WifiAccessPointAssocDevSt_s{
 	uint32_t FailedRetransCount;
 	uint32_t RetryCount;
 	uint32_t MultipleRetryCount;
-}rdm_WifiAccessPointAssocDevSt_t;
-typedef struct rdm_WifiStaFilter_s{
+} rdm_WifiAccessPointAssocDevSt_t;
+
+typedef struct rdm_WifiStaFilter_s {   // RDM_OID_WIFI_STA_FILTER 
 	uint32_t FilterMode;
 	char FilterLists[501];
-}rdm_WifiStaFilter_t;
-typedef struct rdm_WifiEndPoint_s{
+} rdm_WifiStaFilter_t;
+
+typedef struct rdm_WifiEndPoint_s {   // RDM_OID_WIFI_END_POINT 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
 	char ProfileReference[257];
 	char SSIDReference[257];
 	uint32_t ProfileNumberOfEntries;
-}rdm_WifiEndPoint_t;
-typedef struct rdm_WifiEndPointSt_s{
+} rdm_WifiEndPoint_t;
+
+typedef struct rdm_WifiEndPointSt_s {   // RDM_OID_WIFI_END_POINT_ST 
 	uint32_t LastDataDownlinkRate;
 	uint32_t LastDataUplinkRate;
 	uint32_t SignalStrength;
 	uint32_t Retransmissions;
-}rdm_WifiEndPointSt_t;
-typedef struct rdm_WifiEndPointSec_s{
+} rdm_WifiEndPointSt_t;
+
+typedef struct rdm_WifiEndPointSec_s {   // RDM_OID_WIFI_END_POINT_SEC 
 	char ModesSupported[20];
-}rdm_WifiEndPointSec_t;
-typedef struct rdm_WifiEndPointProfile_s{
+} rdm_WifiEndPointSec_t;
+
+typedef struct rdm_WifiEndPointProfile_s {   // RDM_OID_WIFI_END_POINT_PROFILE 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
 	char SSID[33];
 	char Location[37];
 	uint32_t Priority;
-}rdm_WifiEndPointProfile_t;
-typedef struct rdm_WifiEndPointProfileSec_s{
+} rdm_WifiEndPointProfile_t;
+
+typedef struct rdm_WifiEndPointProfileSec_s {   // RDM_OID_WIFI_END_POINT_PROFILE_SEC 
 	char ModeEnabled[25];
 	char WEPKey[14];
 	char PreSharedKey[33];
 	char KeyPassphrase[64];
-}rdm_WifiEndPointProfileSec_t;
-typedef struct rdm_Wps_s{
+} rdm_WifiEndPointProfileSec_t;
+
+typedef struct rdm_Wps_s {   // RDM_OID_WPS 
 	bool Enable;
 	char ConfigMethodsSupported[65];
 	char ConfigMethodsEnabled[256];
-}rdm_Wps_t;
-typedef struct rdm_WifiDiagnostic_s{
+} rdm_Wps_t;
+
+typedef struct rdm_WifiDiagnostic_s {   // RDM_OID_WIFI_DIAGNOSTIC 
 	char DiagnosticsState[25];
 	uint32_t ResultNumberOfEntries;
 	char X_ZYXEL_Creator[23];
-}rdm_WifiDiagnostic_t;
-typedef struct rdm_WifiDiagnosticResults_s{
+} rdm_WifiDiagnostic_t;
+
+typedef struct rdm_WifiDiagnosticResults_s {   // RDM_OID_WIFI_DIAGNOSTIC_RESULTS 
 	char Radio[51];
 	char SSID[33];
 	char BSSID[18];
@@ -2568,8 +2795,9 @@ typedef struct rdm_WifiDiagnosticResults_s{
 	char BasicDataTransferRates[257];
 	char SupportedDataTransferRates[257];
 	uint32_t DTIMPeriod;
-}rdm_WifiDiagnosticResults_t;
-typedef struct rdm_WifiApSteering_s{
+} rdm_WifiDiagnosticResults_t;
+
+typedef struct rdm_WifiApSteering_s {   // RDM_OID_WIFI_AP_STEERING 
 	bool Enable;
 	uint32_t WiFi_24G_NormalToBad_Threshold;
 	uint32_t WiFi_24G_NormalToGood_Threshold;
@@ -2587,8 +2815,9 @@ typedef struct rdm_WifiApSteering_s{
 	uint32_t LogLevel;
 	bool Prohibit_Steering_OverWDS_AP;
 	bool DisableSteering;
-}rdm_WifiApSteering_t;
-typedef struct rdm_WlanScheduler_s{
+} rdm_WifiApSteering_t;
+
+typedef struct rdm_WlanScheduler_s {   // RDM_OID_WLAN_SCHEDULER 
 	bool Enable;
 	char Name[33];
 	char Description[257];
@@ -2601,8 +2830,9 @@ typedef struct rdm_WlanScheduler_s{
 	char TimeStopDate[17];
 	uint32_t TimeStopHour;
 	uint32_t TimeStopMin;
-}rdm_WlanScheduler_t;
-typedef struct rdm_Bridging_s{
+} rdm_WlanScheduler_t;
+
+typedef struct rdm_Bridging_s {   // RDM_OID_BRIDGING 
 	uint32_t MaxBridgeEntries;
 	uint32_t MaxDBridgeEntries;
 	uint32_t MaxQBridgeEntries;
@@ -2613,8 +2843,9 @@ typedef struct rdm_Bridging_s{
 	uint32_t X_ZYXEL_MaxMarkingEntries;
 	uint32_t X_ZYXEL_MarkingNumberOfEntries;
 	uint32_t X_ZYXEL_AvailableInterfaceNumberOfEntries;
-}rdm_Bridging_t;
-typedef struct rdm_BridgingBr_s{
+} rdm_Bridging_t;
+
+typedef struct rdm_BridgingBr_s {   // RDM_OID_BRIDGING_BR 
 	bool Enable;
 	char Status[9];
 	char Alias[65];
@@ -2626,8 +2857,9 @@ typedef struct rdm_BridgingBr_s{
 	uint32_t X_ZYXEL_VLANID;
 	uint32_t X_ZYXEL_ConcurrentWan;
 	bool X_ZYXEL_BridgeClear;
-}rdm_BridgingBr_t;
-typedef struct rdm_BridgingBrPort_s{
+} rdm_BridgingBr_t;
+
+typedef struct rdm_BridgingBrPort_s {   // RDM_OID_BRIDGING_BR_PORT 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -2646,8 +2878,9 @@ typedef struct rdm_BridgingBrPort_s{
 	uint32_t X_ZYXEL_DoNotSwitchBridge;
 	char X_ZYXEL_InterfaceType[33];
 	char X_ZYXEL_IfName[19];
-}rdm_BridgingBrPort_t;
-typedef struct rdm_BridgingBrPortSt_s{
+} rdm_BridgingBrPort_t;
+
+typedef struct rdm_BridgingBrPortSt_s {   // RDM_OID_BRIDGING_BR_PORT_ST 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -2663,21 +2896,24 @@ typedef struct rdm_BridgingBrPortSt_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_BridgingBrPortSt_t;
-typedef struct rdm_BridgingBrVlan_s{
+} rdm_BridgingBrPortSt_t;
+
+typedef struct rdm_BridgingBrVlan_s {   // RDM_OID_BRIDGING_BR_VLAN 
 	bool Enable;
 	char Alias[65];
 	char Name[65];
 	int VLANID;
-}rdm_BridgingBrVlan_t;
-typedef struct rdm_BridgingBrVlanport_s{
+} rdm_BridgingBrVlan_t;
+
+typedef struct rdm_BridgingBrVlanport_s {   // RDM_OID_BRIDGING_BR_VLANPORT 
 	bool Enable;
 	char Alias[65];
 	char VLAN[257];
 	char Port[257];
 	bool Untagged;
-}rdm_BridgingBrVlanport_t;
-typedef struct rdm_BridgingFilter_s{
+} rdm_BridgingBrVlanport_t;
+
+typedef struct rdm_BridgingFilter_s {   // RDM_OID_BRIDGING_FILTER 
 	bool Enable;
 	char Alias[65];
 	char Status[21];
@@ -2711,12 +2947,14 @@ typedef struct rdm_BridgingFilter_s{
 	char X_ZYXEL_SourceMACFromVSIFilter[256];
 	char X_ZYXEL_PreIfaceGroup[129];
 	bool X_ZYXEL_Enable_Criteria;
-}rdm_BridgingFilter_t;
-typedef struct rdm_Ppp_s{
+} rdm_BridgingFilter_t;
+
+typedef struct rdm_Ppp_s {   // RDM_OID_PPP 
 	uint32_t InterfaceNumberOfEntries;
 	char SupportedNCPs[33];
-}rdm_Ppp_t;
-typedef struct rdm_PppIface_s{
+} rdm_Ppp_t;
+
+typedef struct rdm_PppIface_s {   // RDM_OID_PPP_IFACE 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -2755,27 +2993,32 @@ typedef struct rdm_PppIface_s{
 	uint32_t X_ZYXEL_PPPConnRetryInterval;
 	uint32_t X_ZYXEL_LCPEcho;
 	uint32_t X_ZYXEL_LCPEchoRetry;
-}rdm_PppIface_t;
-typedef struct rdm_PppIfacePppoa_s{
-}rdm_PppIfacePppoa_t;
-typedef struct rdm_PppIfacePppoe_s{
+} rdm_PppIface_t;
+
+typedef struct rdm_PppIfacePppoa_s {   // RDM_OID_PPP_IFACE_PPPOA 
+} rdm_PppIfacePppoa_t;
+
+typedef struct rdm_PppIfacePppoe_s {   // RDM_OID_PPP_IFACE_PPPOE 
 	uint32_t SessionID;
 	char ACName[257];
 	char ServiceName[257];
 	char X_ZYXEL_SessionID[33];
-}rdm_PppIfacePppoe_t;
-typedef struct rdm_PppIfaceIpcp_s{
+} rdm_PppIfacePppoe_t;
+
+typedef struct rdm_PppIfaceIpcp_s {   // RDM_OID_PPP_IFACE_IPCP 
 	char LocalIPAddress[16];
 	char RemoteIPAddress[16];
 	char DNSServers[257];
 	bool PassthroughEnable;
 	char PassthroughDHCPPool[257];
-}rdm_PppIfaceIpcp_t;
-typedef struct rdm_PppIntfIpv6cp_s{
+} rdm_PppIfaceIpcp_t;
+
+typedef struct rdm_PppIntfIpv6cp_s {   // RDM_OID_PPP_INTF_IPV6CP 
 	char LocalInterfaceIdentifier[46];
 	char RemoteInterfaceIdentifier[46];
-}rdm_PppIntfIpv6cp_t;
-typedef struct rdm_PppIfaceStat_s{
+} rdm_PppIntfIpv6cp_t;
+
+typedef struct rdm_PppIfaceStat_s {   // RDM_OID_PPP_IFACE_STAT 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -2791,8 +3034,9 @@ typedef struct rdm_PppIfaceStat_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_PppIfaceStat_t;
-typedef struct rdm_Ip_s{
+} rdm_PppIfaceStat_t;
+
+typedef struct rdm_Ip_s {   // RDM_OID_IP 
 	bool IPv4Capable;
 	bool IPv4Enable;
 	char IPv4Status[11];
@@ -2802,8 +3046,9 @@ typedef struct rdm_Ip_s{
 	char ULAPrefix[49];
 	uint32_t InterfaceNumberOfEntries;
 	uint32_t ActivePortNumberOfEntries;
-}rdm_Ip_t;
-typedef struct rdm_IpIface_s{
+} rdm_Ip_t;
+
+typedef struct rdm_IpIface_s {   // RDM_OID_IP_IFACE 
 	bool Enable;
 	bool IPv4Enable;
 	bool IPv6Enable;
@@ -2848,6 +3093,8 @@ typedef struct rdm_IpIface_s{
 	bool X_ZYXEL_Enable_DSLite;
 	uint32_t X_ZYXEL_AdvManagedFlag;
 	uint32_t X_ZYXEL_AdvOtherConfigFlag;
+	bool X_ZYXEL_AdvManagedFlag_Manual;
+	bool X_ZYXEL_AdvOtherConfigFlag_Manual;
 	char X_ZYXEL_DSLiteRelayIPv6Addresses[73];
 	char X_ZYXEL_DSLite_Type[9];
 	char X_ZYXEL_SrvName[33];
@@ -2862,8 +3109,10 @@ typedef struct rdm_IpIface_s{
 	bool X_ZYXEL_PubLan_ARP;
 	bool X_ZYXEL_Enable_Firewall;
 	char X_ZYXEL_AccessDescription[257];
-}rdm_IpIface_t;
-typedef struct rdm_IpIfaceV4Addr_s{
+	bool X_ZYXEL_Global_IPv6Enable;
+} rdm_IpIface_t;
+
+typedef struct rdm_IpIfaceV4Addr_s {   // RDM_OID_IP_IFACE_V4_ADDR 
 	bool Enable;
 	char Status[25];
 	char Alias[65];
@@ -2873,8 +3122,9 @@ typedef struct rdm_IpIfaceV4Addr_s{
 	char X_ZYXEL_IfName[19];
 	bool X_ZYXEL_Alias;
 	char X_ZYXEL_Dhcp4Subnet_Ref[257];
-}rdm_IpIfaceV4Addr_t;
-typedef struct rdm_IpIfaceV6Addr_s{
+} rdm_IpIfaceV4Addr_t;
+
+typedef struct rdm_IpIfaceV6Addr_s {   // RDM_OID_IP_IFACE_V6_ADDR 
 	bool Enable;
 	char Status[25];
 	char IPAddressStatus[17];
@@ -2886,8 +3136,12 @@ typedef struct rdm_IpIfaceV6Addr_s{
 	char ValidLifetime[32];
 	bool Anycast;
 	char X_ZYXEL_LinkLocalAddrType[25];
-}rdm_IpIfaceV6Addr_t;
-typedef struct rdm_IpIfaceV6Prefix_s{
+	uint32_t X_ZYXEL_PreferredLifetime;
+	uint32_t X_ZYXEL_ValidLifetime;
+	uint32_t X_ZYXEL_CurrentTime;
+} rdm_IpIfaceV6Addr_t;
+
+typedef struct rdm_IpIfaceV6Prefix_s {   // RDM_OID_IP_IFACE_V6_PREFIX 
 	bool Enable;
 	char Status[25];
 	char PrefixStatus[17];
@@ -2904,8 +3158,10 @@ typedef struct rdm_IpIfaceV6Prefix_s{
 	uint32_t X_ZYXEL_PreferredLifetime;
 	uint32_t X_ZYXEL_ValidLifetime;
 	char X_ZYXEL_RouteInfoPrefixes[129];
-}rdm_IpIfaceV6Prefix_t;
-typedef struct rdm_IpIfaceStat_s{
+	uint32_t X_ZYXEL_CurrentTime;
+} rdm_IpIfaceV6Prefix_t;
+
+typedef struct rdm_IpIfaceStat_s {   // RDM_OID_IP_IFACE_STAT 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -2921,17 +3177,20 @@ typedef struct rdm_IpIfaceStat_s{
 	uint64_t BroadcastPacketsSent;
 	uint64_t BroadcastPacketsReceived;
 	uint32_t UnknownProtoPacketsReceived;
-}rdm_IpIfaceStat_t;
-typedef struct rdm_IpActivePort_s{
+} rdm_IpIfaceStat_t;
+
+typedef struct rdm_IpActivePort_s {   // RDM_OID_IP_ACTIVE_PORT 
 	char LocalIPAddress[46];
 	uint32_t LocalPort;
 	char RemoteIPAddress[46];
 	uint32_t RemotePort;
 	char Status[13];
-}rdm_IpActivePort_t;
-typedef struct rdm_IpDiag_s{
-}rdm_IpDiag_t;
-typedef struct rdm_IpDiagIpping_s{
+} rdm_IpActivePort_t;
+
+typedef struct rdm_IpDiag_s {   // RDM_OID_IP_DIAG 
+} rdm_IpDiag_t;
+
+typedef struct rdm_IpDiagIpping_s {   // RDM_OID_IP_DIAG_IPPING 
 	char DiagnosticsState[29];
 	char Interface[257];
 	char ProtocolVersion[17];
@@ -2949,8 +3208,9 @@ typedef struct rdm_IpDiagIpping_s{
 	uint32_t MinimumResponseTimeDetailed;
 	uint32_t MaximumResponseTimeDetailed;
 	char X_ZYXEL_Creator[23];
-}rdm_IpDiagIpping_t;
-typedef struct rdm_IpDiagTraceRt_s{
+} rdm_IpDiagIpping_t;
+
+typedef struct rdm_IpDiagTraceRt_s {   // RDM_OID_IP_DIAG_TRACE_RT 
 	char DiagnosticsState[29];
 	char Interface[257];
 	char ProtocolVersion[17];
@@ -2963,14 +3223,16 @@ typedef struct rdm_IpDiagTraceRt_s{
 	uint32_t ResponseTime;
 	uint32_t RouteHopsNumberOfEntries;
 	char X_ZYXEL_Creator[23];
-}rdm_IpDiagTraceRt_t;
-typedef struct rdm_IpDiagTracertRtHops_s{
+} rdm_IpDiagTraceRt_t;
+
+typedef struct rdm_IpDiagTracertRtHops_s {   // RDM_OID_IP_DIAG_TRACERT_RT_HOPS 
 	char Host[257];
 	char HostAddress[25];
 	uint32_t ErrorCode;
 	char RTTimes[273];
-}rdm_IpDiagTracertRtHops_t;
-typedef struct rdm_IpDiagDlDiag_s{
+} rdm_IpDiagTracertRtHops_t;
+
+typedef struct rdm_IpDiagDlDiag_s {   // RDM_OID_IP_DIAG_DL_DIAG 
 	char DiagnosticsState[29];
 	char Interface[257];
 	char DownloadURL[257];
@@ -2989,8 +3251,9 @@ typedef struct rdm_IpDiagDlDiag_s{
 	char TCPOpenRequestTime[32];
 	char TCPOpenResponseTime[32];
 	char X_ZYXEL_Creator[23];
-}rdm_IpDiagDlDiag_t;
-typedef struct rdm_IpDiagUlDiag_s{
+} rdm_IpDiagDlDiag_t;
+
+typedef struct rdm_IpDiagUlDiag_s {   // RDM_OID_IP_DIAG_UL_DIAG 
 	char DiagnosticsState[29];
 	char Interface[257];
 	char UploadURL[257];
@@ -3007,8 +3270,9 @@ typedef struct rdm_IpDiagUlDiag_s{
 	char TCPOpenRequestTime[32];
 	char TCPOpenResponseTime[32];
 	char X_ZYXEL_Creator[23];
-}rdm_IpDiagUlDiag_t;
-typedef struct rdm_IpDiagUdpEchoCfg_s{
+} rdm_IpDiagUlDiag_t;
+
+typedef struct rdm_IpDiagUdpEchoCfg_s {   // RDM_OID_IP_DIAG_UDP_ECHO_CFG 
 	bool Enable;
 	char Interface[257];
 	char SourceIPAddress[46];
@@ -3021,8 +3285,9 @@ typedef struct rdm_IpDiagUdpEchoCfg_s{
 	uint32_t BytesResponded;
 	char TimeFirstPacketReceived[32];
 	char TimeLastPacketReceived[32];
-}rdm_IpDiagUdpEchoCfg_t;
-typedef struct rdm_IpDiagUdpEchoDiag_s{
+} rdm_IpDiagUdpEchoCfg_t;
+
+typedef struct rdm_IpDiagUdpEchoDiag_s {   // RDM_OID_IP_DIAG_UDP_ECHO_DIAG 
 	char DiagnosticsState[29];
 	char Interface[257];
 	char Host[257];
@@ -3043,8 +3308,9 @@ typedef struct rdm_IpDiagUdpEchoDiag_s{
 	uint32_t IndividualPacketResultNumberOfEntries;
 	uint32_t UDPEchoDiagnosticsMaxResults;
 	char X_ZYXEL_Creator[23];
-}rdm_IpDiagUdpEchoDiag_t;
-typedef struct rdm_IpDiagUdpEchoPakRst_s{
+} rdm_IpDiagUdpEchoDiag_t;
+
+typedef struct rdm_IpDiagUdpEchoPakRst_s {   // RDM_OID_IP_DIAG_UDP_ECHO_PAK_RST 
 	bool PacketSuccess;
 	char PacketSendTime[32];
 	char PacketReceiveTime[32];
@@ -3053,8 +3319,9 @@ typedef struct rdm_IpDiagUdpEchoPakRst_s{
 	uint32_t TestRespRcvTimeStamp;
 	uint32_t TestRespReplyTimeStamp;
 	uint32_t TestRespReplyFailureCount;
-}rdm_IpDiagUdpEchoPakRst_t;
-typedef struct rdm_IpDiagSvrSelectDiag_s{
+} rdm_IpDiagUdpEchoPakRst_t;
+
+typedef struct rdm_IpDiagSvrSelectDiag_s {   // RDM_OID_IP_DIAG_SVR_SELECT_DIAG 
 	char DiagnosticsState[29];
 	char Interface[257];
 	char ProtocolVersion[9];
@@ -3067,8 +3334,9 @@ typedef struct rdm_IpDiagSvrSelectDiag_s{
 	uint32_t AverageResponseTime;
 	uint32_t MaximumResponseTime;
 	char IPAddressUsed[46];
-}rdm_IpDiagSvrSelectDiag_t;
-typedef struct rdm_Ipsec_s{
+} rdm_IpDiagSvrSelectDiag_t;
+
+typedef struct rdm_Ipsec_s {   // RDM_OID_IPSEC 
 	bool Enable;
 	char Status[17];
 	bool AHSupported;
@@ -3083,8 +3351,9 @@ typedef struct rdm_Ipsec_s{
 	uint32_t ProfileNumberOfEntries;
 	uint32_t TunnelNumberOfEntries;
 	uint32_t IKEv2SANumberOfEntries;
-}rdm_Ipsec_t;
-typedef struct rdm_IpsecStat_s{
+} rdm_Ipsec_t;
+
+typedef struct rdm_IpsecStat_s {   // RDM_OID_IPSEC_STAT 
 	uint32_t NegotiationFailures;
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
@@ -3097,8 +3366,9 @@ typedef struct rdm_IpsecStat_s{
 	uint32_t ReplayErrors;
 	uint32_t PolicyErrors;
 	uint32_t OtherReceiveErrors;
-}rdm_IpsecStat_t;
-typedef struct rdm_IpsecFilter_s{
+} rdm_IpsecStat_t;
+
+typedef struct rdm_IpsecFilter_s {   // RDM_OID_IPSEC_FILTER 
 	bool Enable;
 	char Status[17];
 	uint32_t Order;
@@ -3121,8 +3391,9 @@ typedef struct rdm_IpsecFilter_s{
 	bool SourcePortExclude;
 	char ProcessingChoice[8];
 	char Profile[33];
-}rdm_IpsecFilter_t;
-typedef struct rdm_IpsecProfile_s{
+} rdm_IpsecFilter_t;
+
+typedef struct rdm_IpsecProfile_s {   // RDM_OID_IPSEC_PROFILE 
 	char Alias[65];
 	uint32_t MaxChildSAs;
 	char RemoteEndpoints[65];
@@ -3148,27 +3419,31 @@ typedef struct rdm_IpsecProfile_s{
 	uint32_t ChildSATimeLimit;
 	char ChildSAExpiryAction[12];
 	uint32_t SentCPAttrNumberOfEntries;
-}rdm_IpsecProfile_t;
-typedef struct rdm_IpsecProfileSentCpAttr_s{
+} rdm_IpsecProfile_t;
+
+typedef struct rdm_IpsecProfileSentCpAttr_s {   // RDM_OID_IPSEC_PROFILE_SENT_CP_ATTR 
 	bool Enable;
 	char Alias[65];
 	uint32_t Type;
 	char Value[5];
-}rdm_IpsecProfileSentCpAttr_t;
-typedef struct rdm_IpsecTunnel_s{
+} rdm_IpsecProfileSentCpAttr_t;
+
+typedef struct rdm_IpsecTunnel_s {   // RDM_OID_IPSEC_TUNNEL 
 	char Alias[65];
 	char TunnelInterface[25];
 	char TunneledInterface[25];
 	char Filters[25];
-}rdm_IpsecTunnel_t;
-typedef struct rdm_IpsecTunnelStat_s{
+} rdm_IpsecTunnel_t;
+
+typedef struct rdm_IpsecTunnelStat_s {   // RDM_OID_IPSEC_TUNNEL_STAT 
 	uint32_t DecryptionErrors;
 	uint32_t IntegrityErrors;
 	uint32_t ReplayErrors;
 	uint32_t PolicyErrors;
 	uint32_t OtherReceiveErrors;
-}rdm_IpsecTunnelStat_t;
-typedef struct rdm_IpsecIkev2sa_s{
+} rdm_IpsecTunnelStat_t;
+
+typedef struct rdm_IpsecIkev2sa_s {   // RDM_OID_IPSEC_IKEV2SA 
 	char Status[17];
 	char Alias[65];
 	char Tunnel[33];
@@ -3182,8 +3457,9 @@ typedef struct rdm_IpsecIkev2sa_s{
 	char CreationTime[32];
 	uint32_t ReceivedCPAttrNumberOfEntries;
 	uint32_t ChildSANumberOfEntriess;
-}rdm_IpsecIkev2sa_t;
-typedef struct rdm_IpsecIkev2saStat_s{
+} rdm_IpsecIkev2sa_t;
+
+typedef struct rdm_IpsecIkev2saStat_s {   // RDM_OID_IPSEC_IKEV2SA_STAT 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint32_t PacketsSent;
@@ -3192,19 +3468,22 @@ typedef struct rdm_IpsecIkev2saStat_s{
 	uint32_t DecryptionErrors;
 	uint32_t IntegrityErrors;
 	uint32_t OtherReceiveErrors;
-}rdm_IpsecIkev2saStat_t;
-typedef struct rdm_IpsecIkev2saReceivedCpAttr_s{
+} rdm_IpsecIkev2saStat_t;
+
+typedef struct rdm_IpsecIkev2saReceivedCpAttr_s {   // RDM_OID_IPSEC_IKEV2SA_RECEIVED_CP_ATTR 
 	uint32_t Type;
 	char Value[5];
-}rdm_IpsecIkev2saReceivedCpAttr_t;
-typedef struct rdm_IpsecIkev2saChildSa_s{
+} rdm_IpsecIkev2saReceivedCpAttr_t;
+
+typedef struct rdm_IpsecIkev2saChildSa_s {   // RDM_OID_IPSEC_IKEV2SA_CHILD_SA 
 	char Status[17];
 	char Alias[65];
 	uint32_t InboundSPI;
 	uint32_t OutboundSPI;
 	char CreationTime[32];
-}rdm_IpsecIkev2saChildSa_t;
-typedef struct rdm_IpsecIkev2saChildSaStat_s{
+} rdm_IpsecIkev2saChildSa_t;
+
+typedef struct rdm_IpsecIkev2saChildSaStat_s {   // RDM_OID_IPSEC_IKEV2SA_CHILD_SA_STAT 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint32_t PacketsSent;
@@ -3215,12 +3494,14 @@ typedef struct rdm_IpsecIkev2saChildSaStat_s{
 	uint32_t ReplayErrors;
 	uint32_t PolicyErrors;
 	uint32_t OtherReceiveErrors;
-}rdm_IpsecIkev2saChildSaStat_t;
-typedef struct rdm_Gre_s{
+} rdm_IpsecIkev2saChildSaStat_t;
+
+typedef struct rdm_Gre_s {   // RDM_OID_GRE 
 	uint32_t TunnelNumberOfEntries;
 	uint32_t FilterNumberOfEntries;
-}rdm_Gre_t;
-typedef struct rdm_GreTunnel_s{
+} rdm_Gre_t;
+
+typedef struct rdm_GreTunnel_s {   // RDM_OID_GRE_TUNNEL 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -3232,8 +3513,9 @@ typedef struct rdm_GreTunnel_s{
 	uint32_t DefaultDSCPMark;
 	char ConnectedRemoteEndpoint[257];
 	uint32_t InterfaceNumberOfEntries;
-}rdm_GreTunnel_t;
-typedef struct rdm_GreTunnelStat_s{
+} rdm_GreTunnel_t;
+
+typedef struct rdm_GreTunnelStat_s {   // RDM_OID_GRE_TUNNEL_STAT 
 	uint32_t KeepAliveSent;
 	uint32_t KeepAliveReceived;
 	uint64_t BytesSent;
@@ -3242,8 +3524,9 @@ typedef struct rdm_GreTunnelStat_s{
 	uint64_t PacketsReceived;
 	uint32_t ErrorsSent;
 	uint32_t ErrorsReceived;
-}rdm_GreTunnelStat_t;
-typedef struct rdm_GreTunnelIface_s{
+} rdm_GreTunnelStat_t;
+
+typedef struct rdm_GreTunnelIface_s {   // RDM_OID_GRE_TUNNEL_IFACE 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -3255,8 +3538,9 @@ typedef struct rdm_GreTunnelIface_s{
 	char KeyIdentifierGenerationPolicy[17];
 	uint32_t KeyIdentifier;
 	bool UseSequenceNumber;
-}rdm_GreTunnelIface_t;
-typedef struct rdm_GreTunnelIfaceStat_s{
+} rdm_GreTunnelIface_t;
+
+typedef struct rdm_GreTunnelIfaceStat_s {   // RDM_OID_GRE_TUNNEL_IFACE_STAT 
 	uint64_t BytesSent;
 	uint64_t BytesReceived;
 	uint64_t PacketsSent;
@@ -3265,8 +3549,9 @@ typedef struct rdm_GreTunnelIfaceStat_s{
 	uint32_t ErrorsReceived;
 	uint32_t DiscardChecksumReceived;
 	uint32_t DiscardSequenceNumberReceived;
-}rdm_GreTunnelIfaceStat_t;
-typedef struct rdm_GreFilter_s{
+} rdm_GreTunnelIfaceStat_t;
+
+typedef struct rdm_GreFilter_s {   // RDM_OID_GRE_FILTER 
 	bool Enable;
 	char Status[33];
 	uint32_t Order;
@@ -3276,17 +3561,20 @@ typedef struct rdm_GreFilter_s{
 	int VLANIDCheck;
 	bool VLANIDExclude;
 	int DSCPMarkPolicy;
-}rdm_GreFilter_t;
-typedef struct rdm_CaptPortal_s{
+} rdm_GreFilter_t;
+
+typedef struct rdm_CaptPortal_s {   // RDM_OID_CAPT_PORTAL 
 	bool Enable;
 	char Status[17];
 	char AllowedList[10001];
 	char URL[2001];
-}rdm_CaptPortal_t;
-typedef struct rdm_Routing_s{
+} rdm_CaptPortal_t;
+
+typedef struct rdm_Routing_s {   // RDM_OID_ROUTING 
 	uint32_t RouterNumberOfEntries;
-}rdm_Routing_t;
-typedef struct rdm_RoutingRouter_s{
+} rdm_Routing_t;
+
+typedef struct rdm_RoutingRouter_s {   // RDM_OID_ROUTING_ROUTER 
 	bool Enable;
 	char Status[17];
 	char Alias[65];
@@ -3295,8 +3583,9 @@ typedef struct rdm_RoutingRouter_s{
 	char X_ZYXEL_ActiveDefaultGateway[321];
 	char X_ZYXEL_ActiveV6DefaultGateway[321];
 	bool X_ZYXEL_AutoSecureDefaultIface;
-}rdm_RoutingRouter_t;
-typedef struct rdm_RoutingRouterV4Fwd_s{
+} rdm_RoutingRouter_t;
+
+typedef struct rdm_RoutingRouterV4Fwd_s {   // RDM_OID_ROUTING_ROUTER_V4_FWD 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
@@ -3316,8 +3605,10 @@ typedef struct rdm_RoutingRouterV4Fwd_s{
 	int X_ZYXEL_SourcePort;
 	char X_ZYXEL_PolicyRouteName[33];
 	bool X_ZYXEL_PolicyRoute;
-}rdm_RoutingRouterV4Fwd_t;
-typedef struct rdm_RoutingRouterV6Fwd_s{
+	char X_ZYXEL_RoutAdder[21];
+} rdm_RoutingRouterV4Fwd_t;
+
+typedef struct rdm_RoutingRouterV6Fwd_s {   // RDM_OID_ROUTING_ROUTER_V6_FWD 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
@@ -3328,13 +3619,15 @@ typedef struct rdm_RoutingRouterV6Fwd_s{
 	char Origin[7];
 	int ForwardingMetric;
 	char ExpirationTime[32];
-}rdm_RoutingRouterV6Fwd_t;
-typedef struct rdm_RoutingRip_s{
+} rdm_RoutingRouterV6Fwd_t;
+
+typedef struct rdm_RoutingRip_s {   // RDM_OID_ROUTING_RIP 
 	bool Enable;
 	char SupportedModes[8];
 	uint32_t InterfaceSettingNumberOfEntries;
-}rdm_RoutingRip_t;
-typedef struct rdm_RoutingRipIntfSet_s{
+} rdm_RoutingRip_t;
+
+typedef struct rdm_RoutingRipIntfSet_s {   // RDM_OID_ROUTING_RIP_INTF_SET 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
@@ -3344,12 +3637,14 @@ typedef struct rdm_RoutingRipIntfSet_s{
 	char X_ZYXEL_Version[8];
 	char X_ZYXEL_RipOpMode[8];
 	bool X_ZYXEL_DisableDefaultGw;
-}rdm_RoutingRipIntfSet_t;
-typedef struct rdm_RoutingRtInfo_s{
+} rdm_RoutingRipIntfSet_t;
+
+typedef struct rdm_RoutingRtInfo_s {   // RDM_OID_ROUTING_RT_INFO 
 	bool Enable;
 	uint32_t InterfaceSettingNumberOfEntries;
-}rdm_RoutingRtInfo_t;
-typedef struct rdm_RoutingRtInfoIntfSet_s{
+} rdm_RoutingRtInfo_t;
+
+typedef struct rdm_RoutingRtInfoIntfSet_s {   // RDM_OID_ROUTING_RT_INFO_INTF_SET 
 	char Status[23];
 	char Interface[257];
 	char SourceRouter[47];
@@ -3359,27 +3654,33 @@ typedef struct rdm_RoutingRtInfoIntfSet_s{
 	uint32_t X_ZYXEL_RouterLifetime;
 	int X_ZYXEL_RA_MFlag;
 	int X_ZYXEL_RA_OFlag;
-}rdm_RoutingRtInfoIntfSet_t;
-typedef struct rdm_NeighborDiscovery_s{
+} rdm_RoutingRtInfoIntfSet_t;
+
+typedef struct rdm_NeighborDiscovery_s {   // RDM_OID_NEIGHBOR_DISCOVERY 
 	bool Enable;
 	uint32_t InterfaceSettingNumberOfEntries;
-}rdm_NeighborDiscovery_t;
-typedef struct rdm_NeighborDiscoveryIntfSet_s{
+} rdm_NeighborDiscovery_t;
+
+typedef struct rdm_NeighborDiscoveryIntfSet_s {   // RDM_OID_NEIGHBOR_DISCOVERY_INTF_SET 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
 	char Interface[33];
 	uint32_t RetransTimer;
 	uint32_t RtrSolicitationInterval;
-	uint32_t MaxRtrSolitations;
+	uint32_t MaxRtrSolicitations;
 	bool NUDEnable;
 	bool RSEnable;
-}rdm_NeighborDiscoveryIntfSet_t;
-typedef struct rdm_RtAdv_s{
+	bool X_ZYXEL_NDEnable;
+	char X_ZYXEL_Ifname[33];
+} rdm_NeighborDiscoveryIntfSet_t;
+
+typedef struct rdm_RtAdv_s {   // RDM_OID_RT_ADV 
 	bool Enable;
 	uint32_t InterfaceSettingNumberOfEntries;
-}rdm_RtAdv_t;
-typedef struct rdm_RtAdvIntfSet_s{
+} rdm_RtAdv_t;
+
+typedef struct rdm_RtAdvIntfSet_s {   // RDM_OID_RT_ADV_INTF_SET 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
@@ -3403,18 +3704,21 @@ typedef struct rdm_RtAdvIntfSet_s{
 	bool X_ZYXEL_RAandDHCP6S;
 	char X_ZYXEL_DNSSearchList[129];
 	uint32_t OptionNumberOfEntries;
-}rdm_RtAdvIntfSet_t;
-typedef struct rdm_RtAdvIntfSetOpt_s{
+} rdm_RtAdvIntfSet_t;
+
+typedef struct rdm_RtAdvIntfSetOpt_s {   // RDM_OID_RT_ADV_INTF_SET_OPT 
 	bool Enable;
 	char Alias[65];
 	uint32_t Tag;
-	char Value[5];
-}rdm_RtAdvIntfSetOpt_t;
-typedef struct rdm_Ipv6rd_s{
+	char Value[257];
+} rdm_RtAdvIntfSetOpt_t;
+
+typedef struct rdm_Ipv6rd_s {   // RDM_OID_IPV6RD 
 	bool Enable;
 	uint32_t InterfaceSettingNumberOfEntries;
-}rdm_Ipv6rd_t;
-typedef struct rdm_Ipv6rdIntf_s{
+} rdm_Ipv6rd_t;
+
+typedef struct rdm_Ipv6rdIntf_s {   // RDM_OID_IPV6RD_INTF 
 	bool Enable;
 	char Status[9];
 	char Alias[65];
@@ -3426,12 +3730,14 @@ typedef struct rdm_Ipv6rdIntf_s{
 	char TunnelInterface[33];
 	char TunneledInterface[33];
 	char X_ZYXEL_Interface[33];
-}rdm_Ipv6rdIntf_t;
-typedef struct rdm_DsLite_s{
+} rdm_Ipv6rdIntf_t;
+
+typedef struct rdm_DsLite_s {   // RDM_OID_DS_LITE 
 	bool Enable;
 	uint32_t InterfaceSettingNumberOfEntries;
-}rdm_DsLite_t;
-typedef struct rdm_DsLiteIntfSet_s{
+} rdm_DsLite_t;
+
+typedef struct rdm_DsLiteIntfSet_s {   // RDM_OID_DS_LITE_INTF_SET 
 	bool Enable;
 	char Status[9];
 	char Alias[65];
@@ -3445,8 +3751,9 @@ typedef struct rdm_DsLiteIntfSet_s{
 	char TunneledInterface[257];
 	char X_ZYXEL_Interface[33];
 	char X_ZYXEL_IPv6AddressSource[51];
-}rdm_DsLiteIntfSet_t;
-typedef struct rdm_Qos_s{
+} rdm_DsLiteIntfSet_t;
+
+typedef struct rdm_Qos_s {   // RDM_OID_QOS 
 	uint32_t MaxClassificationEntries;
 	uint32_t ClassificationNumberOfEntries;
 	uint32_t MaxAppEntries;
@@ -3471,8 +3778,9 @@ typedef struct rdm_Qos_s{
 	uint32_t X_ZYXEL_UpRate;
 	uint32_t X_ZYXEL_DownRate;
 	char X_ZYXEL_AutoMapType[17];
-}rdm_Qos_t;
-typedef struct rdm_QosCls_s{
+} rdm_Qos_t;
+
+typedef struct rdm_QosCls_s {   // RDM_OID_QOS_CLS 
 	bool Enable;
 	char Status[20];
 	uint32_t Order;
@@ -3560,8 +3868,9 @@ typedef struct rdm_QosCls_s{
 	char X_ZYXEL_Service[129];
 	bool X_ZYXEL_ServiceExclude;
 	char X_ZYXEL_TargetInterface[257];
-}rdm_QosCls_t;
-typedef struct rdm_QosApp_s{
+} rdm_QosCls_t;
+
+typedef struct rdm_QosApp_s {   // RDM_OID_QOS_APP 
 	bool Enable;
 	char Status[9];
 	char Alias[65];
@@ -3572,8 +3881,9 @@ typedef struct rdm_QosApp_s{
 	char DefaultPolicer[257];
 	int DefaultDSCPMark;
 	int DefaultEthernetPriorityMark;
-}rdm_QosApp_t;
-typedef struct rdm_QosFlow_s{
+} rdm_QosApp_t;
+
+typedef struct rdm_QosFlow_s {   // RDM_OID_QOS_FLOW 
 	bool Enable;
 	char Status[9];
 	char Alias[65];
@@ -3586,8 +3896,9 @@ typedef struct rdm_QosFlow_s{
 	char Policer[257];
 	int DSCPMark;
 	int EthernetPriorityMark;
-}rdm_QosFlow_t;
-typedef struct rdm_QosPolicer_s{
+} rdm_QosFlow_t;
+
+typedef struct rdm_QosPolicer_s {   // RDM_OID_QOS_POLICER 
 	bool Enable;
 	char X_ZYXEL_Name[65];
 	char Status[9];
@@ -3610,8 +3921,9 @@ typedef struct rdm_QosPolicer_s{
 	uint32_t PartiallyConformingCountedBytes;
 	uint32_t NonConformingCountedPackets;
 	uint32_t NonConformingCountedBytes;
-}rdm_QosPolicer_t;
-typedef struct rdm_QosQue_s{
+} rdm_QosPolicer_t;
+
+typedef struct rdm_QosQue_s {   // RDM_OID_QOS_QUE 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
@@ -3633,8 +3945,9 @@ typedef struct rdm_QosQue_s{
 	int X_ZYXEL_DslLatency;
 	int X_ZYXEL_PtmPriority;
 	bool X_ZYXEL_DefaultQueue;
-}rdm_QosQue_t;
-typedef struct rdm_QosQueStat_s{
+} rdm_QosQue_t;
+
+typedef struct rdm_QosQueStat_s {   // RDM_OID_QOS_QUE_STAT 
 	bool Enable;
 	char Status[9];
 	char Alias[65];
@@ -3646,22 +3959,27 @@ typedef struct rdm_QosQueStat_s{
 	uint32_t DroppedBytes;
 	uint32_t QueueOccupancyPackets;
 	uint32_t QueueOccupancyPercentage;
-}rdm_QosQueStat_t;
-typedef struct rdm_QosShaper_s{
+} rdm_QosQueStat_t;
+
+typedef struct rdm_QosShaper_s {   // RDM_OID_QOS_SHAPER 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
 	char Interface[257];
 	int ShapingRate;
 	uint32_t ShapingBurstSize;
-}rdm_QosShaper_t;
-typedef struct rdm_LanConfSec_s{
+} rdm_QosShaper_t;
+
+typedef struct rdm_LanConfSec_s {   // RDM_OID_LAN_CONF_SEC 
 	char ConfigPassword[65];
-}rdm_LanConfSec_t;
-typedef struct rdm_Hosts_s{
+} rdm_LanConfSec_t;
+
+typedef struct rdm_Hosts_s {   // RDM_OID_HOSTS 
 	uint32_t HostNumberOfEntries;
-}rdm_Hosts_t;
-typedef struct rdm_HostsHost_s{
+	bool X_ZYXEL_DeleteAllLease;
+} rdm_Hosts_t;
+
+typedef struct rdm_HostsHost_s {   // RDM_OID_HOSTS_HOST 
 	char Alias[65];
 	char PhysAddress[65];
 	char IPAddress[49];
@@ -3690,16 +4008,23 @@ typedef struct rdm_HostsHost_s{
 	int X_ZYXEL_RSSI;
 	char X_ZYXEL_SoftwareVersion[65];
 	uint32_t X_ZYXEL_LastUpdate;
+	char X_ZYXEL_Address6Source[7];
+	char X_ZYXEL_DHCP6Client[65];
 	uint32_t IPv4AddressNumberOfEntries;
 	uint32_t IPv6AddressNumberOfEntries;
-}rdm_HostsHost_t;
-typedef struct rdm_HostsHostV4Addr_s{
+	char ClientDuid[48];
+	char ExpireTime[20];
+} rdm_HostsHost_t;
+
+typedef struct rdm_HostsHostV4Addr_s {   // RDM_OID_HOSTS_HOST_V4_ADDR 
 	char IPAddress[16];
-}rdm_HostsHostV4Addr_t;
-typedef struct rdm_HostsHostV6Addr_s{
+} rdm_HostsHostV4Addr_t;
+
+typedef struct rdm_HostsHostV6Addr_s {   // RDM_OID_HOSTS_HOST_V6_ADDR 
 	char IPAddress[49];
-}rdm_HostsHostV6Addr_t;
-typedef struct rdm_ZyHostsHostExt_s{
+} rdm_HostsHostV6Addr_t;
+
+typedef struct rdm_ZyHostsHostExt_s {   // RDM_OID_ZY_HOSTS_HOST_EXT 
 	bool L2DevCtrl_Reboot;
 	char L2DevCtrl_RebootResult[65];
 	bool L2DevCtrl_Reset;
@@ -3709,18 +4034,25 @@ typedef struct rdm_ZyHostsHostExt_s{
 	bool L2DevCtrl_FWUpgrade;
 	char L2DevCtrl_FWURL[257];
 	char L2DevCtrl_FWUpgradeResult[65];
-}rdm_ZyHostsHostExt_t;
-typedef struct rdm_Dns_s{
+	char L2DevCtrl_MediaType[7];
+	bool L2DevCtrl_WiFiPwr;
+} rdm_ZyHostsHostExt_t;
+
+typedef struct rdm_Dns_s {   // RDM_OID_DNS 
 	char SupportedRecordTypes[15];
+	char X_ZYXEL_BoundInterfaceList[257];
+	bool X_ZYXEL_RedirectLANSideDNSQuery;
 	char X_ZYXEL_ActiveDNSServers[257];
 	uint32_t X_ZYXEL_DNSQueryScenario;
-}rdm_Dns_t;
-typedef struct rdm_DnsClient_s{
+} rdm_Dns_t;
+
+typedef struct rdm_DnsClient_s {   // RDM_OID_DNS_CLIENT 
 	bool Enable;
 	char Status[9];
 	uint32_t ServerNumberOfEntries;
-}rdm_DnsClient_t;
-typedef struct rdm_DnsClientSrv_s{
+} rdm_DnsClient_t;
+
+typedef struct rdm_DnsClientSrv_s {   // RDM_OID_DNS_CLIENT_SRV 
 	bool Enable;
 	char Status[9];
 	char Alias[65];
@@ -3731,23 +4063,27 @@ typedef struct rdm_DnsClientSrv_s{
 	char X_ZYXEL_Ifname[33];
 	char X_ZYXEL_GwAddr[65];
 	char X_ZYXEL_DNSSearchList[129];
-}rdm_DnsClientSrv_t;
-typedef struct rdm_DnsRelay_s{
+} rdm_DnsClientSrv_t;
+
+typedef struct rdm_DnsRelay_s {   // RDM_OID_DNS_RELAY 
 	bool Enable;
 	char Status[9];
 	uint32_t ForwardNumberOfEntries;
-}rdm_DnsRelay_t;
-typedef struct rdm_DnsRelayFwd_s{
+} rdm_DnsRelay_t;
+
+typedef struct rdm_DnsRelayFwd_s {   // RDM_OID_DNS_RELAY_FWD 
 	bool Enable;
 	char Status[9];
 	char Alias[65];
 	char DNSServer[46];
 	char Interface[257];
 	char Type[20];
-}rdm_DnsRelayFwd_t;
-typedef struct rdm_DnsDiag_s{
-}rdm_DnsDiag_t;
-typedef struct rdm_DnsDiagNsLookupDiag_s{
+} rdm_DnsRelayFwd_t;
+
+typedef struct rdm_DnsDiag_s {   // RDM_OID_DNS_DIAG 
+} rdm_DnsDiag_t;
+
+typedef struct rdm_DnsDiagNsLookupDiag_s {   // RDM_OID_DNS_DIAG_NS_LOOKUP_DIAG 
 	char DiagnosticsState[27];
 	char Interface[257];
 	char HostName[257];
@@ -3757,33 +4093,39 @@ typedef struct rdm_DnsDiagNsLookupDiag_s{
 	uint32_t SuccessCount;
 	uint32_t ResultNumberOfEntries;
 	char X_ZYXEL_Creator[23];
-}rdm_DnsDiagNsLookupDiag_t;
-typedef struct rdm_DnsDiagNsLookupDiagResult_s{
+} rdm_DnsDiagNsLookupDiag_t;
+
+typedef struct rdm_DnsDiagNsLookupDiagResult_s {   // RDM_OID_DNS_DIAG_NS_LOOKUP_DIAG_RESULT 
 	char Status[28];
 	char AnswerType[17];
 	char HostNameReturned[257];
 	char IPAddresses[1601];
 	char DNSServerIP[46];
 	uint32_t ResponseTime;
-}rdm_DnsDiagNsLookupDiagResult_t;
-typedef struct rdm_Nat_s{
+} rdm_DnsDiagNsLookupDiagResult_t;
+
+typedef struct rdm_Nat_s {   // RDM_OID_NAT 
 	uint32_t InterfaceSettingNumberOfEntries;
 	uint32_t PortMappingNumberOfEntries;
+	bool X_ZYXEL_DMZHost_Enable;
 	char X_ZYXEL_DMZHost[33];
 	bool X_ZYXEL_NAT_ALG;
 	bool X_ZYXEL_SIP_ALG;
 	bool X_ZYXEL_RTSP_ALG;
 	bool X_ZYXEL_PPTP_ALG;
 	bool X_ZYXEL_IPSEC_ALG;
-}rdm_Nat_t;
-typedef struct rdm_NatIntfSetting_s{
+	char X_ZYXEL_RTSP_ALG_Ports[97];
+} rdm_Nat_t;
+
+typedef struct rdm_NatIntfSetting_s {   // RDM_OID_NAT_INTF_SETTING 
 	bool Enable;
 	char Status[28];
 	char Alias[65];
 	char Interface[257];
 	bool X_ZYXEL_FullConeEnabled;
-}rdm_NatIntfSetting_t;
-typedef struct rdm_NatPortMapping_s{
+} rdm_NatIntfSetting_t;
+
+typedef struct rdm_NatPortMapping_s {   // RDM_OID_NAT_PORT_MAPPING 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
@@ -3804,8 +4146,9 @@ typedef struct rdm_NatPortMapping_s{
 	char Protocol[4];
 	char InternalClient[257];
 	char Description[257];
-}rdm_NatPortMapping_t;
-typedef struct rdm_NatPortTriggering_s{
+} rdm_NatPortMapping_t;
+
+typedef struct rdm_NatPortTriggering_s {   // RDM_OID_NAT_PORT_TRIGGERING 
 	bool Enable;
 	char Name[65];
 	char Status[20];
@@ -3817,8 +4160,9 @@ typedef struct rdm_NatPortTriggering_s{
 	char Protocol[4];
 	char TriggerProtocol[4];
 	char Description[257];
-}rdm_NatPortTriggering_t;
-typedef struct rdm_NatAddrMapping_s{
+} rdm_NatPortTriggering_t;
+
+typedef struct rdm_NatAddrMapping_s {   // RDM_OID_NAT_ADDR_MAPPING 
 	bool Enable;
 	char Type[17];
 	char LocalStartIP[17];
@@ -3830,17 +4174,22 @@ typedef struct rdm_NatAddrMapping_s{
 	char Description[65];
 	char WANIntfName[65];
 	char Interface[65];
-}rdm_NatAddrMapping_t;
-typedef struct rdm_NatSessionCtl_s{
+} rdm_NatAddrMapping_t;
+
+typedef struct rdm_NatSessionCtl_s {   // RDM_OID_NAT_SESSION_CTL 
 	uint32_t MaxSessionPerSystem;
 	uint32_t MaxSessionPerHost;
 	uint32_t TcpEstablishedConnectionTimeout;
 	uint32_t UdpConnectionTimeout;
-}rdm_NatSessionCtl_t;
-typedef struct rdm_Dhcpv4_s{
+	uint32_t UdpCustomizedPort;
+	uint32_t UdpCustomizedTimeout;
+} rdm_NatSessionCtl_t;
+
+typedef struct rdm_Dhcpv4_s {   // RDM_OID_DHCPV4 
 	uint32_t ClientNumberOfEntries;
-}rdm_Dhcpv4_t;
-typedef struct rdm_Dhcpv4Client_s{
+} rdm_Dhcpv4_t;
+
+typedef struct rdm_Dhcpv4Client_s {   // RDM_OID_DHCPV4_CLIENT 
 	bool Enable;
 	char Alias[65];
 	char Interface[257];
@@ -3859,25 +4208,30 @@ typedef struct rdm_Dhcpv4Client_s{
 	uint32_t ReqOptionNumberOfEntries;
 	char X_ZYXEL_DhcpcPidFilePath[33];
 	char X_ZYXEL_RenewKey[129];
-}rdm_Dhcpv4Client_t;
-typedef struct rdm_Dhcpv4SentOpt_s{
+} rdm_Dhcpv4Client_t;
+
+typedef struct rdm_Dhcpv4SentOpt_s {   // RDM_OID_DHCPV4_SENT_OPT 
 	bool Enable;
 	char Alias[65];
 	uint32_t Tag;
 	char Value[256];
-}rdm_Dhcpv4SentOpt_t;
-typedef struct rdm_Dhcpv4ReqOpt_s{
+} rdm_Dhcpv4SentOpt_t;
+
+typedef struct rdm_Dhcpv4ReqOpt_s {   // RDM_OID_DHCPV4_REQ_OPT 
 	bool Enable;
 	uint32_t Order;
 	char Alias[65];
 	uint32_t Tag;
 	char Value[256];
-}rdm_Dhcpv4ReqOpt_t;
-typedef struct rdm_Dhcpv4Srv_s{
+} rdm_Dhcpv4ReqOpt_t;
+
+typedef struct rdm_Dhcpv4Srv_s {   // RDM_OID_DHCPV4_SRV 
 	bool Enable;
+	bool X_ZYXEL_Reset;
 	uint32_t PoolNumberOfEntries;
-}rdm_Dhcpv4Srv_t;
-typedef struct rdm_Dhcpv4SrvPool_s{
+} rdm_Dhcpv4Srv_t;
+
+typedef struct rdm_Dhcpv4SrvPool_s {   // RDM_OID_DHCPV4_SRV_POOL 
 	bool Enable;
 	bool X_ZYXEL_SetEnable;
 	bool X_ZYXEL_AutoReserveLanIp;
@@ -3912,48 +4266,56 @@ typedef struct rdm_Dhcpv4SrvPool_s{
 	uint32_t StaticAddressNumberOfEntries;
 	uint32_t OptionNumberOfEntries;
 	uint32_t ClientNumberOfEntries;
-}rdm_Dhcpv4SrvPool_t;
-typedef struct rdm_Dhcpv4SrvPoolStaticAddr_s{
+} rdm_Dhcpv4SrvPool_t;
+
+typedef struct rdm_Dhcpv4SrvPoolStaticAddr_s {   // RDM_OID_DHCPV4_SRV_POOL_STATIC_ADDR 
 	bool Enable;
 	char Alias[65];
 	char Chaddr[18];
 	char Yiaddr[16];
-}rdm_Dhcpv4SrvPoolStaticAddr_t;
-typedef struct rdm_Dhcpv4SrvPoolOpt_s{
+} rdm_Dhcpv4SrvPoolStaticAddr_t;
+
+typedef struct rdm_Dhcpv4SrvPoolOpt_s {   // RDM_OID_DHCPV4_SRV_POOL_OPT 
 	bool Enable;
 	char Alias[65];
 	uint32_t Tag;
 	char Value[256];
-}rdm_Dhcpv4SrvPoolOpt_t;
-typedef struct rdm_Dhcpv4SrvPoolClient_s{
+} rdm_Dhcpv4SrvPoolOpt_t;
+
+typedef struct rdm_Dhcpv4SrvPoolClient_s {   // RDM_OID_DHCPV4_SRV_POOL_CLIENT 
 	char Alias[65];
 	char Chadder[18];
 	bool Active;
 	uint32_t IPv4AddressNumberOfEntries;
 	uint32_t OptionNumberOfEntries;
-}rdm_Dhcpv4SrvPoolClient_t;
-typedef struct rdm_Dhcpv4SrvPoolClientV4Addr_s{
+} rdm_Dhcpv4SrvPoolClient_t;
+
+typedef struct rdm_Dhcpv4SrvPoolClientV4Addr_s {   // RDM_OID_DHCPV4_SRV_POOL_CLIENT_V4_ADDR 
 	char IPAddress[16];
 	char LeaseTimeRemaining[32];
-}rdm_Dhcpv4SrvPoolClientV4Addr_t;
-typedef struct rdm_Dhcpv4SrvPoolClientOpt_s{
+} rdm_Dhcpv4SrvPoolClientV4Addr_t;
+
+typedef struct rdm_Dhcpv4SrvPoolClientOpt_s {   // RDM_OID_DHCPV4_SRV_POOL_CLIENT_OPT 
 	uint32_t Tag;
 	char Value[256];
-}rdm_Dhcpv4SrvPoolClientOpt_t;
-typedef struct rdm_Dhcpv4SrvSubnet_s{
+} rdm_Dhcpv4SrvPoolClientOpt_t;
+
+typedef struct rdm_Dhcpv4SrvSubnet_s {   // RDM_OID_DHCPV4_SRV_SUBNET 
 	bool Enable;
 	char Interface[257];
 	char MinAddress[16];
 	char MaxAddress[16];
 	char SubnetMask[16];
 	char LANIP[16];
-}rdm_Dhcpv4SrvSubnet_t;
-typedef struct rdm_Dhcpv4Relay_s{
+} rdm_Dhcpv4SrvSubnet_t;
+
+typedef struct rdm_Dhcpv4Relay_s {   // RDM_OID_DHCPV4_RELAY 
 	bool Enable;
 	char Status[9];
 	uint32_t ForwardingNumberOfEntries;
-}rdm_Dhcpv4Relay_t;
-typedef struct rdm_Dhcpv4RelayFwd_s{
+} rdm_Dhcpv4Relay_t;
+
+typedef struct rdm_Dhcpv4RelayFwd_s {   // RDM_OID_DHCPV4_RELAY_FWD 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
@@ -3971,11 +4333,13 @@ typedef struct rdm_Dhcpv4RelayFwd_s{
 	bool ChaddrExclude;
 	bool LocallyServed;
 	char DHCPServerIPAddress[16];
-}rdm_Dhcpv4RelayFwd_t;
-typedef struct rdm_Dhcpv6_s{
+} rdm_Dhcpv4RelayFwd_t;
+
+typedef struct rdm_Dhcpv6_s {   // RDM_OID_DHCPV6 
 	uint32_t ClientNumberOfEntries;
-}rdm_Dhcpv6_t;
-typedef struct rdm_Dhcpv6Client_s{
+} rdm_Dhcpv6_t;
+
+typedef struct rdm_Dhcpv6Client_s {   // RDM_OID_DHCPV6_CLIENT 
 	bool Enable;
 	char Alias[65];
 	char Interface[257];
@@ -3993,28 +4357,33 @@ typedef struct rdm_Dhcpv6Client_s{
 	uint32_t SentOptionNumberOfEntries;
 	uint32_t ReqOptionNumberOfEntries;
 	char X_ZYXEL_DhcpcPidFilePath[33];
-}rdm_Dhcpv6Client_t;
-typedef struct rdm_Dhcpv6ClientSrv_s{
+} rdm_Dhcpv6Client_t;
+
+typedef struct rdm_Dhcpv6ClientSrv_s {   // RDM_OID_DHCPV6_CLIENT_SRV 
 	char SourceAddress[33];
 	char DUID[131];
 	char InformationRefreshTime[32];
-}rdm_Dhcpv6ClientSrv_t;
-typedef struct rdm_Dhcpv6ClientSentOpt_s{
+} rdm_Dhcpv6ClientSrv_t;
+
+typedef struct rdm_Dhcpv6ClientSentOpt_s {   // RDM_OID_DHCPV6_CLIENT_SENT_OPT 
 	bool Enable;
 	char Alias[65];
 	uint32_t Tag;
-	char Value[5];
-}rdm_Dhcpv6ClientSentOpt_t;
-typedef struct rdm_Dhcpv6ClientReceivedOpt_s{
+	char Value[257];
+} rdm_Dhcpv6ClientSentOpt_t;
+
+typedef struct rdm_Dhcpv6ClientReceivedOpt_s {   // RDM_OID_DHCPV6_CLIENT_RECEIVED_OPT 
 	uint32_t Tag;
-	char Value[5];
+	char Value[257];
 	char Server[41];
-}rdm_Dhcpv6ClientReceivedOpt_t;
-typedef struct rdm_Dhcpv6Srv_s{
+} rdm_Dhcpv6ClientReceivedOpt_t;
+
+typedef struct rdm_Dhcpv6Srv_s {   // RDM_OID_DHCPV6_SRV 
 	bool Enable;
 	uint32_t PoolNumberOfEntries;
-}rdm_Dhcpv6Srv_t;
-typedef struct rdm_Dhcpv6SrvPool_s{
+} rdm_Dhcpv6Srv_t;
+
+typedef struct rdm_Dhcpv6SrvPool_s {   // RDM_OID_DHCPV6_SRV_POOL 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
@@ -4044,40 +4413,48 @@ typedef struct rdm_Dhcpv6SrvPool_s{
 	char X_ZYXEL_DNSList[33];
 	char X_ZYXEL_DNSSuffix[65];
 	bool X_ZYXEL_RAandDHCP6S;
-}rdm_Dhcpv6SrvPool_t;
-typedef struct rdm_Dhcpv6SrvPoolClient_s{
+	char X_ZYXEL_SrvPoolName[65];
+} rdm_Dhcpv6SrvPool_t;
+
+typedef struct rdm_Dhcpv6SrvPoolClient_s {   // RDM_OID_DHCPV6_SRV_POOL_CLIENT 
 	char Alias[65];
 	char SourceAddress[33];
 	bool Active;
 	uint32_t IPv6AddressNumberOfEntries;
 	uint32_t IPv6PrefixNumberOfEntries;
 	uint32_t OptionNumberOfEntries;
-}rdm_Dhcpv6SrvPoolClient_t;
-typedef struct rdm_Dhcpv6SrvPoolClientV6Addr_s{
+} rdm_Dhcpv6SrvPoolClient_t;
+
+typedef struct rdm_Dhcpv6SrvPoolClientV6Addr_s {   // RDM_OID_DHCPV6_SRV_POOL_CLIENT_V6_ADDR 
 	char IPAddress[49];
 	char PreferredLifetime[32];
 	char ValidLifetime[32];
-}rdm_Dhcpv6SrvPoolClientV6Addr_t;
-typedef struct rdm_Dhcpv6SrvPoolClientV6Prefix_s{
+} rdm_Dhcpv6SrvPoolClientV6Addr_t;
+
+typedef struct rdm_Dhcpv6SrvPoolClientV6Prefix_s {   // RDM_OID_DHCPV6_SRV_POOL_CLIENT_V6_PREFIX 
 	char Prefix[33];
 	char PreferredLifetime[32];
 	char ValidLifetime[32];
-}rdm_Dhcpv6SrvPoolClientV6Prefix_t;
-typedef struct rdm_Dhcpv6SrvPoolClientOpt_s{
+} rdm_Dhcpv6SrvPoolClientV6Prefix_t;
+
+typedef struct rdm_Dhcpv6SrvPoolClientOpt_s {   // RDM_OID_DHCPV6_SRV_POOL_CLIENT_OPT 
 	uint32_t Tag;
-	char Value[5];
-}rdm_Dhcpv6SrvPoolClientOpt_t;
-typedef struct rdm_Dhcpv6SrvPoolOpt_s{
+	char Value[256];
+} rdm_Dhcpv6SrvPoolClientOpt_t;
+
+typedef struct rdm_Dhcpv6SrvPoolOpt_s {   // RDM_OID_DHCPV6_SRV_POOL_OPT 
 	bool Enable;
 	char Alias[65];
 	uint32_t Tag;
 	char Value[65536];
 	char PassthroughClient[257];
-}rdm_Dhcpv6SrvPoolOpt_t;
-typedef struct rdm_Ieee8021x_s{
+} rdm_Dhcpv6SrvPoolOpt_t;
+
+typedef struct rdm_Ieee8021x_s {   // RDM_OID_IEEE8021X 
 	uint32_t SupplicantNumberOfEntries;
-}rdm_Ieee8021x_t;
-typedef struct rdm_Ieee8021xSupplicant_s{
+} rdm_Ieee8021x_t;
+
+typedef struct rdm_Ieee8021xSupplicant_s {   // RDM_OID_IEEE8021X_SUPPLICANT 
 	bool Enable;
 	char Status[20];
 	char Alias[65];
@@ -4096,8 +4473,9 @@ typedef struct rdm_Ieee8021xSupplicant_s{
 	bool X_ZYXEL_BiDirectional;
 	char X_ZYXEL_Certificate[257];
 	char X_ZYXEL_trustCA[257];
-}rdm_Ieee8021xSupplicant_t;
-typedef struct rdm_Ieee8021xSupplicantStat_s{
+} rdm_Ieee8021xSupplicant_t;
+
+typedef struct rdm_Ieee8021xSupplicantStat_s {   // RDM_OID_IEEE8021X_SUPPLICANT_STAT 
 	uint32_t ReceivedFrames;
 	uint32_t TransmittedFrames;
 	uint32_t TransmittedStartFrames;
@@ -4109,30 +4487,36 @@ typedef struct rdm_Ieee8021xSupplicantStat_s{
 	uint32_t ReceivedLengthErrorFrames;
 	uint32_t LastFrameVersion;
 	char LastFrameSourceMACAddress[18];
-}rdm_Ieee8021xSupplicantStat_t;
-typedef struct rdm_Ieee8021xSupplicantEapmd5_s{
+} rdm_Ieee8021xSupplicantStat_t;
+
+typedef struct rdm_Ieee8021xSupplicantEapmd5_s {   // RDM_OID_IEEE8021X_SUPPLICANT_EAPMD5 
 	bool Enable;
 	char SharedSecret[257];
-}rdm_Ieee8021xSupplicantEapmd5_t;
-typedef struct rdm_Ieee8021xSupplicantEaptls_s{
+} rdm_Ieee8021xSupplicantEapmd5_t;
+
+typedef struct rdm_Ieee8021xSupplicantEaptls_s {   // RDM_OID_IEEE8021X_SUPPLICANT_EAPTLS 
 	bool Enable;
 	bool MutualAuthenticationEnable;
-}rdm_Ieee8021xSupplicantEaptls_t;
-typedef struct rdm_Usrs_s{
+} rdm_Ieee8021xSupplicantEaptls_t;
+
+typedef struct rdm_Usrs_s {   // RDM_OID_USRS 
 	uint32_t UserNumberOfEntries;
-}rdm_Usrs_t;
-typedef struct rdm_UsrsUsr_s{
+} rdm_Usrs_t;
+
+typedef struct rdm_UsrsUsr_s {   // RDM_OID_USRS_USR 
 	char Alias[65];
 	bool Enable;
 	bool RemoteAccessCapable;
 	char Username[65];
 	char Password[65];
 	char Language[17];
-}rdm_UsrsUsr_t;
-typedef struct rdm_SmartCardReaders_s{
+} rdm_UsrsUsr_t;
+
+typedef struct rdm_SmartCardReaders_s {   // RDM_OID_SMART_CARD_READERS 
 	uint32_t SmartCardReaderNumberOfEntries;
-}rdm_SmartCardReaders_t;
-typedef struct rdm_SmartCardReadersScr_s{
+} rdm_SmartCardReaders_t;
+
+typedef struct rdm_SmartCardReadersScr_s {   // RDM_OID_SMART_CARD_READERS_SCR 
 	char Alias[65];
 	bool Enable;
 	char status[9];
@@ -4141,17 +4525,20 @@ typedef struct rdm_SmartCardReadersScr_s{
 	char ResetTime[32];
 	uint32_t DecryptionFailedCounter;
 	uint32_t DecryptionFailedNoKeyCounter;
-}rdm_SmartCardReadersScr_t;
-typedef struct rdm_SmartCardReadersScrSc_s{
+} rdm_SmartCardReadersScr_t;
+
+typedef struct rdm_SmartCardReadersScrSc_s {   // RDM_OID_SMART_CARD_READERS_SCR_SC 
 	char Status[8];
 	char Type[5];
 	char Application[14];
 	char SerialNumber[257];
 	char ATR[1025];
-}rdm_SmartCardReadersScrSc_t;
-typedef struct rdm_Upnp_s{
-}rdm_Upnp_t;
-typedef struct rdm_UpnpDev_s{
+} rdm_SmartCardReadersScrSc_t;
+
+typedef struct rdm_Upnp_s {   // RDM_OID_UPNP 
+} rdm_Upnp_t;
+
+typedef struct rdm_UpnpDev_s {   // RDM_OID_UPNP_DEV 
 	bool Enable;
 	char X_ZYXEL_Status[9];
 	bool X_ZYXEL_NATTEnable;
@@ -4164,8 +4551,9 @@ typedef struct rdm_UpnpDev_s{
 	bool UPnPDMBasicMgmt;
 	bool UPnPDMConfigurationMgmt;
 	bool UPnPDMSoftwareMgmt;
-}rdm_UpnpDev_t;
-typedef struct rdm_UpnpDevCapb_s{
+} rdm_UpnpDev_t;
+
+typedef struct rdm_UpnpDevCapb_s {   // RDM_OID_UPNP_DEV_CAPB 
 	uint32_t UPnPArchitecture;
 	uint32_t UPnPArchitectureMinorVer;
 	uint32_t UPnPMediaServer;
@@ -4178,13 +4566,15 @@ typedef struct rdm_UpnpDevCapb_s{
 	uint32_t UPnPDMBasicMgmt;
 	uint32_t UPnPDMConfigurationMgmt;
 	uint32_t UPnPDMSoftwareMgmt;
-}rdm_UpnpDevCapb_t;
-typedef struct rdm_UpnpDisc_s{
+} rdm_UpnpDevCapb_t;
+
+typedef struct rdm_UpnpDisc_s {   // RDM_OID_UPNP_DISC 
 	uint32_t RootDeviceNumberOfEntries;
 	uint32_t DeviceNumberOfEntries;
 	uint32_t ServiceNumberOfEntries;
-}rdm_UpnpDisc_t;
-typedef struct rdm_UpnpDiscRootDev_s{
+} rdm_UpnpDisc_t;
+
+typedef struct rdm_UpnpDiscRootDev_s {   // RDM_OID_UPNP_DISC_ROOT_DEV 
 	char Status[15];
 	char UUID[37];
 	char USN[257];
@@ -4192,8 +4582,9 @@ typedef struct rdm_UpnpDiscRootDev_s{
 	char Location[257];
 	char Server[257];
 	char Host[1025];
-}rdm_UpnpDiscRootDev_t;
-typedef struct rdm_UpnpDiscDev_s{
+} rdm_UpnpDiscRootDev_t;
+
+typedef struct rdm_UpnpDiscDev_s {   // RDM_OID_UPNP_DISC_DEV 
 	char Status[15];
 	char UUID[37];
 	char USN[37];
@@ -4201,24 +4592,27 @@ typedef struct rdm_UpnpDiscDev_s{
 	char Location[257];
 	char Server[257];
 	char Host[1025];
-}rdm_UpnpDiscDev_t;
-typedef struct rdm_UpnpDiscService_s{
+} rdm_UpnpDiscDev_t;
+
+typedef struct rdm_UpnpDiscService_s {   // RDM_OID_UPNP_DISC_SERVICE 
 	char Status[15];
 	char USN[257];
 	uint32_t LeaseTime;
 	char Location[257];
 	char Server[257];
 	char Host[1025];
-}rdm_UpnpDiscService_t;
-typedef struct rdm_Dlna_s{
+} rdm_UpnpDiscService_t;
+
+typedef struct rdm_Dlna_s {   // RDM_OID_DLNA 
 	bool X_ZYXEL_Enable;
 	char X_ZYXEL_Status[9];
 	char X_ZYXEL_MediaPrePath[33];
 	char X_ZYXEL_MediaRelativePath[257];
 	char X_ZYXEL_LastPath[257];
 	char X_ZYXEL_Interface[129];
-}rdm_Dlna_t;
-typedef struct rdm_DlnaCapb_s{
+} rdm_Dlna_t;
+
+typedef struct rdm_DlnaCapb_s {   // RDM_OID_DLNA_CAPB 
 	char HNDDeviceClass[257];
 	char DeviceCapability[257];
 	char HIDDeviceClass[257];
@@ -4227,12 +4621,14 @@ typedef struct rdm_DlnaCapb_s{
 	char AVClassProfileID[257];
 	char MediaCollectionProfileID[257];
 	char PrinterClassProfileID[257];
-}rdm_DlnaCapb_t;
-typedef struct rdm_SelfTestDiag_s{
+} rdm_DlnaCapb_t;
+
+typedef struct rdm_SelfTestDiag_s {   // RDM_OID_SELF_TEST_DIAG 
 	char DiagnosticsState[15];
 	char Results[1025];
-}rdm_SelfTestDiag_t;
-typedef struct rdm_Firewall_s{
+} rdm_SelfTestDiag_t;
+
+typedef struct rdm_Firewall_s {   // RDM_OID_FIREWALL 
 	bool Enable;
 	bool IPv4_Enable;
 	bool IPv6_Enable;
@@ -4245,8 +4641,9 @@ typedef struct rdm_Firewall_s{
 	char LastChange[32];
 	uint32_t LevelNumberOfEntries;
 	uint32_t ChainNumberOfEntries;
-}rdm_Firewall_t;
-typedef struct rdm_FirewallLevel_s{
+} rdm_Firewall_t;
+
+typedef struct rdm_FirewallLevel_s {   // RDM_OID_FIREWALL_LEVEL 
 	char Alias[65];
 	char Name[65];
 	char Description[257];
@@ -4256,15 +4653,17 @@ typedef struct rdm_FirewallLevel_s{
 	char DefaultPolicy[7];
 	bool DefaultLogPolicy;
 	char X_ZYXEL_DefaultConfig[9];
-}rdm_FirewallLevel_t;
-typedef struct rdm_FirewallChain_s{
+} rdm_FirewallLevel_t;
+
+typedef struct rdm_FirewallChain_s {   // RDM_OID_FIREWALL_CHAIN 
 	bool Enable;
 	char Alias[65];
 	char Name[65];
 	char Creator[23];
 	uint32_t RuleNumberOfEntries;
-}rdm_FirewallChain_t;
-typedef struct rdm_FirewallChainRule_s{
+} rdm_FirewallChain_t;
+
+typedef struct rdm_FirewallChainRule_s {   // RDM_OID_FIREWALL_CHAIN_RULE 
 	bool Enable;
 	char Status[20];
 	uint32_t Order;
@@ -4307,13 +4706,15 @@ typedef struct rdm_FirewallChainRule_s{
 	char X_ZYXEL_LimitRateUnit[7];
 	uint32_t X_ZYXEL_ScheduleRule;
 	uint32_t X_ZYXEL_ServiceIndex;
-}rdm_FirewallChainRule_t;
-typedef struct rdm_PerdStatistics_s{
+} rdm_FirewallChainRule_t;
+
+typedef struct rdm_PerdStatistics_s {   // RDM_OID_PERD_STATISTICS 
 	uint32_t MinSampleInterval;
 	uint32_t MaxReportSamples;
 	uint32_t SampleSetNumberOfEntries;
-}rdm_PerdStatistics_t;
-typedef struct rdm_PerdStatisticsSampleSet_s{
+} rdm_PerdStatistics_t;
+
+typedef struct rdm_PerdStatisticsSampleSet_s {   // RDM_OID_PERD_STATISTICS_SAMPLE_SET 
 	char Alias[65];
 	bool Enable;
 	char Status[9];
@@ -4327,8 +4728,9 @@ typedef struct rdm_PerdStatisticsSampleSet_s{
 	char ReportEndTime[32];
 	char SampleSeconds[33];
 	uint32_t ParameterNumberOfEntries;
-}rdm_PerdStatisticsSampleSet_t;
-typedef struct rdm_PerdStatisticsSampleSetParam_s{
+} rdm_PerdStatisticsSampleSet_t;
+
+typedef struct rdm_PerdStatisticsSampleSetParam_s {   // RDM_OID_PERD_STATISTICS_SAMPLE_SET_PARAM 
 	char Alias[65];
 	bool Enable;
 	char Reference[257];
@@ -4340,13 +4742,15 @@ typedef struct rdm_PerdStatisticsSampleSetParam_s{
 	char SuspectData[33];
 	char Values[17];
 	uint32_t Failures;
-}rdm_PerdStatisticsSampleSetParam_t;
-typedef struct rdm_SwModule_s{
+} rdm_PerdStatisticsSampleSetParam_t;
+
+typedef struct rdm_SwModule_s {   // RDM_OID_SW_MODULE 
 	uint32_t ExecEnvNumberOfEntries;
 	uint32_t DeploymentUnitNumberOfEntries;
 	uint32_t ExecutionUnitNumberOfEntries;
-}rdm_SwModule_t;
-typedef struct rdm_SwModuleExecEnv_s{
+} rdm_SwModule_t;
+
+typedef struct rdm_SwModuleExecEnv_s {   // RDM_OID_SW_MODULE_EXEC_ENV 
 	bool Enable;
 	char Status[9];
 	bool Reset;
@@ -4366,8 +4770,9 @@ typedef struct rdm_SwModuleExecEnv_s{
 	int AvailableMemory;
 	char ActiveExecutionUnits[337];
 	char ProcessorRefList[289];
-}rdm_SwModuleExecEnv_t;
-typedef struct rdm_SwModuleDeploymentUnit_s{
+} rdm_SwModuleExecEnv_t;
+
+typedef struct rdm_SwModuleDeploymentUnit_s {   // RDM_OID_SW_MODULE_DEPLOYMENT_UNIT 
 	char UUID[37];
 	char DUID[65];
 	char Alias[65];
@@ -4382,8 +4787,9 @@ typedef struct rdm_SwModuleDeploymentUnit_s{
 	char VendorconfigList[337];
 	char ExecutionUnitList[337];
 	char ExecutionEnvRef[37];
-}rdm_SwModuleDeploymentUnit_t;
-typedef struct rdm_SwModuleExecUnit_s{
+} rdm_SwModuleDeploymentUnit_t;
+
+typedef struct rdm_SwModuleExecUnit_s {   // RDM_OID_SW_MODULE_EXEC_UNIT 
 	char EUID[65];
 	char Alias[65];
 	char Name[33];
@@ -4405,25 +4811,29 @@ typedef struct rdm_SwModuleExecUnit_s{
 	char VendorConfigList[337];
 	char SupportedDataModelList[337];
 	char ExecutionEnvRef[37];
-}rdm_SwModuleExecUnit_t;
-typedef struct rdm_SwModuleExecUnitExt_s{
-}rdm_SwModuleExecUnitExt_t;
-typedef struct rdm_FaultMgmt_s{
+} rdm_SwModuleExecUnit_t;
+
+typedef struct rdm_SwModuleExecUnitExt_s {   // RDM_OID_SW_MODULE_EXEC_UNIT_EXT 
+} rdm_SwModuleExecUnitExt_t;
+
+typedef struct rdm_FaultMgmt_s {   // RDM_OID_FAULT_MGMT 
 	uint32_t SupportedAlarmNumberOfEntries;
 	uint32_t MaxCurrentAlarmEntries;
 	uint32_t CurrentAlarmNumberOfEntries;
 	uint32_t HistoryEventNumberOfEntries;
 	uint32_t ExpeditedEventNumberOfEntries;
 	uint32_t QueuedEventNumberOfEntries;
-}rdm_FaultMgmt_t;
-typedef struct rdm_FaultMgmtSuptAlarm_s{
+} rdm_FaultMgmt_t;
+
+typedef struct rdm_FaultMgmtSuptAlarm_s {   // RDM_OID_FAULT_MGMT_SUPT_ALARM 
 	char EventType[65];
 	char ProbableCause[65];
 	char SpecificProblem[129];
 	char PerceivedSeverity[14];
 	char ReportingMechanism[12];
-}rdm_FaultMgmtSuptAlarm_t;
-typedef struct rdm_FaultMgmtCurrentAlarm_s{
+} rdm_FaultMgmtSuptAlarm_t;
+
+typedef struct rdm_FaultMgmtCurrentAlarm_s {   // RDM_OID_FAULT_MGMT_CURRENT_ALARM 
 	char AlarmIdentifier[65];
 	char AlarmRaisedTime[32];
 	char AlarmChangedTime[32];
@@ -4434,8 +4844,9 @@ typedef struct rdm_FaultMgmtCurrentAlarm_s{
 	char PerceivedSeverity[14];
 	char AdditionalText[257];
 	char AdditionalInformation[257];
-}rdm_FaultMgmtCurrentAlarm_t;
-typedef struct rdm_FaultMgmtHistoryEvent_s{
+} rdm_FaultMgmtCurrentAlarm_t;
+
+typedef struct rdm_FaultMgmtHistoryEvent_s {   // RDM_OID_FAULT_MGMT_HISTORY_EVENT 
 	char EventTime[32];
 	char AlarmIdentifier[65];
 	char NotificationType[13];
@@ -4446,8 +4857,9 @@ typedef struct rdm_FaultMgmtHistoryEvent_s{
 	char PerceivedSeverity[14];
 	char AdditionalText[257];
 	char AdditionalInformation[257];
-}rdm_FaultMgmtHistoryEvent_t;
-typedef struct rdm_FaultMgmtExpeditedEvent_s{
+} rdm_FaultMgmtHistoryEvent_t;
+
+typedef struct rdm_FaultMgmtExpeditedEvent_s {   // RDM_OID_FAULT_MGMT_EXPEDITED_EVENT 
 	char EventTime[32];
 	char AlarmIdentifier[65];
 	char NotificationType[13];
@@ -4458,8 +4870,9 @@ typedef struct rdm_FaultMgmtExpeditedEvent_s{
 	char PerceivedSeverity[14];
 	char AdditionalText[257];
 	char AdditionalInformation[257];
-}rdm_FaultMgmtExpeditedEvent_t;
-typedef struct rdm_FaultMgmtQuedEvent_s{
+} rdm_FaultMgmtExpeditedEvent_t;
+
+typedef struct rdm_FaultMgmtQuedEvent_s {   // RDM_OID_FAULT_MGMT_QUED_EVENT 
 	char EventTime[32];
 	char AlarmIdentifier[65];
 	char NotificationType[13];
@@ -4470,11 +4883,13 @@ typedef struct rdm_FaultMgmtQuedEvent_s{
 	char PerceivedSeverity[14];
 	char AdditionalText[257];
 	char AdditionalInformation[257];
-}rdm_FaultMgmtQuedEvent_t;
-typedef struct rdm_DevSec_s{
+} rdm_FaultMgmtQuedEvent_t;
+
+typedef struct rdm_DevSec_s {   // RDM_OID_DEV_SEC 
 	uint32_t CertificateNumberOfEntries;
-}rdm_DevSec_t;
-typedef struct rdm_DevSecCert_s{
+} rdm_DevSec_t;
+
+typedef struct rdm_DevSecCert_s {   // RDM_OID_DEV_SEC_CERT 
 	char X_ZYXEL_Name[33];
 	char X_ZYXEL_Type[33];
 	char X_ZYXEL_Certificate[4097];
@@ -4493,10 +4908,12 @@ typedef struct rdm_DevSecCert_s{
 	char Subject[257];
 	char SubjectAlt[257];
 	char SignatureAlgorithm[257];
-}rdm_DevSecCert_t;
-typedef struct rdm_Fap_s{
-}rdm_Fap_t;
-typedef struct rdm_FapGps_s{
+} rdm_DevSecCert_t;
+
+typedef struct rdm_Fap_s {   // RDM_OID_FAP 
+} rdm_Fap_t;
+
+typedef struct rdm_FapGps_s {   // RDM_OID_FAP_GPS 
 	bool ScanOnBoot;
 	bool ScanPeriodically;
 	uint32_t PeriodicInterval;
@@ -4511,8 +4928,9 @@ typedef struct rdm_FapGps_s{
 	int LockedLongitude;
 	uint32_t NumberOfSatellites;
 	bool GPSReset;
-}rdm_FapGps_t;
-typedef struct rdm_FapGpsContsGpsStatus_s{
+} rdm_FapGps_t;
+
+typedef struct rdm_FapGpsContsGpsStatus_s {   // RDM_OID_FAP_GPS_CONTS_GPS_STATUS 
 	bool CurrentFix;
 	bool GotFix;
 	bool TimingGood;
@@ -4527,8 +4945,9 @@ typedef struct rdm_FapGpsContsGpsStatus_s{
 	char ReceiverStatus[257];
 	char LocationType[10];
 	uint32_t LockTimeOutDuration;
-}rdm_FapGpsContsGpsStatus_t;
-typedef struct rdm_FapGpsAgpsSrvConf_s{
+} rdm_FapGpsContsGpsStatus_t;
+
+typedef struct rdm_FapGpsAgpsSrvConf_s {   // RDM_OID_FAP_GPS_AGPS_SRV_CONF 
 	bool Enable;
 	char ServerURL[257];
 	uint32_t ServerPort;
@@ -4537,11 +4956,13 @@ typedef struct rdm_FapGpsAgpsSrvConf_s{
 	int ReferenceLatitude;
 	int ReferenceLongitude;
 	bool ServerInUse;
-}rdm_FapGpsAgpsSrvConf_t;
-typedef struct rdm_FapPerfMgmt_s{
+} rdm_FapGpsAgpsSrvConf_t;
+
+typedef struct rdm_FapPerfMgmt_s {   // RDM_OID_FAP_PERF_MGMT 
 	uint32_t ConfigNumberOfEntries;
-}rdm_FapPerfMgmt_t;
-typedef struct rdm_FapPerfMgmtConf_s{
+} rdm_FapPerfMgmt_t;
+
+typedef struct rdm_FapPerfMgmtConf_s {   // RDM_OID_FAP_PERF_MGMT_CONF 
 	bool Enable;
 	char Alias[65];
 	char URL[257];
@@ -4549,15 +4970,17 @@ typedef struct rdm_FapPerfMgmtConf_s{
 	char Password[257];
 	uint32_t PeriodicUploadInterval;
 	char PeriodicUploadTime[32];
-}rdm_FapPerfMgmtConf_t;
-typedef struct rdm_FapAppPlatf_s{
+} rdm_FapPerfMgmtConf_t;
+
+typedef struct rdm_FapAppPlatf_s {   // RDM_OID_FAP_APP_PLATF 
 	char Version[65];
 	bool Enable;
 	char Status[13];
 	uint32_t MaxNumberOfApplications;
 	uint32_t CurrentNumberofApplications;
-}rdm_FapAppPlatf_t;
-typedef struct rdm_FapAppPlatfCapb_s{
+} rdm_FapAppPlatf_t;
+
+typedef struct rdm_FapAppPlatfCapb_s {   // RDM_OID_FAP_APP_PLATF_CAPB 
 	bool PresenceApplicationSupport;
 	bool FemtoAwarenessAPISupport;
 	bool SMSAPISupport;
@@ -4571,12 +4994,14 @@ typedef struct rdm_FapAppPlatfCapb_s{
 	char AccessLevelsSupported[16];
 	char SendSMSTargetAddressType[19];
 	char SendMMSTargetAddressType[19];
-}rdm_FapAppPlatfCapb_t;
-typedef struct rdm_FapAppPlatfCtrl_s{
+} rdm_FapAppPlatfCapb_t;
+
+typedef struct rdm_FapAppPlatfCtrl_s {   // RDM_OID_FAP_APP_PLATF_CTRL 
 	char AuthenticationMethod[257];
 	char TunnelInst[257];
-}rdm_FapAppPlatfCtrl_t;
-typedef struct rdm_FapAppPlatfCtrlFemtoAware_s{
+} rdm_FapAppPlatfCtrl_t;
+
+typedef struct rdm_FapAppPlatfCtrlFemtoAware_s {   // RDM_OID_FAP_APP_PLATF_CTRL_FEMTO_AWARE 
 	bool APIEnable;
 	bool QueueEnable;
 	char Queueing[9];
@@ -4585,8 +5010,9 @@ typedef struct rdm_FapAppPlatfCtrlFemtoAware_s{
 	bool NotificationsUserIdentifierMSISDN;
 	bool SubscribeToNotificationsResponseCallbackData;
 	bool QueryFemtocellResponseTimezone;
-}rdm_FapAppPlatfCtrlFemtoAware_t;
-typedef struct rdm_FapAppPlatfCtrlSms_s{
+} rdm_FapAppPlatfCtrlFemtoAware_t;
+
+typedef struct rdm_FapAppPlatfCtrlSms_s {   // RDM_OID_FAP_APP_PLATF_CTRL_SMS 
 	bool APIEnable;
 	bool QueueEnable;
 	char Queueing[9];
@@ -4594,8 +5020,9 @@ typedef struct rdm_FapAppPlatfCtrlSms_s{
 	uint32_t MinSendSMSTimeInterval;
 	bool EnableQuerySMSDeliveryStatus;
 	bool EnableSubscribeToNotificationsOfMessageSentToApplication;
-}rdm_FapAppPlatfCtrlSms_t;
-typedef struct rdm_FapAppPlatfCtrlMms_s{
+} rdm_FapAppPlatfCtrlSms_t;
+
+typedef struct rdm_FapAppPlatfCtrlMms_s {   // RDM_OID_FAP_APP_PLATF_CTRL_MMS 
 	bool APIEnable;
 	bool QueueEnable;
 	char Queueing[9];
@@ -4603,8 +5030,9 @@ typedef struct rdm_FapAppPlatfCtrlMms_s{
 	uint32_t MinSendSMSTimeInterval;
 	bool EnableQueryMMSDeliveryStatus;
 	bool EnableSubscribeToNotificationsOfMessageSentToApplication;
-}rdm_FapAppPlatfCtrlMms_t;
-typedef struct rdm_FapAppPlatfCtrlTermLoc_s{
+} rdm_FapAppPlatfCtrlMms_t;
+
+typedef struct rdm_FapAppPlatfCtrlTermLoc_s {   // RDM_OID_FAP_APP_PLATF_CTRL_TERM_LOC 
 	bool APIEnable;
 	bool QueueEnable;
 	char Queueing[9];
@@ -4613,46 +5041,52 @@ typedef struct rdm_FapAppPlatfCtrlTermLoc_s{
 	bool QueryMobileLocationResponseLongitudeLatitude;
 	bool QueryMobileLocationResponseAltitude;
 	uint32_t QueryMobileLocationResponseTimestamp;
-}rdm_FapAppPlatfCtrlTermLoc_t;
-typedef struct rdm_FapAppPlatfMont_s{
+} rdm_FapAppPlatfCtrlTermLoc_t;
+
+typedef struct rdm_FapAppPlatfMont_s {   // RDM_OID_FAP_APP_PLATF_MONT 
 	bool Enable;
 	uint32_t MonitoringInterval;
 	uint32_t AuthenticationRequestsReceived;
 	uint32_t AuthenticationRequestsRejected;
-}rdm_FapAppPlatfMont_t;
-typedef struct rdm_FapAppPlatfMontFemtoAware_s{
+} rdm_FapAppPlatfMont_t;
+
+typedef struct rdm_FapAppPlatfMontFemtoAware_s {   // RDM_OID_FAP_APP_PLATF_MONT_FEMTO_AWARE 
 	bool APIAvailable;
 	uint32_t APIUsers;
 	char QueueState[9];
 	uint32_t QueueNum;
 	uint32_t QueueReceived;
 	uint32_t QueueDiscarded;
-}rdm_FapAppPlatfMontFemtoAware_t;
-typedef struct rdm_FapAppPlatfMontSms_s{
+} rdm_FapAppPlatfMontFemtoAware_t;
+
+typedef struct rdm_FapAppPlatfMontSms_s {   // RDM_OID_FAP_APP_PLATF_MONT_SMS 
 	bool APIAvailable;
 	uint32_t APIUsers;
 	char QueueState[9];
 	uint32_t QueueNum;
 	uint32_t QueueReceived;
 	uint32_t QueueDiscarded;
-}rdm_FapAppPlatfMontSms_t;
-typedef struct rdm_FapAppPlatfMontMms_s{
+} rdm_FapAppPlatfMontSms_t;
+
+typedef struct rdm_FapAppPlatfMontMms_s {   // RDM_OID_FAP_APP_PLATF_MONT_MMS 
 	bool APIAvailable;
 	uint32_t APIUsers;
 	char QueueState[9];
 	uint32_t QueueNum;
 	uint32_t QueueReceived;
 	uint32_t QueueDiscarded;
-}rdm_FapAppPlatfMontMms_t;
-typedef struct rdm_FapAppPlatfMontTermLoc_s{
+} rdm_FapAppPlatfMontMms_t;
+
+typedef struct rdm_FapAppPlatfMontTermLoc_s {   // RDM_OID_FAP_APP_PLATF_MONT_TERM_LOC 
 	bool APIAvailable;
 	uint32_t APIUsers;
 	char QueueState[9];
 	uint32_t QueueNum;
 	uint32_t QueueReceived;
 	uint32_t QueueDiscarded;
-}rdm_FapAppPlatfMontTermLoc_t;
-typedef struct rdm_BulkData_s{
+} rdm_FapAppPlatfMontTermLoc_t;
+
+typedef struct rdm_BulkData_s {   // RDM_OID_BULK_DATA 
 	bool Enable;
 	char Status[9];
 	uint32_t MinReportingInterval;
@@ -4661,8 +5095,9 @@ typedef struct rdm_BulkData_s{
 	int MaxNumberOfProfiles;
 	int MaxNumberOfParameterReferences;
 	uint32_t ProfileNumberOfEntries;
-}rdm_BulkData_t;
-typedef struct rdm_BulkDataProf_s{
+} rdm_BulkData_t;
+
+typedef struct rdm_BulkDataProf_s {   // RDM_OID_BULK_DATA_PROF 
 	bool Enable;
 	char Alias[65];
 	char Protocol[10];
@@ -4677,14 +5112,17 @@ typedef struct rdm_BulkDataProf_s{
 	char FileTransferPassword[65];
 	char ControlFileFormat[129];
 	uint32_t ParameterNumberOfEntries;
-}rdm_BulkDataProf_t;
-typedef struct rdm_BulkDataProfParam_s{
+} rdm_BulkDataProf_t;
+
+typedef struct rdm_BulkDataProfParam_s {   // RDM_OID_BULK_DATA_PROF_PARAM 
 	char Reference[257];
-}rdm_BulkDataProfParam_t;
-typedef struct rdm_RomConvert_s{
+} rdm_BulkDataProfParam_t;
+
+typedef struct rdm_RomConvert_s {   // RDM_OID_ROM_CONVERT 
 	int ConvertBit;
-}rdm_RomConvert_t;
-typedef struct rdm_Schedule_s{
+} rdm_RomConvert_t;
+
+typedef struct rdm_Schedule_s {   // RDM_OID_SCHEDULE 
 	bool Enable;
 	char Name[33];
 	char Description[257];
@@ -4695,10 +5133,12 @@ typedef struct rdm_Schedule_s{
 	char TimeStopDate[17];
 	uint32_t TimeStopHour;
 	uint32_t TimeStopMin;
-}rdm_Schedule_t;
-typedef struct rdm_EmailNotify_s{
-}rdm_EmailNotify_t;
-typedef struct rdm_MailService_s{
+} rdm_Schedule_t;
+
+typedef struct rdm_EmailNotify_s {   // RDM_OID_EMAIL_NOTIFY 
+} rdm_EmailNotify_t;
+
+typedef struct rdm_MailService_s {   // RDM_OID_MAIL_SERVICE 
 	bool Enable;
 	char SMTPServerAddress[65];
 	uint32_t SMTPServerPort;
@@ -4707,19 +5147,22 @@ typedef struct rdm_MailService_s{
 	char EmailAddress[129];
 	char SMTPSecurity[17];
 	bool RequiresTLS;
-}rdm_MailService_t;
-typedef struct rdm_MailEventCfg_s{
+} rdm_MailService_t;
+
+typedef struct rdm_MailEventCfg_s {   // RDM_OID_MAIL_EVENT_CFG 
 	bool Enable;
 	char Event[65];
 	char EmailTo[257];
 	char EmailSubject[129];
 	char EmailBody[1025];
 	char SericeRef[129];
-}rdm_MailEventCfg_t;
-typedef struct rdm_ParenCtl_s{
+} rdm_MailEventCfg_t;
+
+typedef struct rdm_ParenCtl_s {   // RDM_OID_PAREN_CTL 
 	bool Enable;
-}rdm_ParenCtl_t;
-typedef struct rdm_ParenCtlProf_s{
+} rdm_ParenCtl_t;
+
+typedef struct rdm_ParenCtlProf_s {   // RDM_OID_PAREN_CTL_PROF 
 	bool Enable;
 	char Name[65];
 	bool WebRedirect;
@@ -4729,8 +5172,9 @@ typedef struct rdm_ParenCtlProf_s{
 	char ScheduleRuleList[65];
 	char URLFilter[581];
 	char NetworkServiceList[1025];
-}rdm_ParenCtlProf_t;
-typedef struct rdm_Ieee8021ag_s{
+} rdm_ParenCtlProf_t;
+
+typedef struct rdm_Ieee8021ag_s {   // RDM_OID_IEEE8021AG 
 	bool Enabled;
 	bool Y1731Mode;
 	char Interface[23];
@@ -4750,8 +5194,9 @@ typedef struct rdm_Ieee8021ag_s{
 	bool SendLinkTrace;
 	char LinkTraceResult[321];
 	uint32_t TmsPid;
-}rdm_Ieee8021ag_t;
-typedef struct rdm_Ieee8023ah_s{
+} rdm_Ieee8021ag_t;
+
+typedef struct rdm_Ieee8023ah_s {   // RDM_OID_IEEE8023AH 
 	bool Enabled;
 	char Interface[23];
 	bool VariableRetrievalEnabled;
@@ -4761,10 +5206,15 @@ typedef struct rdm_Ieee8023ah_s{
 	bool AutoEventEnabled;
 	uint32_t OAMID;
 	uint32_t TmsPid;
-}rdm_Ieee8023ah_t;
-typedef struct rdm_ZyExt_s{
-}rdm_ZyExt_t;
-typedef struct rdm_DnsRtEntry_s{
+} rdm_Ieee8023ah_t;
+
+typedef struct rdm_ZyExt_s {   // RDM_OID_ZY_EXT 
+	bool WPSRunning;
+	uint32_t WPSApIndex;
+	char WPSRunningStatus[257];
+} rdm_ZyExt_t;
+
+typedef struct rdm_DnsRtEntry_s {   // RDM_OID_DNS_RT_ENTRY 
 	bool Enable;
 	char DomainName[257];
 	char RouteInterface[33];
@@ -4772,12 +5222,15 @@ typedef struct rdm_DnsRtEntry_s{
 	char DNSServers[65];
 	char SubnetMask[17];
 	uint32_t RouteMARK;
-}rdm_DnsRtEntry_t;
-typedef struct rdm_DnsEntry_s{
+	char Adder[257];
+} rdm_DnsRtEntry_t;
+
+typedef struct rdm_DnsEntry_s {   // RDM_OID_DNS_ENTRY 
 	char HostName[257];
 	char IPv4Address[17];
-}rdm_DnsEntry_t;
-typedef struct rdm_DDns_s{
+} rdm_DnsEntry_t;
+
+typedef struct rdm_DDns_s {   // RDM_OID_D_DNS 
 	bool Enable;
 	char ServiceProvider[33];
 	char DDNSType[9];
@@ -4794,8 +5247,9 @@ typedef struct rdm_DDns_s{
 	char DynamicIP[129];
 	char UpdateURL[257];
 	char ConnectionType[13];
-}rdm_DDns_t;
-typedef struct rdm_AutoProv_s{
+} rdm_DDns_t;
+
+typedef struct rdm_AutoProv_s {   // RDM_OID_AUTO_PROV 
 	bool Enable;
 	char ServerIP[65];
 	uint32_t ServerPort;
@@ -4804,19 +5258,51 @@ typedef struct rdm_AutoProv_s{
 	uint32_t ExpireTimer;
 	uint32_t KeyType;
 	char Key[65];
-}rdm_AutoProv_t;
-typedef struct rdm_SpeedTest_s{
+} rdm_AutoProv_t;
+
+typedef struct rdm_SpeedTest_s {   // RDM_OID_SPEED_TEST 
 	bool Start;
 	char UploadSpeedResult[17];
 	char DownloadSpeedResult[17];
-}rdm_SpeedTest_t;
-typedef struct rdm_WifiQsteer_s{
+} rdm_SpeedTest_t;
+
+typedef struct rdm_WifiQsteer_s {   // RDM_OID_WIFI_QSTEER 
 	bool Enable;
 	uint32_t MinPhyRate;
 	uint32_t MaxPhyRate;
 	uint32_t WPS_Mode;
-}rdm_WifiQsteer_t;
-typedef struct rdm_ZyIgmp_s{
+} rdm_WifiQsteer_t;
+
+typedef struct rdm_PptpCfg_s {   // RDM_OID_PPTP_CFG 
+	bool pptpEnable;
+	char pptpName[65];
+	char pptpServer[65];
+	char pptpUsername[257];
+	char pptpPassword[65];
+	char pptpLanInf[257];
+	char pptpSecurity[257];
+	int pptpStatus;
+	char pptpLocalIP[129];
+	char pptpRemoteIP[129];
+	bool pptpOriAlgStatus;
+} rdm_PptpCfg_t;
+
+typedef struct rdm_EogreCfg_s {   // RDM_OID_EOGRE_CFG 
+	bool Enable;
+	char Name[65];
+	char RemoteIP[16];
+	char LanInf[257];
+	char LocalIP[16];
+	char LocalMac[18];
+} rdm_EogreCfg_t;
+
+typedef struct rdm_LanDev_s {   // RDM_OID_LAN_DEV 
+	uint32_t HostNumberOfEntries;
+	char LinkInterface[257];
+	char IpInterface[257];
+} rdm_LanDev_t;
+
+typedef struct rdm_ZyIgmp_s {   // RDM_OID_ZY_IGMP 
 	bool Enable;
 	uint32_t IgmpVersion;
 	uint32_t QueryInterval;
@@ -4829,25 +5315,30 @@ typedef struct rdm_ZyIgmp_s{
 	uint32_t LanToLanEnable;
 	uint32_t FastLeave;
 	uint32_t JoinImmediate;
+	uint32_t BridgeAdmissionFilter;
 	uint32_t SnoopingEnable;
 	char Interface[321];
 	char ifName[321];
 	char Status[19];
 	char SnoopingBridgeIfName[101];
-}rdm_ZyIgmp_t;
-typedef struct rdm_ZySnmp_s{
+	bool NoIpSrcAddressEnable;
+} rdm_ZyIgmp_t;
+
+typedef struct rdm_ZySnmp_s {   // RDM_OID_ZY_SNMP 
 	bool Enable;
 	uint32_t Port;
 	char ROCommunity[51];
 	char RWCommunity[51];
 	char TrapCommunity[51];
-}rdm_ZySnmp_t;
-typedef struct rdm_TrapAddr_s{
+} rdm_ZySnmp_t;
+
+typedef struct rdm_TrapAddr_s {   // RDM_OID_TRAP_ADDR 
 	char Host[256];
 	uint32_t Port;
 	uint32_t TarpVer;
-}rdm_TrapAddr_t;
-typedef struct rdm_ZyMld_s{
+} rdm_TrapAddr_t;
+
+typedef struct rdm_ZyMld_s {   // RDM_OID_ZY_MLD 
 	bool Enable;
 	uint32_t MldVersion;
 	uint32_t QueryInterval;
@@ -4864,18 +5355,23 @@ typedef struct rdm_ZyMld_s{
 	char ifName[321];
 	char Status[19];
 	char SnoopingBridgeIfName[101];
-}rdm_ZyMld_t;
-typedef struct rdm_ZyLogCfg_s{
+} rdm_ZyMld_t;
+
+typedef struct rdm_ZyLogCfg_s {   // RDM_OID_ZY_LOG_CFG 
 	uint32_t LoginGroupNumberOfEntries;
 	bool LoginGroupConfigurable;
 	uint32_t MaxiumLoginAccountNumber;
-}rdm_ZyLogCfg_t;
-typedef struct rdm_ZyLogCfgGp_s{
+} rdm_ZyLogCfg_t;
+
+typedef struct rdm_ZyLogCfgGp_s {   // RDM_OID_ZY_LOG_CFG_GP 
 	char Level[9];
 	char GP_Privilege[65];
 	char Page[2049];
-}rdm_ZyLogCfgGp_t;
-typedef struct rdm_ZyLogCfgGpAccount_s{
+	char BasicPage[2049];
+	char HiddenPage[2049];
+} rdm_ZyLogCfgGp_t;
+
+typedef struct rdm_ZyLogCfgGpAccount_s {   // RDM_OID_ZY_LOG_CFG_GP_ACCOUNT 
 	bool Enabled;
 	bool EnableQuickStart;
 	char Page[2049];
@@ -4883,6 +5379,7 @@ typedef struct rdm_ZyLogCfgGpAccount_s{
 	char Password[257];
 	char DefaultPassword[257];
 	char DefaultGuiPassword[257];
+	bool ResetDefaultPassword;
 	char shadow[513];
 	char smbpasswd[513];
 	bool ConfigAccountFromWAN;
@@ -4894,62 +5391,80 @@ typedef struct rdm_ZyLogCfgGpAccount_s{
 	uint32_t AccountLockTime;
 	char RemoHostAddress[49];
 	bool DotChangeDefPwd;
+	bool ShowSkipBtnInChgDefPwdPage;
 	bool AutoGenPwdBySn;
 	bool AutoShowQuickStart;
 	bool GetConfigByFtp;
 	char Privilege[65];
+	char RemoteAccessPrivilege[65];
 	char OldDefaultPassword[257];
-}rdm_ZyLogCfgGpAccount_t;
-typedef struct rdm_ZyMacFilter_s{
+	char CardOrder[513];
+	char ThemeColor[17];
+	char HiddenPage[2049];
+} rdm_ZyLogCfgGpAccount_t;
+
+typedef struct rdm_ZyMacFilter_s {   // RDM_OID_ZY_MAC_FILTER 
 	uint32_t MaxNumberOfEntries;
 	bool Enable;
 	bool Restrict;
-}rdm_ZyMacFilter_t;
-typedef struct rdm_ZyMacFilterWhiteList_s{
+} rdm_ZyMacFilter_t;
+
+typedef struct rdm_ZyMacFilterWhiteList_s {   // RDM_OID_ZY_MAC_FILTER_WHITE_LIST 
 	bool Enable;
 	char MACAddress[18];
 	char HostName[33];
-}rdm_ZyMacFilterWhiteList_t;
-typedef struct rdm_WlanSchedulerAccess_s{
+} rdm_ZyMacFilterWhiteList_t;
+
+typedef struct rdm_WlanSchedulerAccess_s {   // RDM_OID_WLAN_SCHEDULER_ACCESS 
 	bool Enable;
-}rdm_WlanSchedulerAccess_t;
-typedef struct rdm_VcAutoHunt_s{
+	bool AutoSwitchWiFiRadio;
+} rdm_WlanSchedulerAccess_t;
+
+typedef struct rdm_VcAutoHunt_s {   // RDM_OID_VC_AUTO_HUNT 
 	bool Enable;
 	bool DebugEnable;
 	uint32_t SendPatternPeriod;
 	uint32_t SendPatternExpire;
 	uint32_t NumPvcSet;
-}rdm_VcAutoHunt_t;
-typedef struct rdm_VcHuntInfo_s{
+} rdm_VcAutoHunt_t;
+
+typedef struct rdm_VcHuntInfo_s {   // RDM_OID_VC_HUNT_INFO 
 	int PvcId;
 	uint32_t NumHuntRule;
-}rdm_VcHuntInfo_t;
-typedef struct rdm_VcHuntRule_s{
+} rdm_VcHuntInfo_t;
+
+typedef struct rdm_VcHuntRule_s {   // RDM_OID_VC_HUNT_RULE 
 	char HuntAddrs[33];
 	uint32_t HuntServices;
-}rdm_VcHuntRule_t;
-typedef struct rdm_VlanAutoHunt_s{
+} rdm_VcHuntRule_t;
+
+typedef struct rdm_VlanAutoHunt_s {   // RDM_OID_VLAN_AUTO_HUNT 
 	bool Enable;
 	bool DebugEnable;
 	uint32_t MaxNumOfRetry;
 	uint32_t NumHuntInfo;
-}rdm_VlanAutoHunt_t;
-typedef struct rdm_VlanHuntInfo_s{
+} rdm_VlanAutoHunt_t;
+
+typedef struct rdm_VlanHuntInfo_s {   // RDM_OID_VLAN_HUNT_INFO 
 	uint32_t NumHuntRule;
 	char Interface[33];
-}rdm_VlanHuntInfo_t;
-typedef struct rdm_VlanHuntRule_s{
+} rdm_VlanHuntInfo_t;
+
+typedef struct rdm_VlanHuntRule_s {   // RDM_OID_VLAN_HUNT_RULE 
 	uint32_t HuntVlanId;
 	uint32_t HuntService;
-}rdm_VlanHuntRule_t;
-typedef struct rdm_Lang_s{
+} rdm_VlanHuntRule_t;
+
+typedef struct rdm_Lang_s {   // RDM_OID_LANG 
 	char Language[17];
-}rdm_Lang_t;
-typedef struct rdm_RemoMgmt_s{
+} rdm_Lang_t;
+
+typedef struct rdm_RemoMgmt_s {   // RDM_OID_REMO_MGMT 
 	uint32_t ServiceNumberOfEntries;
 	char BoundWANInterfaceList[257];
-}rdm_RemoMgmt_t;
-typedef struct rdm_RemoSrv_s{
+} rdm_RemoMgmt_t;
+
+typedef struct rdm_RemoSrv_s {   // RDM_OID_REMO_SRV 
 	char Name[33];
 	bool Enable;
 	int Protocol;
@@ -4960,13 +5475,15 @@ typedef struct rdm_RemoSrv_s{
 	uint32_t LifeTime;
 	char BoundInterfaceList[129];
 	bool TrustAll;
-}rdm_RemoSrv_t;
-typedef struct rdm_RemoSrvTrustDomain_s{
+} rdm_RemoSrv_t;
+
+typedef struct rdm_RemoSrvTrustDomain_s {   // RDM_OID_REMO_SRV_TRUST_DOMAIN 
 	bool Enable;
 	char IPAddress[49];
 	char SubnetMask[16];
-}rdm_RemoSrvTrustDomain_t;
-typedef struct rdm_SpRemoSrv_s{
+} rdm_RemoSrvTrustDomain_t;
+
+typedef struct rdm_SpRemoSrv_s {   // RDM_OID_SP_REMO_SRV 
 	char Name[33];
 	bool Enable;
 	int Protocol;
@@ -4977,28 +5494,33 @@ typedef struct rdm_SpRemoSrv_s{
 	uint32_t LifeTime;
 	char BoundInterfaceList[129];
 	bool TrustAll;
-}rdm_SpRemoSrv_t;
-typedef struct rdm_SpRemoSrvTrustDomain_s{
+} rdm_SpRemoSrv_t;
+
+typedef struct rdm_SpRemoSrvTrustDomain_s {   // RDM_OID_SP_REMO_SRV_TRUST_DOMAIN 
 	bool Enable;
 	char IPAddress[49];
 	char SubnetMask[16];
 	char WebDoaminName[65];
-}rdm_SpRemoSrvTrustDomain_t;
-typedef struct rdm_RemoMgmtTrustDomain_s{
+} rdm_SpRemoSrvTrustDomain_t;
+
+typedef struct rdm_RemoMgmtTrustDomain_s {   // RDM_OID_REMO_MGMT_TRUST_DOMAIN 
 	bool Enable;
 	char IPAddress[49];
 	char SubnetMask[16];
-}rdm_RemoMgmtTrustDomain_t;
-typedef struct rdm_SpTrustDomain_s{
+} rdm_RemoMgmtTrustDomain_t;
+
+typedef struct rdm_SpTrustDomain_s {   // RDM_OID_SP_TRUST_DOMAIN 
 	bool Enable;
 	char IPAddress[49];
 	char SubnetMask[16];
 	char WebDomainName[65];
-}rdm_SpTrustDomain_t;
-typedef struct rdm_NetworkSrv_s{
+} rdm_SpTrustDomain_t;
+
+typedef struct rdm_NetworkSrv_s {   // RDM_OID_NETWORK_SRV 
 	uint32_t ServiceNumberOfEntries;
-}rdm_NetworkSrv_t;
-typedef struct rdm_NetworkSrvGp_s{
+} rdm_NetworkSrv_t;
+
+typedef struct rdm_NetworkSrvGp_s {   // RDM_OID_NETWORK_SRV_GP 
 	char Name[33];
 	char Description[257];
 	int Protocol;
@@ -5008,8 +5530,9 @@ typedef struct rdm_NetworkSrvGp_s{
 	int DestPortRangeMax;
 	int ICMPType;
 	int ICMPTypeCode;
-}rdm_NetworkSrvGp_t;
-typedef struct rdm_SystemInfo_s{
+} rdm_NetworkSrvGp_t;
+
+typedef struct rdm_SystemInfo_s {   // RDM_OID_SYSTEM_INFO 
 	char HostName[65];
 	bool IsHostNameModify;
 	char DomainName[65];
@@ -5017,60 +5540,83 @@ typedef struct rdm_SystemInfo_s{
 	char Location[51];
 	bool CBT_AccountReset;
 	char OnlineGuide[129];
-}rdm_SystemInfo_t;
-typedef struct rdm_LogSetting_s{
+} rdm_SystemInfo_t;
+
+typedef struct rdm_GponInfo_s {   // RDM_OID_GPON_INFO 
+	char RxPowerSignal[17];
+	char TxPowerSignal[17];
+	char Temperature[17];
+	char SFP_Vendor[17];
+	char SFP_Model[17];
+	char SFP_Serial[17];
+	bool SFP_Presence;
+} rdm_GponInfo_t;
+
+typedef struct rdm_LogSetting_s {   // RDM_OID_LOG_SETTING 
 	bool Enable;
 	bool ZCFG_LOG_Enable;
 	char LogMode[33];
 	char LogServer[129];
 	uint32_t UDPPort;
 	uint32_t Interval;
-}rdm_LogSetting_t;
-typedef struct rdm_LogClassify_s{
+	char RemoteLogFormat[256];
+} rdm_LogSetting_t;
+
+typedef struct rdm_LogClassify_s {   // RDM_OID_LOG_CLASSIFY 
 	char Name[31];
 	char Describe[51];
 	char File[51];
-}rdm_LogClassify_t;
-typedef struct rdm_LogCategory_s{
+} rdm_LogClassify_t;
+
+typedef struct rdm_LogCategory_s {   // RDM_OID_LOG_CATEGORY 
 	bool Enable;
 	char Name[31];
 	char Describe[51];
 	char Filter[256];
 	uint32_t Level;
-}rdm_LogCategory_t;
-typedef struct rdm_ChangeIconName_s{
+	char LocalLogFormat[256];
+} rdm_LogCategory_t;
+
+typedef struct rdm_ChangeIconName_s {   // RDM_OID_CHANGE_ICON_NAME 
 	char HostName[65];
 	char MacAddress[65];
 	char DeviceIcon[33];
-}rdm_ChangeIconName_t;
-typedef struct rdm_PortMirror_s{
+	bool Internet_Blocking_Enable;
+} rdm_ChangeIconName_t;
+
+typedef struct rdm_PortMirror_s {   // RDM_OID_PORT_MIRROR 
 	char MonitorInterface[65];
 	char MirrorInterface[65];
 	bool Direction;
 	bool Status;
-}rdm_PortMirror_t;
-typedef struct rdm_VlanGroup_s{
+} rdm_PortMirror_t;
+
+typedef struct rdm_VlanGroup_s {   // RDM_OID_VLAN_GROUP 
 	bool Enable;
 	char GroupName[129];
 	uint32_t VlanId;
 	char BrRefKey[9];
 	char IntfList[65];
 	char TagList[65];
-}rdm_VlanGroup_t;
-typedef struct rdm_STBVendorID_s{
+} rdm_VlanGroup_t;
+
+typedef struct rdm_STBVendorID_s {   // RDM_OID_S_T_B_VENDOR_I_D 
 	char STBVendorID1[65];
 	char STBVendorID2[65];
 	char STBVendorID3[65];
 	char STBVendorID4[65];
 	char STBVendorID5[65];
-}rdm_STBVendorID_t;
-typedef struct rdm_TFTPSrvName_s{
+} rdm_STBVendorID_t;
+
+typedef struct rdm_TFTPSrvName_s {   // RDM_OID_T_F_T_P_SRV_NAME 
 	char TFTPServerName[65];
-}rdm_TFTPSrvName_t;
-typedef struct rdm_Tr064_s{
+} rdm_TFTPSrvName_t;
+
+typedef struct rdm_Tr064_s {   // RDM_OID_TR064 
 	bool Enable;
-}rdm_Tr064_t;
-typedef struct rdm_ZyWWANBackup_s{
+} rdm_Tr064_t;
+
+typedef struct rdm_ZyWWANBackup_s {   // RDM_OID_ZY_W_W_A_N_BACKUP 
 	bool Enable;
 	char Status[33];
 	char PackageVersion[33];
@@ -5086,15 +5632,17 @@ typedef struct rdm_ZyWWANBackup_s{
 	char PIN[33];
 	char PUK[33];
 	char NewPIN[33];
-}rdm_ZyWWANBackup_t;
-typedef struct rdm_ZyWWANPingCheck_s{
+} rdm_ZyWWANBackup_t;
+
+typedef struct rdm_ZyWWANPingCheck_s {   // RDM_OID_ZY_W_W_A_N_PING_CHECK 
 	bool Enable;
 	uint32_t Interval;
 	uint32_t FailLimit;
 	bool DefaultGateway;
 	char Destination[65];
-}rdm_ZyWWANPingCheck_t;
-typedef struct rdm_ZyWWANBudgetControl_s{
+} rdm_ZyWWANPingCheck_t;
+
+typedef struct rdm_ZyWWANBudgetControl_s {   // RDM_OID_ZY_W_W_A_N_BUDGET_CONTROL 
 	bool Enable;
 	char IMSI[33];
 	uint32_t SaveTimeValue;
@@ -5122,8 +5670,9 @@ typedef struct rdm_ZyWWANBudgetControl_s{
 	bool DropWWAN;
 	bool LogEnable;
 	uint32_t LogInterval;
-}rdm_ZyWWANBudgetControl_t;
-typedef struct rdm_ZyWWANStat_s{
+} rdm_ZyWWANBudgetControl_t;
+
+typedef struct rdm_ZyWWANStat_s {   // RDM_OID_ZY_W_W_A_N_STAT 
 	char ServiceProvider[33];
 	char SignalStrength[33];
 	char RemainingPIN[33];
@@ -5132,12 +5681,14 @@ typedef struct rdm_ZyWWANStat_s{
 	char Model[33];
 	char FWVersion[33];
 	char SIMIMSI[33];
-}rdm_ZyWWANStat_t;
-typedef struct rdm_ZySamba_s{
+} rdm_ZyWWANStat_t;
+
+typedef struct rdm_ZySamba_s {   // RDM_OID_ZY_SAMBA 
 	bool Enable;
 	char PidFileName[257];
-}rdm_ZySamba_t;
-typedef struct rdm_ZySambaDir_s{
+} rdm_ZySamba_t;
+
+typedef struct rdm_ZySambaDir_s {   // RDM_OID_ZY_SAMBA_DIR 
 	bool X_ZYXEL_Public;
 	bool X_ZYXEL_Browseable;
 	char X_ZYXEL_Hostname[65];
@@ -5147,43 +5698,68 @@ typedef struct rdm_ZySambaDir_s{
 	char X_ZYXEL_RootPath[65];
 	char X_ZYXEL_Path[257];
 	char X_ZYXEL_Portnum[6];
-}rdm_ZySambaDir_t;
-typedef struct rdm_GuiCustomization_s{
+} rdm_ZySambaDir_t;
+
+typedef struct rdm_GuiCustomization_s {   // RDM_OID_GUI_CUSTOMIZATION 
 	uint32_t Flag1;
 	uint32_t Flag2;
+	uint32_t Flag3;
 	uint32_t CbtGuestWifi;
 	bool BlockSpecialChar;
 	char BlockChar[129];
 	bool AllowFilter;
 	char AllowCharList[129];
+	bool HideAutoOnlineFWUpgradeGUI;
 	bool EthWanAsLan;
 	bool HidePasswordUnmask;
-}rdm_GuiCustomization_t;
-typedef struct rdm_FeatureFlag_s{
+	bool HideCCWan;
+	bool HideChangeDefault;
+	bool HideSkipPassword;
+	bool USB30Support;
+} rdm_GuiCustomization_t;
+
+typedef struct rdm_InputCheckList_s {   // RDM_OID_INPUT_CHECK_LIST 
+	char inputID[129];
+	char BlockChar[129];
+	char RuleString[257];
+	int minLength;
+	int maxLength;
+	char passwordStrength[129];
+} rdm_InputCheckList_t;
+
+typedef struct rdm_FeatureFlag_s {   // RDM_OID_FEATURE_FLAG 
 	char Customer[33];
 	uint32_t WebRedirect;
 	uint32_t DisableWifiHWButton;
 	char WANPriority[17];
+	uint32_t SfpDelayTimes;
+	uint32_t SipDelayTimes;
 	bool AdminRandomPassword;
-}rdm_FeatureFlag_t;
-typedef struct rdm_ZyOption125_s{
+	uint32_t AdminRandomPasswordMode;
+} rdm_FeatureFlag_t;
+
+typedef struct rdm_ZyOption125_s {   // RDM_OID_ZY_OPTION125 
 	bool Enable;
-}rdm_ZyOption125_t;
-typedef struct rdm_ZyVendorSpecific_s{
+} rdm_ZyOption125_t;
+
+typedef struct rdm_ZyVendorSpecific_s {   // RDM_OID_ZY_VENDOR_SPECIFIC 
 	char Option125ManufacturerOUI[256];
 	char Option125SerialNumber[256];
 	char Option125ProductClass[256];
 	bool Option125HexBox;
-}rdm_ZyVendorSpecific_t;
-typedef struct rdm_ZyIppCfg_s{
+} rdm_ZyVendorSpecific_t;
+
+typedef struct rdm_ZyIppCfg_s {   // RDM_OID_ZY_IPP_CFG 
 	bool Enable;
 	char IppMake[33];
 	char IppDevice[33];
 	char IppName[33];
-}rdm_ZyIppCfg_t;
-typedef struct rdm_Gpon_s{
-}rdm_Gpon_t;
-typedef struct rdm_Onu_s{
+} rdm_ZyIppCfg_t;
+
+typedef struct rdm_Gpon_s {   // RDM_OID_GPON 
+} rdm_Gpon_t;
+
+typedef struct rdm_Onu_s {   // RDM_OID_ONU 
 	char Version[65];
 	char VendorId[26];
 	char SerialNumber[65];
@@ -5212,8 +5788,9 @@ typedef struct rdm_Onu_s{
 	char txPower[6];
 	char rxPower[6];
 	char EmergencyState[33];
-}rdm_Onu_t;
-typedef struct rdm_Ani_s{
+} rdm_Onu_t;
+
+typedef struct rdm_Ani_s {   // RDM_OID_ANI 
 	char TotalTCONTNum[65];
 	char SRIndication[65];
 	char GEMBlockLength[65];
@@ -5232,58 +5809,69 @@ typedef struct rdm_Ani_s{
 	char LowerVoltageThd[33];
 	char UpperVoltageThd[33];
 	char PhyTransParameters[129];
-}rdm_Ani_t;
-typedef struct rdm_Olt_s{
+} rdm_Ani_t;
+
+typedef struct rdm_Olt_s {   // RDM_OID_OLT 
 	char VendorId[65];
 	char EquipmentId[65];
 	char Version[17];
 	char ToD[65];
-}rdm_Olt_t;
-typedef struct rdm_Capability_s{
+} rdm_Olt_t;
+
+typedef struct rdm_Capability_s {   // RDM_OID_CAPABILITY 
 	char OperatorID[26];
 	char SpecVersion[26];
 	char ONU_PowerCtr[26];
-}rdm_Capability_t;
-typedef struct rdm_Loidauth_s{
+} rdm_Capability_t;
+
+typedef struct rdm_Loidauth_s {   // RDM_OID_LOIDAUTH 
 	char LOID[65];
 	char Password[65];
 	char AuthStatus[3];
-}rdm_Loidauth_t;
-typedef struct rdm_Softimage_s{
+} rdm_Loidauth_t;
+
+typedef struct rdm_Softimage_s {   // RDM_OID_SOFTIMAGE 
 	char Version[65];
 	char Committed[9];
 	char Active[9];
 	char Valid[9];
-}rdm_Softimage_t;
-typedef struct rdm_Pm_s{
+} rdm_Softimage_t;
+
+typedef struct rdm_Pm_s {   // RDM_OID_PM 
 	char classId[17];
 	char portId[17];
 	char dataFlag[17];
 	char attrIndex[17];
 	char attrData[65];
-}rdm_Pm_t;
-typedef struct rdm_Common_s{
+} rdm_Pm_t;
+
+typedef struct rdm_Common_s {   // RDM_OID_COMMON 
 	char Enable[17];
 	char CurrentAttribute[33];
-}rdm_Common_t;
-typedef struct rdm_Xpon_s{
+} rdm_Common_t;
+
+typedef struct rdm_Xpon_s {   // RDM_OID_XPON 
 	char phyStatus[17];
 	char trafficStatus[17];
 	char GponBindIfc[17];
 	char StartXpon[17];
 	char LanVidTransparent[17];
-}rdm_Xpon_t;
-typedef struct rdm_Linkcfg_s{
+} rdm_Xpon_t;
+
+typedef struct rdm_Linkcfg_s {   // RDM_OID_LINKCFG 
 	char Mode[65];
 	char LinkState[65];
-}rdm_Linkcfg_t;
-typedef struct rdm_Iphost_s{
+} rdm_Linkcfg_t;
+
+typedef struct rdm_Iphost_s {   // RDM_OID_IPHOST 
 	char WanIf[33];
 	char commitWan[9];
-}rdm_Iphost_t;
-typedef struct rdm_OmciCfg_s{
-}rdm_OmciCfg_t;
-typedef struct rdm_Omci_s{
+} rdm_Iphost_t;
+
+typedef struct rdm_OmciCfg_s {   // RDM_OID_OMCI_CFG 
+} rdm_OmciCfg_t;
+
+typedef struct rdm_Omci_s {   // RDM_OID_OMCI 
 	char Ready[65];
 	char interface[65];
 	char gemportlist[65];
@@ -5291,37 +5879,43 @@ typedef struct rdm_Omci_s{
 	char totalGemPort[65];
 	char TransferFlag[17];
 	char macBridgePort[33];
-}rdm_Omci_t;
-typedef struct rdm_Gemport_s{
+} rdm_Omci_t;
+
+typedef struct rdm_Gemport_s {   // RDM_OID_GEMPORT 
 	char AllocId[65];
 	char PortId[65];
 	char PQPointerDown[65];
 	char Number[9];
 	char EncryptionState[9];
-}rdm_Gemport_t;
-typedef struct rdm_Tcont_s{
+} rdm_Gemport_t;
+
+typedef struct rdm_Tcont_s {   // RDM_OID_TCONT 
 	char Policy[65];
 	char Number[9];
-}rdm_Tcont_t;
-typedef struct rdm_Trtcm_s{
+} rdm_Tcont_t;
+
+typedef struct rdm_Trtcm_s {   // RDM_OID_TRTCM 
 	char channel[65];
 	char cir[65];
 	char pir[65];
 	char cbs[65];
 	char pbs[65];
-}rdm_Trtcm_t;
-typedef struct rdm_Qoscfg_s{
+} rdm_Trtcm_t;
+
+typedef struct rdm_Qoscfg_s {   // RDM_OID_QOSCFG 
 	char QOS[65];
 	char QOSType[65];
 	char QOSCfg[65];
 	char QOSMask[65];
 	char WeightType[65];
 	char WeightScale[65];
-}rdm_Qoscfg_t;
-typedef struct rdm_QosValue_s{
+} rdm_Qoscfg_t;
+
+typedef struct rdm_QosValue_s {   // RDM_OID_QOS_VALUE 
 	char Value[65];
-}rdm_QosValue_t;
-typedef struct rdm_Cngstcfg_s{
+} rdm_QosValue_t;
+
+typedef struct rdm_Cngstcfg_s {   // RDM_OID_CNGSTCFG 
 	char Congest[65];
 	char CongestCfg[65];
 	char CongestMask[65];
@@ -5330,43 +5924,53 @@ typedef struct rdm_Cngstcfg_s{
 	char CongestThredMode[65];
 	char CongestScale[65];
 	char CongestDropProbability[65];
-}rdm_Cngstcfg_t;
-typedef struct rdm_CongestThredValue_s{
+} rdm_Cngstcfg_t;
+
+typedef struct rdm_CongestThredValue_s {   // RDM_OID_CONGEST_THRED_VALUE 
 	char Value[65];
-}rdm_CongestThredValue_t;
-typedef struct rdm_Trtcmcfg_s{
+} rdm_CongestThredValue_t;
+
+typedef struct rdm_Trtcmcfg_s {   // RDM_OID_TRTCMCFG 
 	char TrtcmParam[65];
 	char TrtcmMask[65];
 	char TrtcmCfg[65];
 	char TrtcmScale[65];
-}rdm_Trtcmcfg_t;
-typedef struct rdm_TrtcmValue_s{
+} rdm_Trtcmcfg_t;
+
+typedef struct rdm_TrtcmValue_s {   // RDM_OID_TRTCM_VALUE 
 	char Value[65];
-}rdm_TrtcmValue_t;
-typedef struct rdm_Queue_s{
+} rdm_TrtcmValue_t;
+
+typedef struct rdm_Queue_s {   // RDM_OID_QUEUE 
 	char DropMode[9];
-}rdm_Queue_t;
-typedef struct rdm_OntGeneric_s{
+} rdm_Queue_t;
+
+typedef struct rdm_OntGeneric_s {   // RDM_OID_ONT_GENERIC 
 	char ConfigStatus[9];
-}rdm_OntGeneric_t;
-typedef struct rdm_ZyOneConnect_s{
+} rdm_OntGeneric_t;
+
+typedef struct rdm_ZyOneConnect_s {   // RDM_OID_ZY_ONE_CONNECT 
 	bool Enable;
 	bool X_ZYXEL_AP_Approve_Flag;
-}rdm_ZyOneConnect_t;
-typedef struct rdm_OneConnectInternetAccessMasterSwitch_s{
+} rdm_ZyOneConnect_t;
+
+typedef struct rdm_OneConnectInternetAccessMasterSwitch_s {   // RDM_OID_ONE_CONNECT_INTERNET_ACCESS_MASTER_SWITCH 
 	bool Enable;
 	int Count;
-}rdm_OneConnectInternetAccessMasterSwitch_t;
-typedef struct rdm_OneConnectInternetAccessRule_s{
+} rdm_OneConnectInternetAccessMasterSwitch_t;
+
+typedef struct rdm_OneConnectInternetAccessRule_s {   // RDM_OID_ONE_CONNECT_INTERNET_ACCESS_RULE 
 	bool Enable;
 	char Name[65];
 	char BlockMAC[18];
-}rdm_OneConnectInternetAccessRule_t;
-typedef struct rdm_OneConnectPCGeneral_s{
+} rdm_OneConnectInternetAccessRule_t;
+
+typedef struct rdm_OneConnectPCGeneral_s {   // RDM_OID_ONE_CONNECT_P_C_GENERAL 
 	bool Enable;
 	int Count;
-}rdm_OneConnectPCGeneral_t;
-typedef struct rdm_OneConnectPCRule_s{
+} rdm_OneConnectPCGeneral_t;
+
+typedef struct rdm_OneConnectPCRule_s {   // RDM_OID_ONE_CONNECT_P_C_RULE 
 	bool Enable;
 	char Name[65];
 	char BlockMAC[18];
@@ -5374,9 +5978,11 @@ typedef struct rdm_OneConnectPCRule_s{
 	uint32_t StartMin;
 	uint32_t StopHour;
 	uint32_t StopMin;
-	uint32_t Days;
-}rdm_OneConnectPCRule_t;
-typedef struct rdm_OnlineFWUpgrade_s{
+	char Days[33];
+} rdm_OneConnectPCRule_t;
+
+typedef struct rdm_OnlineFWUpgrade_s {   // RDM_OID_ONLINE_F_W_UPGRADE 
+	bool Enable;
 	char SystemModelName[65];
 	char FWInfoURL[1025];
 	char FWFileName[65];
@@ -5385,12 +5991,14 @@ typedef struct rdm_OnlineFWUpgrade_s{
 	char FWSize[1025];
 	uint32_t HttpSevrPort;
 	char FWURL[1025];
-}rdm_OnlineFWUpgrade_t;
-typedef struct rdm_LandingPage_s{
+} rdm_OnlineFWUpgrade_t;
+
+typedef struct rdm_LandingPage_s {   // RDM_OID_LANDING_PAGE 
 	bool Enable;
 	char URL[257];
-}rdm_LandingPage_t;
-typedef struct rdm_PowerMgmt_s{
+} rdm_LandingPage_t;
+
+typedef struct rdm_PowerMgmt_s {   // RDM_OID_POWER_MGMT 
 	bool Enable;
 	bool curDSL;
 	bool curETH;
@@ -5406,23 +6014,38 @@ typedef struct rdm_PowerMgmt_s{
 	bool LAN3;
 	bool LAN4;
 	bool LED;
-}rdm_PowerMgmt_t;
-typedef struct rdm_PowerSchedule_s{
+} rdm_PowerMgmt_t;
+
+typedef struct rdm_PowerSchedule_s {   // RDM_OID_POWER_SCHEDULE 
 	bool Enable;
 	char Name[65];
 	char Ref[65];
 	char job[1025];
 	int count;
-}rdm_PowerSchedule_t;
-typedef struct rdm_ZyLoopGuard_s{
+} rdm_PowerSchedule_t;
+
+typedef struct rdm_ZyLoopGuard_s {   // RDM_OID_ZY_LOOP_GUARD 
 	bool Enable;
 	char RecoveryTime[17];
 	bool RebootAfterRecovery;
-}rdm_ZyLoopGuard_t;
-typedef struct rdm_ZyProximitySensor_s{
+} rdm_ZyLoopGuard_t;
+
+typedef struct rdm_ZyProximitySensor_s {   // RDM_OID_ZY_PROXIMITY_SENSOR 
 	bool Enable;
-}rdm_ZyProximitySensor_t;
-typedef struct rdm_ZyResetAdmin_s{
+} rdm_ZyProximitySensor_t;
+
+typedef struct rdm_ZyResetAdmin_s {   // RDM_OID_ZY_RESET_ADMIN 
 	char ResetPassword[257];
-}rdm_ZyResetAdmin_t;
-#endif
+} rdm_ZyResetAdmin_t;
+
+typedef struct rdm_OiWizard_s {   // RDM_OID_OI_WIZARD 
+	uint32_t Status;
+	char Region[9];
+	char CorporateRegion[33];
+	char Username[65];
+	char Password[65];
+	uint32_t OiWifiEnable;
+	int OiWifiVLANID;
+} rdm_OiWizard_t;
+
+#endif // _ZCFG_RDM_OBJ_H

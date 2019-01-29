@@ -1,4 +1,6 @@
 /*Parameter*/
+extern tr98Parameter_t para_extend[];
+extern tr98Parameter_t para_Dns[];
 extern tr98Parameter_t para_DnsRtEntry[];
 extern tr98Parameter_t para_DnsEntry[];
 extern tr98Parameter_t para_DDns[];
@@ -7,6 +9,9 @@ extern tr98Parameter_t para_EmailSrv[];
 extern tr98Parameter_t para_EmailEvent[];
 extern tr98Parameter_t para_VlanGroup[];
 extern tr98Parameter_t para_SysInfo[];
+#ifdef ZYXEL_SFP_MODULE_SUPPORT
+extern tr98Parameter_t para_GponInfo[];
+#endif
 extern tr98Parameter_t para_Snmp[];
 extern tr98Parameter_t para_SnmpTrap[];
 #ifdef ISKON_CUSTOMIZATION
@@ -68,6 +73,14 @@ extern tr98Parameter_t para_OneSsid[];
 #endif
 
 /*Handler Function*/
+
+//InternetGatewayDevice.X_ZYXEL_EXT.
+zcfgRet_t zyExtObjGet(char *, int , struct json_object **, bool );
+zcfgRet_t zyExtObjSet(char *, int , struct json_object *, struct json_object * );
+
+//InternetGatewayDevice.X_ZYXEL_EXT.DNS
+extern zcfgRet_t zyExtDnsObjGet(char *, int, struct json_object **, bool);
+extern zcfgRet_t zyExtDnsObjSet(char *, int , struct json_object *, struct json_object *);
 
 /*InternetGatewayDevice.X_ZYXEL_EXT.DNSRouteEntry.i*/
 extern zcfgRet_t zyExtDnsRtObjGet(char *, int, struct json_object **, bool);
@@ -134,6 +147,11 @@ extern zcfgRet_t zyExtSysInfoObjSet(char *, int, struct json_object *, struct js
 extern zcfgRet_t zyExtSysInfoObjNotify(char *, char *, struct json_object *, int, struct json_object **);
 extern int zyExtSysInfoObjAttrGet(char *, int, char *);
 extern zcfgRet_t zyExtSysInfoObjAttrSet(char *, int, char *, int , struct json_object *);
+
+#ifdef ZYXEL_SFP_MODULE_SUPPORT
+/*InternetGatewayDevice.X_ZYXEL_EXT.Gpon_Info*/
+extern zcfgRet_t zyExtGponInfoObjGet(char *, int, struct json_object **, bool);
+#endif
 
 /*InternetGatewayDevice.X_ZYXEL_EXT.SNMP*/
 extern zcfgRet_t zyExtSnmpObjGet(char *, int, struct json_object **, bool);

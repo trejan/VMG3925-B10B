@@ -18,8 +18,15 @@
 #define _ROOT_PATH
 #endif
 
-#define _PATH_UPAPFILE 	 _ROOT_PATH "/etc/ppp/pap-secrets"
+#if defined(BROADCOM_PLATFORM)&& defined(CONFIG_PPTP_SUPPORT) 
+#define _PATH_CHAPFILE 	 _ROOT_PATH "/var/ppp/chap-secrets"
+#define _PATH_PEERFILES	 _ROOT_PATH "/var/ppp/peers/"
+#else
 #define _PATH_CHAPFILE 	 _ROOT_PATH "/etc/ppp/chap-secrets"
+#define _PATH_PEERFILES	 _ROOT_PATH "/etc/ppp/peers/"
+#endif
+
+#define _PATH_UPAPFILE 	 _ROOT_PATH "/etc/ppp/pap-secrets"
 #define _PATH_SRPFILE 	 _ROOT_PATH "/etc/ppp/srp-secrets"
 #define _PATH_SYSOPTIONS _ROOT_PATH "/etc/ppp/options"
 #define _PATH_IPUP	 _ROOT_PATH "/etc/ppp/ip-up"
@@ -28,7 +35,6 @@
 #define _PATH_AUTHDOWN	 _ROOT_PATH "/etc/ppp/auth-down"
 #define _PATH_TTYOPT	 _ROOT_PATH "/etc/ppp/options."
 #define _PATH_CONNERRS	 _ROOT_PATH "/etc/ppp/connect-errors"
-#define _PATH_PEERFILES	 _ROOT_PATH "/etc/ppp/peers/"
 #define _PATH_RESOLV	 _ROOT_PATH "/etc/ppp/resolv.conf"
 
 #define _PATH_USEROPT	 ".ppprc"

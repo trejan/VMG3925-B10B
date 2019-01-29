@@ -3,10 +3,30 @@
 #ifdef ISKON_CUSTOMIZATION_Motorola_VIP1003
 #include <time.h>
 #endif
+
+int esmdApplyAddObjectTmTask(const char *, int , int , const char *);
+int esmdApplyDeleteObjectTmTask(const char *);
+
 void updateLinkStatus(const char*);
 //void updateLanLinkStatus(void);
 //void updateWanLinkStatus(void);
 void emailEventHandle(char *buf, uint8_t clientEid, uint32_t clientPid);
+
+#ifdef ZYXEL_SFP_LINKUP_DELAYTIMES
+enum {
+	sfpLinkUpPrepare = 0,
+	sfpLinkupDelay,
+	sfpLinkUpContinue
+};
+#endif
+
+#ifdef ZYXEL_SIP_DELAYTIMES 
+enum {
+	SipPrepare = 0,
+	SipDelayStatus,
+	SipContinue
+};
+#endif
 
 typedef enum {
 		isATM,

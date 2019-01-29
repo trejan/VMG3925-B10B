@@ -10,8 +10,8 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 PKG_BUILD_DEPENDS:=opkg/host
 
 PREBUILD_BASE_DIR=./files
-# for store CFE images
-PREBUILD_CFE_DIR=$(PREBUILD_BASE_DIR)/cfe
+# for store bootloader`s images
+PREBUILD_BOOTLOADER_DIR=$(PREBUILD_BASE_DIR)/bootloader
 # for store host tools/files
 PREBUILD_STAGING_DIR_HOST=$(PREBUILD_BASE_DIR)/staging_dir/host
 # for store the target files which packed as ipk format. (will be install to rootfs)
@@ -34,13 +34,20 @@ endef
 define CheckDependencies
 endef
 
-define restore_prebuild_cfe
-	mkdir -p $(TOPDIR)/bin/$(BOARD)/brcm-cfe
-	$(CP) $(PREBUILD_CFE_DIR)/* $(TOPDIR)/bin/$(BOARD)/brcm-cfe/
+ifeq ($(CONFIG_TARGET_en75xx),y)
+TARGET_BOOTLOADER_DIR=en75xx-loader
+else
+TARGET_BOOTLOADER_DIR=brcm-cfe
+endif
+
+define restore_prebuild_bootloader
+	mkdir -p $(TOPDIR)/bin/$(BOARD)/$(TARGET_BOOTLOADER_DIR)
+	$(CP) $(PREBUILD_BOOTLOADER_DIR)/* $(TOPDIR)/bin/$(BOARD)/$(TARGET_BOOTLOADER_DIR)/
 endef
 
-ifneq ($(wildcard $(PREBUILD_CFE_DIR)),)
-__need_restore_prebuild_cfe=$(call restore_prebuild_cfe)
+
+ifneq ($(wildcard $(PREBUILD_BOOTLOADER_DIR)),)
+__need_restore_prebuild_bootloader=$(call restore_prebuild_bootloader)
 endif
 
 define restore_prebuild_host_tools
@@ -87,7 +94,7 @@ define Build/Compile
 endef
 	
 define Package/base-files-prebuild/install
-	$(__need_restore_prebuild_cfe)
+	$(__need_restore_prebuild_bootloader)
 	$(INSTALL_DIR) $(1)/
 	if [ -d "$(PKG_BUILD_DIR)/rootfs" ]; then \
 		$(CP) $(PKG_BUILD_DIR)/rootfs/* $(1)/; \

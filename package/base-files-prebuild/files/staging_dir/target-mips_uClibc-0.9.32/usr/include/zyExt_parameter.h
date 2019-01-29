@@ -1,3 +1,22 @@
+
+tr98Parameter_t para_extend[] = {
+#ifdef ZYXEL_ACS_WPS_ACTIVATION
+	{ "WPSRunning", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "WPSApIndex", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
+	{ "WPSRunningStatus", PARAMETER_ATTR_READONLY, 257, json_type_string},
+#endif
+	{ NULL, 0, 0}
+};
+
+tr98Parameter_t para_Dns[] = {
+	{ "SupportedRecordTypes", PARAMETER_ATTR_READONLY, 14, json_type_string},
+	{ "X_ZYXEL_BoundInterfaceList", PARAMETER_ATTR_WRITE, 256, json_type_string},
+	{ "X_ZYXEL_RedirectLANSideDNSQuery", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_ActiveDNSServers", PARAMETER_ATTR_READONLY, 256, json_type_string},
+	{ "X_ZYXEL_DNSQueryScenario", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
+	{ NULL, 0, 0}
+};
+
 tr98Parameter_t para_DnsRtEntry[] = {
 	{ "Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "DomainName", PARAMETER_ATTR_WRITE, 257, json_type_string},
@@ -107,6 +126,7 @@ tr98Parameter_t para_LogCfgGpAccount[] = {
 	{ "AutoShowQuickStart", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "Page", PARAMETER_ATTR_WRITE, 2049, json_type_string},
 	{ "DefaultPassword", PARAMETER_ATTR_WRITE | PARAMETER_ATTR_PASSWORD, 257, json_type_string},
+	{ "ResetDefaultPassword", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "PasswordHash", PARAMETER_ATTR_READONLY | PARAMETER_ATTR_PASSWORD, 17, json_type_string},
 	{ "AccountCreateTime", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	{ "AccountRetryTime", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
@@ -128,6 +148,7 @@ tr98Parameter_t para_LogSetting[] = {
 	{ "ZCFG_LOG_Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "LogMode", PARAMETER_ATTR_WRITE, 33, json_type_string},
 	{ "Interval", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
+	{ "RemoteLogFormat", PARAMETER_ATTR_WRITE, 256, json_type_string},
 	{ NULL, 0, 0}
 };
 
@@ -144,6 +165,7 @@ tr98Parameter_t para_LogCategory[] = {
 	{ "Describe", PARAMETER_ATTR_READONLY, 50, json_type_string},
 	{ "Level", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	{ "Filter", PARAMETER_ATTR_WRITE, 256, json_type_string},
+	{ "LocalLogFormat", PARAMETER_ATTR_WRITE, 256, json_type_string},
 	{ NULL, 0, 0}
 };
 
@@ -244,6 +266,20 @@ tr98Parameter_t para_SysInfo[] = {
 #endif
 	{ NULL, 0, 0, 0}
 };
+
+#ifdef ZYXEL_SFP_MODULE_SUPPORT
+
+tr98Parameter_t para_GponInfo[] = {
+	{ "RxPowerSignal", PARAMETER_ATTR_READONLY, 16, json_type_string},
+	{ "TxPowerSignal", PARAMETER_ATTR_READONLY, 16, json_type_string},
+	{ "Temperature", PARAMETER_ATTR_READONLY, 16, json_type_string},
+	{ "SFP_Vendor", PARAMETER_ATTR_READONLY, 16, json_type_string},
+	{ "SFP_Model", PARAMETER_ATTR_READONLY, 16, json_type_string},
+	{ "SFP_Serial", PARAMETER_ATTR_READONLY, 16, json_type_string},
+	{ "SFP_Presence", PARAMETER_ATTR_READONLY, 0, json_type_boolean},
+	{ NULL, 0, 0, 0}
+};
+#endif
 
 tr98Parameter_t para_Snmp[] = {
 	{ "Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
@@ -386,7 +422,10 @@ tr98Parameter_t para_Landing_Page[] = {
 #endif
 
 tr98Parameter_t para_Feature_Flag[] = {
+	{ "Customer", PARAMETER_ATTR_WRITE, 33, json_type_string},
 	{ "WANPriority", PARAMETER_ATTR_WRITE, 16, json_type_string},
+	{ "SfpDelayTimes", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
+	{ "SipDelayTimes", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	{ NULL, 0, 0, 0}
 };
 
@@ -398,6 +437,8 @@ tr98Parameter_t para_GUI_Customization[] = {
 	{ "AllowFilter", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "AllowCharList", PARAMETER_ATTR_WRITE, 128, json_type_string},
 	{ "EthWanAsLan", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "HideChangeDefault", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "HideSkipPassword", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ NULL, 0, 0, 0}
 };
 

@@ -1,0 +1,54 @@
+Index: linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c
+===================================================================
+--- linux-3.4.11.orig/drivers/mtd/brcmnand/brcmnand_base.c	2017-11-29 15:23:16.595866599 +0800
++++ linux-3.4.11/drivers/mtd/brcmnand/brcmnand_base.c	2017-11-29 16:52:08.339394980 +0800
+@@ -738,6 +738,7 @@
+ 		.ctrlVersion = CONFIG_MTD_BRCMNAND_VERS_2_0, 
+ 	},
+ 
++#if 0 //replaced by TOSHIBA TC58NVG1S3HTAI0 for VMG3927-B50B
+ 	{	/* 33 */  
+ 		.chipId = TOSHIBA_TC58NVG1S3ETAI5,
+ 		.mafId = FLASHTYPE_TOSHIBA,
+@@ -751,6 +752,7 @@
+ 		.nbrBlocks = 2048,
+ 		.ctrlVersion = CONFIG_MTD_BRCMNAND_VERS_2_0, 
+ 	},
++#endif
+ 
+ 	{	/* 34 */  
+ 		.chipId = TOSHIBA_TC58NVG3S0ETA00,
+@@ -920,6 +922,20 @@
+ 		.ctrlVersion = CONFIG_MTD_BRCMNAND_VERS_3_0,
+ 	},
+ 
++	{	/* 44 */ //VMG3927-B50B
++		.chipId = TOSHIBA_TC58NVG1S3HTAI0,
++		.mafId = FLASHTYPE_TOSHIBA,
++		.chipIdStr = "TOSHIBA TC58NVG1S3HTAI0",
++		.options = NAND_BBT_USE_FLASH,
++		.idOptions = BRCMNAND_ID_EXT_BYTES,
++		.timing1 = 0,
++		.timing2 = 0,
++		.nop=4,
++		.eccLevel=8,
++		.nbrBlocks = 2048,
++		.ctrlVersion = CONFIG_MTD_BRCMNAND_VERS_3_0,
++	},
++
+ 	{	/* LAST DUMMY ENTRY */
+ 		.chipId = 0,
+ 		.mafId = 0,
+Index: linux-3.4.11/include/linux/mtd/brcmnand.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/mtd/brcmnand.h	2017-11-29 15:23:16.595866599 +0800
++++ linux-3.4.11/include/linux/mtd/brcmnand.h	2017-11-29 16:49:27.923338324 +0800
+@@ -474,7 +474,7 @@
+ #define FLASHTYPE_TOSHIBA		0x98
+ 
+ #define TOSHIBA_TC58NVG0S3ETA00	0xD1
+-#define TOSHIBA_TC58NVG1S3ETAI5	0xDA
++#define TOSHIBA_TC58NVG1S3HTAI0	0xDA    //VMG3927-B50B used it; replaced "#define TOSHIBA_TC58NVG1S3ETAI5	0xDA"
+ #define TOSHIBA_TC58NVG3S0ETA00	0xD3
+ #define TOSHIBA_TH58NVG2S3HTAI0	0xDC
+ 
