@@ -34,7 +34,7 @@ See ftp://ftp.zyxel.com/VMG3925-B10B/firmware for release notes.
 
 8. Run `make`
 
-9. The complete firmware image is bin/brcm963xx/zyxel/ras.bin and should be roughly 28MB.
+9. The complete firmware image is bin/brcm963xx/zyxel/ras.bin
 
 ## Flashing instructions
 
