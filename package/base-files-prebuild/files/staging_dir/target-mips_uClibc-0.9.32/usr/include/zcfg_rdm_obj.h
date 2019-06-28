@@ -10,6 +10,19 @@ typedef struct rdm_Device_s {   // RDM_OID_DEVICE
 typedef struct rdm_Service_s {   // RDM_OID_SERVICE 
 } rdm_Service_t;
 
+typedef struct rdm_Package_s {   // RDM_OID_PACKAGE 
+	char Name[33];
+	char Version[33];
+	char Script[65];
+	bool Enable;
+	char Data[257];
+	char Status[65];
+} rdm_Package_t;
+
+typedef struct rdm_PackageInstall_s {   // RDM_OID_PACKAGE_INSTALL 
+	bool Install;
+} rdm_PackageInstall_t;
+
 typedef struct rdm_VoiceSrv_s {   // RDM_OID_VOICE_SRV 
 	uint32_t VoiceProfileNumberOfEntries;
 	uint32_t X_ZYXEL_LoggingLevel;
@@ -96,6 +109,7 @@ typedef struct rdm_VoiceProf_s {   // RDM_OID_VOICE_PROF
 	char Region[3];
 	uint32_t X_ZYXEL_Countrycode;
 	char DigitMap[257];
+	char X_ZYXEL_DigitMap[513];
 	bool DigitMapEnable;
 	bool STUNEnable;
 	char STUNServer[257];
@@ -194,6 +208,7 @@ typedef struct rdm_VoiceProfSip_s {   // RDM_OID_VOICE_PROF_SIP
 	bool X_ZYXEL_Rfc3263Support;
 	bool X_ZYXEL_Option120Use;
 	char X_ZYXEL_Option120Server[257];
+	char X_ZYXEL_BackupServer[257];
 } rdm_VoiceProfSip_t;
 
 typedef struct rdm_VoiceProfSipSubscribeObj_s {   // RDM_OID_VOICE_PROF_SIP_SUBSCRIBE_OBJ 
@@ -562,6 +577,7 @@ typedef struct rdm_VoiceCommon_s {   // RDM_OID_VOICE_COMMON
 	bool CustomUserAgentNameEnable;
 	char CustomUserAgentName[129];
 	char P_AccessNetworkInfo[129];
+	char UserAgent_strReplaceRule[257];
 } rdm_VoiceCommon_t;
 
 typedef struct rdm_VoicePhoneBook_s {   // RDM_OID_VOICE_PHONE_BOOK 
@@ -864,6 +880,18 @@ typedef struct rdm_MgmtSrv_s {   // RDM_OID_MGMT_SRV
 	bool X_ZYXEL_TR181SpvPartialSet;
 	uint32_t X_ZYXEL_MaxIndexObjectQueryNum;
 	bool X_ZYXEL_PreSharedKeyOperation;
+	bool X_ZYXEL_Supplemental_EnableCWMP;
+	char X_ZYXEL_Supplemental_URL[257];
+	char X_ZYXEL_Supplemental_Username[257];
+	char X_ZYXEL_Supplemental_Password[257];
+	char X_ZYXEL_Supplemental_ConnReqURL[257];
+	char X_ZYXEL_Supplemental_ConnReqUsername[257];
+	char X_ZYXEL_Supplemental_ConnReqPassword[257];
+	uint32_t X_ZYXEL_Supplemental_ConnReqPort;
+	char X_ZYXEL_Supplemental_v4ConnReqURL[257];
+	char X_ZYXEL_Supplemental_v6ConnReqURL[257];
+	bool X_ZYXEL_ReplyAllObjectsWhileRootQuery;
+	char X_ZYXEL_RootQueryWouldNotReplyObjects[513];
 } rdm_MgmtSrv_t;
 
 typedef struct rdm_MgmtSrvMgabDev_s {   // RDM_OID_MGMT_SRV_MGAB_DEV 
@@ -988,6 +1016,7 @@ typedef struct rdm_UsrIntf_s {   // RDM_OID_USR_INTF
 	char UserUpdateServer[257];
 	char AvailableLanguages[257];
 	char CurrentLanguage[17];
+	int RememberPassword;
 	bool CurrentGUIView;
 	int X_ZYXEL_Timeout;
 } rdm_UsrIntf_t;
@@ -1953,6 +1982,8 @@ typedef struct rdm_UsbUsbhostsHostDevPar_s {   // RDM_OID_USB_USBHOSTS_HOST_DEV_
 	char PartitionName[17];
 	uint32_t Capacity;
 	uint32_t UsedSpace;
+	char Capacity_GByte[65];
+	char UsedSpace_GByte[65];
 } rdm_UsbUsbhostsHostDevPar_t;
 
 typedef struct rdm_UsbUsbhostsHostDevCfg_s {   // RDM_OID_USB_USBHOSTS_HOST_DEV_CFG 
@@ -2473,6 +2504,7 @@ typedef struct rdm_Wifi_s {   // RDM_OID_WIFI
 	uint32_t AccessPointNumberOfEntries;
 	uint32_t EndPointNumberOfEntries;
 	char X_ZYXEL_SSIDType[5];
+	uint32_t X_ZYXEL_WpsBut_Event;
 } rdm_Wifi_t;
 
 typedef struct rdm_WifiOneSsid_s {   // RDM_OID_WIFI_ONE_SSID 
@@ -2547,7 +2579,10 @@ typedef struct rdm_WifiRadio_s {   // RDM_OID_WIFI_RADIO
 	bool X_ZYXEL_AirtimeFairness;
 	bool X_ZYXEL_Support_ATF;
 	char X_ZYXEL_SingleSKU[9];
+	char X_ZYXEL_MaxBitRate[7];
 	bool X_ZYXEL_SSID_Priority_Enable;
+	char X_ZYXEL_Manual_Channels_Skip[129];
+	bool X_ZYXEL_MU_MIMO_Enabled;
 } rdm_WifiRadio_t;
 
 typedef struct rdm_WifiRadioSt_s {   // RDM_OID_WIFI_RADIO_ST 
@@ -2697,6 +2732,8 @@ typedef struct rdm_WifiAccessPointWps_s {   // RDM_OID_WIFI_ACCESS_POINT_WPS
 	bool X_ZYXEL_WPS_EnableAPPin;
 	char X_ZYXEL_WPS_PairingID[257];
 	char X_ZYXEL_WPS_PairingID_Mode[7];
+	bool X_ZyXEL_TriggerWPSPushButton;
+	char X_ZYXEL_WPSRunningStatus[257];
 } rdm_WifiAccessPointWps_t;
 
 typedef struct rdm_WifiAccessPointAssocDev_s {   // RDM_OID_WIFI_ACCESS_POINT_ASSOC_DEV 
@@ -3513,6 +3550,20 @@ typedef struct rdm_GreTunnel_s {   // RDM_OID_GRE_TUNNEL
 	uint32_t DefaultDSCPMark;
 	char ConnectedRemoteEndpoint[257];
 	uint32_t InterfaceNumberOfEntries;
+	char X_ZYXEL_GREInterfaceName[65];
+	char X_ZYXEL_GREInterface[257];
+	char X_ZYXEL_RemoteEndpoint2[257];
+	char X_ZYXEL_LowerLayers[1025];
+	char X_ZYXEL_InterfaceGroup[1025];
+	bool X_ZYXEL_Checksum;
+	uint32_t X_ZYXEL_Key;
+	bool X_ZYXEL_SequenceNumber;
+	uint32_t X_ZYXEL_ShapingRate;
+	uint32_t X_ZYXEL_DownstreamShapingRate;
+	uint32_t X_ZYXEL_DSCP;
+	uint32_t X_ZYXEL_VlanGroupNumberOfEntriesxsi;
+	uint32_t X_ZYXEL_MaxAssociatedDevices;
+	char X_ZYXEL_GREBridgeName[33];
 } rdm_GreTunnel_t;
 
 typedef struct rdm_GreTunnelStat_s {   // RDM_OID_GRE_TUNNEL_STAT 
@@ -3524,6 +3575,8 @@ typedef struct rdm_GreTunnelStat_s {   // RDM_OID_GRE_TUNNEL_STAT
 	uint64_t PacketsReceived;
 	uint32_t ErrorsSent;
 	uint32_t ErrorsReceived;
+	uint32_t X_ZYXEL_DiscardPacketsSent;
+	uint32_t X_ZYXEL_DiscardPacketsReceived;
 } rdm_GreTunnelStat_t;
 
 typedef struct rdm_GreTunnelIface_s {   // RDM_OID_GRE_TUNNEL_IFACE 
@@ -3580,8 +3633,8 @@ typedef struct rdm_RoutingRouter_s {   // RDM_OID_ROUTING_ROUTER
 	char Alias[65];
 	uint32_t IPv4ForwardingNumberOfEntries;
 	uint32_t IPv6ForwardingNumberOfEntries;
-	char X_ZYXEL_ActiveDefaultGateway[321];
-	char X_ZYXEL_ActiveV6DefaultGateway[321];
+	char X_ZYXEL_ActiveDefaultGateway[513];
+	char X_ZYXEL_ActiveV6DefaultGateway[513];
 	bool X_ZYXEL_AutoSecureDefaultIface;
 } rdm_RoutingRouter_t;
 
@@ -3652,6 +3705,7 @@ typedef struct rdm_RoutingRtInfoIntfSet_s {   // RDM_OID_ROUTING_RT_INFO_INTF_SE
 	char Prefix[47];
 	char RouteLifeTime[32];
 	uint32_t X_ZYXEL_RouterLifetime;
+	uint32_t X_ZYXEL_RouterLifetimeReal;
 	int X_ZYXEL_RA_MFlag;
 	int X_ZYXEL_RA_OFlag;
 } rdm_RoutingRtInfoIntfSet_t;
@@ -4010,6 +4064,8 @@ typedef struct rdm_HostsHost_s {   // RDM_OID_HOSTS_HOST
 	uint32_t X_ZYXEL_LastUpdate;
 	char X_ZYXEL_Address6Source[7];
 	char X_ZYXEL_DHCP6Client[65];
+	uint32_t X_ZYXEL_BytesSent;
+	uint32_t X_ZYXEL_BytesReceived;
 	uint32_t IPv4AddressNumberOfEntries;
 	uint32_t IPv6AddressNumberOfEntries;
 	char ClientDuid[48];
@@ -4153,6 +4209,7 @@ typedef struct rdm_NatPortTriggering_s {   // RDM_OID_NAT_PORT_TRIGGERING
 	char Name[65];
 	char Status[20];
 	char Interface[257];
+	bool X_ZYXEL_AutoDetectWanStatus;
 	uint32_t TriggerPort;
 	uint32_t TriggerPortEndRange;
 	uint32_t OpenPort;
@@ -4174,6 +4231,7 @@ typedef struct rdm_NatAddrMapping_s {   // RDM_OID_NAT_ADDR_MAPPING
 	char Description[65];
 	char WANIntfName[65];
 	char Interface[65];
+	bool X_ZYXEL_AutoDetectWanStatus;
 } rdm_NatAddrMapping_t;
 
 typedef struct rdm_NatSessionCtl_s {   // RDM_OID_NAT_SESSION_CTL 
@@ -4222,7 +4280,7 @@ typedef struct rdm_Dhcpv4ReqOpt_s {   // RDM_OID_DHCPV4_REQ_OPT
 	uint32_t Order;
 	char Alias[65];
 	uint32_t Tag;
-	char Value[256];
+	char Value[513];
 } rdm_Dhcpv4ReqOpt_t;
 
 typedef struct rdm_Dhcpv4Srv_s {   // RDM_OID_DHCPV4_SRV 
@@ -5169,6 +5227,7 @@ typedef struct rdm_ParenCtlProf_s {   // RDM_OID_PAREN_CTL_PROF
 	char ServicePolicy[12];
 	uint32_t Type;
 	char MACAddressList[129];
+	char IPAddressList[129];
 	char ScheduleRuleList[65];
 	char URLFilter[581];
 	char NetworkServiceList[1025];
@@ -5273,6 +5332,10 @@ typedef struct rdm_WifiQsteer_s {   // RDM_OID_WIFI_QSTEER
 	uint32_t WPS_Mode;
 } rdm_WifiQsteer_t;
 
+typedef struct rdm_ZyHostNameReplace_s {   // RDM_OID_ZY_HOST_NAME_REPLACE 
+	bool Enable;
+} rdm_ZyHostNameReplace_t;
+
 typedef struct rdm_PptpCfg_s {   // RDM_OID_PPTP_CFG 
 	bool pptpEnable;
 	char pptpName[65];
@@ -5302,6 +5365,10 @@ typedef struct rdm_LanDev_s {   // RDM_OID_LAN_DEV
 	char IpInterface[257];
 } rdm_LanDev_t;
 
+typedef struct rdm_EasyMesh_s {   // RDM_OID_EASY_MESH 
+	bool Enable;
+} rdm_EasyMesh_t;
+
 typedef struct rdm_ZyIgmp_s {   // RDM_OID_ZY_IGMP 
 	bool Enable;
 	uint32_t IgmpVersion;
@@ -5317,7 +5384,7 @@ typedef struct rdm_ZyIgmp_s {   // RDM_OID_ZY_IGMP
 	uint32_t JoinImmediate;
 	uint32_t BridgeAdmissionFilter;
 	uint32_t SnoopingEnable;
-	char Interface[321];
+	char Interface[513];
 	char ifName[321];
 	char Status[19];
 	char SnoopingBridgeIfName[101];
@@ -5351,7 +5418,7 @@ typedef struct rdm_ZyMld_s {   // RDM_OID_ZY_MLD
 	uint32_t MaxMembers;
 	uint32_t FastLeave;
 	uint32_t SnoopingEnable;
-	char Interface[321];
+	char Interface[513];
 	char ifName[321];
 	char Status[19];
 	char SnoopingBridgeIfName[101];
@@ -5396,11 +5463,15 @@ typedef struct rdm_ZyLogCfgGpAccount_s {   // RDM_OID_ZY_LOG_CFG_GP_ACCOUNT
 	bool AutoShowQuickStart;
 	bool GetConfigByFtp;
 	char Privilege[65];
+	char Stored[65];
+	char Salt[65];
+	char RoleList[33];
 	char RemoteAccessPrivilege[65];
 	char OldDefaultPassword[257];
 	char CardOrder[513];
 	char ThemeColor[17];
 	char HiddenPage[2049];
+	char SshKeyBaseAuthPublicKey[4097];
 } rdm_ZyLogCfgGpAccount_t;
 
 typedef struct rdm_ZyMacFilter_s {   // RDM_OID_ZY_MAC_FILTER 
@@ -5418,6 +5489,7 @@ typedef struct rdm_ZyMacFilterWhiteList_s {   // RDM_OID_ZY_MAC_FILTER_WHITE_LIS
 typedef struct rdm_WlanSchedulerAccess_s {   // RDM_OID_WLAN_SCHEDULER_ACCESS 
 	bool Enable;
 	bool AutoSwitchWiFiRadio;
+	bool MasterShip;
 } rdm_WlanSchedulerAccess_t;
 
 typedef struct rdm_VcAutoHunt_s {   // RDM_OID_VC_AUTO_HUNT 
@@ -5475,6 +5547,7 @@ typedef struct rdm_RemoSrv_s {   // RDM_OID_REMO_SRV
 	uint32_t LifeTime;
 	char BoundInterfaceList[129];
 	bool TrustAll;
+	bool DisableSshPasswordLogin;
 } rdm_RemoSrv_t;
 
 typedef struct rdm_RemoSrvTrustDomain_s {   // RDM_OID_REMO_SRV_TRUST_DOMAIN 
@@ -5540,6 +5613,7 @@ typedef struct rdm_SystemInfo_s {   // RDM_OID_SYSTEM_INFO
 	char Location[51];
 	bool CBT_AccountReset;
 	char OnlineGuide[129];
+	char X_ZYXEL_LoginBanner[513];
 } rdm_SystemInfo_t;
 
 typedef struct rdm_GponInfo_s {   // RDM_OID_GPON_INFO 
@@ -5614,7 +5688,28 @@ typedef struct rdm_TFTPSrvName_s {   // RDM_OID_T_F_T_P_SRV_NAME
 
 typedef struct rdm_Tr064_s {   // RDM_OID_TR064 
 	bool Enable;
+	uint32_t Issue;
+	char DataModels[33];
+	char HttpProtocols[33];
+	uint32_t HttpDescriptPort;
+	uint32_t HttpsDescriptPort;
 } rdm_Tr064_t;
+
+typedef struct rdm_Acl_s {   // RDM_OID_ACL 
+} rdm_Acl_t;
+
+typedef struct rdm_ControlPoint_s {   // RDM_OID_CONTROL_POINT 
+	char Name[33];
+	char Alias[129];
+	char ID[65];
+	char RoleList[33];
+} rdm_ControlPoint_t;
+
+typedef struct rdm_Actions_s {   // RDM_OID_ACTIONS 
+	char Name[33];
+	char RoleList[33];
+	char RestrictedRoleList[33];
+} rdm_Actions_t;
 
 typedef struct rdm_ZyWWANBackup_s {   // RDM_OID_ZY_W_W_A_N_BACKUP 
 	bool Enable;
@@ -5626,6 +5721,8 @@ typedef struct rdm_ZyWWANBackup_s {   // RDM_OID_ZY_W_W_A_N_BACKUP
 	char DeviceNumber[9];
 	char VID[9];
 	char PID[9];
+	char StartTime[33];
+	char FinishTime[33];
 	char Manufacturer[129];
 	char DialNumber[33];
 	char APN[101];
@@ -5681,11 +5778,13 @@ typedef struct rdm_ZyWWANStat_s {   // RDM_OID_ZY_W_W_A_N_STAT
 	char Model[33];
 	char FWVersion[33];
 	char SIMIMSI[33];
+	char Technology[33];
 } rdm_ZyWWANStat_t;
 
 typedef struct rdm_ZySamba_s {   // RDM_OID_ZY_SAMBA 
 	bool Enable;
 	char PidFileName[257];
+	uint32_t MaxProcesses;
 } rdm_ZySamba_t;
 
 typedef struct rdm_ZySambaDir_s {   // RDM_OID_ZY_SAMBA_DIR 
@@ -5728,14 +5827,18 @@ typedef struct rdm_InputCheckList_s {   // RDM_OID_INPUT_CHECK_LIST
 } rdm_InputCheckList_t;
 
 typedef struct rdm_FeatureFlag_s {   // RDM_OID_FEATURE_FLAG 
+	uint32_t Flag;
 	char Customer[33];
 	uint32_t WebRedirect;
 	uint32_t DisableWifiHWButton;
+	bool checkDuplicateVlan;
+	bool DownloadScriptTR69;
 	char WANPriority[17];
 	uint32_t SfpDelayTimes;
 	uint32_t SipDelayTimes;
 	bool AdminRandomPassword;
 	uint32_t AdminRandomPasswordMode;
+	bool FactoryResetOnUpgrade;
 } rdm_FeatureFlag_t;
 
 typedef struct rdm_ZyOption125_s {   // RDM_OID_ZY_OPTION125 
@@ -5952,6 +6055,7 @@ typedef struct rdm_OntGeneric_s {   // RDM_OID_ONT_GENERIC
 typedef struct rdm_ZyOneConnect_s {   // RDM_OID_ZY_ONE_CONNECT 
 	bool Enable;
 	bool X_ZYXEL_AP_Approve_Flag;
+	char X_ZYXEL_APP_Customer[17];
 } rdm_ZyOneConnect_t;
 
 typedef struct rdm_OneConnectInternetAccessMasterSwitch_s {   // RDM_OID_ONE_CONNECT_INTERNET_ACCESS_MASTER_SWITCH 
@@ -5962,18 +6066,22 @@ typedef struct rdm_OneConnectInternetAccessMasterSwitch_s {   // RDM_OID_ONE_CON
 typedef struct rdm_OneConnectInternetAccessRule_s {   // RDM_OID_ONE_CONNECT_INTERNET_ACCESS_RULE 
 	bool Enable;
 	char Name[65];
+	char NetAccess[9];
 	char BlockMAC[18];
 } rdm_OneConnectInternetAccessRule_t;
 
 typedef struct rdm_OneConnectPCGeneral_s {   // RDM_OID_ONE_CONNECT_P_C_GENERAL 
 	bool Enable;
+	bool PCMode;
 	int Count;
 } rdm_OneConnectPCGeneral_t;
 
 typedef struct rdm_OneConnectPCRule_s {   // RDM_OID_ONE_CONNECT_P_C_RULE 
 	bool Enable;
 	char Name[65];
+	char Mode[9];
 	char BlockMAC[18];
+	char BlockIP[18];
 	uint32_t StartHour;
 	uint32_t StartMin;
 	uint32_t StopHour;
@@ -6047,5 +6155,49 @@ typedef struct rdm_OiWizard_s {   // RDM_OID_OI_WIZARD
 	uint32_t OiWifiEnable;
 	int OiWifiVLANID;
 } rdm_OiWizard_t;
+
+typedef struct rdm_ZyDataUsage_s {   // RDM_OID_ZY_DATA_USAGE 
+	char DataUsageUpdate[17];
+} rdm_ZyDataUsage_t;
+
+typedef struct rdm_ZyDataUsageLan_s {   // RDM_OID_ZY_DATA_USAGE_LAN 
+	char Timestamp[65];
+	char Upload_Mbps[17];
+	char Download_Mbps[17];
+} rdm_ZyDataUsageLan_t;
+
+typedef struct rdm_ZyDataUsageWan_s {   // RDM_OID_ZY_DATA_USAGE_WAN 
+	char Timestamp[65];
+	char Upload_Mbps[17];
+	char Download_Mbps[17];
+} rdm_ZyDataUsageWan_t;
+
+typedef struct rdm_Iperf_s {   // RDM_OID_IPERF 
+	bool Enable;
+	char Status[33];
+	char Protocol[257];
+	uint32_t Port;
+} rdm_Iperf_t;
+
+typedef struct rdm_ZlogConfig_s {   // RDM_OID_ZLOG_CONFIG 
+	bool Enable;
+	char Status[21];
+} rdm_ZlogConfig_t;
+
+typedef struct rdm_ZlogCategory_s {   // RDM_OID_ZLOG_CATEGORY 
+	bool Enable;
+	uint32_t Severity;
+	bool Console;
+	bool UsbFile;
+	char Filename[129];
+	bool SyslogServer;
+	char SyslogServerIp[129];
+	uint32_t SyslogServerPort;
+	bool Userdefinefile;
+	char FullPath[129];
+	char Name[31];
+	char Describe[51];
+	char Filter[256];
+} rdm_ZlogCategory_t;
 
 #endif // _ZCFG_RDM_OBJ_H

@@ -2,6 +2,11 @@ GCC_VARIANT:=final
 
 include ../common.mk
 
+ifeq ("$(CONFIG_GCC_VERSION_5)","y")
+  GCC_CONFIGURE += \
+	--disable-libsanitizer
+endif
+
 GCC_CONFIGURE += \
 	--with-headers=$(TOOLCHAIN_DIR)/include \
 	--enable-languages=$(TARGET_LANGUAGES) \
@@ -9,12 +14,18 @@ GCC_CONFIGURE += \
 	--enable-threads \
 	--with-slibdir=$(TOOLCHAIN_DIR)/lib
 
-ifneq ($(CONFIG_GCC_VERSION_4_5)$(CONFIG_GCC_VERSION_4_6),)
+ifneq ($(CONFIG_GCC_VERSION_4_5)$(CONFIG_GCC_VERSION_4_6)$(CONFIG_GCC_VERSION_5),)
  ifneq ("_$(CONFIG_arm)_$(CONFIG_TARGET_brcm963xx)_$(CONFIG_UCLIBC_VERSION_0_9_32)_","_y_y_y_")
+ ifneq ("_$(CONFIG_mips)_$(CONFIG_TARGET_en75xx)_$(CONFIG_TC_SDK_7_3_245_300)_","_y_y_y_")
   GCC_CONFIGURE += \
 	--enable-lto \
 	--with-libelf=$(TOPDIR)/staging_dir/host
  endif
+ endif
+endif
+
+ifdef CONFIG_USE_MUSL
+  GCC_MAKE += gcc_cv_libc_provides_ssp=yes
 endif
 
 ifneq ($(CONFIG_SJLJ_EXCEPTIONS),)
@@ -71,6 +82,7 @@ define Host/Install
 		done; \
 	);
 	$(if $(CONFIG_EXTRA_TARGET_ARCH),$(call SetupExtraArch))
+	$(RM) $(TOOLCHAIN_DIR)/lib/libiberty.a
 	$(SCRIPT_DIR)/patch-specs.sh "$(TOOLCHAIN_DIR)"
 endef
 

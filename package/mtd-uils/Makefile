@@ -1,74 +1,56 @@
 #
-# Copyright (C) 2006-2012 OpenWrt.org
+# Copyright (C) 2009-2014 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
+
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mtd-utils
-PKG_VERSION:=1.4.5
-
+PKG_VERSION:=2.0.2
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_CAT:=zcat
+
 PKG_SOURCE_URL:=@ZyXEL_SITE/opensource/tools
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-#PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+
+PKG_INSTALL:=1
+PKG_FIXUP:=autoreconf
+
+PKG_FLAGS:=nonshared
+
+#PKG_BUILD_DEPENDS:=util-linux lzo zlib
+#Start, ZyXEL, use zlib, not use lzo
+PKG_BUILD_DEPENDS:=util-linux zlib
+#End, ZyXEL
+
+PKG_LICENSE:=GPLv2
+PKG_LICENSE_FILES:=
 
 include $(INCLUDE_DIR)/package.mk
-FILES:= \
-	doc_loadbios \
-	docfdisk \
-	flash_erase \
-	flash_eraseall \
-	flash_info \
-	flash_lock \
-	flash_otp_dump \
-	flash_otp_info \
-	flash_unlock \
-	flashcp \
-	ftl_check \
-	ftl_format \
-	jffs2dump \
-	mkfs.jffs2 \
-	mtd_debug \
-	nanddump \
-	nandtest \
-	nandwrite \
-	nftl_format \
-	nftldump \
-	recv_image \
-	rfddump \
-	rfdformat \
-	serve_image \
-	sumtool
+FILES:=
 
 ifneq ($(CONFIG_LINUX_2_4),y)
 FILES += \
-	bin2nand \
-	mkbootenv \
-	mkfs.ubifs \
-	mkpfi \
-	nand2bin \
-	pddcustomize \
-	pfi2bin \
-	pfiflash \
 	ubiattach \
 	ubicrc32 \
-	ubicrc32.pl \
+	ubiblock \
 	ubidetach \
 	ubiformat \
-	ubigen \
-	ubimirror \
 	ubimkvol \
 	ubinfo \
 	ubinize \
 	ubirename \
 	ubirmvol \
+	ubirsvol \
 	ubiupdatevol \
-	unubi
+	flash_erase \
+	nanddump \
+	nandwrite \
+	nandtest \
+	mtdinfo
 endif
-
 
 define PartGen
 define Package/mtd-utils-$(subst _,-,$(1))
@@ -97,13 +79,7 @@ define Package/mtd-utils/install
 endef
 
 $(foreach file,$(FILES),$(eval $(call PartGen,$(file))))
-
-#CFLAGS+= -L$(PKG_BUILD_DIR)/lib  -DNO_NATIVE_SUPPORT
-#-L$(STAGING_DIR)/usr/lib
-#-I$(PKG_BUILD_DIR)/include/linux
-#-lext2fs -lblkid
-#	CFLAGS+="$(CFLAGS)" \
-
+MAKE_FLAGS += LDLIBS+="$(LIBGCC_S)"
 MAKE_FLAGS += \
 	DESTDIR="$(PKG_INSTALL_DIR)" \
 	BUILDDIR="$(PKG_BUILD_DIR)" \
@@ -111,13 +87,13 @@ MAKE_FLAGS += \
 	CFLAGS+="$(CFLAGS)" \
 	WITHOUT_XATTR=1 WITHOUT_LZO=1 WITHOUT_XZ=1
 
-ifeq ($(CONFIG_LINUX_2_4),y)
-MAKE_FLAGS += \
-	SUBDIRS=""
-endif
+CONFIGURE_ARGS += \
+	--disable-tests \
+	--without-xattr \
+	--without-lzo
 
-
-#MTD_MAKEOPTS = $(MAKE_FLAGS)
+TARGET_CFLAGS += -ffunction-sections -fdata-sections
+TARGET_LDFLAGS += -Wl,--gc-sections
 
 define PartInstall
 define Package/mtd-utils-$(subst _,-,$(1))/install
@@ -129,7 +105,6 @@ define Package/mtd-utils-$(subst _,-,$(1))/install
 		$$(1)/usr/sbin/
 endef
 endef
-
 
 define Build/Prepare
 	$(PKG_UNPACK)

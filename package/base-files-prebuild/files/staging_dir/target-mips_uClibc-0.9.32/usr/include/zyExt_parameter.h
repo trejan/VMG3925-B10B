@@ -67,6 +67,7 @@ tr98Parameter_t para_RemoSrv[] = {
 	{ "RestartDeamon", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "BoundInterfaceList", PARAMETER_ATTR_WRITE, 129, json_type_string},
 	{ "TrustAll", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "DisableSshPasswordLogin", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ NULL, 0, 0}
 };
 
@@ -137,6 +138,7 @@ tr98Parameter_t para_LogCfgGpAccount[] = {
 	{ "AutoGenPwdBySn", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "GetConfigByFtp", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "Privilege", PARAMETER_ATTR_WRITE, 65, json_type_string},
+	{ "SshKeyBaseAuthPublicKey", PARAMETER_ATTR_WRITE | PARAMETER_ATTR_PASSWORD, 4097, json_type_string},
 	{ NULL, 0, 0}
 };
 #endif
@@ -423,9 +425,13 @@ tr98Parameter_t para_Landing_Page[] = {
 
 tr98Parameter_t para_Feature_Flag[] = {
 	{ "Customer", PARAMETER_ATTR_WRITE, 33, json_type_string},
+	{ "checkDuplicateVlan", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "WANPriority", PARAMETER_ATTR_WRITE, 16, json_type_string},
 	{ "SfpDelayTimes", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	{ "SipDelayTimes", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
+	// altibox request
+	{ "DownloadScriptTR69", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "FactoryResetOnUpgrade", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ NULL, 0, 0, 0}
 };
 
@@ -441,6 +447,13 @@ tr98Parameter_t para_GUI_Customization[] = {
 	{ "HideSkipPassword", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ NULL, 0, 0, 0}
 };
+
+#ifdef ZYXEL_EASYMESH
+tr98Parameter_t para_EasyMesh[] = {
+	{ "Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ NULL, 0, 0, 0}
+};
+#endif //#ifdef ZYXEL_ONESSID
 
 #ifdef BUILD_SONIQ
 tr98Parameter_t para_Qsteer[] = {
@@ -458,3 +471,24 @@ tr98Parameter_t para_OneSsid[] = {
 	{ NULL, 0, 0, 0}
 };
 #endif //#ifdef ZYXEL_ONESSID
+
+#ifdef ZYXEL_TR69_DATA_USAGE
+tr98Parameter_t para_DataUsage[] = {
+	{ "DataUsageUpdate", PARAMETER_ATTR_WRITE, 16, json_type_string},
+	{ NULL, 0, 0, 0}
+};
+
+tr98Parameter_t para_DataUsageLan[] = {
+	{ "Timestamp", PARAMETER_ATTR_WRITE, 64, json_type_string},
+	{ "Upload_Mbps", PARAMETER_ATTR_WRITE, 16, json_type_string},
+	{ "Download_Mbps", PARAMETER_ATTR_WRITE, 16, json_type_string},
+	{ NULL, 0, 0, 0}
+};
+
+tr98Parameter_t para_DataUsageWan[] = {
+	{ "Timestamp", PARAMETER_ATTR_WRITE, 64, json_type_string},
+	{ "Upload_Mbps", PARAMETER_ATTR_WRITE, 16, json_type_string},
+	{ "Download_Mbps", PARAMETER_ATTR_WRITE, 16, json_type_string},
+	{ NULL, 0, 0, 0}
+};
+#endif

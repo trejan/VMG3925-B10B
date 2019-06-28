@@ -32,7 +32,7 @@ endef
 
 define Package/atftpd
   $(call Package/atftp/Default)
-  DEPENDS:=+libpcre +libpthread
+  DEPENDS:=+libpthread
   TITLE+= server
 endef
 

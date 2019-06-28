@@ -1,0 +1,46 @@
+Index: linux-3.4.11/include/linux/blog.h
+===================================================================
+--- linux-3.4.11.orig/include/linux/blog.h	2018-12-25 15:21:00.220395139 +0800
++++ linux-3.4.11/include/linux/blog.h	2018-12-25 17:23:59.555947200 +0800
+@@ -1091,6 +1091,9 @@
+ #define TX_IP4in6(b)    (((b)->tx.info.hdrs & HDRS_IPinIP)==HDRS_IP4in6)
+ #define TX_IP6in4(b)    (((b)->tx.info.hdrs & HDRS_IPinIP)==HDRS_IP6in4)
+ 
++#define RX_IPinIP(b)    (((b)->rx.info.hdrs & HDRS_IPinIP)==HDRS_IPinIP)
++#define TX_IPinIP(b)    (((b)->tx.info.hdrs & HDRS_IPinIP)==HDRS_IPinIP)
++
+ #define RX_IPV4(b)      ((b)->rx.info.bmap.PLD_IPv4)
+ #define TX_IPV4(b)      ((b)->tx.info.bmap.PLD_IPv4)
+ #define RX_IPV6(b)      ((b)->rx.info.bmap.PLD_IPv6)
+Index: linux-3.4.11/net/core/blog.c
+===================================================================
+--- linux-3.4.11.orig/net/core/blog.c	2018-12-25 15:21:00.220395139 +0800
++++ linux-3.4.11/net/core/blog.c	2018-12-25 17:27:06.790947200 +0800
+@@ -1737,6 +1737,15 @@
+      *          return PKT_NORM;
+      *  
+      */
++
++     /* PPP session ID be changed in the packet ISAKMP UDP port 500
++      * filter UDP port range to avoid those VPN packets into the hardware accelerator
++      */
++    if ( ! RX_IPinIP(blog_p) && RX_IPV4(blog_p) && (blog_p->key.protocol == IPPROTO_UDP) ){
++        if(blog_p->rx.tuple.port.dest == 500 || blog_p->rx.tuple.port.source == 500){
++            return PKT_NORM;
++        }
++    }
+     return PKT_BLOG;    /* continue in stack with logging */
+ }
+ 
+@@ -1908,9 +1917,9 @@
+     if ( action == PKT_BLOG )
+     {
+         fkb_p->blog_p->rx.dev_p = (void *)dev_p;           /* Log device info */
+-#if defined(CC_BLOG_SUPPORT_USER_FILTER)
++//#if defined(CC_BLOG_SUPPORT_USER_FILTER)
+         action = blog_filter(fkb_p->blog_p);
+-#endif
++//#endif
+     }
+ 
+     if ( unlikely(action == PKT_NORM) )

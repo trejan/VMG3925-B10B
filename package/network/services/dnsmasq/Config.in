@@ -1,0 +1,6 @@
+
+config dnsmasq_releaseno
+	string
+	prompt "specify dnsmasq release no" if PACKAGE_dnsmasq
+	default "2.67"
+

@@ -62,6 +62,13 @@ endef
 define CheckDependencies
 endef
 
+ifeq ("$(strip ${ZCFG_PLATFORM})","BROADCOM")
+ifeq ("$(strip ${BRCM_SDK_VERSION})","502L04")
+TARGET_CFLAGS += -DSUPPORT_502L04
+endif
+endif
+
+
 define Build/Configure
 	$(call Build/Configure/Default, \
 		--disable-dependency-tracking \

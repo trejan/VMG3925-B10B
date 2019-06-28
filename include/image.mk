@@ -63,6 +63,11 @@ endif
 
 JFFS2_BLOCKSIZE ?= 64k 128k
 
+ifneq ($(CONFIG_TARGET_ROOTFS_UBIFS),)
+# ADD UBIFS_OPTS arguments
+  UBIFS_OPTS     :=  -x zlib -F -v
+endif
+
 define add_jffs2_mark
 	echo -ne '\xde\xad\xc0\xde' >> $(1)
 endef

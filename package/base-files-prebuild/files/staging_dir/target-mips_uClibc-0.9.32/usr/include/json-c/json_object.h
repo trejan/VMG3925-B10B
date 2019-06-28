@@ -166,6 +166,8 @@ extern int json_object_is_type(struct json_object *obj, enum json_type type);
      json_type_array,
      json_type_string,
  */
+extern void json_object_set_type(struct json_object *obj, enum json_type type);
+
 extern enum json_type json_object_get_type(struct json_object *obj);
 
 

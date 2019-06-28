@@ -19,7 +19,7 @@ else
   REVISION:=$(shell $(TOPDIR)/scripts/getver.sh)
 endif
 
-HOSTCC ?= gcc
+HOSTCC ?= $(CC)
 OPENWRTVERSION:=$(RELEASE)$(if $(REVISION), ($(REVISION)))
 export RELEASE
 export REVISION
@@ -179,6 +179,47 @@ prereq:: prepare-tmpinfo .config
 
 help:
 	cat README
+
+production:
+	@echo "***** Build SMT file image *****"
+	@if [ `grep CONFIG_TARGET_BOARD .config | awk -F"=" '{print $$2}' | sed "s/\"//g"` == "en75xx" ]; then \
+		if ! [ -e $(TOPDIR)/scripts/private/econet/genNANDimg/NANDimg_gen ]; then \
+			make -C scripts/private/econet/genNANDimg; \
+		fi; \
+		$(TOPDIR)/scripts/private/econet/genNANDimg/genNANDimg.sh $P; \
+	fi
+
+production_clean:
+	@echo "***** clean generate SMT utility *****"
+	@if [ `grep CONFIG_TARGET_BOARD .config | awk -F"=" '{print $$2}' | sed "s/\"//g"` == "en75xx" ]; then \
+		make -C scripts/private/econet/genNANDimg clean; \
+	fi
+
+minifw: minifw_prebuild minifw_build
+	@echo "******* To build mini FW finish ************"
+
+minifw_clean:
+	@echo "******* To do minifw_clean ************"
+	./buildramfs.sh $P clean
+
+minifw_prebuild:
+	@echo "******* To do minifw_prebuild ************"
+	# make P=$PROFILE world V=s
+	@if [ `grep CONFIG_TARGET_BOARD .config | awk -F"=" '{print $$2}' | sed "s/\"//g"` == "en75xx" ]; then \
+		$(TOPDIR)/scripts/private/econet/miniboot/buildramfs.sh $P prebuild; \
+	else \
+		echo "Unknown platform !!"; \
+		exit 1; \
+	fi
+
+minifw_build:
+	@echo "******* To do minifw_build ************"
+	@if [ `grep CONFIG_TARGET_BOARD .config | awk -F"=" '{print $$2}' | sed "s/\"//g"` == "en75xx" ]; then \
+		$(TOPDIR)/scripts/private/econet/miniboot/buildramfs.sh $P build; \
+	else \
+		echo "Unknown platform !!"; \
+		exit 1; \
+	fi
 
 docs docs/compile: FORCE
 	@$(_SINGLE)$(SUBMAKE) -C docs compile

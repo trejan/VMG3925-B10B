@@ -11,4 +11,7 @@
 #define WWAN_PARTITION_NAME		"wwan"
 #define IMAGE_PARTITION_NAME	"image"
 #define TCLINUX_PARTITION_NAME 	"tclinux"
+#define MISC_PARTITION_NAME 	"misc"  //for Econet
+#define MISC1_PARTITION_NAME 	"misc1" //for Broadcom
+
 #endif

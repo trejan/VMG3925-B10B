@@ -31,8 +31,8 @@ unsigned int zyUtilMtdDevGetSize(char *devName);
 zcfgRet_t zyUtilWriteBufToFlash(char *devName, void *buf, uint32_t buf_size);
 int zyUtilReadBufFromFlash(char *devName, void *buf, uint32_t buf_size);
 #if 1 //#ifdef ZYXEL_WWAN
-int zyUtilMtdErase(const char *mtd); 
-int zyUtilUpdateWWANPackage(void); 
+int zyUtilMtdErase(const char *mtd);
+int zyUtilUpdateWWANPackage(void);
 #define ZY_WWANPACKAGE_MAXSIZE	131072  // (1024*128) bytes
 #define WWANPACKAGE_HEADER_LEN	32  // theoretically speaking 31 is match
 #define FW_WWANPACKAGE_FILE	"/etc/fw_wwanpackage"
@@ -51,6 +51,9 @@ bool zyUtilFileExists(const char * filename);
 
 
 int zyUtilQueryUtilityEid(const char *name);
+
+char *zyUtilStrCsvString(const char *, const char *);
+char *zyUtilCsvStringStripTerm(const char *, const char *);
 
 zcfgRet_t zyUtilHandleRecvdMsgDebugCfg(const char *msg);
 unsigned int zcfgMsgDebugCfgLevel(void);
@@ -115,7 +118,7 @@ typedef struct
 	size_t len_f6;
 }iptCfg_t;
 
-void zyUtilInitIptablesConfig(iptCfg_t **ipt);
+bool zyUtilInitIptablesConfig(iptCfg_t **ipt);
 void zyUtilRestoreIptablesConfig(iptCfg_t *ipt, const char *file, const char *func, int line);
 //void zyUtilIptablesLockInit(void);
 //void zyUtilIptablesLock(void);
@@ -124,6 +127,11 @@ void zyUtilRestoreIptablesConfig(iptCfg_t *ipt, const char *file, const char *fu
 int zyUtilAuthUserAccount(const char *username, const char *password);
 char *zyGetAccountInfoFromFile(char *username, char *filePath);
 void zyRemoveAccountInfoFromFile(char *username, char *filePath);
+
+#ifdef ABOG_CUSTOMIZATION
+void zyTouchFile(int pid, char *ip);
+void zyRemoveFile(int pid);
+#endif
 
 /*!
  *  Check serial number format.

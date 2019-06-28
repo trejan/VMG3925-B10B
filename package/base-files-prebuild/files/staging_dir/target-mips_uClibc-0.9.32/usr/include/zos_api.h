@@ -4,8 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "zlog_api.h"
+
+//==============================================================================
+#define ZOS_MAX_PROCESS_TIME       2000 // milli-second
 
 //==============================================================================
 /*
@@ -16,10 +20,10 @@
         void *_p_ = NULL; \
         do \
         { \
-            _p_ = calloc(1, _size_); \
+            _p_ = calloc(1, (size_t)(_size_)); \
             if (_p_ == NULL) \
             { \
-                ZLOG_ERROR("Fail to allocate memory, size = %d", _size_); \
+                ZLOG_ERROR("fail to calloc memory, size = %zu", (size_t)(_size_)); \
             } \
         } \
         while (0); \
@@ -30,13 +34,14 @@
     {\
         do \
         { \
-            if (_p_ == NULL) \
+            if ((_p_) == NULL) \
             { \
-                ZLOG_ERROR("Free NULL pointer"); \
+                ZLOG_DEBUG("Free NULL pointer"); \
             } \
             else \
             { \
-                free((void *)_p_); \
+                free((void *)(_p_)); \
+                (_p_) = NULL; \
             } \
         } \
         while (0); \
@@ -105,6 +110,21 @@ int zos_snprintf(
     const char  *format,
     ...
 );
+
+/*!
+ *  get my pid which is shown in top command.
+ *
+ *  @return uint32_t      my pid
+ */
+uint32_t zos_pid_get();
+
+/*!
+ *  get monotonic time in milli-second.
+ *
+ *  @return uint32_t    milli-second
+ *                      0: failed
+ */
+uint32_t zos_mtime_get();
 
 //==============================================================================
 #endif /* _ZOS_API_H */

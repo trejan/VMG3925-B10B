@@ -86,6 +86,22 @@ extern "C" {
 #define CG_UPNP_STATUS_SESSION_ID_EXPIRE 899
 #endif
 
+// DeviceProtection
+#define CG_UPNP_CODE_ACTION_NOT_AUTH	606
+#define CG_UPNP_CODE_AUTH_FAIL	701
+
+
+// TR-064 U2 CMS2
+#define CG_UPNP_CODE_INVALID_XML_ARGUMENT 702
+#define CG_UPNP_CODE_NO_SUCH_NAME 703
+#define CG_UPNP_CODE_INVALID_VALUE_TYPE 704
+#define CG_UPNP_CODE_INVALID_VALUE 705
+#define CG_UPNP_CODE_READ_ONLY_VIOLATION 706
+#define CG_UPNP_CODE_MULTIPLE_SET 707
+#define CG_UPNP_CODE_RESOURCE_TEMP_UNAVAILABLE 708
+
+
+
 /****************************************
  * Data Type
  ****************************************/
@@ -164,6 +180,12 @@ void cg_upnp_status_delete(CgUpnpStatus *upnpStat);
  * \return Status description
  */
 char *cg_upnp_status_code2string(int code);
+
+#ifdef ZYXEL_CMS2_ENHANCEMENT
+char *cg_upnp_cms2_status_code2string(int code);
+#else
+#define cg_upnp_cms2_status_code2string cg_upnp_status_code2string
+#endif
 
 #ifdef  __cplusplus
 

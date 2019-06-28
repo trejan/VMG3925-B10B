@@ -27,7 +27,7 @@ SECTION:=net
 CATEGORY:=Zyxel Packages
 TITLE:= ZyXEL Configuration Management Data Access Library
 DESCRIPTION:=
-DEPENDS:=+libzcfg_fe_rdm_string +libzcfg_fe_rdm_struct +libzcfg_fe_schema +libzyutil
+DEPENDS:=+libzcfg_fe_rdm_string +libzcfg_fe_rdm_struct +libzcfg_fe_schema +libzyutil +libzlog
 endef
 
 #For the compile rules you need to specify the cross compiler which needs to be used :
@@ -60,6 +60,8 @@ ifeq ($(CONFIG_HAWAIIAN_TELCOM),y)
 export HAWAIIAN_TELCOM=y
 endif
 
+export CONFIG_ZYXEL_TR69_SUPPLEMENTAL_ACS
+
 # WAN MAC for Ethernet WAN
 export CONFIG_ZYXEL_WAN_MAC
 export CONFIG_ZyXEL_WEB_GUI_SINGLE_IGMP_MLD
@@ -70,6 +72,7 @@ export CONFIG_ZYXEL_WEB_WIRELESS_NEW_VERSION_ONE
 export CONFIG_ZYXEL_WEB_NETWORK_MAP_NEW_STYLE
 export CONFIG_ZyXEL_WEB_GUI_SHOW_PON
 export CONFIG_ISKON_CUSTOMIZATION
+export CONFIG_ABOG_CUSTOMIZATION
 export CONFIG_ZYXEL_AP_STEERING
 export CONFIG_WIND_ITALY_CUSTOMIZATION
 export CONFIG_ZCFG_VMG8825_B50B_WIND
@@ -78,6 +81,8 @@ export CONFIG_TARGET_en75xx
 export CONFIG_ZYXEL_WEB_GUI_ECONET_QoS_STYLE
 export CONFIG_ZYXEL_WEB_GUI_SHOW_QOS_CLS_TARGET_INTF
 export CONFIG_PACKAGE_webgui_vue
+export CONFIG_ZYXEL_GUIVUE_USB_INFO_SHOW_SYSINFO
+
 #NAT log recorded feature
 export CONFIG_ZYXEL_PPP_AUTH_MENU_CHAP_PAP_CTL
 export CONFIG_ZYXEL_NAT_LOG
@@ -85,6 +90,8 @@ export CONFIG_ZYXEL_NAT_LOG
 export ECONET_PLATFORM
 
 export CONFIG_ZYXEL_ONESSID
+
+export CONFIG_ZYXEL_EASYMESH
 
 #SONiQ Steering
 export CONFIG_ZYXEL_SONIQ
@@ -111,6 +118,12 @@ export CONFIG_SAME_FW_FOR_TWO_BOARD
 export CONFIG_ZYXEL_USA_PRODUCT
 export CONFIG_CODETEL_CUSTOMIZATION
 
+#Support Feature Bits
+export CONFIG_ZYXEL_FEATURE_BITS
+
+#zlog
+export CONFIG_ZLOG_USE_DEBUG
+
 define Package/libzcfg_fe_dal/compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
@@ -124,9 +137,11 @@ define Build/InstallDev
 endef
 
 define Package/libzcfg_fe_dal/install
-	$(INSTALL_DIR) $(1)/lib/public
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libzcfg_fe_dal.so $(1)/lib/public
-	ln -s /lib/public/libzcfg_fe_dal.so $(1)/lib/libzcfg_fe_dal.so
+	$(INSTALL_DIR) $(1)/lib
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME).so $(1)/lib
+#	$(INSTALL_DIR) $(1)/lib/public
+#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libzcfg_fe_dal.so $(1)/lib/public
+#	ln -s /lib/public/libzcfg_fe_dal.so $(1)/lib/libzcfg_fe_dal.so
 endef
 
 $(eval $(call BuildPackage,libzcfg_fe_dal))

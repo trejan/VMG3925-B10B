@@ -139,6 +139,7 @@ extern "C" {
 #define CG_HTTP_CONTENT_RANGE "Content-Range"
 	#define CG_HTTP_CONTENT_RANGE_BYTES "bytes" 
 #define CG_HTTP_LOCATION "Location"
+#define CG_HTTP_SECURELOCATION "SECURELOCATION.UPNP.ORG"
 #define CG_HTTP_SERVER "Server"
 #define CG_HTTP_RANGE "Range"
 #define CG_HTTP_TRANSFER_ENCODING "Transfer-Encoding"
@@ -333,7 +334,7 @@ typedef struct _CgHttpRequest {
 	CgHttpForm form;
 	char loginUserName[32];
 	char loginLevel[16];
-	int sessionID;
+	char sessionID[32+1];
 	BOOL needChgPasswd;
 	BOOL showSkipBtn; /* show skip button in change password page if password is automatically generated */
 	BOOL needQuickStart;
@@ -558,13 +559,13 @@ BOOL cg_http_request_postlastchunk(CgHttpRequest *httpReq);
 #define cg_http_request_getuserdata(httpReq) (httpReq->userData)
 
 #ifdef ZYXEL_PATCH
-#define cg_http_request_setcookiedata(httpRes, data) (httpRes->cookieData = (void *)data)
-#define cg_http_request_getcookiedata(httpRes) (httpRes->cookieData)
+#define cg_http_response_setcookiedata(httpRes, data) (httpRes->cookieData = (void *)data)
+#define cg_http_response_getcookiedata(httpRes) (httpRes->cookieData)
 #define cg_http_request_sethttpserver(httpReq, svr) (httpReq->httpServer = (void *)svr)
 #define cg_http_request_retrievehttpserver(httpReq) (httpReq->httpServer)
 #else
-#define cg_http_request_setcookiedata(httpRes, data) do{}while(0)
-#define cg_http_request_getcookiedata(httpRes) NULL
+#define cg_http_response_setcookiedata(httpRes, data) do{}while(0)
+#define cg_http_response_getcookiedata(httpRes) NULL
 #define cg_http_request_sethttpserver(httpReq, svr) { }
 #define cg_http_request_retrievehttpserver(httpReq) NULL
 #endif
@@ -755,7 +756,8 @@ void cg_http_serverlist_delete(CgHttpServerList *httpServerList);
 #define cg_http_serverlist_add(httpServerList, httpServer) cg_list_add((CgList *)httpServerList, (CgList *)httpServer)
 
 #ifdef ZYXEL_PATCH /*support ssl, ZyXEL 2013, charisse*/
-BOOL cg_http_serverlist_open(CgHttpServerList *httpServerList, int port, BOOL isSecure, void *ctxdata);
+//BOOL cg_http_serverlist_open(CgHttpServerList *httpServerList, int port, BOOL isSecure, void *ctxdata);
+BOOL cg_http_serverlist_open(CgHttpServerList *httpServerList, int port);
 #else
 BOOL cg_http_serverlist_open(CgHttpServerList *httpServerList, int port);
 #endif
@@ -764,6 +766,11 @@ BOOL cg_http_serverlist_start(CgHttpServerList *httpServerList);
 BOOL cg_http_serverlist_stop(CgHttpServerList *httpServerList);
 void cg_http_serverlist_setlistener(CgHttpServerList *httpServerList, CG_HTTP_LISTENER listener);
 void cg_http_serverlist_setuserdata(CgHttpServerList *httpServerList, void *value);
+
+#ifdef ZYXEL_PATCH
+#define cg_http_serverlist_setctxdata(httpServerList, ctx) (httpServerList->ctxdata = ctx)
+#define cg_http_serverlist_retrieve_ctx(httpServerList) (httpServerList->ctxdata)
+#endif
 
 /****************************************
 * Function (Date)
@@ -805,6 +812,7 @@ void cg_http_val_appendvalue(CgHttpVal *val, char *value, int len);
 char *cg_http_val_getvalue(CgHttpVal *val);
 void cg_http_parse_val(char *, CgHttpValList **);
 
+BOOL check_http_request_uri(CgHttpRequest *);
 void cg_http_request_parse_uri(CgHttpRequest *);
 /******************************************
 * List for CgHttpVal

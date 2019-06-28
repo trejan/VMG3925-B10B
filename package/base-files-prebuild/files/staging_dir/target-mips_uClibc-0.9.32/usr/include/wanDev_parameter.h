@@ -496,10 +496,12 @@ tr98Parameter_t para_DhcpClient[] = {
 	{ NULL, 0, 0, 0}
 };
 
+
 tr98Parameter_t para_SentDhcpOpt[] = {
 	{ "Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "Tag", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
-	{ "Value", PARAMETER_ATTR_WRITE, 256, json_type_string},
+	//{ "Value", PARAMETER_ATTR_WRITE, 256, json_type_string},
+	{ "Value", PARAMETER_ATTR_WRITE, 256+(256/2), json_type_base64},
 	{ NULL, 0, 0, 0}
 };
 
@@ -507,7 +509,8 @@ tr98Parameter_t para_ReqDhcpOpt[] = {
 	{ "Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "Order", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	{ "Tag", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
-	{ "Value", PARAMETER_ATTR_READONLY, 256, json_type_uint32},
+	//{ "Value", PARAMETER_ATTR_READONLY, 256, json_type_uint32},
+	{ "Value", PARAMETER_ATTR_READONLY, 256+(256/2), json_type_base64},
 	{ NULL, 0, 0, 0}
 };
 

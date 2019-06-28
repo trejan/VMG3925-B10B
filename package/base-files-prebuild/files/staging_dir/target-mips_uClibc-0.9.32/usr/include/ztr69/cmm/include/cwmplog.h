@@ -98,6 +98,9 @@ typedef enum
 #define TR069_DEBUG_FUNC_STR            "[FUNCT ]"
 
 #define TR069LOG_STR        			"ZTR69"
+#ifdef ZYXEL_TR69_SUPPLEMENTAL_ACS
+#define TR069SUPLOG_STR			"ZTR69_SUP"	//Supplemental ACS
+#endif
 
 #ifdef ZCFG_LOG_USE_DEBUGCFG
 #define debugLev2LogLev(debugLev) (debugLev << 8)

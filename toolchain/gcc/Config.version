@@ -15,19 +15,23 @@ config GCC_VERSION_4_6_2
 	bool
 
 config GCC_VERSION_4_6_3
+	default y if (!TOOLCHAINOPTS && !avr32 && !TARGET_ipq_ipq807x)
 	bool
 
 config GCC_VERSION_4_7_2
 	bool
 
 config GCC_VERSION_4_6_LINARO
-	default y if (!TOOLCHAINOPTS && !avr32)
 	bool
 
 config GCC_VERSION_4_7_LINARO
 	bool
 
 config GCC_VERSION_4_8_0
+	bool
+
+config GCC_VERSION_4_8_LINARO
+	default y if (!TOOLCHAINOPTS && !TARGET_octeon && TARGET_ipq_ipq807x)
 	bool
 
 config GCC_VERSION
@@ -42,6 +46,8 @@ config GCC_VERSION
 	default "4.6-linaro"    if GCC_VERSION_4_6_LINARO
 	default "4.7-linaro"    if GCC_VERSION_4_7_LINARO
 	default "4.8.0"	    if GCC_VERSION_4_8_0
+	default "4.8-linaro"    if GCC_VERSION_4_8_LINARO
+	default "5.3.0"	    if GCC_VERSION_5
 	default "4.6-linaro"
 
 config GCC_VERSION_4_3
@@ -62,5 +68,8 @@ config GCC_VERSION_4_7
 
 config GCC_VERSION_4_8
 	bool
-	default y	if GCC_VERSION_4_8_0
+	default y	if (GCC_VERSION_4_8_0 || GCC_VERSION_4_8_LINARO)
 
+config GCC_VERSION_5
+	default y if (!TOOLCHAINOPTS && !arc && !TARGET_ipq_ipq807x)
+	bool

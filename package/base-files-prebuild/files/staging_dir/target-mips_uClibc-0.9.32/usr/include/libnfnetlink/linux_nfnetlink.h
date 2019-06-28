@@ -1,6 +1,6 @@
 #ifndef _NFNETLINK_H
 #define _NFNETLINK_H
-#include <linux/types.h>
+#include <sys/types.h>
 #include <libnfnetlink/linux_nfnetlink_compat.h>
 
 enum nfnetlink_groups {

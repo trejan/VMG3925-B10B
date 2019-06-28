@@ -2,19 +2,16 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=igmpproxy
-PKG_VERSION:=0.1-beta2
-#PKG_RELEASE:=8
+PKG_VERSION:=0.2.1
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@ZyXEL_SITE/opensource/network/services
-#PKG_MD5SUM:=c56f41ec195bc1fe016369bf74efc5a1
-
+PATCH_DIR:=patches-$(PKG_VERSION)
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-# __ZYXEL__start,
-# Replace 'CONFIG_ECONETSDK_' for menuconfig only supports a single prompt problem.
 ifeq ("$(strip ${ZCFG_PLATFORM})","ECONET")
 PLATFORM_PREFIX=CONFIG_$(call qstrip, $(CONFIG_CUSTOM_SDK_PREFIX))_
 endif
@@ -23,7 +20,6 @@ $(foreach v, \
         $(shell grep "^$(PLATFORM_PREFIX)" $(TOPDIR)/.config), \
         $(eval $(shell echo $v|sed "s/$(PLATFORM_PREFIX)//"|cut -d'=' -f1)=$(shell echo $v|cut -d'=' -f2)))
 endif
-# __ZYXEL__end
 
 #PKG_FIXUP:=autoreconf
 PKG_LICENSE:=GPL-2.0+
@@ -42,9 +38,9 @@ define Package/igmpproxy/description
 	only IGMP signalling (Internet Group Management Protocol).
 endef
 
-#define Package/igmpproxy/conffiles
-#/etc/config/igmpproxy
-#endef
+define Package/igmpproxy/conffiles
+/etc/config/igmpproxy
+endef
 
 PACKAGE_CFLAGS = -Dlog=igmpproxy_log
 
@@ -71,16 +67,15 @@ define Build/Compile
 endef
 
 define Package/igmpproxy/install
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_CONF) ./files/igmpproxy.config $(1)/etc/config/igmpproxy
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/igmpproxy.init $(1)/etc/init.d/igmpproxy
 	$(INSTALL_DIR) $(1)/bin
-	$(CP) $(PKG_BUILD_DIR)/igmpproxy $(1)/bin
+	#$(CP) $(PKG_BUILD_DIR)/igmpproxy $(1)/bin/
+	$(CP) $(PKG_BUILD_DIR)/src/igmpproxy $(1)/bin/
 	$(INSTALL_DIR) $(1)/etc
 	$(CP) $(PKG_BUILD_DIR)/igmpproxy.conf $(1)/etc/
-#	$(INSTALL_DIR) $(1)/etc/config
-#	$(INSTALL_CONF) ./files/igmpproxy.config $(1)/etc/config/igmpproxy
-#	$(INSTALL_DIR) $(1)/etc/init.d
-#	$(INSTALL_BIN) ./files/igmpproxy.init $(1)/etc/init.d/igmpproxy
-#	$(INSTALL_DIR) $(1)/usr/sbin
-#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/src/igmpproxy $(1)/usr/sbin/
 endef
 
 $(eval $(call BuildPackage,igmpproxy))

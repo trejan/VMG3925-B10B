@@ -36,7 +36,9 @@ FLASHBLK_SIZE=$($(shell echo CONFIG_BRCMSDK$(CONFIG_BRCM_SDK_VERSION)_BRCM_FLASH
 JFFS2_BLOCKSIZE:=$(FLASHBLK_SIZE)k
 SUMTOOL_BLOCKSIZE:=$(FLASHBLK_SIZE)KiB
 
-ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L04) $(CONFIG_BRCM963xx_SDK_VER_416L05)),)
+UBIFS_BLOCKSIZE:=$(FLASHBLK_SIZE)k
+
+ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L04) $(CONFIG_BRCM963xx_SDK_VER_416L05) $(CONFIG_BRCM963xx_SDK_VER_502L04)),)
 ifneq ($(call qstrip,$($(shell echo CONFIG_BRCMSDK$(CONFIG_BRCM_SDK_VERSION)_BUILD_NOR_KERNEL_LZ4))),)
 KERNEL_COMPRESSION=lz4
 KERNEL_FILE_TYPE=lz4
@@ -78,6 +80,9 @@ ZYXEL_RAS_FORMAT=$($(shell echo CONFIG_BRCMSDK${CONFIG_BRCM_SDK_VERSION}_ZYXEL_R
 # For zytool generate multi zld.bin
 ZYXEL_ZYTOOL_SCRIPT_DIR=$(TOPDIR)/target/linux/brcm963xx/$(SUBTARGET)
 
+# For ubifs bootfs
+TARGET_UBI_BOOTFS=$(BUILD_DIR)/bootfs
+
 define Image/Build/multi_zld
 	##doing zytool shell script
 	if [ -e $(ZYXEL_ZYTOOL_SCRIPT_DIR)/zytool_multi_zld.sh ]; then \
@@ -95,7 +100,7 @@ endef
 define Image/Build/merge_firmware
 	echo;echo "!!! Package firmware for release !!!";echo
 	mkdir -p $(BIN_DIR)/zyxel/
-	# Generate the tagged image with BCM proprietary tool "bcmImageMaker/bcmImageBuilder"
+	# [BuildMergeFirmware]Generate the tagged image with BCM proprietary tool "bcmImageMaker/bcmImageBuilder"
 ifeq ($(ZYXEL_RAS_FORMAT), y)
 	##doing ZyXEL image formate
 	$(call Image/mkfs/jffs2/sub/original,$(JFFS2_BLOCKSIZE))
@@ -105,24 +110,29 @@ else
 endif
 	cp $(BIN_DIR)/openwrt-nand-$(BOARDNAME)-jffs2-$(JFFS2_BLOCKSIZE).bin.w $(BIN_DIR)/zyxel/ras.bin
 	dd if=$(BIN_DIR)/openwrt-nand-$(BOARDNAME)-jffs2-$(JFFS2_BLOCKSIZE)-cfe.bin.w of=$(BIN_DIR)/zyxel/zld.bin bs=1k count=$(FLASHBLK_SIZE)
-ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L05)), )
+ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L05) $(CONFIG_BRCM963xx_SDK_VER_502L04)), )
 	$(call Image/Build/multi_zld)
 endif
 endef
 
 define Image/Build/CFE
 	mkdir -p $(BIN_DIR)/zyxel/
-	# Generate the tagged image with BCM proprietary tool "bcmImageMaker/bcmImageBuilder"
+	# [BuildCFE]Generate the tagged image with BCM proprietary tool "bcmImageMaker/bcmImageBuilder"
 ifeq ($(CONFIG_BRCM_CFE_BOOT_FROM_NAND),y)
 ifeq ($(ZYXEL_RAS_FORMAT), y)
 	##doing ZyXEL image formate
+ifneq ($(CONFIG_TARGET_ROOTFS_UBIFS),)
+	$(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(BIN_DIR)/brcm-cfe/cfe$(BRCM_CHIP)rom.bin --blocksize $(shell expr 1024 \* $(FLASHBLK_SIZE)) --flashtotalsize $(FLASH_TOTAL_SIZE) --bootofs $(FLASH_BOOT_OFS) --bootsize $(shell expr 1024 \* $(FLASHBLK_SIZE)) --kernelimg $(KERNEL_BUILD_DIR)/vmlinux.lz --rootfs $(KERNEL_BUILD_DIR)/root.$(1) --fake_rootfs $(KERNEL_BUILD_DIR)/fakeroot.ubifs-$(UBIFS_BLOCKSIZE) --image $(BIN_DIR)/openwrt-nand-$(4)-$(1)-cfe.bin --fsonly $(BIN_DIR)/openwrt-nand-$(4)-$(1).bin --ubionlyimage 
+else
 	$(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(BIN_DIR)/brcm-cfe/cfe$(BRCM_CHIP)rom.bin --blocksize $(shell expr 1024 \* $(FLASHBLK_SIZE)) --flashtotalsize $(FLASH_TOTAL_SIZE) --bootofs $(FLASH_BOOT_OFS) --bootsize $(shell expr 1024 \* $(FLASHBLK_SIZE)) --kernelimg $(KERNEL_BUILD_DIR)/vmlinux.lz --rootfs $(KERNEL_BUILD_DIR)/root.$(1) --fake_rootfs $(KERNEL_BUILD_DIR)/fake_root.jffs2-$(JFFS2_BLOCKSIZE) --image $(BIN_DIR)/openwrt-nand-$(4)-$(1)-cfe.bin --fsonly $(BIN_DIR)/openwrt-nand-$(4)-$(1).bin 
+#END ($(CONFIG_TARGET_ROOTFS_UBIFS),)
+endif
 else
 	$(HOSTTOOLS_DIR)/scripts/bcmImageMaker --cferom $(BIN_DIR)/brcm-cfe/cfe$(BRCM_CHIP)rom.bin --blocksize $(shell expr 1024 \* $(FLASHBLK_SIZE)) --bootofs $(FLASH_BOOT_OFS) --bootsize $(shell expr 1024 \* $(FLASHBLK_SIZE)) --rootfs $(KERNEL_BUILD_DIR)/root.$(1) --image $(BIN_DIR)/openwrt-nand-$(4)-$(1)-cfe.bin --fsonly $(BIN_DIR)/openwrt-nand-$(4)-$(1).bin
 endif
 	cp $(BIN_DIR)/openwrt-nand-$(4)-$(1).bin.w $(BIN_DIR)/zyxel/ras.bin
 	dd if=$(BIN_DIR)/openwrt-nand-$(4)-$(1)-cfe.bin.w of=$(BIN_DIR)/zyxel/zld.bin bs=1k count=$(FLASHBLK_SIZE)
-ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L05)), )
+ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L05) $(CONFIG_BRCM963xx_SDK_VER_502L04)), )
 	$(call Image/Build/multi_zld)
 endif
 else
@@ -152,7 +162,10 @@ endif
 endef
 
 define Image/mkfs/jffs2/sub/original
+
+ifeq ("$(call qstrip,$(ZYXEL_RAS_FORMAT))","y")
 	$(HOSTTOOLS_DIR)/zyfwinfo -f $(TARGET_DIR)/cferam.000 -s -k $(KERNEL_BUILD_DIR)/vmlinux.lz -r $(KDIR)/fake_root.jffs2-$(1) $(TOOL_ENDIAN)
+endif
 	touch -a -m -t 197001010000.00 $(TARGET_DIR)/cferam.000
 	# FIXME: removing this line will cause strange behaviour in the foreach loop below
 ifneq ($(call qstrip,$(CONFIG_KERNEL_JFFS2_SUMMARY)),y)
@@ -172,6 +185,9 @@ define Image/mkfs/jffs2/sub
 		echo -e "/.ethWanAsLan" >> $(BUILD_DIR)/nocomprlist; \
 	fi
 	echo -e "/vmlinux.lz" >> $(BUILD_DIR)/nocomprlist
+	if [ -e $(TARGET_DIR)/$(BRCM_DTB) ]; then \
+		echo -e "/$(BRCM_DTB)" >> $(BUILD_DIR)/nocomprlist; \
+	fi
 
 	$(call Image/mkfs/jffs2/sub/fake,$(1))
 
@@ -191,14 +207,85 @@ define Image/mkfs/squashfs
 endef
 endif
 
+ifneq ($(CONFIG_TARGET_ROOTFS_UBIFS),)
+define Image/mkfs/ubifs/sub/fake
+	# Prepare a fake rootfs without default config and cferam.000
+	rm -rf $(TARGET_DIR)_fake
+	cp -afp $(TARGET_DIR) $(TARGET_DIR)_fake
+	rm -f $(TARGET_DIR)_fake/etc/sysconfig.tar.gz $(TARGET_DIR)_fake/cferam.000
+	
+	$(STAGING_DIR_HOST)/bin/mkfs.ubifs $(UBIFS_OPTS) -c 512 -m 2048 -e 126976 -o $(KDIR)/fake_root.ubifs-$(1) -r $(TARGET_DIR)_fake
+
+	./buildUBI -u $(KDIR)/ubinize_fake.cfg -m $(KDIR)/metadata_fake.bin -f $(KDIR)/filestruct_full_fake.bin -t $(TARGET_UBI_BOOTFS) -y $(KDIR)/fake_root.ubifs-$(1)
+
+	$(STAGING_DIR_HOST)/bin/ubinize -v -o $(KDIR)/fakeroot.ubifs-$(1) -m 2048 -p $(patsubst %k,%KiB,$(1)) $(KDIR)/ubinize_fake.cfg
+
+# END Image/mkfs/ubifs/sub/fake
+endef
+
+define Image/mkfs/ubifs
+	# Add nocomprlist for compress whole rootfs but those two image cferam.000 and vmlinux.lz
+	echo -e "/cferam.000" > $(BUILD_DIR)/nocomprlist
+	if [ -e $(TARGET_DIR)/.ethWanAsLan ]; then \
+		echo -e "/.ethWanAsLan" >> $(BUILD_DIR)/nocomprlist; \
+	fi
+	echo -e "/vmlinux.lz" >> $(BUILD_DIR)/nocomprlist
+	if [ -e $(TARGET_DIR)/$(BRCM_DTB) ]; then \
+		echo -e "/$(BRCM_DTB)" >> $(BUILD_DIR)/nocomprlist; \
+	fi
+	
+	# START====Create boot file system dir
+	rm -rf $(TARGET_UBI_BOOTFS)
+	mkdir $(TARGET_UBI_BOOTFS)
+	chmod 777 $(TARGET_UBI_BOOTFS)
+	cp $(TARGET_DIR)/cferam.000 $(TARGET_UBI_BOOTFS)
+	cp $(TARGET_DIR)/$(BRCM_DTB) $(TARGET_UBI_BOOTFS)
+	cp $(KERNEL_BUILD_DIR)/vmlinux.lz $(TARGET_UBI_BOOTFS)
+
+	mkdir -p $(TARGET_UBI_BOOTFS)/etc
+	cp $(TARGET_DIR)/etc/image_version $(TARGET_UBI_BOOTFS)/etc
+
+	echo -n "@(#) $$$$"imageversion:" " > $(TARGET_UBI_BOOTFS)/etc/image_ident
+	cat $(TARGET_DIR)/etc/image_version | tr -d "\n" >> $(TARGET_UBI_BOOTFS)/etc/image_ident
+	echo " $$$$" >> $(TARGET_UBI_BOOTFS)/etc/image_ident
+
+	echo -n "@(#) $$$$"imageversion:" " >> $(TARGET_UBI_BOOTFS)/etc/image_ident
+	cat $(TARGET_DIR)/etc/image_version | tr -d "\n" >> $(TARGET_UBI_BOOTFS)/etc/image_ident
+	echo " $$$$" >> $(TARGET_UBI_BOOTFS)/etc/image_ident
+	# END====Create boot file system dir
+
+	$(call Image/mkfs/ubifs/sub/fake,$(UBIFS_BLOCKSIZE))
+
+ifeq ("$(call qstrip,$(ZYXEL_RAS_FORMAT))","y")
+	$(HOSTTOOLS_DIR)/zyfwinfo -f $(TARGET_DIR)/cferam.000 -s -k $(KERNEL_BUILD_DIR)/vmlinux.lz -r $(KDIR)/fakeroot.ubifs-$(UBIFS_BLOCKSIZE) $(TOOL_ENDIAN)
+endif
+	touch -a -m -t 197001010000.00 $(TARGET_DIR)/cferam.000
+
+	fakeroot $(STAGING_DIR_HOST)/bin/mkfs.ubifs $(UBIFS_OPTS) -c 512 -m 2048 -e 126976 -o $(KDIR)/rootfs.ubifs -r $(TARGET_DIR)
+
+	fakeroot ./buildUBI -u $(KDIR)/ubinize.cfg -m $(KDIR)/metadata.bin -f $(KDIR)/filestruct_full.bin -t $(TARGET_UBI_BOOTFS) -y $(KDIR)/rootfs.ubifs
+
+	fakeroot $(STAGING_DIR_HOST)/bin/ubinize -v -o $(KDIR)/root.ubifs-$(UBIFS_BLOCKSIZE) -m 2048 -p $(patsubst %k,%KiB,$(UBIFS_BLOCKSIZE)) $(KDIR)/ubinize.cfg
+
+	$(call Image/Build,ubifs-$(UBIFS_BLOCKSIZE))
+# END define Image/mkfs/ubifs
+endef
+# END ifneq ($(CONFIG_TARGET_ROOTFS_UBIFS),)
+endif
+
 define Image/mkfs/prepare
 	#workaround: copy all *.ko to rootfs/lib/modules/xxx/; the correct way is modify package/kernel/modules/netfilter.mk, but it should care dependence.
 	cp `find $(LINUX_DIR)/ -name "*.ko"` $(TARGET_DIR)/lib/modules/$(LINUX_VERSION)/
 	cp `find $(BROADCOM_SDK_DIR)/bcmdrivers/ -name "*.ko"` $(TARGET_DIR)/lib/modules/$(LINUX_VERSION)/
+	#In SDK 502L04, some kernel module locate at "bcm963xx\rdp\" directory.
+	if [ -d $(BROADCOM_SDK_DIR)/rdp ]; then \
+		cp `find $(BROADCOM_SDK_DIR)/rdp -name "*.ko"` $(TARGET_DIR)/lib/modules/$(LINUX_VERSION)/; \
+	fi
 	#./depmod.pl -F $(KDIR)/linux-$(LINUX_VERSION)/System.map -b $(TARGET_DIR)/lib/modules/
 	#due to depmod can't generate file at read-only file system, so modify the path that generate file
 #ifneq ($($(shell echo CONFIG_BRCMSDK$(CONFIG_BRCM_SDK_VERSION)_ZYXEL)),)
 ifneq ($(CONFIG_PACKAGE_zcfg),)
+	mkdir -p $(TARGET_DIR)/var/
 	touch $(TARGET_DIR)/var/modules.dep
 	touch $(TARGET_DIR)/var/modules.symbols
 	touch $(TARGET_DIR)/var/modules.alias
@@ -219,10 +306,14 @@ else
 endif	
 else
 	# not select zcfg means want to have Broadcom like firmware.
+ifeq ("$(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_502L04))","y")
+	$(CP) $(TOPDIR)/target/linux/brcm963xx/base-files-bsp-502Lx/* $(TARGET_DIR)/
+else
 	$(CP) $(TOPDIR)/target/linux/brcm963xx/base-files-bsp/* $(TARGET_DIR)/
 endif
+endif
 	rm `find $(TARGET_DIR)/ -name ".gitkeep"`
-ifeq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L04) $(CONFIG_BRCM963xx_SDK_VER_416L05)),)
+ifeq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L04) $(CONFIG_BRCM963xx_SDK_VER_416L05) $(CONFIG_BRCM963xx_SDK_VER_502L04)),)
 	ln -sf /lib/public/libcms_boardctl.so $(TARGET_DIR)/lib/libcms_boardctl.so
 	ln -sf /lib/public/libcms_msg.so $(TARGET_DIR)/lib/libcms_msg.so
 	ln -sf /lib/public/libcms_util.so $(TARGET_DIR)/lib/libcms_util.so
@@ -242,8 +333,14 @@ ifeq ($(CONFIG_BRCM_CFE_BOOT_FROM_NAND),y)
 	touch -a -m -t 197001010000.00 $(TARGET_DIR)/cferam.000
 endif
 
+ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_502L04)),)
+	# Copy the *.dtb file from SDK into rootfs and make sure the timestamp will not changed.
+	rsync -av $(DTB_FILE) $(TARGET_DIR)/
+	touch -a -m -t 197001010000.00 $(TARGET_DIR)/$(BRCM_DTB)
+endif
+
 	$(call Image/mkfs/prepare/default)
-ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L04) $(CONFIG_BRCM963xx_SDK_VER_416L05)),)
+ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L04) $(CONFIG_BRCM963xx_SDK_VER_416L05) $(CONFIG_BRCM963xx_SDK_VER_502L04)),)
 	#in 416L04,416L05, check if we need to do below action?
 	#find $INSTALL_DIR -type f -perm /u=x,g=x,o=x -print |xargs -L1 $EXECSTACK -c 2> /dev/null
 endif
@@ -252,7 +349,7 @@ endef
 
 define Image/Prepare
 	# Using BCM proprietary tool "cmplzma" to compress vmlinux
-ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L04) $(CONFIG_BRCM963xx_SDK_VER_416L05)),)
+ifneq ($(call qstrip,$(CONFIG_BRCM963xx_SDK_VER_416L04) $(CONFIG_BRCM963xx_SDK_VER_416L05) $(CONFIG_BRCM963xx_SDK_VER_502L04)),)
 	$(HOSTTOOLS_DIR)/cmplzma -k -2 -$(KERNEL_COMPRESSION) $(KDIR)/vmlinux.elf $(KDIR)/vmlinux $(KDIR)/vmlinux.$(KERNEL_FILE_TYPE)
 else
 	$(HOSTTOOLS_DIR)/cmplzma -k -2 $(KDIR)/vmlinux.elf $(KDIR)/vmlinux $(KDIR)/vmlinux.$(KERNEL_FILE_TYPE)

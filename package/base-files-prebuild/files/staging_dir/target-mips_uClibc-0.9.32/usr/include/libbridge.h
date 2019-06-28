@@ -21,7 +21,11 @@
 
 #include <sys/socket.h>
 #include <linux/if.h>
+//#if defined(BRCM_SDK_502L04)
+//#include <bcm_local_kernel_include/linux/if_bridge.h>
+//#else
 #include <linux/if_bridge.h>
+//#endif
 
 /* defined in net/if.h but that conflicts with linux/if.h... */
 extern unsigned int if_nametoindex (const char *__ifname);
@@ -114,7 +118,7 @@ extern int br_set_bridge_priority(const char *br, int bridge_priority);
 extern int br_set_port_priority(const char *br, const char *p, 
 				int port_priority);
 
-#if defined(PLATFORM_BROADCOM)
+#if defined(PLATFORM_BROADCOM) && !defined(BRCM_SDK_502L04)
 extern int br_enable_port_snooping(const char *br, int enable);
 extern int br_enable_proxy_mode(const char *br, int enable);
 extern int br_igmp_enable_rate_limit(const char *br, int limit);
@@ -138,6 +142,17 @@ extern int br_read_fdb(const char *br, struct fdb_entry *fdbs,
 extern int br_set_hairpin_mode(const char *bridge, const char *dev,
 			       int hairpin_mode);
 				   
+#if defined(PLATFORM_BROADCOM) && defined(BRCM_SDK_502L04)
+// brcm begin
+int br_get_fdb_limits(const char *brname, int *maxfdb, int *usedfdb );
+int br_get_port_fdb_limits(const char *portname, int *maxfdb, int *minfdb, int *usedfdb );
+
+extern int br_block_stp(const char *bridge, const char *ifName);
+extern int br_mark_dedicated_stp_port(const char *bridge,
+                                      const char *ifName, int setting);
+// brcm end
+#endif
+
 #if defined(ZYXEL_PATCH)
 extern int get_ifname(const char *brname, int portno, char *ifname);
 #endif

@@ -35,6 +35,9 @@ endif
 ifeq ($(PKG_VERSION),2.23.1)
   PKG_MD5SUM:=33adb18c3048d057ac58d07a3f1adb38
 endif
+ifeq ($(PKG_VERSION),2.25.1)
+  PKG_MD5SUM:=ac493a78de4fee895961d025b7905be4
+endif
 
 HOST_BUILD_PARALLEL:=1
 
@@ -55,7 +58,24 @@ BINUTILS_CONFIGURE:= \
 		$(GRAPHITE_CONFIGURE) \
 		$(call qstrip,$(CONFIG_EXTRA_BINUTILS_CONFIG_OPTIONS)) 
 
-ifeq ("_$(CONFIG_arm)_$(CONFIG_TARGET_brcm963xx)_$(CONFIG_UCLIBC_VERSION_0_9_32)_","_y_y_y_")
+ifeq ($(CONFIG_BINUTILS_VERSION_2_25_1),y)
+  BINUTILS_CONFIGURE+= \
+		--enable-deterministic-archives \
+		--disable-sim \
+		--disable-gdb
+ifneq ("_$(CONFIG_arm)_$(CONFIG_TARGET_brcm963xx)_","_y_y_")
+  BINUTILS_CONFIGURE+= \
+		--enable-plugins \
+		--disable-nls
+else
+  BINUTILS_CONFIGURE+= \
+		--enable-plugins \
+		--disable-dependency-tracking \
+		--disable-option-checking
+endif
+endif
+
+ifeq ("_$(CONFIG_arm)_$(CONFIG_TARGET_brcm963xx)_","_y_y_")
   BINUTILS_CONFIGURE+= \
 		--enable-shared \
 		--disable-static \
@@ -89,7 +109,7 @@ ifneq ($(CONFIG_SSP_SUPPORT),)
   BINUTILS_CONFIGURE+= \
 		--enable-libssp
 else
- ifneq ("_$(CONFIG_arm)_$(CONFIG_TARGET_brcm963xx)_$(CONFIG_UCLIBC_VERSION_0_9_32)_","_y_y_y_")
+ ifneq ("_$(CONFIG_arm)_$(CONFIG_TARGET_brcm963xx)_","_y_y_")
  ifneq ("_$(CONFIG_mips)_$(CONFIG_TARGET_en75xx)_$(CONFIG_UCLIBC_VERSION_0_9_33)_","_y_y_y_")
    BINUTILS_CONFIGURE+= \
 		--disable-libssp
@@ -104,8 +124,9 @@ endif
 
 define Host/Prepare
 	$(call Host/Prepare/Default)
-	ln -snf $(PKG_NAME)-$(PKG_VERSION) $(BUILD_DIR_TOOLCHAIN)/$(PKG_NAME)
+	ln -snf $(notdir $(HOST_BUILD_DIR))  $(BUILD_DIR_TOOLCHAIN)/$(PKG_NAME)
 	$(CP) $(SCRIPT_DIR)/config.{guess,sub} $(HOST_BUILD_DIR)/
+	$(SED) 's, " Linaro.*,,' $(HOST_BUILD_DIR)/bfd/version.h
 endef
 
 define Host/Configure
@@ -123,9 +144,18 @@ define Host/Install
 	$(MAKE) -C $(HOST_BUILD_DIR) \
 		prefix=$(TOOLCHAIN_DIR)/initial \
 		install
+	$(MAKE) -C $(HOST_BUILD_DIR) \
+		prefix=$(TOOLCHAIN_DIR) \
+		install
 	$(call FixupLibdir,$(TOOLCHAIN_DIR)/initial)
-	$(CP) $(TOOLCHAIN_DIR)/initial/. $(TOOLCHAIN_DIR)/
+	$(RM) $(TOOLCHAIN_DIR)/initial/lib/libiberty.a
 	$(CP) $(TOOLCHAIN_DIR)/bin/$(REAL_GNU_TARGET_NAME)-readelf $(REAL_STAGING_DIR_HOST)/bin/readelf
+	# ARC gcc requires extlib.
+	# If extlib is not available in "initial" folder
+	# initial gcc will fail to build libc.
+	if [ -d $(TOOLCHAIN_DIR)/extlib ]; then \
+		$(CP) -r $(TOOLCHAIN_DIR)/extlib $(TOOLCHAIN_DIR)/initial/; \
+	fi
 endef
 
 define Host/Clean

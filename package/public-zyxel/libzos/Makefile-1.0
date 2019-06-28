@@ -30,7 +30,7 @@ define Package/$(PKG_NAME)
 	SECTION     := net
 	CATEGORY    := Zyxel public package
 	TITLE       := OS porting layer
-	DEPENDS     := libzlog
+	DEPENDS     := +libzlog
 endef
 
 #
@@ -80,9 +80,10 @@ endef
 #
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/lib
-	$(INSTALL_DIR) $(1)/lib/public
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME).so $(1)/lib/public
-	ln -s /lib/public/$(PKG_NAME).so $(1)/lib/$(PKG_NAME).so
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME).so $(1)/lib
+#	$(INSTALL_DIR) $(1)/lib/public
+#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME).so $(1)/lib/public
+#	ln -s /lib/public/$(PKG_NAME).so $(1)/lib/$(PKG_NAME).so
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))

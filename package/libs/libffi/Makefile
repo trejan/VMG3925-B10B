@@ -75,6 +75,8 @@ define Package/libffi/install
 	$(CP) \
 		$(PKG_INSTALL_DIR)/usr/lib/libffi.so.* \
 		$(1)/usr/lib/
+#	the folder is only for compiling glib2
+	$(INSTALL_DIR) $(STAGING_DIR)/usr/lib/$(PKG_NAME)-$(PKG_VERSION)/include        
 endef
 
 $(eval $(call HostBuild))

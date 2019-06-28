@@ -26,6 +26,9 @@ define Package/libexif
   CATEGORY:=Libraries
   TITLE:=library for jpeg files with exif tags
   URL:=http://libexif.sourceforge.net/
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+  DEPENDS:=+libintl-full
+endif
 endef
 
 define Build/Configure

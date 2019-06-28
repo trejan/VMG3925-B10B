@@ -14,6 +14,8 @@ ifeq ("$(strip ${ZCFG_PLATFORM})","BROADCOM")
 PKG_VERSION:=2.0.10-4
 else ifeq ("$(strip ${ZCFG_PLATFORM})","ECONET")
 PKG_VERSION:=2.0.8-2
+else ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+PKG_VERSION:=2.0.10-4
 endif
 
 #PRODUCT_NAME:=$(word 1, $(subst -,_,$(call qstrip, $(CONFIG_MRD_PRODUCT_NAME))))
@@ -60,6 +62,16 @@ endef
 MAKE_VARS += EXT_LIBSI="$(LIBGCC_S)"
 
 export BUILD_DIR
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+CFLAGS="$(TARGET_CFLAGS)"
+
+export CFLAGS
+
+MAKE_FLAGS += \
+	LIBDIR="/usr/lib/ebtables" \
+	EBT_EXT_FUNC="ip ip6 standard vlan mark_m mark time ftos skiplog AUTOMAP policer"
+else
+export CONFIG_TC_SDK_VERSION
 
 #CFLAGS="$(TARGET_CFLAGS)"
 
@@ -75,6 +87,7 @@ MAKE_FLAGS += \
 	LIBDIR="/usr/lib/ebtables" \
 	EBT_EXT_FUNC="ip ip6 standard vlan mark_m mark time ftos skiplog AUTOMAP policer"
 
+endif
 define Package/ebtables/install
 	$(INSTALL_DIR) $(1)/etc
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/ethertypes $(1)/etc/

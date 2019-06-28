@@ -43,6 +43,11 @@ CONFIGURE_ARGS += \
 		--disable-bgp-announce
 
 TARGET_CFLAGS += -g -O2 -Wall
+ifeq ("$(strip ${CONFIG_TC_SDK_7_3_245_300})","y")
+CONFIGURE_ARGS += --enable-netlink
+TMP_CFLAGS := $(TARGET_CFLAGS)
+TARGET_CFLAGS = $(filter-out -Os -O2, $(TMP_CFLAGS))
+endif
 
 ifeq ("$(strip ${ZCFG_PLATFORM})","BROADCOM")
 define Build/Configure

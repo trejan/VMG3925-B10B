@@ -149,12 +149,25 @@ menu "Target Images"
 	config TARGET_ROOTFS_JFFS2_IN_NAND
 		bool "store in NAND"
 		default n
-		depends TARGET_ROOTFS_JFFS2
+		depends on TARGET_ROOTFS_JFFS2
 		help
 		  The jffs2 rootf filesystem will be strored in NAND flash.
 		  So the clearnmarker node should be omitted when creating image.
 		  Add option -n for mkfs.jffs2.
+if TARGET_ipq_ipq807x
+	config TARGET_ROOTFS_SQUASHFS
+		bool "squashfs"
+		default y if USES_SQUASHFS
+		help
+		  Build a squashfs-lzma root filesystem
 
+                config TARGET_SQUASHFS_BLOCK_SIZE
+                        int "Block size (in KiB)"
+                        depends on TARGET_ROOTFS_SQUASHFS
+                        default 64 if LOW_MEMORY_FOOTPRINT
+                        default 256
+endif
+if !TARGET_ipq_ipq807x
 	config TARGET_ROOTFS_SQUASHFS
 		bool "squashfs"
 		default y if USES_SQUASHFS
@@ -165,9 +178,46 @@ menu "Target Images"
 	config TARGET_ROOTFS_UBIFS
 		bool "ubifs"
 		default y if USES_UBIFS
-		depends on !TARGET_ROOTFS_INITRAMFS && USES_UBIFS
+		depends on !TARGET_ROOTFS_INITRAMFS
 		help
 		  Build a ubifs root filesystem
+endif
+if TARGET_ipq_ipq807x
+        menuconfig TARGET_ROOTFS_UBIFS
+		bool "ubifs"
+		default y if USES_UBIFS
+                depends on USES_UBIFS
+		help
+                  Build a UBIFS root filesystem.
+
+                choice
+                        prompt "compression"
+                        default TARGET_UBIFS_COMPRESSION_ZLIB
+                        depends on TARGET_ROOTFS_UBIFS
+                        help
+                          Select compression type
+
+                        config TARGET_UBIFS_COMPRESSION_NONE
+                                bool "none"
+
+                        config TARGET_UBIFS_COMPRESSION_LZO
+                                bool "lzo"
+
+                        config TARGET_UBIFS_COMPRESSION_ZLIB
+                                bool "zlib"
+                endchoice
+
+                config TARGET_UBIFS_FREE_SPACE_FIXUP
+                        bool "free space fixup" if TARGET_ROOTFS_UBIFS
+                        default y
+                        help
+                          The filesystem free space has to be fixed up on first mount.
+
+                config TARGET_UBIFS_JOURNAL_SIZE
+                        string
+                        prompt "journal size" if TARGET_ROOTFS_UBIFS
+                        default ""
+endif
 
 	comment "Image Options"
 
@@ -201,6 +251,11 @@ menu "Global build settings"
 	config ALL
 		bool "Select all packages by default"
 		default n
+if TARGET_ipq_ipq807x
+	config SIGNED_PACKAGES
+		bool "Cryptographically signed package lists"
+		default y if TARGET_ipq_ipq807x
+endif
 
 	comment "General build options"
 
@@ -253,6 +308,50 @@ menu "Global build settings"
 		help
 			This collects debugging symbols from the kernel and all compiled modules.
 			Useful for release builds, so that kernel issues can be debugged offline later.
+if TARGET_ipq_ipq807x
+        comment "Hardening build options"
+
+        config PKG_CHECK_FORMAT_SECURITY
+                bool
+                prompt "Enable gcc format-security"
+                default n
+                help
+                  Add -Wformat -Werror=format-security to the CFLAGS.  You can disable
+                  this per package by adding PKG_CHECK_FORMAT_SECURITY:=0 in the package
+                  Makefile.
+
+        choice
+                prompt "User space Stack-Smashing Protection"
+                default PKG_CC_STACKPROTECTOR_NONE
+                help
+                  Enable GCC Stack Smashing Protection (SSP) for userspace applications
+                config PKG_CC_STACKPROTECTOR_NONE
+                        bool "None"
+                config PKG_CC_STACKPROTECTOR_REGULAR
+                        bool "Regular"
+                        select SSP_SUPPORT
+                        depends on KERNEL_CC_STACKPROTECTOR_REGULAR
+                config PKG_CC_STACKPROTECTOR_STRONG
+                        bool "Strong"
+                        select SSP_SUPPORT
+                        depends on GCC_VERSION_4_9_LINARO
+                        depends on KERNEL_CC_STACKPROTECTOR_STRONG
+        endchoice
+
+        choice
+                prompt "Kernel space Stack-Smashing Protection"
+                default KERNEL_CC_STACKPROTECTOR_NONE
+                help
+                  Enable GCC Stack-Smashing Protection (SSP) for the kernel
+                config KERNEL_CC_STACKPROTECTOR_NONE
+                        bool "None"
+                config KERNEL_CC_STACKPROTECTOR_REGULAR
+                        bool "Regular"
+                config KERNEL_CC_STACKPROTECTOR_STRONG
+                        depends on GCC_VERSION_4_9_LINARO
+                        bool "Strong"
+        endchoice
+endif
 
 	comment "Kernel build options"
 
@@ -353,6 +452,15 @@ menu "Global build settings"
 		help
 		  This will compile your kernel and modules with debug information.
 
+if TARGET_ipq_ipq807x
+	config KERNEL_DEBUG_INFO_REDUCED
+		bool "Compile the kernel with reduced debugging information"
+		default y if TARGET_ipq807x
+		depends on KERNEL_DEBUG_KERNEL
+		help
+		  This will compile your kernel and modules with reduced debug information.
+endif
+
 	config KERNEL_DEBUG_LL_UART_NONE
 		bool
 		default n
@@ -402,6 +510,12 @@ menu "Global build settings"
 		bool "Enable kernel lock checking"
 		select KERNEL_DEBUG_KERNEL
 		default n
+
+if TARGET_ipq_ipq807x
+	config KERNEL_PRINTK
+		bool "Enable support for printk"
+		default y if TARGET_ipq_ipq807x
+endif
 
 	config KERNEL_PRINTK_TIME
 		bool "Enable printk timestamps"
@@ -554,7 +668,7 @@ menu "Global build settings"
 	config KERNEL_DEVPTS_MULTIPLE_INSTANCES
 		bool
 		depends on KERNEL_NAMESPACES
-
+if TARGET_ipq_ipq807x
 	config KERNEL_NAMESPACES
 		bool "Enable kernel namespaces"
 		default n
@@ -563,8 +677,19 @@ menu "Global build settings"
 		select KERNEL_USER_NS
 		select KERNEL_PID_NS
 		select KERNEL_NET_NS
-		select KERNEL_DEVPTS_MULTIPLE_INSTANCES
-
+		select KERNEL_DEVPTS_MULTIPLE_INSTANCES if !TARGET_ipq_ipq807x
+endif
+if !TARGET_ipq_ipq807x
+	config KERNEL_NAMESPACES
+		bool "Enable kernel namespaces"
+		default n
+		select KERNEL_UTS_NS
+		select KERNEL_IPC_NS
+		select KERNEL_USER_NS
+		select KERNEL_PID_NS
+		select KERNEL_NET_NS
+		select KERNEL_DEVPTS_MULTIPLE_INSTANCES 
+endif
 	config KERNEL_I2C_SX9310
 		bool "Support for I2C SEMTECH SX9310"
 		default n
@@ -644,7 +769,7 @@ menu "Global build settings"
 	choice
 		prompt "Binary stripping method"
 		default USE_STRIP   if EXTERNAL_TOOLCHAIN
-		default USE_STRIP   if USE_GLIBC || USE_EGLIBC || USE_MUSL
+		default USE_STRIP   if USE_GLIBC || USE_MUSL
 		default USE_SSTRIP
 		help
 		  Select the binary stripping method you wish to use.
@@ -664,7 +789,6 @@ menu "Global build settings"
 			bool "sstrip"
 			depends on !DEBUG
 			depends on !USE_GLIBC
-			depends on !USE_EGLIBC
 			help
 			  This will install binaries stripped using sstrip
 	endchoice
@@ -696,7 +820,7 @@ menu "Global build settings"
 	if INSTALL_LIBSTDCPP
 		choice
 			prompt "Preferred standard C++ library"
-			default USE_LIBSTDCXX if USE_EGLIBC
+			default USE_LIBSTDCXX if USE_GLIBC
 			default USE_UCLIBCXX
 			help
 			  Select the preferred standard C++ library for all packages that support this.
@@ -1455,6 +1579,14 @@ menu "ZyXEL Userspace Features"
 
 	endmenu
 
+	menu "EasyMesh"
+	
+		config ZYXEL_EASYMESH
+			bool "support ZyXEL Easy Mesh"
+			default n
+
+	endmenu
+	
 	menu "BSA"
 
 		config BSA_SUPPORT_BCM2_DRIVER
@@ -1552,6 +1684,11 @@ menu "ZyXEL Userspace Features"
 				depends on ZYXEL_ONECONNECT
 				select PACKAGE_zyschedule
 				select ZYXEL_POWER_MANAGEMENT
+
+			config ZYXEL_APP_USERNAME_LOGIN
+				bool "support username to login to the app"
+				default n
+				depends on ZYXEL_APP_AGENT
 				
 			config ZYXEL_P0F
 				bool "p0f (OS fingerprinting tool)"
@@ -1591,10 +1728,6 @@ menu "ZyXEL Userspace Features"
 	
 	config ZYXEL_FIREWALL_INDEPENDENT
 		bool "Enable IPv4/IPv6 Firewall seperately"
-		default n
-		
-	config ZYXEL_USB_SET_MANUALLY
-		bool "Usb can be set by user manually"
 		default n
 	
     config ZYXEL_USB_MANAGERMENT
@@ -1650,9 +1783,9 @@ menu "ZyXEL Userspace Features"
 		default n
 		select PACKAGE_zwol
 		
-	config ZYXEL_ENABLE_DISABLE_RADIO_BY_MAIN_SSID
-		bool "Enable/Disable WLAN Radio by main SSID"
-		default y
+	config ZYXEL_RADIO_MAIN_SSID_INDEPENDENT
+		bool "Support wireless Radio is independent of main SSID"
+		default n
 		
 	config ZY_WIFI_ONESSID_SECURITY_SYNC
                 bool "One SSID security sync for Dual Band"
@@ -1756,6 +1889,11 @@ menu "ZyXEL Userspace Features"
 	config ZyXEL_WEB_REDIRECT
 		bool "Zyxel web redirect"
 		default n
+
+	config ZyXEL_PCP_WEB_REDIRECT
+		bool "Zyxel Parent control web redirect"
+		default n
+		select ZyXEL_WEB_REDIRECT
 	
 	config ZYXEL_LANDING_PAGE_FEATURE
 		bool "Zyxel landing page"
@@ -1778,7 +1916,11 @@ menu "ZyXEL Userspace Features"
 	default n
 
 	config ZYXEL_WAN_MAC
-		bool "Enable/Disable WAN MAC address assignment for Ethernet WAN"
+		bool "Enable/Disable WAN MAC address assignment by user defined"
+		default n
+
+	config ZYXEL_FIX_WAN_MAC
+		bool "Enable/Diasble Fixed WAN MAC address sequence arrangement"
 		default n
 
 	config ZYXEL_INTFGUP_ACCEPT_BIND_ONLY_WAN
@@ -1840,6 +1982,11 @@ menu "ZyXEL Userspace Features"
         config ZCFG_LOG_USE_DEBUGCFG
                 bool "Utilize rdm log settings to config debug options"
                 default n
+
+        config ZLOG_USE_DEBUG
+                bool "Utilize zlog setting to config debug options"
+                default n
+                select PACKAGE_syslog-ng
 
         config CORE_DUMP_ZCMD
                 bool "Save the zcmd core dump log to /var/log/core_zcmd"
@@ -1934,6 +2081,10 @@ menu "ZyXEL Userspace Features"
 	config ZYXEL_DHCPV6C_OPTION
 		bool "Support dhcpv6 client options on TR98 table"
 		default n
+		
+	config ZYXEL_GRE
+		bool "Support gre tunnel"
+		default n
 
 	config ZYXEL_WEB_GUI_SHOW_PWR_MGMT
 		bool "Zyxel Web Gui show Power Management related pages"
@@ -1944,6 +2095,15 @@ menu "ZyXEL Userspace Features"
 		bool "InActive the FW ID check by default. Or switch via the command of sys fwidcheck."
 		default n
 		
+	config ZYXEL_FW_ID_CHECK_PREVENT_DOWNGRADE
+		bool "Implement mechanisms to prevent the installation of a previous firmware version(downgrade)"
+		default n
+		depends on ZYXEL_FW_ID_CHECK_FW_UPGRADE
+
+	config ZYXEL_FW_SIGNATURE_SUPPORT
+		bool "Implement mechanisms to upgrade FW with digital signature check"
+		default n
+
 	config ZYXEL_MODEL_ID_CHECK_FW_UPGRADE
 		bool "Active the Model ID check by default. Or switch via the command of sys modelcheck."
 		default n
@@ -1958,6 +2118,14 @@ menu "ZyXEL Userspace Features"
 
 	config ZYXEL_ENABLE_STP
 		bool "Enable STP when brige interface create"
+		default n
+	
+	config ZYXEL_ZYCLI_SUPERVISOR_IPTABLES
+		bool "Support iptables cmd with supervisor in zycli"
+		default n
+
+	config ZYXEL_ZYCLI_SUPERVISOR_TCPDUMP
+		bool "Support tcpdump cmd with supervisor in zycli"
 		default n
 
 	config ZYXEL_BLOCK_239_255_255_250
@@ -2062,7 +2230,15 @@ menu "ZyXEL Userspace Features"
       config ZYXEL_SIP_DELAYTIMES
                 bool "Add Sip Linkup delaytimes."
                 default n
+
+	config ZYXEL_TR69_DATA_USAGE
+		bool "LAN and WAN Tx and Rx Mbps monitor."
+		default n
                                 
+	config ZYXEL_TR69_SUPPLEMENTAL_ACS
+		bool "Supplemental ACS."
+		default n
+
 endmenu
 
 menu "ZyXEL Kernel Features"
@@ -2078,10 +2254,17 @@ menu "ZyXEL Kernel Features"
 	config KERNEL_ZYXEL_EOGRE_SUPPORT
 		bool "Support EoGRE Tunnel"
 		default n
+		
+	config KERNEL_ZYXEL_SUPPORT_USB_FALL_BACK_2_0
+		bool "Usb can be set by user manually"
+		default n
 
 endmenu
 
 menu "ZyXEL WEB GUI"
+	config ZyXEL_HTTP_CGI_ENC
+		bool "Zyxel encrypted JSON data for CGI's response on GUI 1.1"
+		default n
 
 	config ZyXEL_WEB_GUI_HIDE_802_1x
 		bool "Zyxel Web Gui hide 802.1x related pages and options"
@@ -2187,6 +2370,14 @@ menu "ZyXEL WEB GUI"
 	config ZyXEL_WEB_GUI_HIDE_SP_DOMAIN
 		bool "Zyxel Web Gui hide SP Domain page"
 		default n
+		
+	config ZYXEL_WEB_GUI_SUPPORT_PAGE_SUBJECT_PATH
+		bool "Zyxel Web Gui support page subject path"
+		default n
+		help
+		  New GUI support page title with page subject path.
+		  (ex.Network > Broadband > Add New WAN Interface) 
+		  Last position will show with bold font.
 
 	config ZYXEL_WEB_GUI_NUM_OF_WAN_INTF
 		int "Maximum number of WAN interfaces"
@@ -2208,6 +2399,10 @@ menu "ZyXEL WEB GUI"
 		bool "Show status on index"
 		default n
 
+	config ZYXEL_WEB_GUI_WIFI_SHOW_FLAG
+		hex "WIFI compile flag on Web Gui"
+		default 0x2
+
 	config ZyXEL_WEB_GUI_MGMT_SET_BIND_INTF_BY_SERVICE
 		bool "Zyxel Web Gui Set Remote MGMT Interface Binding By Each Service"
 
@@ -2223,9 +2418,37 @@ menu "ZyXEL WEB GUI"
                 bool "Show new style of networkMap page that was copied from CBT aim at original networkMap page instead."
                 default n
 
-    config ZYXEL_POWERMONITOR_ENABLE
+        config ZYXEL_POWERMONITOR_ENABLE
 		bool "Zyxel Web Gui show Power Status"
 		default n
+
+        config ZYXEL_GUIVUE_CONNECTIVITY_CARDPAGE_DETAIL_INFO
+                bool "Zyxel Web Gui VUE show detail information on connectivity of cardpage"
+                default n
+
+        config ZYXEL_GUIVUE_USB_INFO_SHOW_SYSINFO
+                bool "Replace 3G status with USB status."
+                default n
+				
+        config ZYXEL_GUIVUE_HTTP_REDIRECT_TO_HTTPS
+                bool "If user access GUI form WAN, it's necessary to add https"
+                default n
+
+        config ZYXEL_GUIVUE_SHOW_ALLWIFI_CHANNEL
+                bool "NEW Behavior for SHOW all wifi channel in wifi general page of GUI_vue."
+                default n
+
+endmenu
+
+menu "Manufacture feature "
+
+		config APPS_VOIP_AUTO_TEST
+			bool "Support VOIP Auto Test"
+	    	default n
+
+		config MINI_BOOT
+			bool "Support mini boot"
+	    	default n
 
 endmenu
 
@@ -2443,6 +2666,10 @@ menu "Customization"
 		config CBT_CUSTOMIZATION
 		bool "CBT Customization"
 		default n
+		
+		config CBT_PUBLIC_LAN
+		bool "New style for CBT public lan"
+		default n
 
 	endmenu
 	
@@ -2507,7 +2734,7 @@ menu "Customization"
 		default n
 
 	endmenu
-	
+
 	menu "ISKON"
 		config USE_OLD_VOIP_PREFIX
 		bool "Use old TR98 VOIP parameter prefix X_ZyXEL_COM_"
@@ -2524,21 +2751,33 @@ menu "Customization"
                 config ISKON_CUSTOMIZATION_Motorola_VIP1003
                 bool "For Iskon Motorola_VIP1003 LAN bridge switching issue"
                 default n
-
 	endmenu
 
         menu "Hawaiian Telcom"
                 config HAWAIIAN_TELCOM 
                 bool "Hawaiian Telcom(HT)"
                 default n
-
         endmenu
 
 	menu "Altibox"
 		config ALTIBOX_CUSTOMIZATION
 		bool "Altibox customization"
 		default n
+	endmenu
 
+	menu "TIM"
+		config TIM_Y2015_CUSTOMIZATION
+		bool "TIM_Y2015_CUSTOMIZATION"
+		default n
+
+		config ABOG_CUSTOMIZATION
+		bool "ABOG customization"
+		default n
+
+		config TIM_CUSTOMIZATION
+		bool "Mobile / TIM (Telecom Italia) Customization"
+		default n
+		default y  if (TIM_Y2015_CUSTOMIZATION || ABOG_CUSTOMIZATION)
 	endmenu
 
 endmenu

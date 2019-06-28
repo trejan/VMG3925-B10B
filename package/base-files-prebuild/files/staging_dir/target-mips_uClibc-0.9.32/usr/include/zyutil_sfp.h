@@ -13,6 +13,8 @@ typedef struct sfp_ddmi_state
    unsigned char sfp_sn[DDMI_STRING_MAX_LENGTH];		// Vendor serial number, end with 0x20
 }sfp_ddmi_state_t;
 
+
+
 /*!
  *  Open first i2c bus, /dev/i2c-0
  *
@@ -67,5 +69,25 @@ int dump_DDMI_state(sfp_ddmi_state_t *ddmi_state);
  *
  */
 int zyUtil_sfp_read_ddmi_state(sfp_ddmi_state_t *ddmi_state);
+
+/*!
+ *  Check mii if the SFP module is link up or not.
+ *
+ *  @return     1 means up, 0 means down, -1 means access fail.
+ *
+ */
+int zyUtil_is_sfp_linkup(void);
+
+ 
+#ifdef BROADCOM_PLATFORM
+  /*!
+  *  ioctl get SFP speed/duplex.
+  *
+  *  @return	 0 if succeed
+  *
+  */
+int zyUtil_netdevice_sfp_info(char* ifname, int* intIfBitRate, int* intIfDuplex);
+
+#endif
 
 #endif

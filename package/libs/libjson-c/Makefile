@@ -38,6 +38,12 @@ ifeq ("$(strip ${ZCFG_PLATFORM})","BROADCOM")
 TARGET_CFLAGS += -Wno-error=unused-but-set-variable
 endif
 
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+CONFIGURE_ARGS += \
+	ac_cv_func_strdup=yes \
+	ac_cv_func_strncasecmp=yes \
+	ac_cv_func_snprintf=yes
+endif
 define Package/libjson
   SECTION:=libs
   CATEGORY:=Libraries
@@ -47,6 +53,19 @@ endef
 define Package/libjson/description
  This package contains a library for javascript object notation backends.
 endef
+
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+define Package/libjson-c
+  SECTION:=libs
+  CATEGORY:=Libraries
+  TITLE:=javascript object notation
+  URL:=http://oss.metaparadigm.com/json-c/
+endef
+
+define Package/libjson-c/description
+ This package contains a library for javascript object notation backends.
+endef
+endif
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include
@@ -65,6 +84,12 @@ else
 endif	
 	
 endef
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+define Package/libjson-c/install
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libjson-c.so.* $(1)/usr/lib/
+endef
+endif
 
 define Package/libjson/install
 	$(INSTALL_DIR) $(1)/usr/lib
@@ -78,3 +103,6 @@ endif
 endef
 
 $(eval $(call BuildPackage,libjson))
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+$(eval $(call BuildPackage,libjson-c))
+endif

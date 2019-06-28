@@ -47,6 +47,10 @@ ifeq ($(CONFIG_CBT_CUSTOMIZATION),y)
 FTP_CFLAGS += -DCBT_CUSTOMIZATION
 endif
 
+ifeq ($(CONFIG_ABOG_CUSTOMIZATION),y)
+FTP_CFLAGS += -DABOG_CUSTOMIZATION
+endif
+
 define Build/Configure
 	$(call Build/Configure/Default, \
 		--with-throttling \

@@ -20,6 +20,13 @@ tr98Parameter_t para_DevInfo[] = {
 	{ NULL, 0, 0, 0}
 };
 
+tr98Parameter_t para_MemoryStatus[] = {
+	{ "Total", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
+	{ "Free", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
+	{ NULL, 0, 0}
+};
+
+
 tr98Parameter_t para_DevInfoVendorCfg[] = {
 	{ "Alias", PARAMETER_ATTR_WRITE, 65, json_type_string},
 	{ "Name", PARAMETER_ATTR_READONLY, 65, json_type_string},

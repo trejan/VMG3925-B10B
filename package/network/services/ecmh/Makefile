@@ -27,6 +27,12 @@ endef
 
 PACKAGE_CFLAGS += -DTRENDCHIP -I$(LINUX_DIR)/include
 MAKE_FLAGS += LINUX_DIR=$(LINUX_DIR)
+MAKE_FLAGS += ZCFG_PLATFORM=ECONET
+ifeq ("$(strip ${ZCFG_PLATFORM})","ECONET")
+ifeq ("$(strip $(CONFIG_$(subst $\",,$(CONFIG_CUSTOM_SDK_PREFIX))_TCSUPPORT_3_18_21_KERNEL))","y")
+MAKE_FLAGS += TCSUPPORT_3_18_21_KERNEL=y
+endif
+endif
 
 define Package/ecmh/install
 	$(INSTALL_DIR) $(1)/userfs/bin

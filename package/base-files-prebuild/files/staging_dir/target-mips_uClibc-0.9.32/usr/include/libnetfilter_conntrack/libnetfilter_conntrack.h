@@ -1,8 +1,10 @@
 /*
- * (C) 2005-2008 by Pablo Neira Ayuso <pablo@netfilter.org>
+ * (C) 2005-2011 by Pablo Neira Ayuso <pablo@netfilter.org>
  *
- * This software may be used and distributed according to the terms
- * of the GNU General Public License, incorporated herein by reference.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  */
 
 #ifndef _LIBNETFILTER_CONNTRACK_H_
@@ -130,6 +132,9 @@ enum nf_conntrack_attr {
 	ATTR_SECCTX,				/* string */
 	ATTR_TIMESTAMP_START,			/* u64 bits, linux >= 2.6.38 */
 	ATTR_TIMESTAMP_STOP = 64,		/* u64 bits, linux >= 2.6.38 */
+	ATTR_HELPER_INFO,			/* variable length */
+	ATTR_CONNLABELS,			/* variable length */
+	ATTR_CONNLABELS_MASK,			/* variable length */
 	ATTR_MAX
 };
 
@@ -147,6 +152,10 @@ enum nf_conntrack_attr_grp {
 	ATTR_GRP_MASTER_PORT,			/* struct nfct_attr_grp_port */
 	ATTR_GRP_ORIG_COUNTERS,			/* struct nfct_attr_grp_ctrs */
 	ATTR_GRP_REPL_COUNTERS,			/* struct nfct_attr_grp_ctrs */
+	ATTR_GRP_ORIG_ADDR_SRC = 12,		/* union nfct_attr_grp_addr */
+	ATTR_GRP_ORIG_ADDR_DST,			/* union nfct_attr_grp_addr */
+	ATTR_GRP_REPL_ADDR_SRC,			/* union nfct_attr_grp_addr */
+	ATTR_GRP_REPL_ADDR_DST,			/* union nfct_attr_grp_addr */
 	ATTR_GRP_MAX
 };
 
@@ -170,6 +179,12 @@ struct nfct_attr_grp_icmp {
 struct nfct_attr_grp_ctrs {
 	u_int64_t packets;
 	u_int64_t bytes;
+};
+
+union nfct_attr_grp_addr {
+	u_int32_t ip;
+	u_int32_t ip6[4];
+	u_int32_t addr[4];
 };
 
 /* message type */
@@ -260,6 +275,26 @@ enum {
 	NFCT_CB_STOLEN = 2,     /* like continue, but ct is not freed */
 };
 
+/* bitmask setter/getter */
+struct nfct_bitmask;
+
+struct nfct_bitmask *nfct_bitmask_new(unsigned int maxbit);
+struct nfct_bitmask *nfct_bitmask_clone(const struct nfct_bitmask *);
+unsigned int nfct_bitmask_maxbit(const struct nfct_bitmask *);
+
+void nfct_bitmask_set_bit(struct nfct_bitmask *, unsigned int bit);
+int nfct_bitmask_test_bit(const struct nfct_bitmask *, unsigned int bit);
+void nfct_bitmask_unset_bit(struct nfct_bitmask *, unsigned int bit);
+void nfct_bitmask_destroy(struct nfct_bitmask *);
+
+/* connlabel name <-> bit translation mapping */
+struct nfct_labelmap;
+
+struct nfct_labelmap *nfct_labelmap_new(const char *mapfile);
+void nfct_labelmap_destroy(struct nfct_labelmap *map);
+const char *nfct_labelmap_get_name(struct nfct_labelmap *m, unsigned int bit);
+int nfct_labelmap_get_bit(struct nfct_labelmap *m, const char *name);
+
 /* setter */
 extern void nfct_set_attr(struct nf_conntrack *ct,
 			  const enum nf_conntrack_attr type,
@@ -280,6 +315,11 @@ extern void nfct_set_attr_u32(struct nf_conntrack *ct,
 extern void nfct_set_attr_u64(struct nf_conntrack *ct,
 			      const enum nf_conntrack_attr type,
 			      u_int64_t value);
+
+extern void nfct_set_attr_l(struct nf_conntrack *ct,
+			    const enum nf_conntrack_attr type,
+			    const void *value,
+			    size_t len);
 
 /* getter */
 extern const void *nfct_get_attr(const struct nf_conntrack *ct,
@@ -358,6 +398,14 @@ extern int nfct_snprintf(char *buf,
 			 const unsigned int out_type,
 			 const unsigned int out_flags);
 
+extern int nfct_snprintf_labels(char *buf,
+				unsigned int size,
+				const struct nf_conntrack *ct,
+				const unsigned int msg_type,
+				const unsigned int out_type,
+				const unsigned int out_flags,
+				struct nfct_labelmap *map);
+
 /* comparison */
 extern int nfct_compare(const struct nf_conntrack *ct1,
 			const struct nf_conntrack *ct2);
@@ -390,6 +438,8 @@ enum nf_conntrack_query {
 	NFCT_Q_DUMP,
 	NFCT_Q_DUMP_RESET,
 	NFCT_Q_CREATE_UPDATE,
+	NFCT_Q_DUMP_FILTER,
+	NFCT_Q_DUMP_FILTER_RESET,
 };
 
 extern int nfct_query(struct nfct_handle *h,
@@ -419,7 +469,7 @@ extern void nfct_copy_attr(struct nf_conntrack *ct1,
 			   const struct nf_conntrack *ct2,
 			   const enum nf_conntrack_attr type);
 
-/* filter */
+/* event filtering */
 
 struct nfct_filter;
 
@@ -470,6 +520,33 @@ extern int nfct_filter_set_logic(struct nfct_filter *filter,
 extern int nfct_filter_attach(int fd, struct nfct_filter *filter);
 extern int nfct_filter_detach(int fd);
 
+/* dump filtering */
+
+struct nfct_filter_dump;
+
+struct nfct_filter_dump_mark {
+	u_int32_t val;
+	u_int32_t mask;
+};
+
+enum nfct_filter_dump_attr {
+	NFCT_FILTER_DUMP_MARK = 0,	/* struct nfct_filter_dump_mark */
+	NFCT_FILTER_DUMP_L3NUM,		/* u_int8_t */
+	NFCT_FILTER_DUMP_MAX
+};
+
+struct nfct_filter_dump *nfct_filter_dump_create(void);
+
+void nfct_filter_dump_destroy(struct nfct_filter_dump *filter);
+
+void nfct_filter_dump_set_attr(struct nfct_filter_dump *filter_dump,
+			       const enum nfct_filter_dump_attr type,
+			       const void *data);
+
+void nfct_filter_dump_set_attr_u8(struct nfct_filter_dump *filter_dump,
+				  const enum nfct_filter_dump_attr type,
+				  u_int8_t data);
+
 /* low level API: netlink functions */
 
 extern __attribute__((deprecated)) int
@@ -492,6 +569,12 @@ int nfct_build_query(struct nfnl_subsys_handle *ssh,
 			    void *req,
 			    unsigned int size);
 
+/* New low level API: netlink functions */
+
+extern int nfct_nlmsg_build(struct nlmsghdr *nlh, const struct nf_conntrack *ct);
+extern int nfct_nlmsg_parse(const struct nlmsghdr *nlh, struct nf_conntrack *ct);
+extern int nfct_payload_parse(const void *payload, size_t payload_len, uint16_t l3num, struct nf_conntrack *ct);
+
 /*
  * NEW expectation API
  */
@@ -507,6 +590,11 @@ enum nf_expect_attr {
 	ATTR_EXP_TIMEOUT,	/* u32 bits */
 	ATTR_EXP_ZONE,		/* u16 bits */
 	ATTR_EXP_FLAGS,		/* u32 bits */
+	ATTR_EXP_HELPER_NAME,	/* string (16 bytes max) */
+	ATTR_EXP_CLASS,		/* u32 bits */
+	ATTR_EXP_NAT_TUPLE,	/* pointer to conntrack object */
+	ATTR_EXP_NAT_DIR,	/* u8 bits */
+	ATTR_EXP_FN,		/* string */
 	ATTR_EXP_MAX
 };
 
@@ -596,6 +684,15 @@ extern int nfexp_snprintf(char *buf,
 			  const unsigned int out_type,
 			  const unsigned int out_flags);
 
+/* compare */
+extern int nfexp_cmp(const struct nf_expect *exp1,
+		     const struct nf_expect *exp2,
+		     unsigned int flags);
+
+extern int nfexp_send(struct nfct_handle *h,
+		      const enum nf_conntrack_query qt,
+		      const void *data);
+
 extern int nfexp_catch(struct nfct_handle *h);
 
 /* low level API */
@@ -618,6 +715,11 @@ int nfexp_build_query(struct nfnl_subsys_handle *ssh,
 			     const void *data,
 			     void *buffer,
 			     unsigned int size);
+
+/* New low level API: netlink functions */
+
+extern int nfexp_nlmsg_build(struct nlmsghdr *nlh, const struct nf_expect *exp);
+extern int nfexp_nlmsg_parse(const struct nlmsghdr *nlh, struct nf_expect *exp);
 
 /* Bitset representing status of connection. Taken from ip_conntrack.h
  * 
@@ -709,6 +811,11 @@ enum ip_conntrack_status {
 #define NFCT_DIR_ORIGINAL 0
 #define NFCT_DIR_REPLY 1
 #define NFCT_DIR_MAX NFCT_DIR_REPLY+1
+
+/* xt_helper uses a length size of 30 bytes, however, no helper name in
+ * the tree has exceeded 16 bytes length. Since 2.6.29, the maximum
+ * length accepted is 16 bytes, this limit is enforced during module load. */
+#define NFCT_HELPER_NAME_MAX	16
 
 #ifdef __cplusplus
 }

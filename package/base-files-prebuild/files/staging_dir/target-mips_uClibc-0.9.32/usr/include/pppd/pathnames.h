@@ -61,5 +61,10 @@
 #endif /* __STDC__ */
 
 #ifdef PLUGIN
-#define _PATH_PLUGIN	"/usr/lib/pppd/" VERSION
+#if 1 /* <JoannaSu>, <20180313>, <pppd reated plugins are installed in /lib. Change it due to depend on dlopen> */
+#define _PATH_PLUGIN    "/lib"
+#else
+#define _PATH_PLUGIN    "/usr/lib/pppd/" VERSION
+#endif /* <JoannaSu>, <20180313>, <pppd reated plugins are installed in /lib. Change it due to depend on dlopen> */
+
 #endif /* PLUGIN */

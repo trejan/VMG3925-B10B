@@ -27,6 +27,10 @@ ifneq ($(HOST_OS),Linux)
 CFLAGS += -Dloff_t=off_t -D__BYTE_ORDER=BYTE_ORDER -include getline.h -include endian.h -I$(CURDIR)/include -include fls.h
 endif
 
+ifeq ($(ZCFG_PLATFORM),BROADCOM)
+CFLAGS += -D__$(ZCFG_PLATFORM)_PLATFORM__
+endif
+
 MTD_MAKEOPTS = \
 	CFLAGS="$(CFLAGS)" \
 	LDFLAGS="$(HOST_LDFLAGS) $(HOST_STATIC_LINKING)" \
@@ -64,7 +68,7 @@ define Host/Install
 endef
 
 define Host/Clean
-	rm -f $(STAGING_DIR_HOST)/bin/{mkfs.jffs2,mkfs.ubifs,ubinize}
+	rm -f $(STAGING_DIR_HOST)/bin/{mkfs.jffs2,sumtool,mkfs.ubifs,ubinize}
 endef
 
 $(eval $(call HostBuild))

@@ -5,7 +5,7 @@ LIB_NAME    = libzos
 OBJS        = zos_api.o
 CURRENT_DIR = $(shell pwd)
 
-#LINK_LIB = -lpthread
+LINK_LIB = -lrt -lzlog
 #LIBS_PATH =
 LDFLAGS += $(LIBS_PATH) $(LINK_LIB)
 
@@ -17,7 +17,7 @@ CFLAGS += -I. -std=gnu99
 all: clean $(LIB_NAME)
 
 .c.o:
-	$(CC) $(CFLAGS) -Werror -fPIC -c $< -o $@
+	$(CC) $(CFLAGS) -Wall -Werror -fPIC -c $< -o $@
 
 $(LIB_NAME) : $(OBJS)
 	$(CC) $(LDFLAGS) -shared -o $(LIB_NAME).so $(OBJS)

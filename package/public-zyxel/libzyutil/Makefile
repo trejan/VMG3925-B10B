@@ -27,8 +27,9 @@ include $(INCLUDE_DIR)/package.mk
 
 export CONFIG_ELISA_CUSTOMIZATION PRODUCT_NAME CONFIG_ZYXEL_RMA_FW_SUPPORT
 export CONFIG_ZYXEL_IPV6_UPLOAD_DIAG_ENABLE
+export CONFIG_WIND_ITALY_CUSTOMIZATION
 
-PKG_BUILD_DEPENDS:=zcfg libjson libopenssl
+PKG_BUILD_DEPENDS:=zcfg libjson libopenssl libzlog libzos
 
 define Package/libzyutil
 SECTION:=net
@@ -74,8 +75,16 @@ ifeq ($(CONFIG_BRCM_SDK_VERSION), "416L05")
 EXTRA_CFLAGS += -DNEW_MTD_DRIVER
 endif
 
+ifeq ($(CONFIG_BRCM_SDK_VERSION), "502L04")
+EXTRA_CFLAGS += -DNEW_MTD_DRIVER
+endif
+
 ifneq ($(strip $(TCSUPPORT_BOOTROM_LARGE_SIZE)),)
 EXTRA_CFLAGS += -DBOOTROM_LARGE_SIZE
+endif
+
+ifeq ($(CONFIG_ABOG_CUSTOMIZATION),y)
+EXTRA_CFLAGS += -DABOG_CUSTOMIZATION
 endif
 
 EXTRA_CFLAGS += -I$(LINUX_DIR)/user_headers/include
@@ -89,6 +98,9 @@ endif
 ifeq ("$(strip ${ZCFG_PLATFORM})","ECONET")
 ifneq ($($(shell echo CONFIG_$(CONFIG_CUSTOM_SDK_PREFIX)_ZYXEL_LAN_WAN_WLAN_SHARE_THE_SAME_MAC)),)
 EXTRA_CFLAGS += -DZYXEL_LAN_WAN_WLAN_SHARE_THE_SAME_MAC
+endif
+ifeq ($(CONFIG_TC_SDK_7_3_245_300),y)
+EXTRA_CFLAGS += -DNEW_MTD_DRIVER
 endif
 endif
 
@@ -119,6 +131,10 @@ define Build/Compile
 		EXTRA_CFLAGS="$(EXTRA_CFLAGS)" \
 		STAGING_DIR_HOST=$(STAGING_DIR_HOST)
 endef
+else ifeq ("$(ZCFG_PLATFORM)","QUALCOMM")
+define Build/Compile
+	$(call Build/Compile/Default, EXTRA_CFLAGS="-DNEW_MTD_DRIVER")
+endef
 endif
 
 
@@ -131,10 +147,13 @@ define Build/InstallDev
 endef
 
 define Package/libzyutil/install
-	$(INSTALL_DIR) $(1)/lib/public
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libzyutil.so $(1)/lib/public
+	$(INSTALL_DIR) $(1)/lib
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME).so $(1)/lib
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libdebug.a $(STAGING_DIR)/usr/lib
-	ln -s /lib/public/libzyutil.so $(1)/lib/libzyutil.so
+#	$(INSTALL_DIR) $(1)/lib/public
+#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libzyutil.so $(1)/lib/public
+#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libdebug.a $(STAGING_DIR)/usr/lib
+#	ln -s /lib/public/libzyutil.so $(1)/lib/libzyutil.so
 endef
 
 $(eval $(call BuildPackage,libzyutil))

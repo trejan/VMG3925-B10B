@@ -7,8 +7,8 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/Makefile
  EXTRA_CFLAGS += -DZYXEL_SFP_TX_FAULT_PIN
  endif
 +#ZYXEL USB3.0 or USB2.0 can be set by user manually
-+ifeq ($(strip ${ZYXEL_USB_SET_MANUALLY}),y)
-+EXTRA_CFLAGS += -DZYXEL_USB_SET_MANUALLY
++ifeq ($(strip ${ZYXEL_SUPPORT_USB_FALL_BACK_2_0}),y)
++EXTRA_CFLAGS += -DZYXEL_SUPPORT_USB_FALL_BACK_2_0
 +endif
  else
  EXTRA_CFLAGS += -DZYXEL=0
@@ -21,7 +21,7 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
  #define CAP_TYPE_OHCI       0x01
  #define CAP_TYPE_XHCI       0x02
  
-+#if defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++#if defined(ZYXEL_SUPPORT_USB_FALL_BACK_2_0) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
 +int USB3_ENABLE;
 +#endif
 +
@@ -32,7 +32,7 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
  {
     
       short usb_gpio;
-+#if defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++#if defined(ZYXEL_SUPPORT_USB_FALL_BACK_2_0) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
 +	 const char *name = "xhci_hcd";
 +#endif
  
@@ -42,7 +42,7 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
         }
      }
  
-+#if defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++#if defined(ZYXEL_SUPPORT_USB_FALL_BACK_2_0) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
 +	mutex_lock(&module_mutex);
 +	if (find_module(name) != NULL)
 +	{
@@ -86,7 +86,7 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
 +		bcm63138B0_manual_usb_ldo_start();
 +#endif
 +	}
-+#else  //defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++#else  //defined(ZYXEL_SUPPORT_USB_FALL_BACK_2_0) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
  #if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
      /*enable SSC for usb3.0 */
       usb3_ssc_enable();
@@ -94,7 +94,7 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
  #endif
  
  #endif/* defined(CONFIG_USB_XHCI_PLATFORM) */
-+#endif //defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++#endif //defined(ZYXEL_SUPPORT_USB_FALL_BACK_2_0) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
  
  
      /*adjust the default AFE settings for better eye diagrams */
@@ -105,7 +105,7 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
 -
 -#if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
 -
-+#if defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++#if defined(ZYXEL_SUPPORT_USB_FALL_BACK_2_0) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
 +	if (USB3_ENABLE)
 +	{
  #if defined(CONFIG_BCM963138)
@@ -123,7 +123,7 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
 +		xhci_dev = bcm_add_usb_host(CAP_TYPE_XHCI, 0, USB_XHCI_PHYS_BASE,
 +			0x1000, INTERRUPT_ID_USB_XHCI, "xhci-hcd", NULL);
 +	}
-+#else //defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++#else //defined(ZYXEL_SUPPORT_USB_FALL_BACK_2_0) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
 +
 +#if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
 +	
@@ -138,7 +138,7 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
 +    xhci_dev = bcm_add_usb_host(CAP_TYPE_XHCI, 0, USB_XHCI_PHYS_BASE,
 +			0x1000, INTERRUPT_ID_USB_XHCI, "xhci-hcd", NULL);
 +#endif/*defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)*/
-+#endif //defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++#endif //defined(ZYXEL_SUPPORT_USB_FALL_BACK_2_0) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
 +
 +
      ehci_dev = bcm_add_usb_host(CAP_TYPE_EHCI, 0, USB_EHCI_PHYS_BASE,
@@ -148,7 +148,7 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
  #if defined CONFIG_USB_EHCI_HCD_MODULE || defined CONFIG_USB_XHCI_HCD_MODULE
  static void bcm_mod_cleanup(void)
  {
-+#if defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++#if defined(ZYXEL_SUPPORT_USB_FALL_BACK_2_0) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
 +		if (USB3_ENABLE)
 +		{
 +		    // we want to just disable usb interrupts and power down usb
@@ -161,7 +161,7 @@ Index: linux-3.4.11/arch/arm/plat-bcm63xx/bcm63xx_usb.c
  #if defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE)
      platform_device_del(xhci_dev);
  #endif
-+#endif //defined(ZYXEL_USB_SET_MANUALLY) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
++#endif //defined(ZYXEL_SUPPORT_USB_FALL_BACK_2_0) && (defined(CONFIG_USB_XHCI_PLATFORM) || defined(CONFIG_USB_XHCI_PLATFORM_MODULE))
 +
      platform_device_del(ehci_dev);
      platform_device_del(ohci_dev);

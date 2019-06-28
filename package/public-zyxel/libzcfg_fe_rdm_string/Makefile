@@ -68,9 +68,11 @@ define Build/InstallDev
 endef
 
 define Package/libzcfg_fe_rdm_string/install
-	$(INSTALL_DIR) $(1)/lib/public
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libzcfg_fe_rdm_string.so $(1)/lib/public
-	ln -s /lib/public/libzcfg_fe_rdm_string.so $(1)/lib/libzcfg_fe_rdm_string.so
+	$(INSTALL_DIR) $(1)/lib
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME).so $(1)/lib
+#	$(INSTALL_DIR) $(1)/lib/public
+#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libzcfg_fe_rdm_string.so $(1)/lib/public
+#	ln -s /lib/public/libzcfg_fe_rdm_string.so $(1)/lib/libzcfg_fe_rdm_string.so
 endef
 
 $(eval $(call BuildPackage,libzcfg_fe_rdm_string))

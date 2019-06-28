@@ -8,15 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=readline
-PKG_VERSION:=6.2
+PKG_VERSION:=5.2
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-#PKG_SOURCE_URL:=@GNU/readline
 PKG_SOURCE_URL:=@ZyXEL_SITE/opensource/libs
-PKG_MD5SUM:=67948acb2ca081f23359d0256e9a271c
 
-PKG_LICENSE:=GPLv3
+PKG_LICENSE:=GPLv2
 PKG_LICENSE_FILES:=COPYING
 
 PKG_BUILD_PARALLEL:=1
@@ -62,12 +60,12 @@ define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/readline $(1)/usr/include/
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{history,readline}.{a,so,so.6,so.6.2} $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{history,readline}.{a,so*} $(1)/usr/lib/
 endef
 
 define Package/libreadline/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{history,readline}.{so,so.6,so.6.2} $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{history,readline}.so.* $(1)/usr/lib/
 endef
 
 $(eval $(call BuildPackage,libreadline))

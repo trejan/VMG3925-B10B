@@ -39,7 +39,7 @@ Index: libzcfg_fe_dal-1.0/network/wireless/zcfg_fe_dal_wifi_general.c
  	if(wifiApObj) zcfgFeObjJsonSetWithoutApply(RDM_OID_WIFI_ACCESS_POINT, &wifiApIid, wifiApObj, NULL);
  	if(wifiSecObj) zcfgFeObjJsonSetWithoutApply(RDM_OID_WIFI_ACCESS_POINT_SEC, &wifiSecIid, wifiSecObj, NULL);
 +#ifdef WIFI_ONESSID_SECURITY_SYNC
-+	if(syncWifiSecObj) zcfgFeObjJsonSetWithoutApply(RDM_OID_WIFI_ACCESS_POINT_SEC, &syncWifiSecIid, syncWifiSecObj, NULL);
++	if(syncWifiSecObj) zcfgFeObjJsonBlockedSet(RDM_OID_WIFI_ACCESS_POINT_SEC, &syncWifiSecIid, syncWifiSecObj, NULL);
 +#endif //WIFI_ONESSID_SECURITY_SYNC
  	if(wifiRadioObj) zcfgFeObjJsonSetWithoutApply(RDM_OID_WIFI_RADIO, &wifiRadioIid, wifiRadioObj, NULL);
  	if(wifiSsidObj)zcfgFeObjJsonBlockedSet(RDM_OID_WIFI_SSID, &wifiSsidIid, wifiSsidObj, NULL);

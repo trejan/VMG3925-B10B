@@ -17,4 +17,9 @@ else
 	cat $TOPDIR/configs/$P/platform.defconfig $TOPDIR/configs/$P/project.defconfig > $TOPDIR/.config
 fi
 
-
+if [[ "$P" == "ipq807x" ]] ; then
+	echo "QCA PLATFORM, use right version."
+	rm -rf $TOPDIR/include $TOPDIR/scripts
+	cp -rf $TOPDIR/include_qca $TOPDIR/include
+	cp -rf $TOPDIR/scripts_qca $TOPDIR/scripts
+fi

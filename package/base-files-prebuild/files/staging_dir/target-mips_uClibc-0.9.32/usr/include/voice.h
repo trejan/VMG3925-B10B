@@ -123,7 +123,7 @@ tr98Parameter_t para_VoiceProf[] = {
 	//{ "X_ZYXEL_LogServerPort", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	//{ "X_ZYXEL_SPNum", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	//{ "X_ZYXEL_V18_Support", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
-	//{ "X_ZYXEL_VoipIOPFlags", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
+	{ "X_ZYXEL_VoipIOPFlags", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	//{ "X_ZYXEL_P_AccessNetworkInfo", PARAMETER_ATTR_WRITE, 128, json_type_string},
 	//{ "X_ZYXEL_BoundIfName", PARAMETER_ATTR_WRITE, 33, json_type_string},
 	//{ "X_ZYXEL_BoundIfList", PARAMETER_ATTR_WRITE, 257, json_type_string},
@@ -203,6 +203,7 @@ tr98Parameter_t para_VoiceProfSip[] = {
 #else
 	{ "X_ZYXEL_Rfc3263Support", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 #endif
+	{ "X_ZYXEL_BackupServer", PARAMETER_ATTR_WRITE, 257, json_type_string},
 	{ NULL, 0, 0, 0}
 };
 tr98Parameter_t para_VoiceProfSipSubscribeObj[] = {
@@ -591,6 +592,7 @@ tr98Parameter_t para_VoiceCommon[] = {
 	//{ "X_ZYXEL_Pound", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "VoipIOPFlags", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
 	{ "P_AccessNetworkInfo", PARAMETER_ATTR_WRITE, 128, json_type_string},
+	{ "UserAgent_strReplaceRule", PARAMETER_ATTR_WRITE, 257, json_type_string},
 	{ NULL, 0, 0, 0}
 };
 tr98Parameter_t para_VoicePhoneBook[] = {

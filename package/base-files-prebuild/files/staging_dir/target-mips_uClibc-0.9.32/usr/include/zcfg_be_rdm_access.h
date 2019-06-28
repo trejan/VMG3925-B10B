@@ -43,6 +43,8 @@ zcfgRet_t zcfgBeRdmReqGetNext(zcfg_offset_t rdmObjId, objIndex_t *objIid, char *
 zcfgRet_t zcfgBeRdmReqSet(zcfg_offset_t , objIndex_t *, void *, uint32_t , char *);
 zcfgRet_t zcfgBeRdmReqSetWitoutApply(zcfg_offset_t , objIndex_t *, void *, uint32_t , char *);
 
+zcfgRet_t zcfgBeRdmModuleSet(zcfg_offset_t , objIndex_t *, struct json_object *, uint32_t );
+
 zcfgRet_t zcfgBeLanAppySyncDhcp4Server();
 
 struct json_object *zcfgBeApplyObjRetrievePartialObj(void *obj);

@@ -23,13 +23,17 @@
 #include "cwmptypedef.h"
 
 #define TR069CMD_PATH "/tmp/tr069_cmd"
+#ifdef ZYXEL_TR69_SUPPLEMENTAL_ACS
+#define TR069CMD_SUPPLEMENTAL_PATH "/tmp/tr069_supplemental_cmd"
+#endif
 #ifdef ISKON_CUSTOMIZATION
 #define TR069CMD_OUTPUT "/tmp/tr069cmdOutputData"
 #endif
 #define SIZE_IPCVAL				1024 /*ObjectValue*/
 
 extern uint32_t TR069_FEATURE_Flag;
-#define TR069_FEATURE_UPLOAD_BY_PUT                           0x00000001 // bit0
+#define TR069_FEATURE_UPLOAD_BY_PUT		(1 << 0) // RPC upload file by PUT method instead of POST.
+#define TR069_FEATURE_CLEARTEXT_PSK		(1 << 1) // readable psk instead of empty string.
 
 typedef enum tr069IpcCmd_s{
 	eTr069IpcEnable,
@@ -37,8 +41,6 @@ typedef enum tr069IpcCmd_s{
 	eTr069IpcClose,
 	eTr069IpcDebugOn,
 	eTr069IpcDebugOff,
-	eTr069IpcFeatureOn,
-	eTr069IpcFeatureOff,
 	eTr069IpcDisplay,
 	eTr069IpcActive,
 	eTr069IpcIpProtocol,
@@ -60,7 +62,6 @@ typedef struct tr069IpcMsgData_s{
 	char data[SIZE_IPCVAL+1];
 }tr069IpcMsgData_t;
 
-extern void TR069_FEATURE_CONFIG( uint32 flag );
 void cwmp_cmd_task(void);
 
 #endif /*_CWMP_CMD_H_*/

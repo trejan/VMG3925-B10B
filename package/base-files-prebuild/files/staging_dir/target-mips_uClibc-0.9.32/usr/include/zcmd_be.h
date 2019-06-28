@@ -10,3 +10,4 @@ typedef struct zcmdBeConfigRegData_s {
 int zcmdBeDataModelMode();
 void zcmdBeRegConfigObj(const zcmdBeConfigRegData_t *);
 void zcmdBeAcsSpvNotifyRequired(bool);
+void zcmdBeforceNotifyRequired(bool notifyRequried);

@@ -481,9 +481,9 @@ Index: libzcfg_fe_tr98-1.0/ipv6Spec.c
 +			struct tm *nPtr=NULL;
 +			char RouteLifeTimeStr[24];
 +
-+			paramValue = json_object_object_get(routeInfoObj, "X_ZYXEL_RouterLifetime");
++			paramValue = json_object_object_get(routeInfoObj, "X_ZYXEL_RouterLifetimeReal");
 +			if(paramValue != NULL){
-+				//printf("X_ZYXEL_RouterLifetime=%d\n",json_object_get_int(paramValue));
++				//printf("X_ZYXEL_RouterLifetimeReal=%d\n",json_object_get_int(paramValue));
 +				life_time=json_object_get_int(paramValue);
 +				nPtr = localtime(&life_time);
 +				memset(RouteLifeTimeStr, 0, sizeof(RouteLifeTimeStr));

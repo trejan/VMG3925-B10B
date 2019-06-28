@@ -15,8 +15,25 @@ FEATURES:=usb pci pcmcia
 ifeq ($(shell grep CONFIG_BRCM963xx_SDK_VER_412L08 $(TOPDIR)/.config | cut -d'=' -f2),y)
 LINUX_VERSION:=2.6.30
 else
+ifeq ($(shell grep CONFIG_BRCM963xx_SDK_VER_502L04 $(TOPDIR)/.config | cut -d'=' -f2),y)
+LINUX_VERSION:=4.1.45
+else
 LINUX_VERSION:=3.4.11
 endif
+endif
+
+ifeq ($(CONFIG_BRCM_SDK_VERSION), "416L05")
+ifeq ($(CONFIG_BCM416L05_WIFI_VER_7_14_164_23),y)
+WIFI_DRIVER_VER:=7_14_164_23
+else ifeq ($(CONFIG_BCM416L05_WIFI_VER_7_14_164_20),y)
+WIFI_DRIVER_VER:=7_14_164_20_NEW
+else ifeq ($(CONFIG_BCM416L05_WIFI_VER_7_14_164_303),y)
+WIFI_DRIVER_VER:=7_14_164_303_NEW
+else
+WIFI_DRIVER_VER:=7_14_164_23
+endif
+endif
+
 
 SUBTARGETS:=96838GWOV 963138ref 963269bhr $(filter fmg% vmg% xmg% emg% ,$(shell find * -maxdepth 0 -type d))
 
@@ -54,6 +71,12 @@ define Kernel/Prepare/RTKSW
 endef
 
 
+ifeq ("$(CONFIG_BRCM963xx_SDK_VER_502L04)", "y")
+INC_DIR:=include/uapi
+else
+INC_DIR:=include
+endif
+
 KERNEL_INCLUDE_LINK_NAME := bcm_local_kernel_include
 KERNEL_MIPS_INCLUDE_LINK_NAME := bcm_local_kernel_mips_include
 KERNEL_ARM_INCLUDE_LINK_NAME := bcm_local_kernel_arm_include
@@ -71,14 +94,30 @@ define Kernel/Prepare
 	$(call Kernel/Prepare/RTKSW)
 	if [ ! -f  $(BROADCOM_SDK_DIR)/targets/$(BCM_PROFILE)/$(BCM_PROFILE) ]; then mkdir -p $(BROADCOM_SDK_DIR)/targets/$(BCM_PROFILE)/ ; fi
 	$(TOPDIR)/scripts/genBrcmProfile.sh $(TOPDIR)/.config $(BROADCOM_SDK_DIR)/targets/$(BCM_PROFILE)/$(BCM_PROFILE) $(CONFIG_BRCM_SDK_VERSION)
+	echo "$(BCM_PROFILE)" > $(BROADCOM_SDK_DIR)/.last_profile
 	$(call genMRDinfo)
-	ln -s -f $(LINUX_DIR)/include $(KERNEL_INCLUDE_LINK);
+	ln -s -f $(LINUX_DIR)/$(INC_DIR) $(KERNEL_INCLUDE_LINK);
 ifneq ($(CONFIG_mips),)
-	ln -s -f $(LINUX_DIR)/arch/mips/include $(KERNEL_MIPS_INCLUDE_LINK);
+	ln -s -f $(LINUX_DIR)/arch/mips/$(INC_DIR) $(KERNEL_MIPS_INCLUDE_LINK);
 else
-	ln -s -f $(LINUX_DIR)/arch/arm/include $(KERNEL_ARM_INCLUDE_LINK);
+	ln -s -f $(LINUX_DIR)/arch/arm/$(INC_DIR) $(KERNEL_ARM_INCLUDE_LINK);
 endif
 	$(call Kernel/Prepare/Default)
+endef
+
+
+define prepareWlConfig
+endef
+
+define Kernel/Configure
+	$(call Kernel/Configure/Default)
+ifeq ("$(CONFIG_BRCM963xx_SDK_VER_502L04)", "y")
+	make -C $(BROADCOM_SDK_DIR) bcmdrivers_autogen
+	make -C $(BROADCOM_SDK_DIR) rdp_link
+	make -C $(BROADCOM_SDK_DIR) generate_cms_dmp_flags_h
+	make -C $(BROADCOM_SDK_DIR) dtbs
+	$(call prepareWlConfig)
+endif
 
 endef
 

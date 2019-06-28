@@ -9,6 +9,16 @@ GCC_CONFIGURE += \
 	--disable-shared \
 	--disable-threads
 
+ifneq ($(CONFIG_GCC_VERSION_5),)
+  GCC_CONFIGURE += \
+	--disable-libsanitizer
+endif
+
+ifneq ("_$(CONFIG_arm)_$(CONFIG_TARGET_brcm963xx)_","_y_y_")
+GCC_CONFIGURE += \
+	--disable-libssp
+endif
+
 define Host/SetToolchainInfo
 	$(SED) 's,TARGET_CROSS=.*,TARGET_CROSS=$(REAL_GNU_TARGET_NAME)-,' $(TOOLCHAIN_DIR)/info.mk
 	$(SED) 's,GCC_VERSION=.*,GCC_VERSION=$(GCC_VERSION),' $(TOOLCHAIN_DIR)/info.mk
@@ -20,8 +30,8 @@ define Host/Prepare
 	ln -snf $(GCC_DIR) $(BUILD_DIR_TOOLCHAIN)/$(PKG_NAME)
 	$(CP) $(SCRIPT_DIR)/config.{guess,sub} $(HOST_BUILD_DIR)/
 	$(SED) 's,^MULTILIB_OSDIRNAMES,# MULTILIB_OSDIRNAMES,' $(HOST_BUILD_DIR)/gcc/config/*/t-*
-	$(SED) 'd' $(HOST_BUILD_DIR)/gcc/DATESTAMP
 	$(SED) 'd' $(HOST_BUILD_DIR)/gcc/DEV-PHASE
+	$(SED) 's, DATESTAMP,,' $(HOST_BUILD_DIR)/gcc/version.c
 	#(cd $(HOST_BUILD_DIR)/libstdc++-v3; autoconf;);
 	$(SED) 's,gcc_no_link=yes,gcc_no_link=no,' $(HOST_BUILD_DIR)/libstdc++-v3/configure
 	mkdir -p $(GCC_BUILD_DIR)

@@ -181,6 +181,9 @@ typedef struct _CgUpnpActionResponse {
 	CgSoapResponse *soapRes;
 	BOOL isSoapResCreated;
 	CgUpnpArgumentList *argList;
+	CgString *descript;
+	void *userdata;
+	void (*userdataRelease)(void *);
 } CgUpnpActionResponse;
 
 /**
@@ -191,6 +194,8 @@ typedef struct _CgUpnpActionRequest{
 	BOOL isSoapReqCreated;
 	CgUpnpArgumentList *argList;
 	CgUpnpActionResponse *actionRes;
+	void *userdata;
+	void (*userdataRelease)(void *);
 } CgUpnpActionRequest;
 
 /**** Query ****/
@@ -319,7 +324,7 @@ void cg_upnp_control_action_request_clear(CgUpnpActionRequest *actionReq);
  * @param actionReq Action request
  * @param soapReq Soap request
  */
-void cg_upnp_control_action_request_setsoaprequest(CgUpnpActionRequest *actionReq, CgSoapRequest *soapReq);
+int cg_upnp_control_action_request_setsoaprequest(CgUpnpActionRequest *actionReq, CgSoapRequest *soapReq);
 
 /**
  * Get soap request associated with action request
@@ -338,6 +343,19 @@ void cg_upnp_control_action_request_setsoaprequest(CgUpnpActionRequest *actionRe
  * @return Argument list
  */
 #define cg_upnp_control_action_request_getargumentlist(actionReq) (actionReq->argList)
+
+
+// set action request argumentlist
+#define cg_upnp_control_action_request_setargumentlist(cactionReq, List) (cactionReq->argList = List)
+
+// set action request user data
+#define cg_upnp_control_action_request_setuserdata(cactionReq, data) (cactionReq->userdata = data)
+
+// set action request user data release rout
+#define cg_upnp_control_action_request_setuserdata_releaserout(cactionReq, rout) (cactionReq->userdataRelease = rout)
+
+// retrieve action request user data
+#define cg_upnp_control_action_request_getuserdata(cactionReq) (cactionReq->userdata)
 
 /**
  * Get XML action node from action request
@@ -373,6 +391,11 @@ void cg_upnp_control_action_request_setaction(CgUpnpActionRequest *actionReq, Cg
  * @return Action response
  */
 #define cg_upnp_control_action_request_getactionresponse(actionReq) (actionReq->actionRes)
+
+
+// set action request 'action response'
+#define cg_upnp_control_action_request_setactionresponse(actionReq, Res) (actionReq->actionRes = Res)
+
 
 /**
  * Send action request
@@ -428,6 +451,26 @@ void cg_upnp_control_action_response_setsoapresponse(CgUpnpActionResponse *actio
  * @param action UPnP action
  */
 void cg_upnp_control_action_response_setresponse(CgUpnpActionResponse *actionRes, CgUpnpAction *action);
+
+
+
+// set action response argumentlist
+#define cg_upnp_control_action_response_getargumentlist(cactionRes) (cactionRes->argList)
+
+// retrieve action response argumentlist
+#define cg_upnp_control_action_response_setargumentlist(cactionRes, argumentList) (cactionRes->argList = argumentList)
+
+// set action response user data
+#define cg_upnp_control_action_response_setuserdata(cactionRes, data) (cactionRes->userdata = data)
+
+// set action response user data release rout
+#define cg_upnp_control_action_response_setuserdata_releaserout(cactionRes, rout) (cactionRes->userdataRelease = rout)
+
+// set action response description
+void cg_upnp_control_action_response_setdescriptvalue(CgUpnpActionResponse *, char *);
+
+// retrieve action response description
+char *cg_upnp_control_action_response_getdescriptvalue(CgUpnpActionResponse *);
 
 /**
  * Check if action response indicates that action invoke was successfull

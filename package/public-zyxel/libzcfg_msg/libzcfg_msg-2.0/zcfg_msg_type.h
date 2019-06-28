@@ -30,6 +30,10 @@
 
 #define ZCFG_MSG_ADDITIONAL_BITS	(ZCFG_NO_WAIT_REPLY | ZCFG_BLOCK_MODE_CONFIG_APPLY | ZCFG_PARTIAL_OBJECT_SET | ZCFG_MSG_RPC_ADDITIONS)
 
+#define ZCFG_MSG_TYPE(_t_)          (_t_ & 0x00FFffFF)
+#define ZCFG_MSG_WITH_REPLY(_t_)    (!(_t_ & ZCFG_NO_WAIT_REPLY))
+#define ZCFG_MSG_WITH_REPLY_S(_t_)  (ZCFG_MSG_WITH_REPLY(_t_) ? "with" : "without")
+
 /*******************************************************************************
 
     Messgae type
@@ -164,7 +168,10 @@
 #define ZCFG_MSG_RA_IPV6_LOST                           (283 | ZCFG_NO_WAIT_REPLY)
 #define ZCFG_MSG_FAKEROOT_SYS_FWUR                      (284 | ZCFG_NO_WAIT_REPLY)  /* Fakeroot for "sys fwur" */
 #define ZCFG_MSG_FAKEROOT_ZIGBEE_CMD                    (285 | ZCFG_NO_WAIT_REPLY)  /* Fakeroot for ZIGBEE_CMD */
-#define ZCFG_MSG_FAKEROOT_COMMAND_REPLY                  286	
+#define ZCFG_MSG_FAKEROOT_COMMAND_REPLY                  286
+#define ZCFG_MSG_FAKEROOT_ZYCLI_COMMAND                 (287 | ZCFG_NO_WAIT_REPLY)  /* Fakeroot for zycli command */
+#define ZCFG_MSG_GET_ROMD                                288
+#define ZCFG_MSG_ROOT_QURY_OBJECT_PATH_LIST             (289 | ZCFG_NO_WAIT_REPLY)
 
 /*------------------------------------------------------------------------------
 
@@ -173,8 +180,8 @@
         prefix : ZCFG_MSG_WAN_
 
 ------------------------------------------------------------------------------*/
-#define ZCFG_MSG_WAN_CONNCTION_READY	                 1000
-#define ZCFG_MSG_WAN_CONNCTION_LOST	                     1001
+#define ZCFG_MSG_WAN_CONNCTION_READY	                (1000 | ZCFG_NO_WAIT_REPLY)
+#define ZCFG_MSG_WAN_CONNCTION_LOST	                    (1001 | ZCFG_NO_WAIT_REPLY)
 #define ZCFG_MSG_WAN_PPP_DISCONNECT                      1002
 #define ZCFG_MSG_WAN_PPP_CONNECT                         1003
 #define ZCFG_MSG_WAN_IP_RELEASE                          1004
@@ -209,6 +216,7 @@
 #define ZCFG_MSG_VOICE_CONFIG_CHANGED_PARTIAL_RELOAD	(2010 | ZCFG_NO_WAIT_REPLY)
 #define ZCFG_MSG_DECT_CONTROL                            2011
 #define ZCFG_MSG_DECT_STATS_GET                          2012
+#define ZCFG_MSG_VOICE_AUTO_TEST                          2013
 
 /*------------------------------------------------------------------------------
 
@@ -276,5 +284,9 @@
 #define ZCFG_MSG_WPSRUN_UPDATE_CONFIG                   (4028 | ZCFG_NO_WAIT_REPLY)
 #define ZCFG_MSG_WPSRUN_STOP                            (4029 | ZCFG_NO_WAIT_REPLY)
 #define ZCFG_MSG_WPS_IPTV_PBC				 4030
+#define ZCFG_MSG_WPSRUN_ESMD_ZHTTPD			(4031 | ZCFG_NO_WAIT_REPLY)
+
+#define ZCFG_MSG_ZCMD_MODULE_CONFIG			(4032 | ZCFG_NO_WAIT_REPLY)
+
 //==============================================================================
 #endif // _ZCFG_MSG_TYPE_H_

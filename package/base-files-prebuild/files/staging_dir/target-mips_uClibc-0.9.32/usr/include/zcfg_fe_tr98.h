@@ -208,6 +208,35 @@ typedef struct tr98RpcSubRout_s {
 	rpcSubRout rout;
 }tr98RpcSubRout_t;
 
+
+#ifdef ZCFG_TR181_RPC_OBJECT_HANDLE_ROUT
+typedef zcfgRet_t (*spvHandleRout)(uint32_t , objIndex_t *, struct json_object *, struct json_object *, char *);
+
+typedef struct tr181SpvHandleRout_s {
+	uint32_t oid;
+	spvHandleRout rout;
+}tr181SpvHandleRout_t;
+
+typedef zcfgRet_t (*qryHandleRout)(uint32_t , objIndex_t *, struct json_object *, void *data);
+typedef struct tr181QueryHandleRout_s {
+	uint32_t oid;
+	qryHandleRout rout;
+}tr181QueryHandleRout_t;
+
+#endif
+
+
+typedef struct objPathIdx_s {
+	uint32_t objnum;
+	int16_t idx[SUPPORTED_INDEX_LEVEL];
+}objPathIdx_t;
+
+void zcfgEnableRootQuryBlackObjPath(int);
+bool zcfgObjectPathListToStruct(const char *objectPathList, int);
+bool zcfgObjectPathListPickObjPath(const char *objectPathName);
+int zcfgFeTr98QryRootPath();
+void zcfgFeTr98SetQryRootPath(int );
+
 #define TR98_MAX_OBJ_NAME_LENGTH 257
 #define _isdigit(c) ((c >= 0x30) && (c <= 0x39))
 
@@ -240,6 +269,23 @@ struct json_object *zcfgTr98CreatePvsNewMapping();
 struct json_object *zcfgTr181CreatePvsNewMapping();
 zcfgRet_t zcfgTr98MappingConvert(struct json_object *, struct json_object *);
 zcfgRet_t zcfgTr181MappingConvert(struct json_object *, struct json_object *);
+#endif
+
+int charHex2Int(char );
+int hexStr2AscStr(const char *, char *);
+int ascStr2HexStr(const char *, char *);
+bool base64Char(char );
+char *base64StrParticularCharHandle(const char *);
+#ifdef ZCFG_TR181_RPC_OBJECT_HANDLE_ROUT
+void zcfgFeTr181SpvHandleRoutInit();
+zcfgRet_t zcfgFeMultiObjJsonSpvHandleRout(struct json_object *multiJobj, char *faultString);
+void zcfgFeTr181QueryHandleRoutInit();
+zcfgRet_t zcfgFeTr181QueryHandleRout(uint32_t oid, objIndex_t *objIid, struct json_object *qryObj, void *data);
+#else
+#define zcfgFeTr181SpvHandleRoutInit() { }
+#define zcfgFeMultiObjJsonSpvHandleRout(multiJobj, faultString) ZCFG_SUCCESS
+#define zcfgFeTr181QueryHandleRoutInit() { }
+#define zcfgFeTr181QueryHandleRout(oid, objIid, qryObj, data) ZCFG_SUCCESS
 #endif
 char *csvStringStripTerm(const char *csv, const char *term);
 zcfgRet_t zcfgFeTr98ObjNameGet(char *, struct  json_object** );

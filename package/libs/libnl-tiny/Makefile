@@ -9,11 +9,18 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libnl-tiny
 PKG_VERSION:=0.1
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+PKG_RELEASE:=4
+
+PKG_LICENSE:=LGPL-2.1
+else
 PKG_RELEASE:=3
 
 PKG_LICENSE:=GPLv2 LGPLv2.1
 PKG_LICENSE_FILES:=
 
+endif
+SRC_DIR:=src-$(PKG_VERSION).$(PKG_RELEASE)
 PKG_MAINTAINER:=Felix Fietkau <nbd@openwrt.org>
 
 include $(INCLUDE_DIR)/package.mk
@@ -30,7 +37,7 @@ endef
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./src/* $(PKG_BUILD_DIR)/
+	$(CP) ./$(SRC_DIR)/* $(PKG_BUILD_DIR)/
 endef
 
 TARGET_CFLAGS += $(FPIC)

@@ -14,12 +14,13 @@
 #include <sys/types.h>
 #include <syslog.h>
 #include <stdarg.h>
-
-#include "zlog_api.h"
+#include <stdint.h>
 
 #define _GNU_SOURCE         /* See feature_test_macros(7) */
 #include <unistd.h>         // for syscall()
 #include <sys/syscall.h>    // for syscall()
+
+#include "zlog_api.h"
 
 #include <errno.h>          // for program_invocation_short_name
 extern char *program_invocation_short_name;
@@ -29,10 +30,25 @@ extern char *program_invocation_short_name;
     0 - printf()
     1 - syslog-ng
 */
+#ifdef CONFIG_ZLOG_USE_DEBUG
+
+#define _USE_SYSLOG     1
+
+#else
+
 #define _USE_SYSLOG     0
 
+#endif 
+
+/*
+    --- IMPORTANT ---
+        this macro is to break the circular dependency with zos
+        this should always be the same as zos_pid_get()
+*/
+#define _pid_get()      (uint32_t)(syscall(__NR_gettid))
+
 #define _dbg_printf(_fmt_, ...) \
-    fprintf(stderr, "[PID %ld] %s line %d, %s(), " _fmt_, syscall(__NR_gettid), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+    fprintf(stderr, "[PID %u] %s line %d, %s(), " _fmt_, _pid_get(), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
 //==============================================================================
 static zlog_level_t     _log_level = ZLOG_LEVEL_INFO;
@@ -59,9 +75,12 @@ static const char *_level_str(
 {
     switch (level)
     {
+        case ZLOG_LEVEL_EMERG:      return "EMERG";
+        case ZLOG_LEVEL_ALERT:      return "ALERT";
         case ZLOG_LEVEL_CRITICAL:   return "CRITICAL";
         case ZLOG_LEVEL_ERROR:      return "ERROR";
         case ZLOG_LEVEL_WARNING:    return "WARNING";
+        case ZLOG_LEVEL_NOTICE:     return "NOTICE";
         case ZLOG_LEVEL_INFO:       return "INFO";
         case ZLOG_LEVEL_DEBUG:      return "DEBUG";
         default:                    return "UNKNOWN";
@@ -169,7 +188,7 @@ void zlog_log_f(
     ...
 )
 {
-#define _STR_MAX_LEN    128
+#define _STR_MAX_LEN    256
 #define _MSG_MAX_LEN    (_STR_MAX_LEN * 2)
 
     char        str[_STR_MAX_LEN + 1] = {0};
@@ -188,6 +207,14 @@ void zlog_log_f(
 
     switch (level)
     {
+        case ZLOG_LEVEL_EMERG:
+            priority = LOG_EMERG;
+            break;
+
+        case ZLOG_LEVEL_ALERT:
+            priority = LOG_ALERT;
+            break;
+
         case ZLOG_LEVEL_CRITICAL:
             priority = LOG_CRIT;
             break;
@@ -200,6 +227,10 @@ void zlog_log_f(
             priority = LOG_WARNING;
             break;
 
+        case ZLOG_LEVEL_NOTICE:
+            priority = LOG_NOTICE;
+            break;
+
         case ZLOG_LEVEL_INFO:
             priority = LOG_INFO;
             break;
@@ -210,7 +241,7 @@ void zlog_log_f(
 
         default:
             _dbg_printf("ERROR : invalid level %d\n", level);
-            return false;
+            return ;
     }
 
 #else // _USE_SYSLOG
@@ -218,7 +249,7 @@ void zlog_log_f(
     if (level < 0 || level > ZLOG_LEVEL_DEBUG)
     {
         _dbg_printf("ERROR : invalid level %d\n", level);
-        return false;
+        return;
     }
 
 #endif // _USE_SYSLOG
@@ -226,13 +257,13 @@ void zlog_log_f(
     if (_datetime_str(date) == false)
     {
         _dbg_printf("fail to get date time\n");
-        return false;
+        return;
     }
 
     if (format == NULL)
     {
         _dbg_printf("format == NULL\n");
-        return false;
+        return;
     }
 
     va_start(ap, format);
@@ -244,7 +275,7 @@ void zlog_log_f(
     if (r < 0 || r > _STR_MAX_LEN)
     {
         _dbg_printf("fail to vsnprintf()\n");
-        return false;
+        return;
     }
 
     // remove tailing '\n'
@@ -260,31 +291,31 @@ void zlog_log_f(
     if (file)
     {
         /*
-            <time> <program><<pid>> <file>:<line> <func> <severity> : <message>
+            <time> <program><<pid>, <file>:<line> <func> <severity> : <message>
         */
-        r = snprintf(msg, _MSG_MAX_LEN, "%s %s<%ld>, %s:%d, %s(), %s: %s\n", date,
-                     program_invocation_short_name, syscall(__NR_gettid), file,
+        r = snprintf(msg, _MSG_MAX_LEN, "%s %s<%u>, %s:%d, %s(), %s: %s\n", date,
+                     program_invocation_short_name, _pid_get(), file,
                      line, func, _level_str(level), str);
 
         if (r < 0)
         {
             _dbg_printf("fail to snprintf()\n");
-            return false;
+            return;
         }
     }
     else
     {
         /*
-            <time> <program><<pid>> <severity> : <message>
+            <time> <program><<pid>, <severity> : <message>
         */
-        r = snprintf(msg, _MSG_MAX_LEN, "%s %s<%ld>, %s: %s\n", date,
-                     program_invocation_short_name, syscall(__NR_gettid),
+        r = snprintf(msg, _MSG_MAX_LEN, "%s %s<%u>, %s: %s\n", date,
+                     program_invocation_short_name, _pid_get(),
                      _level_str(level), str);
 
         if (r < 0)
         {
             _dbg_printf("fail to snprintf()\n");
-            return false;
+            return;
         }
     }
 
@@ -298,7 +329,7 @@ void zlog_log_f(
 
 #endif // _USE_SYSLOG
 
-    return true;
+    return;
 
 } // zlog_log_f
 

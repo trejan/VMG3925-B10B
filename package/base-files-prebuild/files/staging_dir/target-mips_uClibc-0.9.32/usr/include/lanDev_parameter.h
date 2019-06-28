@@ -60,6 +60,11 @@ tr98Parameter_t para_IpIntf[] = {
 	{ "X_ZYXEL_IPv6AddressNumberOfEntries", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
 	{ "X_ZYXEL_IPv6PrefixNumberOfEntries", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
 #endif
+	{ "X_ZYXEL_PubLan", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_PubLan_DHCP", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_PubLan_ARP", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_PubLan_IP", PARAMETER_ATTR_WRITE, 16, json_type_string},
+	{ "X_ZYXEL_PubLan_Mask", PARAMETER_ATTR_WRITE, 16, json_type_string},
 	{ NULL, 0, 0, 0}
 };
 
@@ -156,8 +161,8 @@ tr98Parameter_t para_DhcpStaticAddr[] = {
 tr98Parameter_t para_DhcpOpt[] = {
 	{ "Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "Tag", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
-	//{ "Value", PARAMETER_ATTR_WRITE, json_type_base64},
-	{ "Value", PARAMETER_ATTR_WRITE, 256, json_type_string},
+	{ "Value", PARAMETER_ATTR_WRITE, 256+(256/2), json_type_base64},
+	//{ "Value", PARAMETER_ATTR_WRITE, 256, json_type_string},
 	{ NULL, 0, 0, 0}
 };
 
@@ -202,7 +207,8 @@ tr98Parameter_t para_DhcpCondServPoolDhcpStaticAddr[] = {
 tr98Parameter_t para_DhcpCondServPoolDhcpOpt[] = {	
 	{ "Enable", PARAMETER_ATTR_WRITE, 0, json_type_boolean},	
 	{ "Tag", PARAMETER_ATTR_WRITE, 0, json_type_uint32},	
-	{ "Value", PARAMETER_ATTR_WRITE, 256, json_type_string},
+	//{ "Value", PARAMETER_ATTR_WRITE, 256, json_type_string},
+	{ "Value", PARAMETER_ATTR_WRITE, 256+(256/2), json_type_base64},
 	{ NULL, 0, 0, 0}
 };
 
@@ -345,6 +351,8 @@ tr98Parameter_t para_LanDevWlanCfgWps[] = {
 	//{ "X_ZYXEL_WPS_DevicePin", PARAMETER_ATTR_READONLY | PARAMETER_ATTR_PASSWORD , 11, json_type_string},
 	//
 #endif
+	{ "X_ZyXEL_TriggerWPSPushButton", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_WPSRunningStatus", PARAMETER_ATTR_READONLY, 257, json_type_string},
 	{ NULL, 0, 0, 0}
 };
 

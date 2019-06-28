@@ -18,6 +18,7 @@ pi_init_suppress_stderr="y"
 pi_init_path="/bin:/sbin:/usr/bin:/usr/sbin"
 pi_init_cmd="/sbin/init"
 
+KERNELVER=`uname -r`
 
 # get new setting for above variables from /lib/preinit/00_preinit.conf if file exist.
 [ -e /lib/preinit/00_preinit.conf ] && . /lib/preinit/00_preinit.conf
@@ -30,7 +31,12 @@ mount -o noatime -t tmpfs -o size=$pi_size,nosuid,nodev,mode=1777 tmpfs /tmp
 #mkdir -p /tmp/var
 
 # create device nodes
+if [ "$KERNELVER" = "3.18.21" ];then
+# For Econet SDK 7.3.245.300 with new kernel, let /dev use devtmpfs, not tmpfs.
+mount -t devtmpfs devtmpfs /dev
+else
 mount -t tmpfs -o noatime,mode=0755,size=512K tmpfs /dev
+fi
 if [ -x /lib/preinit/makeDevNodes.sh ]; then
 	/lib/preinit/makeDevNodes.sh
 else

@@ -98,7 +98,7 @@ endef
 $(foreach t,$(ATM_DEBUG_TOOLS),$(eval $(call GenAtmPlugin,atm-$(t),$(t))))
 
 ifeq ("$(strip ${ZCFG_PLATFORM})","ECONET")
-TARGET_CFLAGS += -I$(LINUX_DIR)/include \
+TARGET_CFLAGS += -I$(LINUX_DIR)/user_headers/include \
 					$(TARGET_CFLAGS)
 TARGET_CFLAGS += -D$(ZCFG_PLATFORM)_PLATFORM
 endif

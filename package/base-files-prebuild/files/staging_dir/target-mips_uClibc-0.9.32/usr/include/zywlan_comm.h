@@ -124,6 +124,7 @@ typedef struct zyWlanRadio_t {
 	char phyType[5];
 	char country[11];
 	char ifName[65];
+	char status[18];
 	unsigned char macaddr[MAC_ADDR_LEN];
 	unsigned long GPIOOverlays;
 	char __inactive_channels[129];
@@ -131,6 +132,12 @@ typedef struct zyWlanRadio_t {
 	bool probresp_rw;
         char singleSKU[9];
 }zyWlanRadio_s;
+
+#ifdef ZYXEL_EASYMESH
+typedef struct zyWlanEasyMesh_t {
+	bool enable;
+}zyWlanEasyMesh_s;
+#endif
 
 enum {
 	CTLSB_NONE=0,

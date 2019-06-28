@@ -174,6 +174,8 @@ typedef struct _CgUpnpDevice
   CgMutex *mutex;
   /** List of HTTP servers */
   CgHttpServerList *httpServerList;
+  // List of HTTPS servers
+  CgHttpServerList *httpsServerList;
   /** List of SSDP servers */
   CgUpnpSSDPServer *ssdpServerList;
   /** Device advertiser thread */
@@ -188,6 +190,8 @@ typedef struct _CgUpnpDevice
   CgSysTime leaseTime;
   /** HTTP Port to listen to */
   int httpPort;
+  // HTTPS server port
+  int httpsSvrPort;
   /** This device's SSDP packet */
   CgUpnpSSDPPacket *ssdpPkt;
   /** User data used to pass miscellaneous data */
@@ -199,6 +203,11 @@ typedef struct _CgUpnpDevice
 #ifdef ZYXEL_PATCH /*support ztr64, ZyXEL 2013, charisse*/
 	CG_UPNP_SERVICE_PERFORMLISTNER performListner;
 #endif
+
+  void *cookieList;
+  void (*cookieListRelease)(void *);
+
+  CgString *stdHeadLine;
 
 } CgUpnpDevice, CgUpnpDeviceList;
 
@@ -728,6 +737,32 @@ void cg_upnp_device_seturlbase(CgUpnpDevice *dev, char *value);
  */
 #define cg_upnp_device_geturlbase(dev) cg_xml_node_getchildnodevalue(cg_upnp_device_getrootnode(cg_upnp_device_getrootdevice(dev)), CG_UPNP_DEVICE_URLBASE_NAME)
 
+
+int cg_upnp_device_serverlist_running(char *protocol, CgUpnpDevice *dev, char *host);
+
+/*****************************************************************************
+ * Device std
+ ******************************************************************************/
+void cg_upnp_device_add_stdheadline(CgUpnpDevice *dev, char *std);
+char *cg_upnp_device_retrieve_stdheadline(CgUpnpDevice *dev);
+
+char *cg_upnp_device_retrieve_http_protocol(CgUpnpDevice *dev);
+
+
+/*****************************************************************************
+ * DeviceProtection
+ ******************************************************************************/
+char *cg_upnp_device_retrieve_securelocationurl(CgUpnpDevice *dev, char *host, char *buf, int bufLen);
+
+
+/*****************************************************************************
+ * Device Cookie List
+ ******************************************************************************/
+#define cg_upnp_device_retrieve_cookielist(dev) (dev->cookieList)
+#define cg_upnp_device_set_cookielist(dev, list) (dev->cookieList=list)
+
+#define cg_upnp_device_set_cookielist_release_rout(dev, rout) (dev->cookieListRelease)
+
 /*****************************************************************************
  * Start/Stop
  *****************************************************************************/
@@ -856,6 +891,23 @@ void cg_upnp_device_setquerylistener(CgUpnpDevice *dev, CG_UPNP_STATEVARIABLE_LI
 #ifdef ZYXEL_PATCH /*support ztr64, ZyXEL 2013, charisse*/
 void cg_upnp_device_setperflistener(CgUpnpDevice *dev, CG_UPNP_SERVICE_PERFORMLISTNER perfListner);
 #endif
+
+/*****************************************************************************
+ * CMS handle routines
+ *****************************************************************************/
+#ifdef ZYXEL_CMS2_ENHANCEMENT
+
+// set cms2 action handle rout
+void cg_upnp_cms2_device_setactionrout(CgUpnpDevice *dev, CG_UPNP_CMS2_ACTION_ROUT actionrout);
+
+// set cms2 action argument parsing rout
+void cg_upnp_cms2_device_setactionargumentparser(CgUpnpDevice *dev, CG_UPNP_CMS2_ACTION_ARGUPARSER argumentparser);
+
+// set cms2 action response param handle rout
+void cg_upnp_cms2_device_setactionresparamhandler(CgUpnpDevice *dev, CG_UPNP_CMS2_ACTION_RESPARMHDLER resparamhandler);
+
+#endif
+
 /*****************************************************************************
  * User Data
  *****************************************************************************/
@@ -1333,6 +1385,9 @@ void cg_upnp_devicelist_delete(CgUpnpDeviceList *devList);
  */
 #define cg_upnp_device_sethttpport(dev,value) (dev->httpPort = value)
 
+// https server port
+#define cg_upnp_device_sethttpsport(dev, port) (dev->httpsSvrPort = port)
+
 /**
  * Get the device's HTTP port
  * 
@@ -1340,6 +1395,9 @@ void cg_upnp_devicelist_delete(CgUpnpDeviceList *devList);
  *
  */
 #define cg_upnp_device_gethttpport(dev) (dev->httpPort)
+
+// https server port
+#define cg_upnp_device_retrievehttpsport(dev) (dev->httpsSvrPort)
 
 /**
  * Set an HTTP listener function to the device
@@ -1366,6 +1424,10 @@ void cg_upnp_devicelist_delete(CgUpnpDeviceList *devList);
  */
 #define cg_upnp_device_gethttpserverlist(dev) (dev->httpServerList)
 	
+
+#define cg_upnp_device_gethttpsserverlist(dev) (dev->httpsServerList)
+
+
 /**
  * Handler function for a received HTTP request. Delegates GET and POST requests
  * to their respective handlers, or treats as a BAD REQUEST, when appropriate.

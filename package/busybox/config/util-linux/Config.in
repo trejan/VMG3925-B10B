@@ -585,6 +585,14 @@ config BUSYBOX_CONFIG_FEATURE_MOUNT_FSTAB
 	help
 	  Support mount all and looking for files in /etc/fstab.
 
+config BUSYBOX_CONFIG_NSENTER
+        bool "nsenter"
+        default n
+        select BUSYBOX_CONFIG_PLATFORM_LINUX
+        help
+          Run program with namespaces of other processes.
+
+
 config BUSYBOX_CONFIG_PIVOT_ROOT
 	bool "pivot_root"
 	default y

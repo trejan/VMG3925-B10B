@@ -156,6 +156,7 @@ char *cg_string_getvalue(CgString *str);
 	
 int cg_string_length(CgString *str);
 
+char *cg_string_addcsv(CgString *str, char *value);
 char *cg_string_addvalue(CgString *str, char *value);
 char *cg_string_naddvalue(CgString *str, char *value, int valueLen);
 char *cg_string_addrepvalue(CgString *str, char *value, int repeatCnt);

@@ -12,9 +12,14 @@
 #include <stdarg.h>     // va_list()
 #include <sys/types.h>
 #include <sys/wait.h>   // waitpid()
-#include <unistd.h>     // fork(), execvp(), _exit()
 #include <string.h>     // strchr()
 #include <errno.h>
+#include <time.h>
+#include <stdint.h>
+
+#define _GNU_SOURCE         /* See feature_test_macros(7) */
+#include <unistd.h>         // for syscall(), fork(), execvp(), _exit()
+#include <sys/syscall.h>    // for syscall()
 
 #include "zos_api.h"
 #include "zlog_api.h"
@@ -154,7 +159,7 @@ bool zos_system(
 
     if (format == NULL)
     {
-        ZLOG_ERROR("format == NULL\n");
+        ZLOG_ERROR("format == NULL");
         return false;
     }
 
@@ -218,13 +223,13 @@ int zos_snprintf(
 
     if (buf == NULL)
     {
-        ZLOG_ERROR("buf == NULL\n");
+        ZLOG_ERROR("buf == NULL");
         return ret;
     }
 
     if (format == NULL)
     {
-        ZLOG_ERROR("format == NULL\n");
+        ZLOG_ERROR("format == NULL");
         return ret;
     }
 
@@ -254,4 +259,35 @@ int zos_snprintf(
     return ret;
 
 } // zos_snprintf
+
+/*!
+ *  get my pid which is shown in top command.
+ *
+ *  @return uint32_t      my pid
+ */
+uint32_t zos_pid_get()
+{
+    return (uint32_t)(syscall(__NR_gettid));
+}
+
+/*!
+ *  get monotonic time in milli-second.
+ *
+ *  @return uint32_t    milli-second
+ *                      0: failed
+ */
+uint32_t zos_mtime_get()
+{
+    struct timespec     tp;
+
+    if (clock_gettime(CLOCK_MONOTONIC, &tp) != 0)
+    {
+        ZLOG_ERROR("fail to get monotonic time");
+        return 0;
+    }
+
+    return tp.tv_sec * 1000 + tp.tv_nsec / 1000000;
+}
+
+
 

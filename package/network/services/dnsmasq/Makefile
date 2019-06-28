@@ -8,8 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dnsmasq
+ifeq ($(CONFIG_dnsmasq_releaseno),"2.78")
+PKG_VERSION:=2.78
+COPTS:=HAVE_DBUS
+else
 PKG_VERSION:=2.67
-#PKG_VERSION:=2.75
+endif
+
 PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
@@ -42,11 +47,13 @@ define Package/dnsmasq
 $(call Package/dnsmasq/Default)
   VARIANT:=nodhcpv6
   DEPENDS:=
+  MENU:=1
 endef
 
 define Package/dnsmasq/config
 	select PACKAGE_libzcfg_msg if PACKAGE_zcfg
 	select PACKAGE_esmd if PACKAGE_zcfg
+	source "$(SOURCE)/Config.in"
 endef
 #Disable Dependencies Check
 define CheckDependencies
@@ -96,8 +103,8 @@ endif
 
 MAKE_FLAGS := \
 	$(TARGET_CONFIGURE_OPTS) \
-	CFLAGS="$(TARGET_CFLAGS) -g" \
-	LDFLAGS="-Wl,--gc-sections -lzcfg_msg" \
+	CFLAGS="$(TARGET_CFLAGS) -g -Werror" \
+	LDFLAGS="-lzcfg_msg -Wl,--gc-sections" \
 	PREFIX="/usr"
 
 define Package/dnsmasq/install

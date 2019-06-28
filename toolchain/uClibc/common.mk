@@ -38,13 +38,18 @@ UCLIBC_TARGET_ARCH:=$(shell echo $(ARCH) | sed -e s'/-.*//' \
 		-e 's/cris.*/cris/' \
 )
 
+ifeq ($(call qstrip,$(CONFIG_CUSTOM_SDK_PREFIX)),EN7516SDK)
+SPECIAL_SOC=en7516
+endif
+
 GEN_CONFIG=$(SCRIPT_DIR)/kconfig.pl -n \
 	$(if $(wildcard $(CONFIG_DIR)/common),'+' $(CONFIG_DIR)/common) \
 	$(if $(CONFIG_UCLIBC_ENABLE_DEBUG),$(if $(wildcard $(CONFIG_DIR)/debug),'+' $(CONFIG_DIR)/debug)) \
 	$(CONFIG_DIR)/$(ARCH)$(strip \
+		$(if $(wildcard $(CONFIG_DIR)/$(ARCH).$(BOARD).$(SPECIAL_SOC)),.$(BOARD).$(SPECIAL_SOC), \
 		$(if $(wildcard $(CONFIG_DIR)/$(ARCH).$(BOARD)),.$(BOARD), \
 			$(if $(CONFIG_MIPS64_ABI),.$(subst ",,$(CONFIG_MIPS64_ABI)), \
-			$(if $(CONFIG_HAS_SPE_FPU),$(if $(wildcard $(CONFIG_DIR)/$(ARCH).e500),.e500)))))
+			$(if $(CONFIG_HAS_SPE_FPU),$(if $(wildcard $(CONFIG_DIR)/$(ARCH).e500),.e500))))))
 
 TARGET_CFLAGS := $(filter-out -mips16,$(TARGET_CFLAGS))
 
@@ -67,7 +72,7 @@ CPU_CFLAGS += \
 else
 CPU_CFLAGS += \
 	-ffunction-sections -fdata-sections \
-	$(if $(CONFIG_GCC_VERSION_4_3)$(CONFIG_GCC_VERSION_4_4)$(CONFIG_GCC_VERSION_4_5),,-Wno-error=unused-but-set-variable)
+	$(if $(CONFIG_GCC_VERSION_4_3)$(CONFIG_GCC_VERSION_4_4)$(CONFIG_GCC_VERSION_4_5)$(CONFIG_GCC_VERSION_4_6),,-Wno-error=unused-but-set-variable)
 endif
 endif
 

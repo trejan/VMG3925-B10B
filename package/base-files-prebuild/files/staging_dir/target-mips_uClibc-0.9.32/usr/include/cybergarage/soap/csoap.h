@@ -143,6 +143,8 @@ void cg_soap_response_setcontent(CgSoapResponse *soapRes, CgXmlNode *node);
 
 CgXmlNode *cg_soap_createenvelopebodynode();
 
+char *cg_soap_request_retrieve_soapaction_name(CgSoapRequest *soapReq);
+
 #ifdef  __cplusplus
 }
 #endif

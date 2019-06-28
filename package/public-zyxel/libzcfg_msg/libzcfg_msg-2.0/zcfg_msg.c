@@ -17,7 +17,6 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <sys/syscall.h>
 
 #include <unistd.h>
 #include <errno.h>
@@ -30,10 +29,8 @@
 #include "zos_api.h"
 
 //==============================================================================
-#define _MAX_THREADS            3
-
-#define _MSG_TYPE(_t_)          (_t_ & 0x00FFffFF)
-#define _MSG_REPLY(_t_)         (!(_t_ & ZCFG_NO_WAIT_REPLY))
+#define _MAX_THREADS            16
+#define _SEND_TRY_MAX_CNT       3
 
 #define _MUTEX_LOCK()           pthread_mutex_lock(&_mutex)
 #define _MUTEX_UNLOCK()         pthread_mutex_unlock(&_mutex)
@@ -46,7 +43,7 @@
 typedef struct
 {
     zcfg_msg_eid_t      eid;
-    zcfg_msg_pid_t      pid;
+    uint32_t            pid;
     int                 sck_id;
 } _msg_data_s;
 
@@ -55,7 +52,7 @@ static bool             _init  = false;
 static pthread_mutex_t  _mutex = PTHREAD_MUTEX_INITIALIZER;
 static _msg_data_s      _msg_data[_MAX_THREADS];
 
-static int32_t          _zcfg_msg_req_idx = 0;
+static uint32_t         _zcfg_msg_req_idx = 0;
 
 //==============================================================================
 /*!
@@ -87,8 +84,8 @@ static _msg_data_s *_free_msg_data_get()
  */
 static _msg_data_s *_my_msg_data_get()
 {
-    int                 i;
-    zcfg_msg_pid_t      my_pid;
+    int         i;
+    uint32_t    my_pid;
 
     if (_init == false)
     {
@@ -96,7 +93,7 @@ static _msg_data_s *_my_msg_data_get()
         return NULL;
     }
 
-    my_pid = zcfg_msg_pid_get();
+    my_pid = zos_pid_get();
 
     for (i = 0; i < _MAX_THREADS; ++i)
     {
@@ -125,7 +122,8 @@ static _msg_data_s *_my_msg_data_get()
  *  @return char*   memory pointer allocated
  *          NULL    fail to allocate memory due to memory insufficient
  */
-static char *_msg_alloc(
+static char *_msg_alloc
+(
     int     size
 )
 {
@@ -156,6 +154,8 @@ static char *_msg_alloc(
  *  @param [in]  timeout_msec   waiting time in milli-second, ZCFG_MSG_WAIT_FOREVER, ZCFG_MSG_WAIT_NONE
  *  @param [in]  wait_eid       EID we are waiting for, it is valid when b_server is FALSE
  *                              always be 0 if b_server is TRUE
+ *  @param [in]  wait_type      wait for the process on the type
+ *  @param [in]  wait_oid       wait for the process on the OID
  *
  *  @return ZCFG_SUCCESS    successfully receive
  *          ZCFG_TIMEOUT    time out
@@ -163,13 +163,16 @@ static char *_msg_alloc(
  *
  *  @note   call should free recvBuf after using it.
  */
-static zcfgRet_t _msg_recv(
+static zcfgRet_t _msg_recv
+(
     uint32_t            eid,
     int                 sck_id,
     bool                b_server,
     zcfgMsg_t           **recvBuf,
     uint32_t            timeout_msec,
-    zcfg_msg_eid_t      wait_eid
+    zcfg_msg_eid_t      wait_eid,
+    uint32_t            wait_type,
+    uint32_t            wait_oid
 )
 {
     int                 result;
@@ -228,13 +231,15 @@ static zcfgRet_t _msg_recv(
                 {
                     if (! b_server)
                     {
-                        ZLOG_WARNING("EID = %u, select() timeout, wait EID = %u forever", eid, wait_eid);
+                        ZLOG_WARNING("EID = %u, select() wait forever, EID = %u, type = %u %s reply, oid = %u",
+                            eid, wait_eid, ZCFG_MSG_TYPE(wait_type), ZCFG_MSG_WITH_REPLY_S(wait_type), wait_oid);
                     }
                     continue;
                 }
                 else
                 {
-                    ZLOG_WARNING("EID = %u, select() timeout, wait EID = %u for %u milli-seconds", eid, wait_eid, timeout_msec);
+                    ZLOG_WARNING("EID = %u, select() wait for %u milli-seconds, EID = %u, type = %u %s reply, oid = %u",
+                        eid, timeout_msec, wait_eid, ZCFG_MSG_TYPE(wait_type), ZCFG_MSG_WITH_REPLY_S(wait_type), wait_oid);
                     return ZCFG_TIMEOUT;
                 }
             }
@@ -336,7 +341,8 @@ static zcfgRet_t _msg_recv(
  *  @return ZCFG_SUCCESS    successfully receive
  *          others          failed
  */
-static zcfgRet_t _msg_send(
+static zcfgRet_t _msg_send
+(
     uint32_t    eid,
     int         sck_id,
     bool        b_server,
@@ -348,9 +354,18 @@ static zcfgRet_t _msg_send(
     int                 total_len;
     char                *ptr;
     int                 n;
+    uint32_t            try_cnt;
 
-    ZLOG_DEBUG("sendMsg->srcEid = %d, dstEid = %d, type = %d, %s reply, oid = %d",
-        sendMsg->srcEid, sendMsg->dstEid, _MSG_TYPE(sendMsg->type), _MSG_REPLY(sendMsg->type) ? "with" : "without", sendMsg->oid);
+    ZLOG_DEBUG("sendMsg->srcEid = %d, dstEid = %d, type = %u %s reply, oid = %u",
+        sendMsg->srcEid, sendMsg->dstEid, ZCFG_MSG_TYPE(sendMsg->type), ZCFG_MSG_WITH_REPLY_S(sendMsg->type), sendMsg->oid);
+
+#if 0 /* for debug */
+    if (sendMsg->dstEid == ZCFG_EID_ESMD)
+    {
+        ZLOG_INFO("sendMsg->srcEid = %d, dstEid = %d, type = %u %s reply, oid = %u",
+            sendMsg->srcEid, sendMsg->dstEid, ZCFG_MSG_TYPE(sendMsg->type), ZCFG_MSG_WITH_REPLY_S(sendMsg->type), sendMsg->oid);
+    }
+#endif
 
     if (sck_id < 0)
     {
@@ -377,6 +392,7 @@ static zcfgRet_t _msg_send(
 
     ptr       = (char *)sendMsg;
     total_len = sizeof(zcfgMsg_t) + sendMsg->length;
+    try_cnt   = 0;
 
     while (1)
     {
@@ -384,24 +400,23 @@ static zcfgRet_t _msg_send(
 
         if (n <= 0)
         {
-            if (errno == EAGAIN || errno == EWOULDBLOCK)
+            if ((try_cnt < _SEND_TRY_MAX_CNT) && (errno == EAGAIN || errno == EWOULDBLOCK))
             {
-                ZLOG_WARNING("send again, srcEid = %d, dstEid = %d, type = %d, %s reply, oid = %d",
-                    sendMsg->srcEid, sendMsg->dstEid, _MSG_TYPE(sendMsg->type), _MSG_REPLY(sendMsg->type) ? "with" : "without", sendMsg->oid);
+                ZLOG_WARNING("send again, srcEid = %d, dstEid = %d, type = %u %s reply, oid = %u",
+                    sendMsg->srcEid, sendMsg->dstEid, ZCFG_MSG_TYPE(sendMsg->type), ZCFG_MSG_WITH_REPLY_S(sendMsg->type), sendMsg->oid);
 
-                sleep(1); //wait 1 seconds
+                sleep(1); // wait 1 seconds
+
+                if (ZCFG_MSG_WITH_REPLY(sendMsg->type) == false)
+                {
+                    ++try_cnt;
+                }
                 continue;
             }
 
-            ZLOG_ERROR("errno = %d, %s", errno, strerror(errno));
-            ZLOG_ERROR("fail to sendto %s", server_addr.sun_path);
-            ZLOG_ERROR("srcEid = %d, dstEid = %d, type = %d, %s reply",
-                sendMsg->srcEid, sendMsg->dstEid, _MSG_TYPE(sendMsg->type), _MSG_REPLY(sendMsg->type) ? "with" : "without");
-
-            ZLOG_DEBUG("sendMsg->oid       = %d", sendMsg->oid);
-            ZLOG_DEBUG("sendMsg->length    = %d", sendMsg->length);
-            ZLOG_DEBUG("sendMsg->clientPid = %d", sendMsg->clientPid);
-            ZLOG_DEBUG("sendMsg->statCode  = %d", sendMsg->statCode);
+            ZLOG_ERROR("fail to sendto %s, errno = %d(%s), srcEid = %d, dstEid = %d, type = %u %s reply, oid = %u",
+                server_addr.sun_path, errno, strerror(errno), sendMsg->srcEid, sendMsg->dstEid, ZCFG_MSG_TYPE(sendMsg->type),
+                ZCFG_MSG_WITH_REPLY_S(sendMsg->type), sendMsg->oid);
 
             ZOS_FREE(sendMsg);
             return ZCFG_INTERNAL_ERROR;
@@ -433,6 +448,8 @@ static zcfgRet_t _msg_send(
 
     // free message buffer
     ZOS_FREE(sendMsg);
+
+    ZLOG_DEBUG("send successfully");
 
     // successful
     return ZCFG_SUCCESS;
@@ -469,7 +486,8 @@ void _init_msg_data()
  *  @return true    successful
  *          false   fail
  */
-bool zcfg_msg_eidInit(
+bool zcfg_msg_eidInit
+(
     zcfg_msg_eid_t      eid,
     char                *module_name
 )
@@ -498,7 +516,7 @@ bool zcfg_msg_eidInit(
 
     // register into msg data
     free_entry->eid = eid;
-    free_entry->pid = zcfg_msg_pid_get();
+    free_entry->pid = zos_pid_get();
 
     _MUTEX_UNLOCK();
 
@@ -559,8 +577,6 @@ zcfgRet_t zcfg_msg_serverInit()
         return ZCFG_INTERNAL_ERROR;
     }
 
-    ZLOG_INFO("Socket ID = %d", my_entry->sck_id);
-
     // nonblocking operation
     flags = fcntl(my_entry->sck_id, F_GETFL, 0);
     fcntl(my_entry->sck_id, F_SETFL, flags | O_NONBLOCK);
@@ -579,7 +595,7 @@ zcfgRet_t zcfg_msg_serverInit()
         return ZCFG_INTERNAL_ERROR;
     }
 
-    ZLOG_INFO("EID %u bind server on %s successfully", my_entry->eid, saun.sun_path);
+    ZLOG_INFO("EID %u bind server socket %d on %s successfully", my_entry->eid, my_entry->sck_id, saun.sun_path);
 
     // allow access
     chmod(saun.sun_path, 0777);
@@ -601,7 +617,8 @@ zcfgRet_t zcfg_msg_serverInit()
  *
  *  @note   caller should free recvBuf after using it.
  */
-zcfgRet_t zcfg_msg_serverRecv(
+zcfgRet_t zcfg_msg_serverRecv
+(
     zcfgMsg_t   **recvBuf,
     uint32_t    timeout_msec
 )
@@ -626,7 +643,7 @@ zcfgRet_t zcfg_msg_serverRecv(
         return ZCFG_INTERNAL_ERROR;
     }
 
-    return _msg_recv(my_entry->eid, my_entry->sck_id, true, recvBuf, timeout_msec, 0);
+    return _msg_recv(my_entry->eid, my_entry->sck_id, true, recvBuf, timeout_msec, 0, 0, 0);
 }
 
 /*!
@@ -639,7 +656,8 @@ zcfgRet_t zcfg_msg_serverRecv(
  *
  *  @note   sendMsg will be freed anyway
  */
-zcfgRet_t zcfg_msg_serverSend(
+zcfgRet_t zcfg_msg_serverSend
+(
     zcfgMsg_t   *sendMsg
 )
 {
@@ -690,7 +708,8 @@ zcfgRet_t zcfg_msg_serverSend(
  *          - sendMsg will be freed anyway
  *          - caller should free recvBuf after using it if ZCFG_SUCCESS.
  */
-zcfgRet_t zcfg_msg_sendAndGetReply(
+zcfgRet_t zcfg_msg_sendAndGetReply
+(
     zcfgMsg_t   *sendMsg,
     zcfgMsg_t   **replyMsg,
     uint32_t    timeout_msec
@@ -701,10 +720,11 @@ zcfgRet_t zcfg_msg_sendAndGetReply(
     struct sockaddr_un  server_addr;
     int                 flags;
     int                 addrlen;
-    int32_t             seqid;
-    int32_t             sendtype;
+    uint32_t            seqid;
     zcfg_msg_eid_t      eid;
     zcfg_msg_eid_t      dst_eid;
+    uint32_t            send_oid;
+    uint32_t            send_type;
 
     if (sendMsg == NULL)
     {
@@ -735,9 +755,6 @@ zcfgRet_t zcfg_msg_sendAndGetReply(
     }
 #endif
 
-    // get send type
-    sendtype = sendMsg->type;
-
     // create socket for send
     fd = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (fd < 0)
@@ -766,7 +783,7 @@ zcfgRet_t zcfg_msg_sendAndGetReply(
     addrlen = sizeof(server_addr);
 
     // get unique sequence ID
-    seqid = getpid();
+    seqid = zos_pid_get();
 
     _MUTEX_LOCK();
     _zcfg_msg_req_idx = ((_zcfg_msg_req_idx) % 0xFFFF) + 1;
@@ -793,8 +810,10 @@ zcfgRet_t zcfg_msg_sendAndGetReply(
         sendMsg will be freed in _msg_send no matter of result !!!
     */
 
-    // keep dst_eid for later use
-    dst_eid = sendMsg->dstEid;
+    // get send information
+    send_type = sendMsg->type;
+    send_oid  = sendMsg->oid;
+    dst_eid   = sendMsg->dstEid;
 
     // send message
     ret = _msg_send(eid, fd, false, sendMsg);
@@ -807,7 +826,7 @@ zcfgRet_t zcfg_msg_sendAndGetReply(
     }
 
     // Check whether it needs to wait reply message
-    if (sendtype & ZCFG_NO_WAIT_REPLY)
+    if (send_type & ZCFG_NO_WAIT_REPLY)
     {
         close(fd);
         unlink(server_addr.sun_path);
@@ -818,7 +837,7 @@ zcfgRet_t zcfg_msg_sendAndGetReply(
     }
 
     // receive message
-    ret = _msg_recv(eid, fd, false, replyMsg, timeout_msec, dst_eid);
+    ret = _msg_recv(eid, fd, false, replyMsg, timeout_msec, dst_eid, send_type, send_oid);
 
     if (ret != ZCFG_SUCCESS)
     {
@@ -882,14 +901,4 @@ int zcfg_msg_sckIdGet()
     }
 
     return my_entry->sck_id;
-}
-
-/*!
- *  get my pid which is shown in top.
- *
- *  @return zcfg_msg_pid_t      my pid
- */
-zcfg_msg_pid_t zcfg_msg_pid_get()
-{
-    return (zcfg_msg_pid_t)(syscall(__NR_gettid));
 }

@@ -9,6 +9,11 @@ CURRENT_DIR = $(shell pwd)
 #LIBS_PATH =
 LDFLAGS += $(LIBS_PATH) $(LINK_LIB)
 
+#zlog
+ifeq ($(CONFIG_ZLOG_USE_DEBUG),y)
+CFLAGS += -DCONFIG_ZLOG_USE_DEBUG
+endif
+
 #CFLAGS += -I$(TOOLCHAIN)/include -I. -std=gnu99
 CFLAGS += -I. -std=gnu99
 
@@ -17,7 +22,7 @@ CFLAGS += -I. -std=gnu99
 all: clean $(LIB_NAME)
 
 .c.o:
-	$(CC) $(CFLAGS) -Wall -fPIC -c $< -o $@
+	$(CC) $(CFLAGS) -Wall -Werror -fPIC -c $< -o $@
 
 $(LIB_NAME) : $(OBJS)
 	$(CC) $(LDFLAGS) -shared -o $(LIB_NAME).so $(OBJS)

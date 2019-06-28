@@ -355,6 +355,10 @@ CgUpnpArgument *cg_upnp_argumentlist_get(CgUpnpArgumentList *argumentList, char 
  */
 void cg_upnp_argumentlist_set(CgUpnpArgumentList *argumentList, CgUpnpArgumentList *srcArgumentList);
 
+void cg_upnp_argumentlist_setvalue(CgUpnpArgumentList *argumentList, const char *value);
+#define cg_upnp_argumentlist_getvalue(argumentList) ((argumentList && argumentList->value) ? cg_string_getvalue(argumentList->value) : NULL)
+
+
 #ifdef  __cplusplus
 }
 #endif

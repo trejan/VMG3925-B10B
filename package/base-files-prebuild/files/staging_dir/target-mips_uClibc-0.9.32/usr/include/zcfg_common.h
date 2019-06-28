@@ -151,16 +151,10 @@ typedef zcfgParmQryAttr_t zcfgParmQryValue_t;
 #define TR69CLIENT_CRT_NAME CERT_DIR"/tr69_cert.crt"
 #define TR69CLIENT_KEY_NAME CERT_DIR"/tr69_cert.key"
 
+
 // Support Feature of Idle Timeout Mechanism for CLI connection
 #define IDLE_TIMEOUT_FILE "/var/accountIdleTime"
 
-/* for openwrt 3.4 insmod */
-#ifdef BROADCOM_PLATFORM
-#define KMOD_LOAD_PATH "/lib/modules/3.4.11/"
-#endif
-/* for openwrt 2.6.36 insmod */
-#ifdef ECONET_PLATFORM
-#define KMOD_LOAD_PATH "/lib/modules/2.6.36/"
-#endif
+#define KMOD_LOAD_PATH "/lib/modules/"
 
 #endif

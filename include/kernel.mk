@@ -65,7 +65,11 @@ else
     ifeq ($(KERNEL),2.6)
        LINUX_SITE:=@ZyXEL_SITE/kernel/2.6.x
     else
-       LINUX_SITE:=@ZyXEL_SITE/kernel/3.x
+       ifeq ($(KERNEL),4.1)
+          LINUX_SITE:=@ZyXEL_SITE/kernel/4.x
+       else
+          LINUX_SITE:=@ZyXEL_SITE/kernel/3.x
+       endif
     endif
   endif
 

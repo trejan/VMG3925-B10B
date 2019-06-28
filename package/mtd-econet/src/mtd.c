@@ -48,6 +48,15 @@
 #include "tc_partition.h"
 #endif
 
+// Zyxel don`t need this
+#if 0 //def TCSUPPORT_PRODUCTIONLINE
+#include "prolinecmd.h"
+#endif
+
+#ifdef TCSUPPORT_MT7570
+#include "mt7570.h"
+#endif
+
 #if KERNEL_VERSION(2,6,0) <= LINUX_VERSION_CODE
 #define IS_KERNEL26 1
 #else
@@ -72,6 +81,10 @@
 
 #define SYSTYPE_UNKNOWN     0
 #define SYSTYPE_BROADCOM    1
+
+/* add for MTD bob cmd */
+#define MTD_BOB_DEFAULT_FILE "/tmp/7570_bob.conf"
+#define MTD_BOB_DEVICE  "reservearea"
 
 #ifndef TRENDCHIP
 /* to be continued */
@@ -849,6 +862,10 @@ usage(void)
 "        readflash  <imagefile> <n> <offset> <device> read n bytes from offset of <device> to <imagefile>\n"
 "        erasesector <offset> <device> erase one sector from offset of <device>\n"
 #endif
+#ifdef TCSUPPORT_MT7570
+"        bob get <imagefile> | - ( used to get bob info form flash)\n"
+"        bob save <imagefile> | - ( used to save bob info into flash)\n"
+#endif
 	"Following options are available:\n"
 	"        -q                      quiet mode (once: no [w] on writing,\n"
 	"                                           twice: no status messages)\n"
@@ -873,6 +890,10 @@ main(int argc, char **argv)
 		CMD_READ,
 		CMD_ERASESECTOR,
 	#endif
+#ifdef TCSUPPORT_MT7570
+        CMD_BOB_GET,
+        CMD_BOB_SET,
+#endif
 		CMD_UNLOCK
 	} cmd;
 #ifdef TRENDCHIP
@@ -1071,6 +1092,71 @@ main(int argc, char **argv)
 		}
 	}
 #endif
+#ifdef TCSUPPORT_MT7570
+	else if((strcmp(argv[0], "bob") == 0))
+	{
+		device = MTD_BOB_DEVICE;
+		tcoffset = BOB_RA_OFFSET;
+		tclen = BOB_RA_SIZE;
+
+		if((strcmp(argv[1], "save") == 0))
+		{
+			/* this function use to set bob to flash */
+			cmd = CMD_BOB_SET;
+			if(argc == 3){
+				imagefile = argv[2];
+			}
+			else if (argc == 2) {
+				imagefile = MTD_BOB_DEFAULT_FILE;
+			}
+			else {
+				usage();//in this function ,call exit(1),so here not call exit again
+			}
+			if ((imagefd = open(imagefile, O_RDONLY)) < 0)
+			{
+				fprintf(stderr, "Couldn't open image file: %s!\n", imagefile);
+				close(imagefd);
+				exit(1);
+			}
+			if (!mtd_check(device))
+			{
+				fprintf(stderr, "Can't open device for writing!\n");
+				close(imagefd);
+				exit(1);
+			}
+			fprintf(stderr, "OPEN file %s fd = %d!\n",imagefile,imagefd);
+			if(!bob_check(imagefd))
+			{
+				fprintf(stderr, "BOB file is error\n");
+				close(imagefd);
+				exit(1);
+			}
+		}
+		else if((strcmp(argv[1], "get") == 0))
+		{
+			/* this function use to get bob info to an designated file */
+			cmd = CMD_BOB_GET;
+			if(argc == 3){
+				imagefile = argv[2];
+			}
+			else if (argc == 2) {
+				imagefile = MTD_BOB_DEFAULT_FILE;
+			}
+			else {
+				usage();//in this function ,call exit(1),so here not call exit again
+			}
+			if ((imagefd = open(imagefile, O_RDWR | O_CREAT | O_TRUNC)) < 0)
+			{
+				fprintf(stderr, "Couldn't open image file: %s!\n", imagefile);
+				exit(1);
+			}
+		}
+		else
+		{
+			usage();//in this function ,call exit(1),so here not call exit again
+		}
+	}
+#endif
 	else {
 		usage();
 	}
@@ -1148,6 +1234,39 @@ main(int argc, char **argv)
 			erasesector(device,tcoffset,quiet);
 			break;
 #endif
+#ifdef TCSUPPORT_MT7570
+		case CMD_BOB_GET:
+			fprintf(stderr, "Doing bob get function , get bob info to %s \n",imagefile);
+			readflash(imagefd, device,tcoffset, tclen);
+
+			lseek(imagefd,0,SEEK_SET);
+			if(!bob_check(imagefd))
+			{
+				fprintf(stderr, "BOB file is error, use old mode \n");
+				readflash(imagefd, device,BOB_RA_OFFSET_OLD_MODE, tclen);
+
+				lseek(imagefd,0,SEEK_SET);
+				if(!bob_check(imagefd)){
+					fprintf(stderr, "OLD mode still error use current value \n");
+					readflash(imagefd, device,tcoffset, tclen);
+				}
+			}
+
+			break;
+		case CMD_BOB_SET:
+			fprintf(stderr, "Doing bob set function set %s bob info to flash \n",imagefile);
+			#ifdef TCSUPPORT_MTD_ENCHANCEMENT
+				writeflash(imagefd,device ,tcoffset, tclen,quiet);
+				fprintf(stderr, "writeflash(%d, %s,%d, %d,%d); \n",imagefd,device ,tcoffset, tclen,quiet);
+			#else
+				mtd_write(imagefd, device, quiet, (unlocked == 0));
+				fprintf(stderr, "mtd_write(%d, %s,%d, %d); \n",imagefd,device ,quiet,(unlocked == 0));
+			#endif
+			fprintf(stderr, "Doing bob save function save bob info from %s \n",imagefile);
+
+			break;
+#endif
+
 		default:
 			if (quiet < 2)
 				fprintf(stderr, "unknown cmd type!\n");

@@ -11,6 +11,7 @@ enum nfqnl_msg_types {
 	NFQNL_MSG_PACKET,		/* packet from kernel to userspace */
 	NFQNL_MSG_VERDICT,		/* verdict from userspace to kernel */
 	NFQNL_MSG_CONFIG,		/* connect to a particular queue */
+	NFQNL_MSG_VERDICT_BATCH,	/* batch verdict from userspace to kernel */
 
 	NFQNL_MSG_MAX
 };
@@ -86,8 +87,15 @@ enum nfqnl_attr_config {
 	NFQA_CFG_CMD,			/* nfqnl_msg_config_cmd */
 	NFQA_CFG_PARAMS,		/* nfqnl_msg_config_params */
 	NFQA_CFG_QUEUE_MAXLEN,		/* u_int32_t */
+	NFQA_CFG_MASK,			/* identify which flags to change */
+	NFQA_CFG_FLAGS,			/* value of these flags (__u32) */
 	__NFQA_CFG_MAX
 };
 #define NFQA_CFG_MAX (__NFQA_CFG_MAX-1)
+
+/* Flags/options for NFQA_CFG_FLAGS */
+#define NFQA_CFG_F_FAIL_OPEN		(1 << 0)
+#define NFQA_CFG_F_CONNTRACK		(1 << 1)
+#define NFQA_CFG_F_MAX			(1 << 2)
 
 #endif /* _NFNETLINK_QUEUE_H */

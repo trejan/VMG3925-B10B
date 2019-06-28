@@ -94,6 +94,8 @@ char *cg_xml_attributelist_getvalue(CgXmlAttributeList *attrList, char *name);
 CgXmlAttribute *cg_xml_attribute_new();
 void cg_xml_attribute_delete(CgXmlAttribute *attr);
 
+CgXmlNode *cg_xml_node_dup(CgXmlNode *node);
+
 #define cg_xml_attribute_next(attr) (CgXmlAttribute *)cg_list_next((CgList *)attr)
 #define cg_xml_attribute_remove(attr) cg_list_remove((CgList *)attr)
 
@@ -150,6 +152,8 @@ void cg_xml_node_delete(CgXmlNode *node);
 CgXmlNode *cg_xml_node_getrootnode(CgXmlNode *node);
 
 #define cg_xml_node_getchildnodelist(node) (node->nodeList)
+#define cg_xml_node_setchildnodelist(node, list) (node->nodeList=list)
+
 void cg_xml_node_addchildnode(CgXmlNode *node, CgXmlNode *cnode);
 void cg_xml_node_setchildnode(CgXmlNode *node, char *name, char *value);
 char *cg_xml_node_getchildnodevalue(CgXmlNode *node, char *name);
@@ -182,6 +186,8 @@ void cg_xml_node_removeattribute(CgXmlNode *node, char *name);
 
 char *cg_xml_node_tostring(CgXmlNode *node, BOOL withChildNode, CgString *str);
 void  cg_xml_node_print(CgXmlNode *node);
+
+void cg_xml_nodelist_print(CgXmlNode *, const char *);
 
 void cg_xml_node_copy(CgXmlNode *dstNode, CgXmlNode *srcNode);
 

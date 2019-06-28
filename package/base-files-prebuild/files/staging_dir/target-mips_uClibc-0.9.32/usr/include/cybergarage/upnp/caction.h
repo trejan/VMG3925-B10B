@@ -57,13 +57,25 @@ typedef struct _CgUpnpAction {
 	CgXmlNode *actionNode;
 	CgUpnpArgumentList *argumentList;
 	/**** Execution Data ****/
-	BOOL (*listener)(struct _CgUpnpAction *);
+	int (*listener)(struct _CgUpnpAction *);
 	CgUpnpStatus *upnpStatus;
 	void *userData;
+#ifdef ZYXEL_CMS2_ENHANCEMENT
+	int (*rout) (void *, struct _CgUpnpAction *);
+	int (*argumentParser)(void *);
+	CgXmlNode *(*resParamHandler) (void *, struct _CgUpnpAction *);
+#endif
 } CgUpnpAction, CgUpnpActionList;
 
-typedef BOOL (*CG_UPNP_ACTION_LISTNER)(CgUpnpAction *);
+typedef int (*CG_UPNP_ACTION_LISTNER)(CgUpnpAction *);
 
+//#ifdef ZYXEL_CMS_ENHANCEMENT
+// CG_UPNP_CMS2_ACTION_ROUT, success: return 1, fail: return cms2 error code
+typedef int (*CG_UPNP_CMS2_ACTION_ROUT)(void *, CgUpnpAction *);
+// CG_UPNP_CMS2_ACTION_ARGUPARSER, success: return 1, fail: return cms2 error code
+typedef int (*CG_UPNP_CMS2_ACTION_ARGUPARSER)(void *);
+typedef CgXmlNode *(*CG_UPNP_CMS2_ACTION_RESPARMHDLER)(void *, CgUpnpAction *);
+//#endif
 /****************************************************************************
  * Function (Action)
  ****************************************************************************/
@@ -299,6 +311,15 @@ BOOL cg_upnp_action_setargumentvaluebyname(CgUpnpAction *action, char *name, cha
  * @deprecated Compatibility macro for typo correction
  */
 #define cg_upnp_action_getlistner cg_upnp_action_getlistener
+
+// ZYXEL_CMS2_ENHANCEMENT
+#define cg_upnp_cms2_action_getactionrout(action) (action->rout)
+#define cg_upnp_cms2_action_getargumentparser(action) (action->argumentParser)
+#define cg_upnp_cms2_action_getresponseparamhandle(action) (action->resParamHandler)
+
+#define cg_upnp_cms2_action_setactionrout(action, rt) (action->rout = rt)
+#define cg_upnp_cms2_action_setargumentparser(action, parser) (action->argumentParser = parser)
+#define cg_upnp_cms2_action_setresparamhandler(action, handler) (action->resParamHandler = handler)
 
 /****************************************************************************
  * User Data

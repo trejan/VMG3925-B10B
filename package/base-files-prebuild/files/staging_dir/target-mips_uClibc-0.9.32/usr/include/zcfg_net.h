@@ -33,6 +33,8 @@
 #define DHCP6S_CONF_FILE "/var/dhcp6s.conf"
 #define DHCP6S_EXEC_FILE "dhcp6s -c "DHCP6S_CONF_FILE" br0 &"
 
+#define DROPBEAR_AUTH_KEY_DIR "/var/"
+#define DROPBEAR_AUTH_KEY_PATH DROPBEAR_AUTH_KEY_DIR"authorized_keys"
 
 #define MAX_URL_LEN 256
 

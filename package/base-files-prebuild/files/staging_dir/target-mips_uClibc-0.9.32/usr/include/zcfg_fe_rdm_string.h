@@ -32,7 +32,10 @@ zcfgRet_t zcfgFeObjJsonBlockedAdd(zcfg_offset_t oid, objIndex_t *objIid, char *f
 zcfgRet_t zcfgFeMultiObjJsonBlockedSet(struct json_object *multiJobj, char *feedbackMsg);
 #endif
 zcfgRet_t zcfgFeJsonMultiObjAddParam(struct json_object *, zcfg_offset_t , objIndex_t *, const char *, struct json_object *);
+zcfgRet_t zcfgFeJsonMultiObjRetrieveParam(struct json_object *, zcfg_offset_t , objIndex_t *, const char *, struct json_object **);
 zcfgRet_t zcfgFeJsonMultiObjRetrieve(struct json_object *multiJobj, zcfg_offset_t oid, objIndex_t *objIid, objIndex_t *rtdIid, struct json_object **rtdObj);
+zcfgRet_t zcfgFeJsonMultiObjAddObjParam(struct json_object *, zcfg_offset_t , objIndex_t *, const char *, struct json_object *);
+zcfgRet_t zcfgFeJsonMultiObjRetrieveObjParam(struct json_object *multiobj, zcfg_offset_t oid, objIndex_t *objIid, const char *parmName, struct json_object **paramObj);
 
 zcfgRet_t zcfgFeWholeObjJsonGet(char *tr181path, struct json_object **);
 zcfgRet_t zcfgFeWholeObjJsonSet(char *tr181path, struct json_object *, char *);

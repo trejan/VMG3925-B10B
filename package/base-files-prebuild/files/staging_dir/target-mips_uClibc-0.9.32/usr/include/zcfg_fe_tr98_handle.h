@@ -49,6 +49,7 @@
 #define TR98_CAPB                     "InternetGatewayDevice.Capabilities"
 #define TR98_PERF_DIAG                "InternetGatewayDevice.Capabilities.PerformanceDiagnostic"
 #define TR98_DEV_INFO                 "InternetGatewayDevice.DeviceInfo"
+#define TR98_MemoryStatus             "InternetGatewayDevice.DeviceInfo.MemoryStatus"
 #define TR98_VEND_CONF_FILE           "InternetGatewayDevice.DeviceInfo.VendorConfigFile.i"
 #define TR98_PROC_ST                  "InternetGatewayDevice.DeviceInfo.ProcessStatus"
 #define TR98_PROC_ST_PS               "InternetGatewayDevice.DeviceInfo.ProcessStatus.Process.i"
@@ -279,6 +280,10 @@
 #define TR98_PROXIMITY_SENSOR "InternetGatewayDevice.X_ZYXEL_EXT.ProximitySensor"
 #endif //#ifdef PROXIMITY_SENSOR_SUPPORT
 
+#ifdef ZYXEL_EASYMESH
+#define TR98_EasyMesh			"InternetGatewayDevice.X_ZYXEL_EXT.EasyMesh"
+#endif
+
 #ifdef BUILD_SONIQ
 #define TR98_Qsteer			"InternetGatewayDevice.X_ZYXEL_EXT.Qsteer"
 #endif
@@ -296,6 +301,12 @@
 #ifdef ZYXEL_ONESSID
 #define TR98_ONESSID                  "InternetGatewayDevice.X_ZYXEL_EXT.X_ZYXEL_ONESSID"
 #endif 
+
+#ifdef ZYXEL_TR69_DATA_USAGE
+#define TR98_DATA_USAGE                  "InternetGatewayDevice.X_ZYXEL_DataUsage"
+#define TR98_DATA_USAGE_LAN                  "InternetGatewayDevice.X_ZYXEL_DataUsage.Lan.i"
+#define TR98_DATA_USAGE_WAN                  "InternetGatewayDevice.X_ZYXEL_DataUsage.Wan.i"
+#endif
 
 #ifdef ZYXEL_IPV6SPEC
 #define TR98_IPV6SPEC					"InternetGatewayDevice.IPv6Specific"
@@ -336,6 +347,12 @@
 #define TR98_IPV6_DHCPV6_SERVER_CNT_V6PREFIX	"InternetGatewayDevice.IPv6Specific.DHCPv6.Server.Pool.i.Client.i.IPv6Prefix.i"
 #define TR98_IPV6_DHCPV6_SERVER_CNT_OPT	"InternetGatewayDevice.IPv6Specific.DHCPv6.Server.Pool.i.Client.i.Option.i"
 #define TR98_IPV6_DHCPV6_SERVER_OPT		"InternetGatewayDevice.IPv6Specific.DHCPv6.Server.Pool.i.Option.i"
+#endif
+
+#ifdef ZYXEL_X_GRE
+#define TR98_XGRE						"InternetGatewayDevice.X_GRE"
+#define TR98_XGRE_TUNNEL				"InternetGatewayDevice.X_GRE.Tunnel.i"
+#define TR98_XGRE_TUNNEL_STATS			"InternetGatewayDevice.X_GRE.Tunnel.i.Stats"
 #endif
 
 #define OBSOLETED 1
@@ -393,6 +410,7 @@ tr98Object_t tr98Obj[] = {
 {TR98_CAPB,                     0,              NULL,                   NULL,                    NULL,                   NULL,             NULL,            NULL},
 {TR98_PERF_DIAG,                0,              para_PerpDiag,          perfDiagObjGet,          NULL,                   NULL,             NULL,            NULL},
 {TR98_DEV_INFO,                 0,              para_DevInfo,           devInfoObjGet,           devInfoObjSet,          NULL,             NULL,            devInfoObjNotify, devInfoObjAttrGet, devInfoObjAttrSet},
+{TR98_MemoryStatus, 			0,				para_MemoryStatus,		memoryStatusObjGet, 	 NULL,					 NULL,			   NULL,			NULL},
 {TR98_VEND_CONF_FILE,           ATTR_INDEXNODE, para_DevInfoVendorCfg,                   devInfoVendorCfgObjGet,                    devInfoVendorCfgObjSet,                   NULL,             NULL,            NULL},
 {TR98_PROC_ST, 				0,				    para_ProcSt,			devProcStGet,			 NULL, 		 NULL,			   NULL,			NULL},
 {TR98_PROC_ST_PS,           ATTR_INDEXNODE,     para_ProcStPs,          devProcStPsGet,           NULL,          NULL,             NULL,        NULL},
@@ -602,6 +620,11 @@ tr98Object_t tr98Obj[] = {
 {TR98_IPV6_DHCPV6_SERVER_CNT_OPT,		ATTR_INDEXNODE,	para_Ipv6Dhcpv6SrvCntOpt,	zyIpv6Dhcpv6SrvCntOptObjGet, NULL, NULL, NULL,	NULL,	NULL,	NULL},
 {TR98_IPV6_DHCPV6_SERVER_OPT,	ATTR_INDEX_CREA,para_Ipv6Dhcpv6SrvOpt, 		zyIpv6Dhcpv6SrvOptObjGet,	zyIpv6Dhcpv6SrvOptObjSet, zyIpv6Dhcpv6SrvOptObjAdd, zyIpv6Dhcpv6SrvOptObjDel,	NULL,	NULL,	NULL},
 #endif
+#ifdef ZYXEL_X_GRE
+{TR98_XGRE,						0,				para_XGRE,					zyXGREObjGet, 			 NULL, NULL, NULL,	NULL,	NULL,	NULL},
+{TR98_XGRE_TUNNEL, 				ATTR_INDEX_CREA,para_XGRETunnel,			zyXGRETunnelObjGet, 	 zyXGRETunnelObjSet, zyXGRETunnelObjAdd,	zyXGRETunnelObjDel,	NULL,	NULL,	NULL},
+{TR98_XGRE_TUNNEL_STATS,		0, 				para_XGRETunnelStats,		zyXGRETunnelStatsObjGet, NULL, NULL, NULL,	NULL,	NULL,	NULL},
+#endif
 #if ZYXEL_EXT
 {TR98_ZYXEL_EXT,                0,              para_extend,            zyExtObjGet,             zyExtObjSet, NULL, NULL, NULL, NULL, NULL},
 #ifdef ZYXEL_LANDING_PAGE_FEATURE
@@ -690,11 +713,19 @@ tr98Object_t tr98Obj[] = {
 #ifdef ZyXEL_IPP_PRINTSERVER
 {TR98_PRINT_SERVER,             0,              para_Ipp_PrintServer,   zyExtIppPrintServObjGet,          zyExtIppPrintServObjSet,         NULL,             NULL,            NULL, NULL, NULL},
 #endif
+#ifdef ZYXEL_EASYMESH
+{TR98_EasyMesh,             0,              para_EasyMesh,   zyExtEasyMeshObjGet,          zyExtEasyMeshObjSet,         NULL,             NULL,            NULL, NULL, NULL},
+#endif
 #ifdef BUILD_SONIQ
 {TR98_Qsteer,             0,              para_Qsteer,   zyExtQsteerObjGet,          zyExtQsteerObjSet,         NULL,             NULL,            NULL, NULL, NULL},
 #endif
 #ifdef ZYXEL_ONESSID
 {TR98_ONESSID,					0,				para_OneSsid,			zyExtOneSsidObjGet,				zyExtOneSsidObjSet,			NULL,			NULL,		NULL,	NULL,	NULL},
+#endif
+#ifdef ZYXEL_TR69_DATA_USAGE
+{TR98_DATA_USAGE,         		    0,              para_DataUsage,	   		    zyExtDataUsageObjGet, 	     zyExtDataUsageObjSet,		NULL,             NULL,            NULL, NULL, NULL},
+{TR98_DATA_USAGE_LAN,                           ATTR_INDEX_CREA,              para_DataUsageLan,                         zyExtDataUsageLanObjGet,            NULL,              NULL,             NULL,            NULL, NULL, NULL},
+{TR98_DATA_USAGE_WAN,                           ATTR_INDEX_CREA,              para_DataUsageWan,                         zyExtDataUsageWanObjGet,            NULL,              NULL,             NULL,            NULL, NULL, NULL},
 #endif
 {NULL,                          0,              NULL,                   NULL,                    NULL,                   NULL,             NULL,            NULL}
 };

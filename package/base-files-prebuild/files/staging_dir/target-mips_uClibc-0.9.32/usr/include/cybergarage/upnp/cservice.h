@@ -483,6 +483,19 @@ BOOL cg_upnp_service_byebyefrom(CgUpnpService *service, char *bindAddr);
  */
 void cg_upnp_service_setactionlistener(CgUpnpService *service, CG_UPNP_ACTION_LISTNER actionListener);
 
+
+/*******************************************************************************
+ * CMS2 Handle Routines
+ *******************************************************************************/
+
+#ifdef ZYXEL_CMS2_ENHANCEMENT
+void cg_upnp_cms2_service_setactionrout(CgUpnpService *service, CG_UPNP_CMS2_ACTION_ROUT actionrout);
+
+void cg_upnp_cms2_service_setactionargumentparser(CgUpnpService *service, CG_UPNP_CMS2_ACTION_ARGUPARSER argumentparser);
+
+void cg_upnp_cms2_service_setactionresparamhandler(CgUpnpService *service, CG_UPNP_CMS2_ACTION_RESPARMHDLER resparamhandler);
+#endif
+
 /**
  * Set a query listener to the service
  *

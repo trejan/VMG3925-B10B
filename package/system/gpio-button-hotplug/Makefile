@@ -10,12 +10,20 @@ include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=gpio-button-hotplug
 PKG_RELEASE:=1
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+SRC_DIR=src-qsdk
+else
+SRC_DIR=src
+endif
 
 include $(INCLUDE_DIR)/package.mk
 
 define KernelPackage/gpio-button-hotplug
   SUBMENU:=Other modules
   TITLE:=Simple GPIO Button Hotplug driver
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+  DEPENDS:=+kmod-input-core
+endif
   FILES:=$(PKG_BUILD_DIR)/gpio-button-hotplug.ko
   AUTOLOAD:=$(call AutoLoad,30,gpio-button-hotplug)
   KCONFIG:=
@@ -32,7 +40,7 @@ MAKE_OPTS:= \
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./src/* $(PKG_BUILD_DIR)/
+	$(CP) ./$(SRC_DIR)/* $(PKG_BUILD_DIR)/
 endef
 
 define Build/Compile

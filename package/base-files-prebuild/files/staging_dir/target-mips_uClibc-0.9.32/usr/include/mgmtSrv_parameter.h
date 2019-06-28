@@ -31,6 +31,7 @@ tr98Parameter_t para_MgmtSrv[] = {
 	{ "X_ZYXEL_BoundInterface", PARAMETER_ATTR_WRITE, 33, json_type_string},
 	{ "X_ZYXEL_BoundInterfaceList", PARAMETER_ATTR_WRITE, 129, json_type_string},
 	{ "X_ZYXEL_DataModelSpec", PARAMETER_ATTR_WRITE, 17, json_type_string},
+	{ "X_ZYXEL_SerialNumber_Type", PARAMETER_ATTR_READONLY, 0, json_type_uint32},
 	{ "X_ZYXEL_V4TrustDomain", PARAMETER_ATTR_WRITE, 65, json_type_string},
     { "X_ZYXEL_ROMD_Action", PARAMETER_ATTR_WRITE, 9, json_type_string},
 	{ "X_ZYXEL_V6TrustDomain", PARAMETER_ATTR_WRITE, 257, json_type_string},
@@ -40,6 +41,18 @@ tr98Parameter_t para_MgmtSrv[] = {
 	{ "X_ZYXEL_AcsUrlModifyAndClearTransData", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_UtilizeDelayApply", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
 	{ "X_ZYXEL_SpvOnSessionComplete", PARAMETER_ATTR_WRITE, 0, json_type_boolean},	
+#ifdef ZYXEL_TR69_SUPPLEMENTAL_ACS
+	{ "X_ZYXEL_Supplemental_EnableCWMP", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_Supplemental_URL", PARAMETER_ATTR_WRITE, 257, json_type_string},
+	{ "X_ZYXEL_Supplemental_Username", PARAMETER_ATTR_WRITE, 257, json_type_string},
+	{ "X_ZYXEL_Supplemental_Password", PARAMETER_ATTR_WRITE | PARAMETER_ATTR_PASSWORD, 257, json_type_string},
+	{ "X_ZYXEL_Supplemental_ConnReqURL", PARAMETER_ATTR_READONLY|PARAMETER_ATTR_ACTIVENOTIFY, 257, json_type_string},
+	{ "X_ZYXEL_Supplemental_ConnReqUsername", PARAMETER_ATTR_WRITE, 257, json_type_string},
+	{ "X_ZYXEL_Supplemental_ConnReqPassword", PARAMETER_ATTR_WRITE | PARAMETER_ATTR_PASSWORD, 257, json_type_string},
+	{ "X_ZYXEL_Supplemental_ConnReqPort", PARAMETER_ATTR_WRITE, 0, json_type_uint32},
+#endif
+	{ "X_ZYXEL_ReplyAllObjectsWhileRootQuery", PARAMETER_ATTR_WRITE, 0, json_type_boolean},
+	{ "X_ZYXEL_RootQueryWouldNotReplyObjects", PARAMETER_ATTR_WRITE, 513, json_type_string},
 	{ NULL, 0, 0, 0}
 };
 

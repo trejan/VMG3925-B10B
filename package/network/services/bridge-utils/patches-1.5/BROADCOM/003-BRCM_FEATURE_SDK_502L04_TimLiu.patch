@@ -1,0 +1,213 @@
+Index: bridge-utils-1.5/brctl/brctl_cmd.c
+===================================================================
+--- bridge-utils-1.5.orig/brctl/brctl_cmd.c	2018-01-16 15:10:32.999753675 +0800
++++ bridge-utils-1.5/brctl/brctl_cmd.c	2018-01-16 15:10:33.007749675 +0800
+@@ -25,6 +25,10 @@
+ #include "libbridge.h"
+ #include "brctl.h"
+ #if defined(PLATFORM_BROADCOM)
++#if defined(BRCM_SDK_502L04)
++#include <sys/ioctl.h>
++#include <unistd.h>
++#endif
+ #include <linux/sockios.h>
+ #endif
+ 
+@@ -284,6 +288,42 @@
+ }
+ 
+ #if defined(PLATFORM_BROADCOM)
++#if defined(BRCM_SDK_502L04)
++// brcm begin
++static int dump_port_mac_limits(const char *br, const char *p,  void *arg)
++{
++	int err;
++	int maxfdb;
++	int minfdb;
++	int usedfdb;
++
++	err = br_get_port_fdb_limits(p, &maxfdb, &minfdb, &usedfdb);
++	if ( err == 0 )
++	{
++		printf("interface    max         min        used\n");
++		printf("%-12s %-11d% -11d %d\n", p, maxfdb, minfdb, usedfdb);
++	}
++	return err;
++}
++
++static int br_cmd_show_mac_lmt(int argc, char *const* argv)
++{
++	const char *brname = argv[1];
++	int         err;
++	int         maxfdb;
++	int         usedfdb;
++
++	err = br_get_fdb_limits(brname, &maxfdb, &usedfdb);
++	if ( err == 0 )
++	{
++		printf("bridge       max         used\n");
++		printf("%-12s %-11d %d\n", brname, maxfdb, usedfdb);
++		err = br_foreach_port(brname, dump_port_mac_limits, NULL);
++	}
++	return err != 0;
++}
++// brcm end
++#else
+ static int br_cmd_enableportsnooping(int argc, char*const* argv)
+ {
+ 	int err;
+@@ -592,6 +632,7 @@
+ 	return err != 0;
+ }
+ #endif
++#endif
+ 
+ static int br_cmd_stp(int argc, char *const* argv)
+ {
+@@ -775,7 +816,7 @@
+ 	return err != 0;
+ }
+ 
+-#if defined(PLATFORM_BROADCOM)
++#if defined(PLATFORM_BROADCOM) && !defined(BRCM_SDK_502L04)
+ static int br_get_port_list(const char *brname, int *ifindices, int num)
+ {
+ 	unsigned long args[4] = { BRCTL_GET_PORT_LIST,
+@@ -923,7 +964,7 @@
+ 	  "<bridge> <port> <cost>\tset path cost" },
+ 	{ 3, "setportprio", br_cmd_setportprio,
+ 	  "<bridge> <port> <prio>\tset port priority" },
+-#if defined(PLATFORM_BROADCOM)
++#if defined(PLATFORM_BROADCOM) && !defined(BRCM_SDK_502L04)
+ 	{ 2, "enableportsnooping", br_cmd_enableportsnooping,
+ 	  "<bridge> <value>\t0-disable 1-standard 2-blocking" },
+ #if (!defined(BRCM_SDK_416L04)) && (!defined(BRCM_SDK_416L05))
+@@ -935,7 +976,7 @@
+ 	  "[ <bridge> ]\t\tshow a list of bridges" },
+ 	{ 1, "showmacs", br_cmd_showmacs, 
+ 	  "<bridge>\t\tshow a list of mac addrs"},
+-#if defined(PLATFORM_BROADCOM)
++#if defined(PLATFORM_BROADCOM) && !defined(BRCM_SDK_502L04)
+ 	{ 3, "addmacs", br_cmd_addmacs, 
+ 	  "<bridge> <ifname> <mac>\t\tadd mac addresses to the bridge table"},
+ 	{ 3, "delmacs", br_cmd_delmacs, 
+@@ -948,6 +989,12 @@
+ 	{ 2, "stp", br_cmd_stp,
+ 	  "<bridge> {on|off}\tturn stp on/off" },
+ #if defined(PLATFORM_BROADCOM)
++#if defined(BRCM_SDK_502L04)
++// brcm begin
++	{ 1, "showmaclmt", br_cmd_show_mac_lmt,
++	  "<bridge>\t\tshow a mac limit of bridge"},
++// brcm end
++#else
+ 	{ 2, "mldenableportsnooping", br_cmd_mld_enableportsnooping,
+ 	  "<bridge> <value>\t0-disable 1-standard 2-blocking" },
+ #if (!defined(BRCM_SDK_416L04)) && (!defined(BRCM_SDK_416L05))
+@@ -966,7 +1013,8 @@
+ 	  "<bridge> <value>\t0-disable 1-enable" },
+     { 1, "showmaclmt", br_cmd_show_mac_lmt, 
+       "<bridge>\t\tshow a mac limit of bridge"},
+-#endif	  
++#endif
++#endif
+ };
+ 
+ const struct command *command_lookup(const char *cmd)
+Index: bridge-utils-1.5/libbridge/libbridge.h
+===================================================================
+--- bridge-utils-1.5.orig/libbridge/libbridge.h	2018-01-16 15:10:32.991757675 +0800
++++ bridge-utils-1.5/libbridge/libbridge.h	2018-01-16 15:10:33.007749675 +0800
+@@ -21,7 +21,11 @@
+ 
+ #include <sys/socket.h>
+ #include <linux/if.h>
++//#if defined(BRCM_SDK_502L04)
++//#include <bcm_local_kernel_include/linux/if_bridge.h>
++//#else
+ #include <linux/if_bridge.h>
++//#endif
+ 
+ /* defined in net/if.h but that conflicts with linux/if.h... */
+ extern unsigned int if_nametoindex (const char *__ifname);
+@@ -114,7 +118,7 @@
+ extern int br_set_port_priority(const char *br, const char *p, 
+ 				int port_priority);
+ 
+-#if defined(PLATFORM_BROADCOM)
++#if defined(PLATFORM_BROADCOM) && !defined(BRCM_SDK_502L04)
+ extern int br_enable_port_snooping(const char *br, int enable);
+ extern int br_enable_proxy_mode(const char *br, int enable);
+ extern int br_igmp_enable_rate_limit(const char *br, int limit);
+@@ -138,6 +142,17 @@
+ extern int br_set_hairpin_mode(const char *bridge, const char *dev,
+ 			       int hairpin_mode);
+ 				   
++#if defined(PLATFORM_BROADCOM) && defined(BRCM_SDK_502L04)
++// brcm begin
++int br_get_fdb_limits(const char *brname, int *maxfdb, int *usedfdb );
++int br_get_port_fdb_limits(const char *portname, int *maxfdb, int *minfdb, int *usedfdb );
++
++extern int br_block_stp(const char *bridge, const char *ifName);
++extern int br_mark_dedicated_stp_port(const char *bridge,
++                                      const char *ifName, int setting);
++// brcm end
++#endif
++
+ #if defined(ZYXEL_PATCH)
+ extern int get_ifname(const char *brname, int portno, char *ifname);
+ #endif
+Index: bridge-utils-1.5/libbridge/libbridge_devif.c
+===================================================================
+--- bridge-utils-1.5.orig/libbridge/libbridge_devif.c	2018-01-16 15:10:32.999753675 +0800
++++ bridge-utils-1.5/libbridge/libbridge_devif.c	2018-01-16 15:10:33.011747676 +0800
+@@ -401,7 +401,7 @@
+ 	return port_set(bridge, port, "priority", priority, BRCTL_SET_PORT_PRIORITY);
+ }
+ 
+-#if defined(PLATFORM_BROADCOM)
++#if defined(PLATFORM_BROADCOM) && !defined(BRCM_SDK_502L04)
+ int br_enable_port_snooping(const char *br, int enable)
+ {
+ 	int ret;
+@@ -689,3 +689,40 @@
+ 
+ 	return n;
+ }
++
++#if defined(PLATFORM_BROADCOM) && defined(BRCM_SDK_502L04)
++int br_get_fdb_limits(const char *brname, int *maxfdb, int *usedfdb )
++{
++	DIR *d;
++	char path[SYSFS_PATH_MAX];
++
++	snprintf(path, SYSFS_PATH_MAX, SYSFS_CLASS_NET "%s/bridge", brname);
++	d = opendir(path);
++	if (!d)
++	{
++		return -1;
++	}
++	*maxfdb = fetch_int(path, "max_fdb_entries");
++	*usedfdb = fetch_int(path, "used_fdb_entries");
++	return 0;
++}
++
++int br_get_port_fdb_limits(const char *portname, int *maxfdb, int *minfdb, int *usedfdb )
++{
++	DIR *d;
++	char path[SYSFS_PATH_MAX];
++
++	snprintf(path, SYSFS_PATH_MAX, SYSFS_CLASS_NET "%s/brport", portname);
++	d = opendir(path);
++	if (!d)
++	{
++		return -1;
++	}
++	*maxfdb = fetch_int(path, "max_fdb_entries");
++	*minfdb = fetch_int(path, "min_fdb_entries");
++	*usedfdb = fetch_int(path, "used_fdb_entries");
++	return 0;
++}
++
++#endif
++

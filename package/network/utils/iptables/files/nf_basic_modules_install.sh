@@ -1,18 +1,18 @@
 #!/bin/sh
 
-#In Linux kernel v2.6.36 defconfig of Econet, following kernel modules are built-in.
-
-if grep -q '3.4.11' /proc/version && echo $?; then
 #nat basic modules
-insmod /lib/modules/3.4.11/nf_conntrack.ko
-insmod /lib/modules/3.4.11/nf_defrag_ipv4.ko
-insmod /lib/modules/3.4.11/nf_conntrack_ipv4.ko
-insmod /lib/modules/3.4.11/nf_nat.ko
+insmod /lib/modules/`uname -r`/nf_conntrack.ko
+insmod /lib/modules/`uname -r`/nf_defrag_ipv4.ko
+insmod /lib/modules/`uname -r`/nf_conntrack_ipv4.ko
+insmod /lib/modules/`uname -r`/nf_nat.ko
+if grep -q '4.1.45' /proc/version && echo $?; then
+insmod /lib/modules/`uname -r`/nf_nat_ipv4.ko
+insmod /lib/modules/`uname -r`/nf_nat_masquerade_ipv4.ko
+fi
 
 #iptables basic modules
-insmod /lib/modules/3.4.11/ip_tables.ko
-insmod /lib/modules/3.4.11/iptable_nat.ko
-insmod /lib/modules/3.4.11/iptable_filter.ko
-insmod /lib/modules/3.4.11/iptable_mangle.ko
-insmod /lib/modules/3.4.11/ipt_MASQUERADE.ko
-fi
+insmod /lib/modules/`uname -r`/ip_tables.ko
+insmod /lib/modules/`uname -r`/iptable_nat.ko
+insmod /lib/modules/`uname -r`/iptable_filter.ko
+insmod /lib/modules/`uname -r`/iptable_mangle.ko
+insmod /lib/modules/`uname -r`/ipt_MASQUERADE.ko

@@ -59,9 +59,10 @@ endef
 
 define Package/libzcfg_fe_rdm_access/install
 	$(INSTALL_DIR) $(1)/lib
-	$(INSTALL_DIR) $(1)/lib/public
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libzcfg_fe_rdm_access.so $(1)/lib/public
-	ln -s /lib/public/libzcfg_fe_rdm_access.so $(1)/lib/libzcfg_fe_rdm_access.so
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME).so $(1)/lib
+#	$(INSTALL_DIR) $(1)/lib/public
+#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libzcfg_fe_rdm_access.so $(1)/lib/public
+#	ln -s /lib/public/libzcfg_fe_rdm_access.so $(1)/lib/libzcfg_fe_rdm_access.so
 endef
 
 $(eval $(call BuildPackage,libzcfg_fe_rdm_access))

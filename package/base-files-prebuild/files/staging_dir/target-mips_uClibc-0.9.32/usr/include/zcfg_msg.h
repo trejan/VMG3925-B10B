@@ -1,6 +1,8 @@
 #ifndef _ZCFG_MSG_H_
 #define _ZCFG_MSG_H_
 
+#include <stdint.h>
+
 #include "zcfg_common.h"
 #include "zcfg_eid.h"
 #include "zcfg_msg_type.h"
@@ -11,7 +13,6 @@
 
 //==============================================================================
 typedef uint8_t     zcfg_msg_eid_t;
-typedef long int    zcfg_msg_pid_t;
 
 /*
     Notice the alignment
@@ -122,13 +123,6 @@ zcfg_msg_eid_t zcfg_msg_eidGet();
  */
 int zcfg_msg_sckIdGet();
 
-/*!
- *  get my pid which is shown in top.
- *
- *  @return zcfg_msg_pid_t      my pid
- */
-zcfg_msg_pid_t zcfg_msg_pid_get();
-
 //==============================================================================
 #define ZCFG_MSG_INVALID_EID(_eid_)             ((_eid_) <= 0 || (_eid_) >= ZCFG_EID_MAX)
 
@@ -141,8 +135,10 @@ zcfg_msg_pid_t zcfg_msg_pid_get();
 #define zcfgMsgRepSend(_s_)                     zcfg_msg_serverSend(_s_)
 #define zcfgMsgSendAndGetReply(_s_, _r_, _t_)   zcfg_msg_sendAndGetReply(_s_, _r_, _t_)
 
+#if 0
 #define zcfg_msg_dbg_printf(_fmt_, ...) \
-    fprintf(stderr, "[PID %ld] %s line %d, %s(), " _fmt_, zcfg_msg_pid_get(), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+    fprintf(stderr, "[PID %u] %s line %d, %s(), " _fmt_, zcfg_msg_pid_get(), __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+#endif
 
 //==============================================================================
 #endif // _ZCFG_MSG_H_

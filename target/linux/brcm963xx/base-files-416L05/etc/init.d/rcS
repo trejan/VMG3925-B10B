@@ -31,6 +31,9 @@ mount -t usbfs usbfs /proc/bus/usb/
 # pppd lock dir
 mkdir /var/lock
 
+mkdir -m 755 -p /var/fyi
+mkdir -m 755 -p /var/fyi/sys
+
 # 3G WWAN
 mkdir /var/wwan
 # 4G LTE WNC
@@ -74,3 +77,10 @@ fi
 
 #ZYXEL, for SONiQ, the event might lost from driver to zywifid
 echo 360448 > /proc/sys/net/core/rmem_max
+
+#ZyXEL, Cj, Conntrack tuning, refer to : https://wiki.khnet.info/index.php/Conntrack_tuning
+filename='/proc/sys/net/netfilter/nf_conntrack_buckets'
+if [ -f $filename ]; then
+	HASHSIZE=$(cat $filename)
+	echo $(($HASHSIZE*4)) > /proc/sys/net/netfilter/nf_conntrack_expect_max
+fi

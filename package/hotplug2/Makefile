@@ -46,7 +46,7 @@ MAKE_FLAGS += \
 	COPTS="$(TARGET_CFLAGS)" \
 	STATIC_WORKER="fork"
 
-ifneq ($(CONFIG_USE_EGLIBC),)
+ifneq ($(CONFIG_USE_GLIBC),)
   TARGET_LDFLAGS += -lbsd
 endif
 

@@ -8,14 +8,24 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=dropbear
+
 PKG_VERSION:=2018.76
+#PKG_VERSION:=2012.55
+
+ifeq ("$(strip $(PKG_VERSION))", "2018.76")
+PKG_MD5SUM:=c3912f7fcdcc57c99937e4a79480d2c2
 PKG_RELEASE:=4
+else ifeq ("$(strip $(PKG_VERSION))", "2012.55")
+PKG_MD5SUM:=8c784baec3054cdb1bb4bfa792c87812
+PKG_RELEASE:=3
+endif
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+PATCH_DIR:=patches-$(PKG_VERSION)
+
 #PKG_SOURCE_URL:= \
 	http://matt.ucc.asn.au/dropbear/releases/ \
 	http://www.mirrors.wiretapped.net/security/cryptography/apps/ssh/dropbear/
-PKG_MD5SUM:=c3912f7fcdcc57c99937e4a79480d2c2
 PKG_SOURCE_URL:=@ZyXEL_SITE/opensource/network/services
 
 PKG_LICENSE:=MIT
@@ -80,6 +90,10 @@ export BUILD_APPS
 export LN_SCP
 export LN_DBCLIENT
 
+ifeq ($(CONFIG_ABOG_CUSTOMIZATION),y)
+TARGET_CFLAGS += -DABOG_CUSTOMIZATION
+endif
+
 #Remote Access privilege feature
 export CONFIG_ZYXEL_REMOTE_ACCESS_PRIVILEGE
 
@@ -118,16 +132,17 @@ define Package/dropbear/install
 #	$(INSTALL_DIR) $(1)/etc/dropbear
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) $(PKG_BUILD_DIR)/openssl.cnf $(1)/etc/config
-	$(INSTALL_DIR) $(1)/etc/dropbear
-	ln -s /data/dropbear/dropbear_dss_host_key $(1)/etc/dropbear/dropbear_dss_host_key
-	ln -s /data/dropbear/dropbear_rsa_host_key $(1)/etc/dropbear/dropbear_rsa_host_key
 #	touch $(1)/etc/dropbear/dropbear_rsa_host_key
 #	touch $(1)/etc/dropbear/dropbear_dss_host_key
 	$(INSTALL_DIR) -d -m 755 $(1)/etc/mycert
+ifeq ("$(strip $(PKG_VERSION))", "2018.76")
+	$(INSTALL_DIR) $(1)/etc/dropbear
+	ln -s /data/dropbear/dropbear_dss_host_key $(1)/etc/dropbear/dropbear_dss_host_key
+	ln -s /data/dropbear/dropbear_rsa_host_key $(1)/etc/dropbear/dropbear_rsa_host_key
 	ln -s /data/dropbear/dropbear_rsa_host_key $(1)/etc/mycert/ssh.rsa
-###	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dropbear_rsa_host_key.ZyXEL $(1)/etc/mycert/ssh.rsa
-	$(CP) ./files/authorized_keys $(1)/etc/
-	chmod 644 $(1)/etc/authorized_keys
+else ifeq ("$(strip $(PKG_VERSION))", "2012.55")
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dropbear_rsa_host_key.ZyXEL $(1)/etc/mycert/ssh.rsa
+endif
 endef
 
 #define Package/dropbearconvert/install

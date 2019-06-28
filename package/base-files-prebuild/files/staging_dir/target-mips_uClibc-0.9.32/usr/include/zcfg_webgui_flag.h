@@ -37,4 +37,7 @@
 #define TR069_PAGE_READ_ONLY			(1 << 0)
 /* End of Flag3*/
 
-
+/*WIFI GUI compile flag, used to AND ZYXEL_WEB_GUI_WIFI_SHOW flag for 32 bits. Every bit means a switch to show or hide feature on webgui*/
+#define WIFI_GUI_SHOW_MU_MIMO_24G		(1 << 0)
+#define WIFI_GUI_SHOW_MU_MIMO_5G		(1 << 1)
+/* End of WIFI GUI compile flag */

@@ -1,0 +1,312 @@
+Index: linux-3.4.11/arch/arm/plat-bcm63xx/pcie-bcm63xx.c
+===================================================================
+--- linux-3.4.11.orig/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2018-08-08 11:39:50.852364684 +0800
++++ linux-3.4.11/arch/arm/plat-bcm63xx/pcie-bcm63xx.c	2018-08-08 11:55:11.384364684 +0800
+@@ -46,7 +46,20 @@
+ static int bcm63xx_pcie_setup(int nr, struct pci_sys_data *sys);
+ static void bcm63xx_pcie_phy_mode_config(int index);
+ static void bcm63xx_pcie_config_timeouts(struct bcm63xx_pcie_port *port);
+-static void bcm63xx_pcie_phy_config_ssc_mode(struct bcm63xx_pcie_port *port, bool enable);
++static void bcm63xx_pcie_phy_config_ssc(struct bcm63xx_pcie_port *port);
++static void bcm63xx_pcie_phy_enable_ssc(struct bcm63xx_pcie_port *port, bool enable);
++static void bcm63xx_pcie_core_set_speed(int index);
++
++/*
++    ssc and force_gen1 values
++    disable    -  0x0
++    core0 only -  0x1
++    core1 only -  0x2
++    core0 and 1 - 0x3
++*/
++static u32 bcm63xx_pcie_config_ssc = 0x0;
++static u32 bcm63xx_pcie_force_gen1 = 0x0;
++
+ 
+ /* calculate size dynamically according to the RAM
+  * 0x01 ... 64KB
+@@ -85,6 +98,7 @@
+ 	  mdelay(10);
+ 	  bcm63xx_pcie_phy_mode_config(index);
+ 	  mdelay(10);			  
++      bcm63xx_pcie_core_set_speed(index);
+ 	  val |= (1<<index);
+ 	  __raw_writel(val, MISC_BASE+offsetof(Misc,miscPCIECtrl));
+ 	  mdelay(10);
+@@ -156,11 +170,7 @@
+ 	},
+ #endif	
+ };
+-#ifdef CONFIG_BCM_PCIE_SSC
+-bool bcm63xx_pcie_config_ssc = TRUE;
+-#else
+-bool bcm63xx_pcie_config_ssc = FALSE;
+-#endif
++
+ 
+ /* 
+   Function pcie_mdio_read (phyad, regad)
+@@ -274,12 +284,69 @@
+         return 1;
+ }
+ 
+-static void bcm63xx_pcie_phy_config_ssc_mode(struct bcm63xx_pcie_port *port, bool enable)
++static void bcm63xx_pcie_core_set_speed(int index)
++{
++   unsigned char * __iomem regs = bcm63xx_pcie_ports[index].regs;
++   u32 data;
++
++   TRACE();
++   if (bcm63xx_pcie_force_gen1 & (1 << index)) {
++       data = __raw_readl(regs+PCIEH_BLK_428_REGS+offsetof(PcieBlk428Regs,linkCapability));
++       data &= ~PCIE_IP_BLK428_LINK_CAPBILITY_MAX_LINK_SPEED_MASK;
++       data |= PCIE_IP_BLK428_LINK_CAPBILITY_MAX_LINK_SPEED_2500MBPS;
++       __raw_writel(data, regs+PCIEH_BLK_428_REGS+offsetof(PcieBlk428Regs,linkCapability));
++
++       data = __raw_readl(regs+PCIEH_REGS+offsetof(PcieRegs,linkControl2));
++       data &= ~PCIE_IP_BLK428_LINK_CAPBILITY_MAX_LINK_SPEED_MASK;
++       data |= PCIE_IP_BLK428_LINK_CAPBILITY_MAX_LINK_SPEED_2500MBPS;
++       __raw_writel(data, regs+PCIEH_REGS+offsetof(PcieRegs,linkControl2));
++       mdelay(10);
++       printk("PCIE port %d  Link speed set to 2.5 Gbps\n", index);
++   }
++}
++
++static void bcm63xx_pcie_phy_enable_ssc(struct bcm63xx_pcie_port *port, bool enable)
+ {
+ 	uint16 data = 0; 
++        int timeout = 40;
++
++   /* Nothing to do, if SSC is not configured */
++   if (!(bcm63xx_pcie_config_ssc & (1<<port->hw_pci.domain)))
++       return;
++
++   /* SSC disabled when PCIe core comes out of reset to allow PLL sync to happen
++    * write sscControl0 register ssc_mode_enable_ovrd & ssc_mode_enable_ovrd_val */
++   bcm63xx_pcie_mdio_write(port, 0, 0x1f, 0x1100);
++   data = bcm63xx_pcie_mdio_read (port, 0, 0x02);
++   if (enable == TRUE)
++       data |= 0xc000;     /* bit 15:14 11'b to enable SSC */
++   else
++       data &= ~0xc000;    /* bit 15:14 00'b to disable SSC */
++   bcm63xx_pcie_mdio_write(port, 0, 0x02, data);
++
++   /* TODO: Check the status to see if SSC is set or not */
++        while (timeout-- > 0) {
++            data = bcm63xx_pcie_mdio_read(port, 0, 1);
++            /* Bit-31=1 is DONE */
++            if (((data & (1<<10)) >> 10) == enable)
++                break;
++            timeout = timeout - 1;
++            udelay(1000);
++        }
++
++        if (timeout == 0) {
++       printk("PCIE port %d  failed to %s SSC\n", port->hw_pci.domain, (enable) ? "Enable" : "Disable");
++        } else
++
++   printk("PCIE port %d  SSC %s\n", port->hw_pci.domain, (enable) ? "Enabled" : "Disabled");
+ 
++   return;
++}
++
++static void bcm63xx_pcie_phy_config_ssc(struct bcm63xx_pcie_port *port)
++{
+ 	/* Nothing to do, if SSC is not configured */
+-	if (bcm63xx_pcie_config_ssc == FALSE)
++	if (!(bcm63xx_pcie_config_ssc & (1<<port->hw_pci.domain)))
+ 		return;
+ 
+ 	/* set the SSC parameters */
+@@ -306,16 +373,6 @@
+ 	bcm63xx_pcie_mdio_write(port, 0, 0x06, 0xfef1);
+ 	bcm63xx_pcie_mdio_write(port, 0, 0x07, 0xe818);
+ 
+-	/* SSC disabled when PCIe core comes out of reset to allow PLL sync to happen
+-	 * write sscControl0 register ssc_mode_enable_ovrd & ssc_mode_enable_ovrd_val */
+-	bcm63xx_pcie_mdio_write(port, 0, 0x1f, 0x1100);
+-	data = bcm63xx_pcie_mdio_read (port, 0, 0x02);
+-	if (enable == TRUE)
+-		data |= 0xc000; 	/* bit 15:14 11'b to enable SSC */
+-	else
+-		data &= ~0xc000;	/* bit 15:14 00'b to disable SSC */
+-	bcm63xx_pcie_mdio_write(port, 0, 0x02, data);
+-	printk("PCIE port %d  SSC %s\n", port->hw_pci.domain, (data&0xC000) ? "Enabled" : "Disabled");
+ 
+ 	return;
+ }
+@@ -422,7 +479,8 @@
+ 		bcm63xx_pcie_mdio_write(port, 0, 7, 0xf0c8);
+ 
+ 		/* Disable SSC, will be enabled after reset if link is up (enable= FALSE)*/
+-		bcm63xx_pcie_phy_config_ssc_mode(port, FALSE);
++		bcm63xx_pcie_phy_config_ssc(port);
++        bcm63xx_pcie_phy_enable_ssc(port, FALSE);
+ 
+ 		/*
+ 		 * EP Mode PLL Bandwidth and Peaking
+@@ -696,7 +754,7 @@
+         bcm63xx_pcie_config_timeouts(port);
+ 
+ 	/* If configured, enable PCIe SSC (enable = TRUE) */
+-	bcm63xx_pcie_phy_config_ssc_mode(port, TRUE);
++	bcm63xx_pcie_phy_enable_ssc(port, TRUE);
+ 
+ }
+ 
+Index: linux-3.4.11/arch/mips/pci/pci-bcm963xx.c
+===================================================================
+--- linux-3.4.11.orig/arch/mips/pci/pci-bcm963xx.c	2018-08-08 11:39:48.580364684 +0800
++++ linux-3.4.11/arch/mips/pci/pci-bcm963xx.c	2018-08-08 11:55:18.588364684 +0800
+@@ -95,13 +95,6 @@
+ #endif
+ #endif
+ 
+-#if defined(PCIE3_CORE) 
+-#ifdef CONFIG_BCM_PCIE_SSC
+-bool bcm63xx_pcie_config_ssc = TRUE;
+-#else
+-bool bcm63xx_pcie_config_ssc = FALSE;
+-#endif
+-#endif
+ 
+ #if defined(CONFIG_BCM96362) || defined(CONFIG_BCM963268)
+ extern uint32 pci63xx_wlan_soft_config_space[WLAN_ONCHIP_DEV_NUM][WLAN_ONCHIP_PCI_HDR_DW_LEN];
+@@ -234,12 +227,83 @@
+ }
+ 
+ #if defined(PCIE3_CORE)
+-static void bcm63xx_pcie_phy_config_ssc_mode(int port, bool enable)
++/*
++   ssc and force_gen1 values
++   disable    -  0x0
++   core0 only -  0x1
++   core1 only -  0x2
++   core0 and 1 - 0x3
++*/
++static u32 bcm63xx_pcie_config_ssc = 0x0;
++static u32 bcm63xx_pcie_force_gen1 = 0x0;
++
++static void bcm63xx_pcie_core_set_speed(int port)
++{
++   volatile PcieBlk428Regs *blk428Regs;
++   volatile PcieRegs *pcieRegs;
++
++   if (bcm63xx_pcie_force_gen1 & (1 << port)) {
++#if defined(PCIEH_1)
++       blk428Regs = port ? PCIEH_1_BLK_428_REGS : PCIEH_BLK_428_REGS;
++       pcieRegs = port ? PCIEH_1_REGS : PCIEH_REGS;
++#else
++       blk428Regs = PCIEH_BLK_428_REGS;
++       pcieRegs = PCIEH_REGS;
++#endif
++
++       blk428Regs->linkCapability &= ~PCIE_IP_BLK428_LINK_CAPBILITY_MAX_LINK_SPEED_MASK;
++       blk428Regs->linkCapability |= PCIE_IP_BLK428_LINK_CAPBILITY_MAX_LINK_SPEED_2500MBPS;
++
++       pcieRegs->linkControl2 &= ~PCIE_IP_BLK428_LINK_CAPBILITY_MAX_LINK_SPEED_MASK;
++       pcieRegs->linkControl2  |= PCIE_IP_BLK428_LINK_CAPBILITY_MAX_LINK_SPEED_2500MBPS;
++       mdelay(10);
++
++       printk("PCIE port %d  speed set to 2.5Gbps\n", port);
++   }
++}
++
++static void bcm63xx_pcie_phy_enable_ssc(int port, bool enable)
+ {
+ 	uint16 data = 0; 
++        int timeout = 40;
++
++   /* Nothing to do, if SSC is not configured */
++   if (!(bcm63xx_pcie_config_ssc & (1<<port)))
++       return;
++
++   /* SSC disabled when PCIe core comes out of reset to allow PLL sync to happen
++    * write sscControl0 register ssc_mode_enable_ovrd & ssc_mode_enable_ovrd_val */
++   bcm63xx_pcie_mdio_write(port, 0, 0x1f, 0x1100);
++   data = bcm63xx_pcie_mdio_read (port, 0, 0x02);
++   if (enable == TRUE)
++       data |= 0xc000;     /* bit 15:14 11'b to enable SSC */
++   else
++       data &= ~0xc000;    /* bit 15:14 00'b to disable SSC */
++   bcm63xx_pcie_mdio_write(port, 0, 0x02, data);
++
++   /* TODO: Check the status to see if SSC is set or not */
++        while (timeout-- > 0) {
++            data = bcm63xx_pcie_mdio_read(port, 0, 1);
++            /* Bit-31=1 is DONE */
++            if (((data & (1<<10)) >> 10) == enable)
++                break;
++            timeout = timeout - 1;
++            udelay(1000);
++        }
+ 
++        if (timeout == 0) {
++       printk("PCIE port %d  failed to %s SSC\n", port, (enable) ? "Enable" : "Disable");
++        } else
++
++   printk("PCIE port %d  SSC %s\n", port, (enable) ? "Enabled" : "Disabled");
++
++   return;
++}
++
++static void bcm63xx_pcie_phy_config_ssc(int port)
++{
+ 	/* Nothing to do, if SSC is not configured */
+-	if (bcm63xx_pcie_config_ssc == FALSE)
++	if (!(bcm63xx_pcie_config_ssc & (1<<port)))
+ 		return;
+ 
+ 	/* set the SSC parameters */
+@@ -266,16 +330,6 @@
+ 	bcm63xx_pcie_mdio_write(port, 0, 0x06, 0xfef1);
+ 	bcm63xx_pcie_mdio_write(port, 0, 0x07, 0xe818);
+ 
+-	/* SSC disabled when PCIe core comes out of reset to allow PLL sync to happen
+-	 * write sscControl0 register ssc_mode_enable_ovrd & ssc_mode_enable_ovrd_val */
+-	bcm63xx_pcie_mdio_write(port, 0, 0x1f, 0x1100);
+-	data = bcm63xx_pcie_mdio_read (port, 0, 0x02);
+-	if (enable == TRUE)
+-		data |= 0xc000; 	/* bit 15:14 11'b to enable SSC */
+-	else
+-		data &= ~0xc000;	/* bit 15:14 00'b to disable SSC */
+-	bcm63xx_pcie_mdio_write(port, 0, 0x02, data);
+-	printk("PCIE port %d  SSC %s\n", port, (data&0xC000) ? "Enabled" : "Disabled");
+ 
+ 	return;
+ }
+@@ -411,7 +465,8 @@
+         bcm63xx_pcie_mdio_write(port, 0, 7, 0xf0c8);
+         
+ 	/* Disable SSC, will be enabled after reset if link is up (enable= FALSE)*/
+-	bcm63xx_pcie_phy_config_ssc_mode(port, FALSE);
++	bcm63xx_pcie_phy_config_ssc(port);
++    bcm63xx_pcie_phy_enable_ssc(port, FALSE);
+         
+         /*
+          * EP Mode PLL Bandwidth and Peaking
+@@ -453,6 +508,7 @@
+         /* adjust pcie phy */
+         bcm63xx_pcie_phy_mode_config(port);
+         mdelay(10);
++        bcm63xx_pcie_core_set_speed(port);
+         val |= (1<<port);
+         MISC->miscPCIECtrl = val;
+         mdelay(10);
+@@ -698,7 +754,7 @@
+ 
+ #if defined(PCIE3_CORE)
+ 	/* If configured, enable PCIe SSC (enable = TRUE) */
+-	bcm63xx_pcie_phy_config_ssc_mode(0, TRUE);
++	bcm63xx_pcie_phy_enable_ssc(0, TRUE);
+ #endif
+ 
+         /*bus 1 and 2 */
+@@ -719,7 +775,7 @@
+ 
+ #if defined(PCIE3_CORE)
+ 	/* If configured, enable PCIe SSC (enable = TRUE) */
+-	bcm63xx_pcie_phy_config_ssc_mode(1, TRUE);
++	bcm63xx_pcie_phy_enable_ssc(1, TRUE);
+ #endif
+ 
+         /*bus 3 and 4 */

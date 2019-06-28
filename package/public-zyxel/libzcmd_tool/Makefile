@@ -61,9 +61,10 @@ endef
 
 define Package/libzcmd_tool/install
 	$(INSTALL_DIR) $(1)/lib
-	$(INSTALL_DIR) $(1)/lib/public
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libzcmd_tool.so $(1)/lib/public
-	ln -s /lib/public/libzcmd_tool.so $(1)/lib/libzcmd_tool.so
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME).so $(1)/lib
+#	$(INSTALL_DIR) $(1)/lib/public
+#	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libzcmd_tool.so $(1)/lib/public
+#	ln -s /lib/public/libzcmd_tool.so $(1)/lib/libzcmd_tool.so
 endef
 
 $(eval $(call BuildPackage,libzcmd_tool))

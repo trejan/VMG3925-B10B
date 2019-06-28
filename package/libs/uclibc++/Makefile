@@ -12,7 +12,8 @@ PKG_VERSION:=0.2.4
 PKG_RELEASE:=1
 
 PKG_SOURCE:=uClibc++-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:=http://cxx.uclibc.org/src/
+# PKG_SOURCE_URL:=http://cxx.uclibc.org/src/
+PKG_SOURCE_URL:=@ZyXEL_SITE/opensource/libs
 PKG_MD5SUM:=394c119363dd8b469fb898442a6764b8
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/uClibc++-$(PKG_VERSION)

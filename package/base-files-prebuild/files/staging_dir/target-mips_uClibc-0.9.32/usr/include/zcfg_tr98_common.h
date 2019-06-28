@@ -60,6 +60,7 @@ typedef enum {
 	e_TR98_CAPB                    ,
 	e_TR98_PERF_DIAG               ,
 	e_TR98_DEV_INFO                ,
+	e_TR98_MemoryStatus            ,
 	e_TR98_VEND_CONF_FILE          ,
 	e_TR98_DEV_INFO_PS_STAT         ,
 	e_TR98_DEV_INFO_PS_STAT_PS      ,
@@ -135,6 +136,9 @@ typedef enum {
 	e_TR98_ASSOC_DEV_STAT          ,
 	e_TR98_WEP_KEY                 ,
 	e_TR98_PSK                     ,
+#ifdef ZYXEL_SUPPORT_8021X
+	e_TR98_RADIUS                  ,
+#endif
 //	e_TR98_AP_WMM_PARAM            ,
 //	e_TR98_STA_WMM_PARAM           ,
 	e_TR98_HOSTS                   ,
@@ -261,6 +265,11 @@ typedef enum {
 	e_TR98_IPV6_DHCPV6_SERVER_CNT_OPT	,
 	e_TR98_IPV6_DHCPV6_SERVER_OPT	,
 #endif
+#ifdef ZYXEL_X_GRE
+	e_TR98_GRE              		,
+	e_TR98_GRE_TUNNEL				,
+	e_TR98_GRE_TUNNEL_STATS			,
+#endif
 #if ZYXEL_EXT
 	e_TR98_ZYXEL_EXT               ,
 #ifdef ZYXEL_LANDING_PAGE_FEATURE
@@ -297,6 +306,11 @@ typedef enum {
 	e_TR98_SAMBA		           ,
 	e_TR98_UPNP		           ,
 	e_TR98_IGMP                    ,
+#ifdef ZYXEL_TR69_DATA_USAGE
+	e_TR98_DATA_USAGE                   ,
+	e_TR98_DATA_USAGE_LAN               ,
+	e_TR98_DATA_USAGE_WAN               ,
+#endif
 #if defined(SUNRISE_RANDOM_PASSWORD) || defined(SOL_TR69_LOGINACCOUNT) || defined(ZYXEL_SUPPORT_TR98_LOGIN_ACCOUNT)
 	e_TR98_LOG_CFG           		 ,
 	e_TR98_LOG_CFG_GP           	 ,
@@ -330,6 +344,9 @@ typedef enum {
 #endif
 #ifdef ZyXEL_IPP_PRINTSERVER
 	e_TR98_PRINT_SERVER,
+#endif
+#ifdef ZYXEL_EASYMESH
+	e_TR98_EasyMesh	,
 #endif
 #ifdef BUILD_SONIQ
 	e_TR98_Qsteer		,

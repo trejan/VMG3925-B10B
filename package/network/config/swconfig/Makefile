@@ -21,7 +21,21 @@ define Package/swconfig
   DEPENDS:=@!TARGET_brcm47xx +libuci +libnl-tiny
   TITLE:=Switch configuration utility
 endef
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+FILES_DIR:=files-qca
+TARGET_CPPFLAGS := \
+	-D_GNU_SOURCE \
+	-I$(STAGING_DIR)/usr/include/libnl-tiny \
+	-I$(PKG_BUILD_DIR) \
+	$(TARGET_CPPFLAGS) \
+	-I$(LINUX_DIR)/user_headers/include
 
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) ./src-qca/* $(PKG_BUILD_DIR)/
+endef
+else
+FILES_DIR:=files-opal
 TARGET_CPPFLAGS := \
 	-D_GNU_SOURCE \
 	-I$(STAGING_DIR)/usr/include/libnl-tiny \
@@ -30,8 +44,9 @@ TARGET_CPPFLAGS := \
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	$(CP) ./src/* $(PKG_BUILD_DIR)/
+	$(CP) ./src-opal/* $(PKG_BUILD_DIR)/
 endef
+endif
 
 define Build/Compile
 	CFLAGS="$(TARGET_CPPFLAGS) $(TARGET_CFLAGS)" \
@@ -43,7 +58,7 @@ endef
 define Package/swconfig/install
 	$(INSTALL_DIR) $(1)/sbin $(1)/lib/network
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/swconfig $(1)/sbin/swconfig
-	$(INSTALL_DATA) ./files/switch.sh $(1)/lib/network/
+	$(INSTALL_DATA) ./$(FILES_DIR)/switch.sh $(1)/lib/network/
 endef
 
 $(eval $(call BuildPackage,swconfig))

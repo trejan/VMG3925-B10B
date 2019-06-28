@@ -220,6 +220,9 @@ typedef struct wlinfo_t {
 	unsigned char macaddr[MAC_ADDR_LEN];
 	zyWlanRadio_s wlanRadio[WLAN_RADIO_NUM];
 	zyWlanSsid_s wlanSsid[WLAN_MAX_BSS];
+#ifdef ZYXEL_EASYMESH
+	zyWlanEasyMesh_s wlanEasyMesh;
+#endif
 	wlcap_s cap;
 	time_t csTime;
 	struct ChScanInfo *ch_info;
@@ -384,7 +387,7 @@ typedef struct wlmodule_t {
 	zcfgRet_t (*beWifi_EnableSoniqEvt)(bool);
 	zcfgRet_t (*beWifi_GetVlanID)(int, int, int*);
 #endif
-#ifdef SSID_PRIORITY
+#ifdef GUEST_SSID_WPS_PBC
 	zcfgRet_t (*beWifi_StartWpsIptvPBC)(wlinfo_s *, const char *);
 #endif
 }wlmodule_s;

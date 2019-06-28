@@ -57,8 +57,10 @@ define Build/Install/Default
 endef
 
 define Package/libedit/install
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/local/lib/libedit.so* $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/lib
+	$(CP) $(PKG_INSTALL_DIR)/usr/local/lib/libedit.so* $(1)/lib/
+#	$(INSTALL_DIR) $(1)/usr/lib
+#	$(CP) $(PKG_INSTALL_DIR)/usr/local/lib/libedit.so* $(1)/usr/lib/
 #	$(CP) $(PKG_INSTALL_DIR)/usr/local/lib/libedit.{a,so*} $(1)/usr/lib/
 endef
 

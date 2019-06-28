@@ -12,14 +12,22 @@ USBHID_DIR?=hid/usbhid
 USBINPUT_DIR?=input/misc
 
 ifneq ("$(KERNEL)","2.6")
+ifeq ($(strip $(call CompareKernelPatchVer,$(KERNEL_PATCHVER),lt,3.16.0)),1)
 USB_CORE_FILES= \
 	$(LINUX_DIR)/drivers/usb/core/usbcore.ko \
 	$(LINUX_DIR)/drivers/usb/usb-common.ko
 USB_CORE_AUTOLOAD=usb-common usbcore
 else
+USB_CORE_FILES= \
+	$(LINUX_DIR)/drivers/usb/core/usbcore.ko \
+	$(LINUX_DIR)/drivers/usb/common/usb-common.ko
+USB_CORE_AUTOLOAD=usb-common usbcore
+endif
+else
 USB_CORE_FILES=$(LINUX_DIR)/drivers/usb/core/usbcore.ko
 USB_CORE_AUTOLOAD=usbcore
 endif
+
 define KernelPackage/usb-core
   SUBMENU:=$(USB_MENU)
   TITLE:=Support for USB

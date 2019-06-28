@@ -33,9 +33,11 @@ define Host/Install
 		  done \
 		done \
 	)
-	#rm -f \
+ifeq ($(ZCFG_PLATFORM),QUALCOMM)
+	rm -f \
 		$(TOOLCHAIN_DIR)/lib/libresolv*.so* \
 		$(TOOLCHAIN_DIR)/lib/libnsl*.so*
+endif
 	#Broadcom SDK 4.16L.04 need libresolv, don`t remove it!
 	rm -f $(TOOLCHAIN_DIR)/lib/libnsl*.so*
   ifeq ($(PKG_VERSION),0.9.29)

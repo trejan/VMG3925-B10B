@@ -12,9 +12,12 @@ typedef enum
 
 typedef enum
 {
-    ZLOG_LEVEL_CRITICAL = 0,
+    ZLOG_LEVEL_EMERG = 0,
+    ZLOG_LEVEL_ALERT,
+    ZLOG_LEVEL_CRITICAL,
     ZLOG_LEVEL_ERROR,
     ZLOG_LEVEL_WARNING,
+    ZLOG_LEVEL_NOTICE,
     ZLOG_LEVEL_INFO,
     ZLOG_LEVEL_DEBUG
 } zlog_level_t;
@@ -119,11 +122,13 @@ bool zlog_levelAllow(
 /*
     Public macro
 */
+#define ZLOG_EMERG(_fmt_, ...)     _ZLOG_MSG(ZLOG_LEVEL_EMERG,    _fmt_, ##__VA_ARGS__)
+#define ZLOG_ALERT(_fmt_, ...)     _ZLOG_MSG(ZLOG_LEVEL_ALERT,    _fmt_, ##__VA_ARGS__)
 #define ZLOG_CRITICAL(_fmt_, ...)  _ZLOG_MSG(ZLOG_LEVEL_CRITICAL, _fmt_, ##__VA_ARGS__)
 #define ZLOG_ERROR(_fmt_, ...)     _ZLOG_MSG(ZLOG_LEVEL_ERROR,    _fmt_, ##__VA_ARGS__)
 #define ZLOG_WARNING(_fmt_, ...)   _ZLOG_MSG(ZLOG_LEVEL_WARNING,  _fmt_, ##__VA_ARGS__)
+#define ZLOG_NOTICE(_fmt_, ...)    _ZLOG_MSG(ZLOG_LEVEL_NOTICE,   _fmt_, ##__VA_ARGS__)
 #define ZLOG_INFO(_fmt_, ...)      _ZLOG_MSG(ZLOG_LEVEL_INFO,     _fmt_, ##__VA_ARGS__)
 #define ZLOG_DEBUG(_fmt_, ...)     _ZLOG_MSG(ZLOG_LEVEL_DEBUG,    _fmt_, ##__VA_ARGS__)
-
 //==============================================================================
 #endif // _ZLOG_API_H_

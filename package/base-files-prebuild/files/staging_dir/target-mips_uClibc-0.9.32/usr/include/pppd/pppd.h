@@ -307,6 +307,9 @@ extern char	*ipparam;	/* Extra parameter for ip up/down scripts */
 extern bool	cryptpap;	/* Others' PAP passwords are encrypted */
 extern int	idle_time_limit;/* Shut down link if idle for this long */
 extern int	holdoff;	/* Dead time before restarting */
+#ifdef ABOG_CUSTOMIZATION
+extern int	count_sendPADI;	/* count how many packets sending */
+#endif
 extern bool	holdoff_specified; /* true if user gave a holdoff value */
 extern bool	notty;		/* Stdin/out is not a tty */
 extern char	*pty_socket;	/* Socket to connect to pty */

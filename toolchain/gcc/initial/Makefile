@@ -9,6 +9,14 @@ GCC_CONFIGURE += \
 	--disable-shared \
 	--disable-threads \
 
+ifeq ("_$(CONFIG_arm)_$(CONFIG_TARGET_brcm963xx)_$(CONFIG_GCC_VERSION_5)_","_y_y_y_")
+GCC_CONFIGURE += \
+		--disable-dependency-tracking \
+		--without-headers \
+		--disable-nls \
+		--disable-largefile
+endif
+
 define Host/Compile
 	$(CP) $(BUILD_DIR_TOOLCHAIN)/linux-dev/* $(BUILD_DIR_TOOLCHAIN)/$(LIBC)-dev/
 	+$(GCC_MAKE) $(HOST_JOBS) -C $(GCC_BUILD_DIR) \

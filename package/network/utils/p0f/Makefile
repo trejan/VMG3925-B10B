@@ -16,7 +16,7 @@ define Package/p0f
  SECTION:=net
  CATEGORY:=Network
  TITLE:=Passive OS Fingerprinting
- DEPENDS:=@ZYXEL_ONECONNECT +libpcap +libssp
+ DEPENDS:=@ZYXEL_ONECONNECT +libpcap +SSP_SUPPORT:libssp
 endef
 
 define Package/p0f/description

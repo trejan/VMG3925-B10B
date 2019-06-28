@@ -320,7 +320,7 @@ Index: libzyutil-1.0/zyutil_sfp.c
 +    zyUtil_i2c_close(busfd);
 +
 +    // Check if the DDMI data is ready
-+    if ( ddmi2_data[DDMI2_STATUS_CONTROL_OFFSET] && DDMI_DATA_READY_BAR_MASK )
++    if ( ddmi2_data[DDMI2_STATUS_CONTROL_OFFSET] & DDMI_DATA_READY_BAR_MASK )
 +    {
 +        // true means the DDMI data is not ready.
 +        printf("The DDMI data is not ready.\n");

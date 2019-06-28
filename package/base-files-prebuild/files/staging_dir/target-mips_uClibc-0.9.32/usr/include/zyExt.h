@@ -68,8 +68,18 @@ extern tr98Parameter_t para_GUI_Customization[];
 extern tr98Parameter_t para_Qsteer[];
 #endif
 
+#ifdef ZYXEL_EASYMESH
+extern tr98Parameter_t para_EasyMesh[];
+#endif
+
 #ifdef ZYXEL_ONESSID
 extern tr98Parameter_t para_OneSsid[];
+#endif
+
+#ifdef ZYXEL_TR69_DATA_USAGE
+extern tr98Parameter_t para_DataUsage[];
+extern tr98Parameter_t para_DataUsageLan[];
+extern tr98Parameter_t para_DataUsageWan[];
 #endif
 
 /*Handler Function*/
@@ -343,6 +353,11 @@ extern zcfgRet_t zyExtFeatureFlagObjSet(char *tr98FullPathName, int handler, str
 extern zcfgRet_t zyExtCustomizationObjGet(char *tr98FullPathName, int handler, struct json_object **tr98Jobj, bool updateFlag);
 extern zcfgRet_t zyExtCustomizationObjSet(char *tr98FullPathName, int handler, struct json_object *tr98Jobj, struct json_object *multiJobj);
 
+#ifdef ZYXEL_EASYMESH
+extern zcfgRet_t zyExtEasyMeshObjGet(char *tr98FullPathName, int handler, struct json_object **tr98Jobj, bool updateFlag);
+extern zcfgRet_t zyExtEasyMeshObjSet(char *tr98FullPathName, int handler, struct json_object *tr98Jobj, struct json_object *multiJobj);
+#endif
+
 #ifdef BUILD_SONIQ
 extern zcfgRet_t zyExtQsteerObjGet(char *tr98FullPathName, int handler, struct json_object **tr98Jobj, bool updateFlag);
 extern zcfgRet_t zyExtQsteerObjSet(char *tr98FullPathName, int handler, struct json_object *tr98Jobj, struct json_object *multiJobj);
@@ -352,3 +367,11 @@ extern zcfgRet_t zyExtQsteerObjSet(char *tr98FullPathName, int handler, struct j
 extern zcfgRet_t zyExtOneSsidObjGet(char *tr98FullPathName, int handler, struct json_object **tr98Jobj, bool updateFlag);
 extern zcfgRet_t zyExtOneSsidObjSet(char *tr98FullPathName, int handler, struct json_object *tr98Jobj, struct json_object *multiJobj);
 #endif
+
+#ifdef ZYXEL_TR69_DATA_USAGE
+extern zcfgRet_t zyExtDataUsageObjGet(char *tr98FullPathName, int handler, struct json_object **tr98Jobj, bool updateFlag);
+extern zcfgRet_t zyExtDataUsageObjSet(char *tr98FullPathName, int handler, struct json_object *tr98Jobj, struct json_object *multiJobj);
+extern zcfgRet_t zyExtDataUsageLanObjGet(char *tr98FullPathName, int handler, struct json_object **tr98Jobj, bool updateFlag);
+extern zcfgRet_t zyExtDataUsageWanObjGet(char *tr98FullPathName, int handler, struct json_object **tr98Jobj, bool updateFlag);
+#endif
+

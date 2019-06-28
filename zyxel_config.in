@@ -7,6 +7,10 @@ menu "ZyXEL Project Configuration"
         string "ZyXEL firmware Id"
         default ""
 
+   config ZYXEL_FIRMWARE_VERSION_EXT
+        string "ZyXEL firmware ext version"
+        default "AGXKK_0.0.0"
+
    config ZYXEL_GUI_PATCH_DIR
         string "ZyXEL GUI patch directory"
         default ""
@@ -208,6 +212,10 @@ menu "ZyXEL Project Configuration"
 
     endmenu
 
+	config ZYXEL_SUPPORT_MISC
+		bool "Support misc partition"
+		default n
+
    endmenu
 
    menu "bcm963xx default NVRAM values"
@@ -331,6 +339,13 @@ menu "ZyXEL Project Configuration"
 		default n
 		help
 			Display WPS spotlight.
+
+	config ZYXEL_WPS_SPOTLIGHT_BLINK
+		bool
+		prompt "WPS blink spotlight"
+		default n
+		help
+			Display WPS spotlight blink.
 			
 	config ZYXEL_WPS_SPOTLIGHT_2GPIO
 		bool

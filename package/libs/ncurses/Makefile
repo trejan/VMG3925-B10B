@@ -116,8 +116,10 @@ endif
 endef
 
 define Package/libncurses/install
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{curses,ncurses}.so* $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/lib
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{curses,ncurses}.so* $(1)/lib/
+#	$(INSTALL_DIR) $(1)/usr/lib
+#	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{curses,ncurses}.so* $(1)/usr/lib/
 #	$(CP) $(PKG_INSTALL_DIR)/usr/lib/lib{curses,ncurses,panel,menu,form}.so* $(1)/usr/lib/
 endef
 

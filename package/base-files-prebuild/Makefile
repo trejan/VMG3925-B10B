@@ -41,8 +41,8 @@ TARGET_BOOTLOADER_DIR=brcm-cfe
 endif
 
 define restore_prebuild_bootloader
-	mkdir -p $(TOPDIR)/bin/$(BOARD)/$(TARGET_BOOTLOADER_DIR)
-	$(CP) $(PREBUILD_BOOTLOADER_DIR)/* $(TOPDIR)/bin/$(BOARD)/$(TARGET_BOOTLOADER_DIR)/
+	mkdir -p $(BIN_DIR)/$(TARGET_BOOTLOADER_DIR)
+	$(CP) $(PREBUILD_BOOTLOADER_DIR)/* $(BIN_DIR)/$(TARGET_BOOTLOADER_DIR)/
 endef
 
 

@@ -117,6 +117,9 @@ define Package/uhttpd-mod-ubus/description
  session.* namespace and procedures.
 endef
 
+ifneq ($(CONFIG_USE_GLIBC),)
+  TARGET_CFLAGS += -D_DEFAULT_SOURCE
+endif
 
 TARGET_LDFLAGS += -lubox -lcrypt
 

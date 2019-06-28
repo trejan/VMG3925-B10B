@@ -34,7 +34,11 @@ MAKE_PATH:=source
 CONFIGURE_PATH:=source
 endif
 PKG_BUILD_BIN:=$(PKG_BUILD_DIR)/$(MAKE_PATH)/bin
-
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+PATH_DIR=etc
+else
+PATH_DIR=var
+endif
 define Package/samba
   SECTION:=net
   CATEGORY:=Network
@@ -124,7 +128,35 @@ CONFIGURE_VARS+= \
 	samba_cv_have_longlong=yes \
 	ac_cv_type_long_long=yes \
 	samba_cv_HAVE_KERNEL_OPLOCKS_LINUX=yes
-	
+ifeq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+CONFIGURE_ARGS+= \
+	--with-configdir=/etc/samba \
+	--with-codepagedir=/etc/samba \
+	--with-included-iniparser \
+	--with-included-popt \
+	--with-lockdir=/var/lock \
+	--with-logfilebase=/var/log \
+	--with-nmbdsocketdir=/var/nmbd \
+	--with-piddir=/var/run \
+	--with-privatedir=/etc/samba \
+	--with-aio-support \
+	--with-sendfile-support \
+	--with-sys-quotas=no \
+	--enable-cups=no \
+	--enable-iprint=no \
+	--enable-largefile \
+	--without-krb5 \
+	--without-ads \
+	--without-ldap \
+	--without-pam \
+	--without-winbind \
+	--without-libtdb \
+	--without-libtalloc \
+	--without-libnetapi \
+	--without-libsmbclient \
+	--without-libsmbsharemodes \
+	--without-libaddns 
+else	
 CONFIGURE_ARGS+= \
 	--with-configdir=/etc/samba \
 	--with-codepagedir=/var/samba \
@@ -154,6 +186,7 @@ CONFIGURE_ARGS+= \
 	--without-libsmbsharemodes \
 	--without-libaddns
 endif
+endif
 ZCFLAGS += -DZYXEL_PATCH
 	
 TARGET_CFLAGS += -DAVM_SMALLER -DAVM_NO_PRINTING -DMAX_DEBUG_LEVEL=2 $(ZCFLAGS)
@@ -165,16 +198,19 @@ MAKE_FLAGS += OWRT_NO_PRINTING=1 OWRT_SMALLER=1
 # endef
 
 define Package/samba/install
-	$(INSTALL_DIR) $(1)/var/samba
-	$(INSTALL_DIR) $(1)/var/samba/nmbd
+	$(INSTALL_DIR) $(1)/$(PATH_DIR)/samba
 ifeq ($(CONFIG_ZYXEL_SUPPORT_SMB2),y)
+	$(INSTALL_DIR) $(1)/var/samba/nmbd
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/codepages/lowcase.dat $(1)/var/samba
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/codepages/upcase.dat $(1)/var/samba
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/codepages/valid.dat $(1)/var/samba
 else
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/$(MAKE_PATH)/codepages/lowcase.dat $(1)/var/samba
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/$(MAKE_PATH)/codepages/upcase.dat $(1)/var/samba
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/$(MAKE_PATH)/codepages/valid.dat $(1)/var/samba
+ifneq ("$(strip ${ZCFG_PLATFORM})","QUALCOMM")
+	$(INSTALL_DIR) $(1)/$(PATH_DIR)/samba/nmbd
+endif
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/$(MAKE_PATH)/codepages/lowcase.dat $(1)/$(PATH_DIR)/samba
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/$(MAKE_PATH)/codepages/upcase.dat $(1)/$(PATH_DIR)/samba
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/$(MAKE_PATH)/codepages/valid.dat $(1)/$(PATH_DIR)/samba
 endif
 	$(INSTALL_DIR) $(1)/usr/lib
 #	$(INSTALL_BIN) $(PKG_BUILD_BIN)/libtalloc.so.1 $(1)/usr/lib

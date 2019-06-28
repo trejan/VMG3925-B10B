@@ -141,6 +141,10 @@ void cg_upnp_ssdprequest_delete(CgUpnpSSDPRequest *ssdpReq);
 #define cg_upnp_ssdprequest_setlocation(ssdpReq,value) cg_http_packet_setheadervalue((CgHttpPacket*)ssdpReq, CG_HTTP_LOCATION, value)
 #define cg_upnp_ssdprequest_getlocation(ssdpReq) cg_http_packet_getheadervalue((CgHttpPacket*)ssdpReq,CG_HTTP_LOCATION)
 
+// SECURELOCATION
+#define cg_upnp_ssdprequest_set_securelocation(ssdpReq,value) cg_http_packet_setheadervalue((CgHttpPacket *)ssdpReq, CG_HTTP_SECURELOCATION, value)
+#define cg_upnp_ssdprequeset_retrieve_securelocationurl(ssdpReq) cg_http_packet_getheadervalue((CgHttpPacket *)ssdpReq, CG_HTTP_SECURELOCATION)
+
 /**** USN ****/
 #define cg_upnp_ssdprequest_setusn(ssdpReq,value) cg_http_packet_setheadervalue((CgHttpPacket*)ssdpReq, CG_UPNP_SSDP_USN, value)
 #define cg_upnp_ssdprequest_getusn(ssdpReq) cg_http_packet_getheadervalue((CgHttpPacket*)ssdpReq,CG_UPNP_SSDP_USN)

@@ -26,6 +26,9 @@ ZHTTPD_CFLAGS:=
 ifeq ($(ENABLE_CROSS_SITE_DEBUG),y)
 	ZHTTPD_CFLAGS += -DZYXEL_CROSS_SITE_DEBUG
 endif
+ifeq ($(CONFIG_PACKAGE_webgui_vue),y)
+	ZHTTPD_CFLAGS += -DPACKAGE_webgui_vue
+endif
 ifeq ($(CONFIG_ZyXEL_Online_Firmware_Upgrade),y)
     ZHTTPD_CFLAGS += -DZyXEL_Online_Firmware_Upgrade
 endif
@@ -52,7 +55,9 @@ endif
 ifeq ($(CONFIG_SMALL_RAM),y)
     ZHTTPD_CFLAGS += -DSMALL_RAM
 endif
-
+ifeq ($(CONFIG_ZYXEL_CMS2_ENHANCEMENT),y)
+    ZHTTPD_CFLAGS += -DZYXEL_CMS2_ENHANCEMENT 
+endif
 ifeq ($(CONFIG_ZCFG_VMG1312_B10D_Generic),y)
     ZHTTPD_CFLAGS += -DZYPRJ_VMG1312
 endif
@@ -62,6 +67,11 @@ endif
 ifeq ($(CONFIG_ZCFG_VMG1312_B10D_Turkey),y)
     ZHTTPD_CFLAGS += -DZYPRJ_VMG1312
 endif
+
+ifeq ($(CONFIG_ZYXEL_GRE),y)
+    ZHTTPD_CFLAGS += -DUPGRADE_FW_RM_WIFI_MODULE
+endif
+
 ifeq ($(CONFIG_ZCFG_VMG1312_B10D_Tsf),y)
     ZHTTPD_CFLAGS += -DUPGRADE_FW_RM_WIFI_MODULE
 endif

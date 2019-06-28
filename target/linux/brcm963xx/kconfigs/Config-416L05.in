@@ -2101,6 +2101,11 @@ choice
 		bool "All"
 endchoice
 
+config BRCMSDK416L05_BRCM_VRG_SLACVENDOR_CFG_SILABS_VER
+	string "SILABS driver directory name"
+	depends on BRCMSDK416L05_BRCM_VRG_SLACVENDOR_CFG_SILABS || BRCMSDK416L05_BRCM_VRG_SLACVENDOR_CFG_ALL
+	default "silabs_8_1_1"
+
 choice
 	prompt "Voice Locale Selection"
 	config BRCMSDK416L05_BRCM_VRG_COUNTRY_CFG_ALL_COUNTRIES
@@ -3006,6 +3011,10 @@ config BRCMSDK416L05_ZYXEL_L3_WAN_SAME_MAC
 	bool "Assign same MAC (6th) for all L3 WAN interface"
 	def_bool n
 
+config BRCMSDK416L05_ZYXEL_ONE_MAC_ADDRESS
+	bool "Utilize base MAC address on all WAN interfaces"
+	def_bool n
+
 ##############################################################################
 ## Please create a new project in ascending order as best you can.
 ##############################################################################
@@ -3415,7 +3424,34 @@ if BRCMSDK416L05_ZYXEL
 	config BRCMSDK416L05_SUNRISE_XTUR_CUSTOMIZATION
 		bool "Sunrise"
    endchoice
-	
+
+   choice
+	prompt "Broadcom Wifi version"
+	default BCM416L05_WIFI_VER_7_14_164_23
+
+	config BCM416L05_WIFI_VER_7_14_164_23
+		bool "7.14.164.23"
+		help
+			"wlan driver 7.14.164.23 2018/Aug/1 release"
+
+	config BCM416L05_WIFI_VER_7_14_164_20
+		bool "7.14.164.20"
+		help
+			"wlan driver 7.14.164.20 2017/Aug/10 release"
+
+	config BCM416L05_WIFI_VER_7_14_164_303
+		bool "7.14.164.303"
+		help
+			"wlan driver 7.14.164.303 2016/Nov/11 release"
+   endchoice
+
+   config BCM416L05_WIFI_DRIVER
+	string
+	default 7.14.164.23 if BCM416L05_WIFI_VER_7_14_164_23
+	default 7.14.164.20 if BCM416L05_WIFI_VER_7_14_164_20
+	default 7.14.164.303 if BCM416L05_WIFI_VER_7_14_164_303
+
+
    config BRCMSDK416L05_ZYXEL_FORCE_WIFI_SROM
     bool 'ZyXEL Force WiFi srom from software(/etc/wlan/bcmXXXX_map.bin)'
 
